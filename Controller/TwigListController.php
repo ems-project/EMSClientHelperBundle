@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\File\File;
 
-class DefaultController extends Controller
+class TwigListController extends Controller
 {   
 
     /**
@@ -16,7 +16,7 @@ class DefaultController extends Controller
      */
     public function pageAction(Request $request) {
     	
-    	$templates = $this->container->getParameter('ems_client_helper.templates');
+    	$templates = $this->container->getParameter('ems_client_helper.twig_list.templates');
     	
     	$twigs = array();
 
@@ -33,8 +33,8 @@ class DefaultController extends Controller
     		}
     	}
     	
-    	if($this->container->getParameter('ems_client_helper.app_enabled')){
-    		$base_paths = $this->container->getParameter('ems_client_helper.app_base_path');
+    	if($this->container->getParameter('ems_client_helper.twig_list.app_enabled')){
+    		$base_paths = $this->container->getParameter('ems_client_helper.twig_list.app_base_path');
     		
     		foreach ($base_paths as $key =>$base_path) {
     			$finder = new Finder();

@@ -26,9 +26,9 @@ class EMSClientHelperExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
       
-        $container->setParameter('ems_client_helper.templates', $config['templates']);
-        $container->setParameter('ems_client_helper.app_enabled', $config['app_enabled']);
-        $container->setParameter('ems_client_helper.app_base_path', $config['app_base_path']);
+        $container->setParameter('ems_client_helper.twig_list.templates', $config['twig_list']['templates']);
+        $container->setParameter('ems_client_helper.twig_list.app_enabled', $config['twig_list']['app_enabled']);
+        $container->setParameter('ems_client_helper.twig_list.app_base_path', $config['twig_list']['app_base_path']);
    
     }
 }
