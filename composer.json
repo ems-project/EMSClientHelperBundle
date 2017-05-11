@@ -1,0 +1,14 @@
+{
+    "name": "elasticms/client-helper-bundle",
+    "require": {
+        "symfony/finder": "^3.2",
+        "twig/twig": "^2.3"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Isabelle Michiels",
+            "email": "isabelle.michiels@smals.be"
+        }
+    ]
+}

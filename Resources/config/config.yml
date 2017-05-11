@@ -1,0 +1,1 @@
+ems_client_helper:     templates:          - {resource: 'EMSClientHelperBundle', path: 'Resources/views/Pages'}    app_enabled: false    app_base_path : #['Resources/views/default']
