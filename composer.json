@@ -3,7 +3,7 @@
     "description" : "An elasticms extension for client helper functions (Graphical frontend, API, ... )", 
     "type" : "symfony-bundle",
     "keywords" : [
-        "elasticms",
+        "elasticms"
     ],
     "license": "MIT",
     "authors": [
