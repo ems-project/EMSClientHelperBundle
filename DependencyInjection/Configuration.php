@@ -26,6 +26,16 @@ class Configuration implements ConfigurationInterface
         
         $rootNode
          ->children()
+                ->arrayNode('elasticms')
+                    ->prototype('array')
+                        ->children()
+                            ->scalarNode('index_prefix')->isRequired()->end()
+                            ->arrayNode('clusters')
+                                ->prototype('scalar')->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
         	->arrayNode('twig_list')
 	          ->children()
 	         	->arrayNode('templates')
