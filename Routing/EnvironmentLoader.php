@@ -43,6 +43,6 @@ class EnvironmentLoader extends Loader
      */
     public function supports($resource, $type = null)
     {
-        return 'ems_environment' === $type;
+        return 'emsch_environment' === $type;
     }
 }

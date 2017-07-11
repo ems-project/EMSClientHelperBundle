@@ -2,29 +2,29 @@
 
 namespace EMS\ClientHelperBundle\Twig;
 
+use EMS\ClientHelperBundle\Service\RequestService;
 use Symfony\Bridge\Twig\Extension\RoutingExtension as BaseExtension;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\TwigFunction;
 
 class RoutingExtension extends BaseExtension
 {
     /**
-     * @var RequestStack
+     * @var RequestService
      */
-    private $requestStack;
+    private $requestService;
     
     /**
      * @param UrlGeneratorInterface $generator
-     * @param RequestStack          $requestStack
+     * @param RequestService        $requestService
      */
     public function __construct(
-        UrlGeneratorInterface $generator, 
-        RequestStack $requestStack
+        UrlGeneratorInterface $generator,
+        RequestService $requestService
     ) {
         parent::__construct($generator);
         
-        $this->requestStack = $requestStack;
+        $this->requestService = $requestService;
     }
     
     /**
@@ -32,9 +32,9 @@ class RoutingExtension extends BaseExtension
      */
     public function getFunctions()
     {
-        return array(
-            new TwigFunction('ems_path', array($this, 'getPath'), array('is_safe_callback' => array($this, 'isUrlGenerationSafe'))),
-        );
+        return [
+            new TwigFunction('emsch_path', array($this, 'getPath'), array('is_safe_callback' => array($this, 'isUrlGenerationSafe'))),
+        ];
     }
     
     /**
@@ -42,10 +42,8 @@ class RoutingExtension extends BaseExtension
      */
     public function getPath($name, $parameters = array(), $relative = false)
     {
-        $env = $this->requestStack->getCurrentRequest()->get('_environment');
-        
         return parent::getPath(
-            sprintf('%s_%s', $env, $name), 
+            sprintf('%s_%s', $this->requestService->getEnvironment(), $name), 
             $parameters, 
             $relative
         );

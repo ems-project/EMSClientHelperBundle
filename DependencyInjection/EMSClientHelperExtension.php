@@ -2,9 +2,11 @@
 
 namespace EMS\ClientHelperBundle\DependencyInjection;
 
+use EMS\ClientHelperBundle\Translation\TranslationLoader;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
@@ -47,11 +49,11 @@ class EMSClientHelperExtension extends Extension
     {
         $container
             ->setDefinition(
-                sprintf('emsch.client.%s', $project), 
-                new ChildDefinition('emsch.client')
+                sprintf('elasticsearch.client.%s', $project), 
+                new ChildDefinition('elasticsearch.client')
             )
             ->setArguments([
-                ['hosts' => $config['clusters']]
+                ['hosts' => $config['hosts']]
             ]);
         
         $container
@@ -60,8 +62,36 @@ class EMSClientHelperExtension extends Extension
                 new ChildDefinition('emsch.client_request')
             )
             ->setArguments([
-                new Reference(sprintf('emsch.client.%s', $project)),
+                new Reference(sprintf('elasticsearch.client.%s', $project)),
                 $config['index_prefix']
             ]);
+        
+        if ($config['translation_type']) {
+            $this->loadProjectTranslations($project, $config, $container);
+        }
     }
+    
+    /**
+     * @param string           $project
+     * @param array            $config
+     * @param ContainerBuilder $container
+     */
+    protected function loadProjectTranslations($project, array $config, ContainerBuilder $container)
+    {
+        $loader = new Definition(TranslationLoader::class);
+        $loader->setArguments([
+            new Reference(sprintf('elasticsearch.client.%s', $project)),
+            $project,
+            $config['environments'],
+            $config['index_prefix'],
+            $config['translation_type']
+        ]);
+        $loader->addTag('translation.loader', ['alias' => $project]);
+        
+        $container->setDefinition(
+            sprintf('translation.loader.%s', $project), 
+            $loader
+        );
+    }
+    
 }

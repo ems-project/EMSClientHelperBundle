@@ -3,21 +3,21 @@
 namespace EMS\ClientHelperBundle\Elasticsearch;
 
 use Elasticsearch\Client;
-use Symfony\Component\HttpFoundation\RequestStack;
+use EMS\ClientHelperBundle\Service\RequestService;
 
 class ClientRequestFactory
 {
     /**
-     * @var RequestStack 
+     * @var RequestService 
      */
-    private $requestStack;
+    private $requestService;
     
     /**
-     * @param RequestStack $requestStack
+     * @param RequestService $requestService
      */
-    public function __construct(RequestStack $requestStack)
+    public function __construct(RequestService $requestService)
     {
-        $this->requestStack = $requestStack;
+        $this->requestService = $requestService;
     }
     
     /**
@@ -30,7 +30,7 @@ class ClientRequestFactory
     {
         return new ClientRequest(
             $client, 
-            $this->requestStack, 
+            $this->requestService, 
             $indexPrefix
         );
     }
