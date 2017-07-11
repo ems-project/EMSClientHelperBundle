@@ -1,4 +1,0 @@
-services:
-#    ems_client_helper.example:
-#        class: EMS\ClientHelperBundle\Example
-#        arguments: ["@service_id", "plain_value", "%parameter%"]

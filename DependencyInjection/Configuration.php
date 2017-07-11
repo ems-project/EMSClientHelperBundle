@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\DependencyInjection;
 
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -18,31 +19,54 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
+        /* @var $rootNode ArrayNodeDefinition */
         $rootNode = $treeBuilder->root('ems_client_helper');
-
-        // Here you should define the parameters that are allowed to
-        // configure your bundle. See the documentation linked above for
-        // more information on that topic.
-        
         $rootNode
-         ->children()
-        	->arrayNode('twig_list')
-	          ->children()
-	         	->arrayNode('templates')
-	   			  ->prototype('array')
-	   			  	->cannotBeEmpty()
-	             	->children()
-	              	  ->scalarNode('resource')->cannotBeEmpty()->end()
-	              	  ->scalarNode('base_path')->cannotBeEmpty()->end() 
-	        	  ->end()
-	        	->end()
-	        	->defaultValue($this->getTemplatesDefaultValues())
-	          ->end()
-	          ->booleanNode('app_enabled')->defaultFalse()->end()
-	          ->arrayNode('app_base_path')->prototype('scalar')->end() 
-	        ->end()
-       	  ->end()
-        ->end();
+            ->children()
+                   ->arrayNode('elasticms')
+                        ->prototype('array')
+                            ->info('name for the ems-project')
+                            ->children()
+                                ->arrayNode('hosts')
+                                    ->info('elasticsearch hosts')
+                                    ->isRequired()
+                                    ->prototype('scalar')->end()
+                                ->end()
+                                ->arrayNode('environments')
+                                    ->info("example: ['preview', 'staging', 'live']")
+                                    ->isRequired()
+                                    ->prototype('scalar')->end()
+                                ->end()
+                                ->scalarNode('index_prefix')
+                                    ->info("example: 'test_'")
+                                    ->isRequired()
+                                ->end()
+                                ->scalarNode('translation_type')
+                                    ->info("example: 'test_i18n'")
+                                    ->defaultValue(null)
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                    ->arrayNode('twig_list')
+                        ->children()
+                            ->arrayNode('templates')
+                                ->defaultValue($this->getTemplatesDefaultValues())
+                                ->prototype('array')
+                                    ->cannotBeEmpty()
+                                    ->children()
+                                        ->scalarNode('resource')->cannotBeEmpty()->end()
+                                        ->scalarNode('base_path')->cannotBeEmpty()->end() 
+                                     ->end()
+                                ->end()
+                            ->end()
+                        ->booleanNode('app_enabled')->defaultFalse()->end()
+                        ->arrayNode('app_base_path')
+                            ->prototype('scalar')
+                        ->end() 
+                    ->end()
+                ->end()
+            ->end();
         
 
         return $treeBuilder;
@@ -55,11 +79,11 @@ class Configuration implements ConfigurationInterface
      */
     protected function getTemplatesDefaultValues()
     {
-    	return array(
-    			array(
-    					'resource'  => 'EMSClientHelperBundle',
-    					'base_path'  => 'Resources/views/Pages',
-    			),
-    	);
+    	return [
+            [
+                'resource'  => 'EMSClientHelperBundle',
+                'base_path'  => 'Resources/views/Pages',
+            ],
+    	];
     }
 }

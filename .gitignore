@@ -3,3 +3,6 @@
 .DS_Store
 /.buildpath
 /.project
+/nbproject/
+/vendor
+composer.lock
