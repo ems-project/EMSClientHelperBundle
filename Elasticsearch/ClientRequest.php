@@ -73,7 +73,7 @@ class ClientRequest
         $hits = $search['hits'];
         
         if (1 != $hits['total']) {
-            throw new Exception(sprintf('expected 1 result, got %d', $hits['total']));
+            throw new \Exception(sprintf('expected 1 result, got %d', $hits['total']));
         }
         
         return $hits['hits'][0];
