@@ -65,3 +65,7 @@ Create empty translation files in (/app/Resources/translations) in the following
     ```
     {{ emsch_path(homepage, {}) }}
     ```
+- emsch_helper
+    ```
+    {{ 'type:AV02131ywJBP0ULmVzID'|emsch_ouuid }} #returns AV02131ywJBP0ULmVzID
+    ```
