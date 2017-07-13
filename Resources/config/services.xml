@@ -7,6 +7,7 @@
     <parameters>
        <parameter key="emsch.routing.environment_loader.class">EMS\ClientHelperBundle\Routing\EnvironmentLoader</parameter>
        
+       <parameter key="emsch.twig.extension.helper.class">EMS\ClientHelperBundle\Twig\HelperExtension</parameter>
        <parameter key="emsch.twig.extension.routing.class">EMS\ClientHelperBundle\Twig\RoutingExtension</parameter>
        <parameter key="emsch.twig.extension.trans.class">EMS\ClientHelperBundle\Twig\TranslationExtension</parameter>
        
@@ -22,6 +23,9 @@
         </service>
         
         <!-- twig extensions -->
+        <service id="emsch.twig.extension.helper" class="%emsch.twig.extension.helper.class%">
+            <tag name="twig.extension" />
+        </service>
         <service id="emsch.twig.extension.trans" class="%emsch.twig.extension.trans.class%">
             <argument type="service" id="translator" />
             <argument type="service" id="emsch.request.service" />

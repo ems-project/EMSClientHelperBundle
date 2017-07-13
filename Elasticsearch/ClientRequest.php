@@ -47,12 +47,29 @@ class ClientRequest
     
     /**
      * @param string $type
+     * @param string $id
+     * 
+     * @return array
+     */
+    public function get($type, $id)
+    {
+        return $this->client->get([
+            'index' => $this->getIndex(),
+            'type' => $type,
+            'id' => $id,
+        ]);
+    }
+    
+    /**
+     * @param string $type
      * @param array  $body
+     * 
+     * @return array
      */
     public function search($type, array $body)
     {
         return $this->client->search([
-            'index' => $this->indexPrefix . $this->requestService->getEnvironment(),
+            'index' => $this->getIndex(),
             'type' => $type,
             'body' => $body,
         ]);
@@ -77,5 +94,13 @@ class ClientRequest
         }
         
         return $hits['hits'][0];
+    }
+    
+    /**
+     * @return string
+     */
+    private function getIndex()
+    {
+        return $this->indexPrefix . $this->requestService->getEnvironment();
     }
 }
