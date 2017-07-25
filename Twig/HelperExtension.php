@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Twig;
 
+use EMS\ClientHelperBundle\Elasticsearch\ClientRequest;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
@@ -22,13 +23,7 @@ class HelperExtension extends AbstractExtension
      */
     public function getOuuid($emsLink)
     {
-        if (!strpos($emsLink, ':')) {
-            return $emsLink;
-        }
-        
-        list($contentType, $ouuid) = preg_split('/:/', $emsLink);
-        
-        return $ouuid;
+        return ClientRequest::getOuuid($emsLink);
     }
 
         /**

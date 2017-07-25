@@ -36,7 +36,23 @@ class ClientRequest
         $this->requestService = $requestService;
         $this->indexPrefix = $indexPrefix;
     }
+       
+    /**
+     * @param string $emsLink
+     *
+     * @return string|null
+     */
+    public static function getOuuid($emsLink)
+    {
+        if (!strpos($emsLink, ':')) {
+            return $emsLink;
+        }
         
+        $split = preg_split('/:/', $emsLink);
+        
+        return array_pop($split);
+    }
+    
     /**
      * @return string
      */

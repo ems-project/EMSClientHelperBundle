@@ -11,7 +11,7 @@ class StorageService
     /**
      * @var string
      */
-    private $path;
+    private $basePath;
     
     /**
      * @var Filesystem
@@ -19,11 +19,11 @@ class StorageService
     private $filesystem;
     
     /**
-     * @param string $path
+     * @param string $basePath
      */
-    public function __construct($path)
+    public function __construct($basePath)
     {
-        $this->path = $path;
+        $this->basePath = $basePath;
         $this->filesystem = new Filesystem();
     }
     
@@ -36,22 +36,8 @@ class StorageService
      */
     public function getFileBySha1($sha1)
     {
-        return new File($this->getFilename($sha1));
-    }
-    
-    /**
-     * @param string $sha1
-     *
-     * @return string
-     */
-    private function getFilename($sha1)
-    {
-        $path = $this->path.'/'.substr($sha1, 0, 3);
+        $path = $this->basePath.'/'.substr($sha1, 0, 3).'/'.$sha1;
         
-        if (!$this->filesystem->exists($path)) {
-            $this->filesystem->mkdir($path);
-        }
-        
-        return $path . '/' . $sha1;
+        return new File($path);
     }
 }
