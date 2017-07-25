@@ -97,6 +97,43 @@ class ClientRequest
     }
     
     /**
+     * @param string $type
+     * @param array  $body
+     * @param int    $size
+     * 
+     * //http://stackoverflow.com/questions/10836142/elasticsearch-duplicate-results-with-paging
+     */
+    public function searchAll($type, array $body, $pageSize = 10)
+    {
+        $params = [
+            'preference' => '_primary', //see function description
+            'from' => 0,
+            'size' => 0,
+            'index' => $this->getIndex(),
+            'type' => $type,
+            'body' => $body,
+        ];
+        
+        $totalSearch = $this->client->search($params);
+        $total = $totalSearch["hits"]["total"];
+        
+        $results = [];
+        $params['size'] = $pageSize;
+        
+        while($params['from'] < $total){
+            $search = $this->client->search($params);
+            
+            foreach ($search["hits"]["hits"] as $document){
+                $results[] = $document;
+            }
+            
+            $params['from'] += $pageSize;
+        }
+        
+        return $results;
+    }
+    
+    /**
      * @return string
      */
     private function getIndex()
