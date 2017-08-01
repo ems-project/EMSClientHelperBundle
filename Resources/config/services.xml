@@ -30,11 +30,6 @@
             <argument type="service" id="translator" />
             <argument type="service" id="emsch.request.service" />
             <tag name="twig.extension" />
-        </service>    
-        <service id="emsch.twig.extension.routing" class="%emsch.twig.extension.routing.class%">
-            <argument type="service" id="router" />
-            <argument type="service" id="emsch.request.service" />
-            <tag name="twig.extension" />
         </service>
                         
         <!-- elasticsearch services -->
