@@ -5,10 +5,9 @@
         http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-       <parameter key="emsch.routing.environment_loader.class">EMS\ClientHelperBundle\Routing\EnvironmentLoader</parameter>
+       <parameter key="emsch.request_listener.class">EMS\ClientHelperBundle\EventListener\RequestListener</parameter>
        
        <parameter key="emsch.twig.extension.helper.class">EMS\ClientHelperBundle\Twig\HelperExtension</parameter>
-       <parameter key="emsch.twig.extension.routing.class">EMS\ClientHelperBundle\Twig\RoutingExtension</parameter>
        <parameter key="emsch.twig.extension.trans.class">EMS\ClientHelperBundle\Twig\TranslationExtension</parameter>
        
        <parameter key="emsch.request.service.class">EMS\ClientHelperBundle\Service\RequestService</parameter>
@@ -16,10 +15,11 @@
        <parameter key="emsch.client_request_factory.class">EMS\ClientHelperBundle\Elasticsearch\ClientRequestFactory</parameter>
     </parameters>
     
-    <services>
-        <!-- loaders -->
-        <service id="emsch.routing.environment_loader" class="%emsch.routing.environment_loader.class%">
-            <tag name="routing.loader" />
+    <services>        
+        <!-- event listeners -->
+        <service id="emsch.request_listener" class="%emsch.request_listener.class%">
+            <argument></argument> <!-- will be filled in with request_environment config dynamically -->
+            <tag name="kernel.event_listener" event="kernel.request" />
         </service>
         
         <!-- twig extensions -->
