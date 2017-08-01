@@ -19,11 +19,6 @@ class TranslationLoader implements LoaderInterface
     private $project;
     
     /**
-     * @var array
-     */
-    private $environments;
-    
-    /**
      * @var string
      */
     private $prefix;
@@ -36,15 +31,13 @@ class TranslationLoader implements LoaderInterface
     /**
      * @param Client $client
      * @param string $project
-     * @param array  $environments
      * @param string $prefix
      * @param string $type
      */
-    public function __construct(Client $client, $project, array $environments, $prefix, $type)
+    public function __construct(Client $client, $project, $prefix, $type)
     {
         $this->client = $client;
         $this->project = $project;
-        $this->environments = $environments;
         $this->prefix = $prefix;
         $this->type = $type;
     }
@@ -54,10 +47,6 @@ class TranslationLoader implements LoaderInterface
      */
     public function load($resource, $locale, $domain = 'messages')
     {
-        if (!in_array($domain, $this->environments)) {
-            throw new \Exception(sprintf('invalid environment: %s', $domain));
-        }
-        
         $catalogue = new MessageCatalogue($locale);
         $pageSize = 100;
         

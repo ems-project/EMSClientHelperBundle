@@ -23,6 +23,10 @@ class Configuration implements ConfigurationInterface
         $rootNode = $treeBuilder->root('ems_client_helper');
         $rootNode
             ->children()
+                    ->arrayNode('request_environment')
+                        ->info('environment name => regex for matching the base url')
+                        ->prototype('scalar')->end()
+                    ->end()
                    ->arrayNode('elasticms')
                         ->prototype('array')
                             ->info('name for the ems-project')
@@ -32,11 +36,7 @@ class Configuration implements ConfigurationInterface
                                     ->isRequired()
                                     ->prototype('scalar')->end()
                                 ->end()
-                                ->arrayNode('environments')
-                                    ->info("example: ['preview', 'staging', 'live']")
-                                    ->isRequired()
-                                    ->prototype('scalar')->end()
-                                ->end()
+                                
                                 ->scalarNode('index_prefix')
                                     ->info("example: 'test_'")
                                     ->isRequired()

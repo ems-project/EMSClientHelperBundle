@@ -34,6 +34,9 @@ class EMSClientHelperExtension extends Extension
         foreach ($elasticms as $project => $projectConfig) {
             $this->loadProject($project, $projectConfig, $container);
         }
+        
+        $requestListenerDef = $container->getDefinition('emsch.request_listener');
+        $requestListenerDef->replaceArgument(0, $config['request_environment']);
 
         $container->setParameter('ems_client_helper.twig_list.templates', $config['twig_list']['templates']);
         $container->setParameter('ems_client_helper.twig_list.app_enabled', $config['twig_list']['app_enabled']);
@@ -82,7 +85,6 @@ class EMSClientHelperExtension extends Extension
         $loader->setArguments([
             new Reference(sprintf('elasticsearch.client.%s', $project)),
             $project,
-            $config['environments'],
             $config['index_prefix'],
             $config['translation_type']
         ]);
