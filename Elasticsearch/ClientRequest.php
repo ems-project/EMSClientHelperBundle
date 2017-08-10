@@ -82,13 +82,21 @@ class ClientRequest
      * 
      * @return array
      */
-    public function search($type, array $body)
+    public function search($type, array $body, $from = 0, $size = 10)
     {
-        return $this->client->search([
+        $params = [
             'index' => $this->getIndex(),
             'type' => $type,
             'body' => $body,
-        ]);
+            'size' => $size,
+            'from' => $from
+        ];
+        
+        if ($from > 0) {
+            $params['preference'] = '_primary';
+        }
+        
+        return $this->client->search($params);
     }
     
     /**
