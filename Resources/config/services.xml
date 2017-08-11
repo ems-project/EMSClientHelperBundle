@@ -19,7 +19,8 @@
         <!-- event listeners -->
         <service id="emsch.request_listener" class="%emsch.request_listener.class%">
             <argument></argument> <!-- will be filled in with request_environment config dynamically -->
-            <tag name="kernel.event_listener" event="kernel.request" />
+            <tag name="kernel.event_listener" event="kernel.request" priority="100" />
+            <tag name="kernel.event_listener" event="kernel.exception" priority="100" />
         </service>
         
         <!-- twig extensions -->

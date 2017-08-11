@@ -4,6 +4,7 @@ namespace EMS\ClientHelperBundle\EventListener;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 
 class RequestListener
 {
@@ -27,14 +28,34 @@ class RequestListener
      */
     public function onKernelRequest(GetResponseEvent $event)
     {
-        if (null === $this->requestEnvironment || !$event->isMasterRequest()) {
+        $this->setEnvironment($event->getRequest());
+    }
+    
+    /**
+     * @param GetResponseForExceptionEvent $event
+     * 
+     * @return void
+     */
+    public function onKernelException(GetResponseForExceptionEvent $event)
+    {
+        $this->setEnvironment($event->getRequest());
+    }
+    
+    /**
+     * @param Request $request
+     *
+     * @return void
+     */
+    private function setEnvironment(Request $request)
+    {
+        if (null === $this->requestEnvironment) {
             return;
         }
         
-        $environment = $this->getEnvironment($event->getRequest());
+        $environment = $this->getEnvironment($request);
         
         if ($environment) {
-            $event->getRequest()->attributes->set('_environment', $environment);
+            $request->attributes->set('_environment', $environment);
         }
     }
     
