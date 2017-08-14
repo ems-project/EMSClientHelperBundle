@@ -1,0 +1,57 @@
+<?php
+
+namespace EMS\ClientHelperBundle\WebClient\Frontend\DependencyInjection;
+
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Definition\ConfigurationInterface;
+
+/**
+ * This is the class that validates and merges configuration from your app/config files.
+ *
+ * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/configuration.html}
+ */
+class Configuration implements ConfigurationInterface
+{
+    /**
+     * {@inheritdoc}
+     */
+    public function getConfigTreeBuilder()
+    {
+        $treeBuilder = new TreeBuilder();
+        /* @var $rootNode ArrayNodeDefinition */
+        $rootNode = $treeBuilder->root('ems_client_helper');
+        $rootNode
+            ->children()
+                    ->arrayNode('request_environment')
+                        ->info('environment name => regex for matching the base url')
+                        ->prototype('scalar')->end()
+                    ->end()
+                   ->arrayNode('elasticms')
+                        ->prototype('array')
+                            ->info('name for the ems-project')
+                            ->children()
+                                ->arrayNode('hosts')
+                                    ->info('elasticsearch hosts')
+                                    ->isRequired()
+                                    ->prototype('scalar')->end()
+                                ->end()
+                                
+                                ->scalarNode('index_prefix')
+                                    ->info("example: 'test_'")
+                                    ->isRequired()
+                                ->end()
+                                ->scalarNode('translation_type')
+                                    ->info("example: 'test_i18n'")
+                                    ->defaultValue(null)
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
+            ->end();
+        
+
+        return $treeBuilder;
+    }
+}
