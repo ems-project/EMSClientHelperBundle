@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\WeblCient\TwigList;
+namespace EMS\ClientHelperBundle\WebClient\TwigList;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 

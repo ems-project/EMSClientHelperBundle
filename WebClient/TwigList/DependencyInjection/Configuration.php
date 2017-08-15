@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\WeblCient\TwigList\DependencyInjection;
+namespace EMS\ClientHelperBundle\WebClient\TwigList\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -56,7 +56,7 @@ class Configuration implements ConfigurationInterface
     {
     	return [
             [
-                'resource'  => 'EMSClientHelperBundle',
+                'resource'  => 'EMSClientHelperBundle/WebClient/TwigList',
                 'base_path'  => 'Resources/views/Pages',
             ],
     	];

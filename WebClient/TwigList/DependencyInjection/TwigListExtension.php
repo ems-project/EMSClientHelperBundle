@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\WeblCient\TwigList\DependencyInjection;
+namespace EMS\ClientHelperBundle\WebClient\TwigList\DependencyInjection;
 
 use EMS\ClientHelperBundle\Translation\TranslationLoader;
 use Symfony\Component\Config\FileLocator;
