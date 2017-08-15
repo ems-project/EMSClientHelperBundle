@@ -2,7 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Frontend\Twig;
 
-use EMS\ClientHelperBundle\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Frontend\Elasticsearch\ClientRequest;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 

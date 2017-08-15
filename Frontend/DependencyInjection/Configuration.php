@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\WebClient\Frontend\DependencyInjection;
+namespace EMS\ClientHelperBundle\Frontend\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -20,7 +20,7 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder();
         /* @var $rootNode ArrayNodeDefinition */
-        $rootNode = $treeBuilder->root('ems_client_helper');
+        $rootNode = $treeBuilder->root('ems_frontend');
         $rootNode
             ->children()
                     ->arrayNode('request_environment')

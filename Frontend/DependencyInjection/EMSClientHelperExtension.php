@@ -1,8 +1,8 @@
 <?php
 
-namespace EMS\ClientHelperBundle\WebClient\Frontend\DependencyInjection;
+namespace EMS\ClientHelperBundle\Frontend\DependencyInjection;
 
-use EMS\ClientHelperBundle\Translation\TranslationLoader;
+use EMS\ClientHelperBundle\Frontend\Translation\TranslationLoader;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
