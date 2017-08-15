@@ -1,3 +1,0 @@
-ems_client_helper:
-    resource: '@EMSClientHelperBundle/TwigList/Controller/'
-    type : annotation

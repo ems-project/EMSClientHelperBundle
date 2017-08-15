@@ -1,1 +1,0 @@
-ems_twig_list :    templates:        - {resource: 'EMSClientHelperBundle/TwigList', path: 'Resources/views/Pages'}    app_enabled: false    app_base_path : #['Resources/views/default']

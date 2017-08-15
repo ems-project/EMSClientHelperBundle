@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\TwigList\Controller;
+namespace EMS\ClientHelperBundle\EMSTwigListBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;

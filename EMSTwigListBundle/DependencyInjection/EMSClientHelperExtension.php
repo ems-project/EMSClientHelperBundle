@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\TwigList\DependencyInjection;
+namespace EMS\ClientHelperBundle\EMSTwigListBundle\DependencyInjection;
 
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;

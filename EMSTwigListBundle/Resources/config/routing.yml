@@ -1,0 +1,3 @@
+ems_twig_list:
+    resource: '@EMSTwigListBundle/Controller/'
+    type : annotation
