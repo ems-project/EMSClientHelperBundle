@@ -16,7 +16,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
  *
  * @link http://symfony.com/doc/current/cookbook/bundles/extension.html
  */
-class FrontendExtension extends Extension
+class EMSClientHelperExtension extends Extension
 {
     /**
      * {@inheritdoc}
