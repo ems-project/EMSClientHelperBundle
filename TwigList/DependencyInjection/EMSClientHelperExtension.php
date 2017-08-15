@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\WebClient\TwigList\DependencyInjection;
+namespace EMS\ClientHelperBundle\TwigList\DependencyInjection;
 
 use EMS\ClientHelperBundle\Translation\TranslationLoader;
 use Symfony\Component\Config\FileLocator;
@@ -29,8 +29,8 @@ class EMSClientHelperExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $container->setParameter('ems_client_helper.twig_list.templates', $config['twig_list']['templates']);
-        $container->setParameter('ems_client_helper.twig_list.app_enabled', $config['twig_list']['app_enabled']);
-        $container->setParameter('ems_client_helper.twig_list.app_base_path', $config['twig_list']['app_base_path']);
+        $container->setParameter('ems_twig_list.templates', $config['templates']);
+        $container->setParameter('ems_twig_list.app_enabled', $config['app_enabled']);
+        $container->setParameter('ems_twig_list.app_base_path', $config['app_base_path']);
     }
 }

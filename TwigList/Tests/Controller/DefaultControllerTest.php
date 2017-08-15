@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\WebClient\TwigList\Tests\Controller;
+namespace EMS\ClientHelperBundle\TwigList\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 

@@ -20,29 +20,24 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder();
         /* @var $rootNode ArrayNodeDefinition */
-        $rootNode = $treeBuilder->root('ems_client_helper');
+        $rootNode = $treeBuilder->root('ems_twig_list');
         $rootNode
             ->children()
-                    ->arrayNode('twig_list')
-                        ->children()
-                            ->arrayNode('templates')
-                                ->defaultValue($this->getTemplatesDefaultValues())
-                                ->prototype('array')
-                                    ->cannotBeEmpty()
-                                    ->children()
-                                        ->scalarNode('resource')->cannotBeEmpty()->end()
-                                        ->scalarNode('base_path')->cannotBeEmpty()->end()
-                                     ->end()
+                ->arrayNode('templates')
+                    ->defaultValue($this->getTemplatesDefaultValues())
+                        ->prototype('array')
+                            ->cannotBeEmpty()
+                                ->children()
+                                    ->scalarNode('resource')->cannotBeEmpty()->end()
+                                    ->scalarNode('base_path')->cannotBeEmpty()->end()
                                 ->end()
-                            ->end()
-                        ->booleanNode('app_enabled')->defaultFalse()->end()
-                        ->arrayNode('app_base_path')
-                            ->prototype('scalar')
                         ->end()
-                    ->end()
+                ->end()
+                ->booleanNode('app_enabled')->defaultFalse()->end()
+                ->arrayNode('app_base_path')
+                    ->prototype('scalar')
                 ->end()
             ->end();
-        
 
         return $treeBuilder;
     }
@@ -56,7 +51,7 @@ class Configuration implements ConfigurationInterface
     {
     	return [
             [
-                'resource'  => 'EMSClientHelperBundle/WebClient/TwigList',
+                'resource'  => 'EMSClientHelperBundle/TwigList',
                 'base_path'  => 'Resources/views/Pages',
             ],
     	];

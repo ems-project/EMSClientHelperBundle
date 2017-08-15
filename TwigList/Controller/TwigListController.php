@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\WebClient\TwigList\Controller;
+namespace EMS\ClientHelperBundle\TwigList\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -16,7 +16,7 @@ class TwigListController extends Controller
      */
     public function pageAction(Request $request) {
     	
-    	$templates = $this->container->getParameter('ems_client_helper.twig_list.templates');
+    	$templates = $this->container->getParameter('ems_twig_list.templates');
     	
     	$twigs = array();
 
@@ -33,8 +33,8 @@ class TwigListController extends Controller
     		}
     	}
     	
-    	if($this->container->getParameter('ems_client_helper.twig_list.app_enabled')){
-    		$base_paths = $this->container->getParameter('ems_client_helper.twig_list.app_base_path');
+    	if($this->container->getParameter('ems_twig_list.app_enabled')){
+    		$base_paths = $this->container->getParameter('ems_twig_list.app_base_path');
     		
     		foreach ($base_paths as $key =>$base_path) {
     			$finder = new Finder();
@@ -51,7 +51,7 @@ class TwigListController extends Controller
     		 
     	}
     	
-    	return $this->render('EMSClientHelperBundle:Default:templates.html.twig',[
+    	return $this->render('EMSTwigListBundle:Default:templates.html.twig',[
     			'templates' => $twigs
     	]);
     }
