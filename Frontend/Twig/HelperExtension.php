@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\WebClient\Frontend\Twig;
+namespace EMS\ClientHelperBundle\Frontend\Twig;
 
 use EMS\ClientHelperBundle\Elasticsearch\ClientRequest;
 use Twig\Extension\AbstractExtension;
