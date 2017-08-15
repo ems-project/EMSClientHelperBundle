@@ -1,8 +1,8 @@
 <?php
 
-namespace EMS\ClientHelperBundle\EMSFrontendBundle\DependencyInjection;
+namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\DependencyInjection;
 
-use EMS\ClientHelperBundle\EMSFrontendBundle\Translation\TranslationLoader;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Translation\TranslationLoader;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -16,7 +16,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
  *
  * @link http://symfony.com/doc/current/cookbook/bundles/extension.html
  */
-class EMSFrontendExtension extends Extension
+class EMSBackendBridgeExtension extends Extension
 {
     /**
      * {@inheritdoc}

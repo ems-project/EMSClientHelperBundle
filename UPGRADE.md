@@ -11,7 +11,7 @@ new EMS\ClientHelperBundle\EMSClientHelperBundle()
 with the following separated bundles (feel free to omit unused parts of the bundle)
 ```bash
 new EMS\ClientHelperBundle\EMSTwigListBundle\EMSTwigListBundle(),
-new EMS\ClientHelperBundle\EMSFrontendBundle\EMSFrontendBundle()
+new EMS\ClientHelperBundle\EMSBackendBridgeBundle\EMSBackendBridgeBundle()
 ````
 ### config.yml
 Each subbundle now has it's own configuration tree. The original config:
@@ -35,8 +35,8 @@ ems_twig_list:
     app_enabled:
     app_base_path:
 
-php bin/console config:dump-reference EMSFrontendBundle
-ems_frontend:
+php bin/console config:dump-reference EMSBackendBridgeBundle
+ems_backend_bridge:
     request_environment:
     elasticms:
 ````
@@ -61,7 +61,11 @@ Find here some exemple changes to get you along:
 ```bash
 EMS\ClientHelperBundle\Elasticsearch\ClientRequest 
 --> 
-EMS\ClientHelperBundle\EMSFrontendBundle\Elasticsearch\ClientRequest
+EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest,
+
+EMS\ClientHelperBundle\Storage\StorageService
+-->
+EMS\ClientHelperBundle\EMSBackendBridgeBundle\Storage\StorageService
 ````
 The easiest strategy would be to find and replace 
-`ClientHelperBundle` with `ClientHelperBundle\EMSFrontendBundle` in your project source.
+`ClientHelperBundle` with `ClientHelperBundle\EMSBackendBridgeBundle` in your project source.

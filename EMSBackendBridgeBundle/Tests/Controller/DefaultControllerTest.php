@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\EMSFrontendBundle\Tests\Controller;
+namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 

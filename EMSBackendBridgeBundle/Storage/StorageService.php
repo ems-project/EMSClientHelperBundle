@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\EMSFrontendBundle\Storage;
+namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Storage;
 
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 use Symfony\Component\Filesystem\Filesystem;
