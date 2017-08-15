@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\Frontend;
+namespace EMS\ClientHelperBundle\EMSFrontendBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 

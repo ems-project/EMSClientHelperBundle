@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\Frontend\DependencyInjection;
+namespace EMS\ClientHelperBundle\EMSFrontendBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;

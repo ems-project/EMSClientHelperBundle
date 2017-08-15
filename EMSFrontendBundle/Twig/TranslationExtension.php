@@ -1,8 +1,8 @@
 <?php
 
-namespace EMS\ClientHelperBundle\Frontend\Twig;
+namespace EMS\ClientHelperBundle\EMSFrontendBundle\Twig;
 
-use EMS\ClientHelperBundle\Frontend\Service\RequestService;
+use EMS\ClientHelperBundle\EMSFrontendBundle\Service\RequestService;
 use Symfony\Bridge\Twig\Extension\TranslationExtension as BaseExtension;
 use Symfony\Component\Translation\TranslatorInterface;
 use Twig\NodeVisitor\NodeVisitorInterface;

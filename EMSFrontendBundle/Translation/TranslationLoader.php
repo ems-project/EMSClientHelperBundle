@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\Frontend\Translation;
+namespace EMS\ClientHelperBundle\EMSFrontendBundle\Translation;
 
 use Elasticsearch\Client;
 use Symfony\Component\Translation\Loader\LoaderInterface;

@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\Frontend\EventListener;
+namespace EMS\ClientHelperBundle\EMSFrontendBundle\EventListener;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;

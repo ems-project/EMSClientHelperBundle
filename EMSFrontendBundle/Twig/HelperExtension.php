@@ -1,8 +1,8 @@
 <?php
 
-namespace EMS\ClientHelperBundle\Frontend\Twig;
+namespace EMS\ClientHelperBundle\EMSFrontendBundle\Twig;
 
-use EMS\ClientHelperBundle\Frontend\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\EMSFrontendBundle\Elasticsearch\ClientRequest;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 

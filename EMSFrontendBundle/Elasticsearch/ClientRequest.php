@@ -1,9 +1,9 @@
 <?php
 
-namespace EMS\ClientHelperBundle\Frontend\Elasticsearch;
+namespace EMS\ClientHelperBundle\EMSFrontendBundle\Elasticsearch;
 
 use Elasticsearch\Client;
-use EMS\ClientHelperBundle\Frontend\Service\RequestService;
+use EMS\ClientHelperBundle\EMSFrontendBundle\Service\RequestService;
 
 class ClientRequest
 {

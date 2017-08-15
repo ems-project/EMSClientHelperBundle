@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\Frontend\Service;
+namespace EMS\ClientHelperBundle\EMSFrontendBundle\Service;
 
 use Symfony\Component\HttpFoundation\RequestStack;
 
