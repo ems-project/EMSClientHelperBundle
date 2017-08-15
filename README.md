@@ -3,33 +3,41 @@ Contains helper services, controllers and twig extensions for elasticms integrat
 ## Getting Started
 ### Config reference
 ```bash
-php bin/console config:dump-reference EMSClientHelperBundle
-# Default configuration for "EMSClientHelperBundle"
-ems_client_helper:
-    request_environment:
-        preview: '/preview/'
-        staging: '/staging/'
-        live: ''
+php bin/console config:dump-reference EMSTwigListBundle
+# Default configuration for "EMSTwigListBundle"
+ems_twig_list:
+    templates:
+
+        # Prototype
+        -
+            resource:             ~
+            base_path:            ~
+    app_enabled:          false
+    app_base_path:        []
+````
+```bash
+php bin/console config:dump-reference EMSBackendBridgeBundle
+# Default configuration for "EMSBackendBridgeBundle"
+ems_backend_bridge:
+
+    # environment name => regex for matching the base url
+    request_environment:  []
     elasticms:
+
         # Prototype: name for the ems-project
         -
+
             # elasticsearch hosts
             hosts:                [] # Required
+
             # example: 'test_'
             index_prefix:         ~ # Required
+
             # example: 'test_i18n'
             translation_type:     null
-    twig_list:
-        templates:
-            # Prototype
-            -
-                resource:             ~
-                base_path:            ~
-        app_enabled:          false
-        app_base_path:        []
 ````
 ### Request Environment
-The config array **request_environment** is required for setting the correct **_environment** attribute, this is done by the RequestListener (EMS\ClientHelperBundle\EventListener\RequestListener)
+The config array **request_environment** is required for setting the correct **_environment** attribute, this is done by the RequestListener (EMS\ClientHelperBundle\EMSBackendBridgeBundle\EventListener\RequestListener)
 
 ### Services
 Foreach elasticms project defined in the bundle configuration the following services are available.
