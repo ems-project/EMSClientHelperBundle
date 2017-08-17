@@ -17,15 +17,7 @@
         <service id="emsch.client_request_factory" class="%emsch.client_request_factory.class%" public="false">
             <argument type="service" id="emsch.request.service" />
         </service>
-<<<<<<< HEAD
-<<<<<<< HEAD
         <service id="emsch.client_request" class="%emsch.client_request.class%" public="false">
-=======
-        <service id="emsch.client_request" class="%emsch.client_request.class%" public="falsegi">
->>>>>>> Bundle for language selection page
-=======
-        <service id="emsch.client_request" class="%emsch.client_request.class%" public="false">
->>>>>>> bc3dc759be7e427454079d3a4f507bbba2743110
             <factory service="emsch.client_request_factory" method="create"/>
         </service>
 
