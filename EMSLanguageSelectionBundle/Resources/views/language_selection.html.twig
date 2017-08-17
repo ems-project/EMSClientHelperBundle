@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Language selection</title>
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+        {% block stylesheets %}
+
+        {% endblock %}
+    </head>
+    <body class="languages-page">
+        <div id="wrapper">
+            <div class="container-fluid">
+                <ul>
+                    {% for locale, selection in selections %}
+                        <li lang="{{ locale }}">
+                            <a href="{{ locale }}{{ destination }}">
+                                <div class="logo">
+                                    {# TODO translation domain via config #}
+                                    <img src="{{ asset(selection.logo) }}" alt="{{ 'general.name'|emsch_trans({}, emsch_trans_domain, locale) }}">
+                                    <span>{{ 'header.logo.title'|emsch_trans({}, emsch_trans_domain, locale) }}</span>
+                                </div>
+                                <button class="btn btn-default">{{ 'language.select.continue'|emsch_trans({}, emsch_trans_domain, locale) }}</button>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% block javascripts %}
+
+        {% endblock %}
+    </body>
+
+</html>
