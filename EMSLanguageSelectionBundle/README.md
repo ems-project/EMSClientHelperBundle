@@ -32,6 +32,5 @@ ems_language_selection:
 Add the controller to your routing.yml file
 ```yml
 ems_language_selection:
-    resource: '@EMSLanguageSelectionBundle/Controller/'
-    type : annotation
+    resource: '@EMSLanguageSelectionBundle/Resources/config/routing.yml'
 ````
