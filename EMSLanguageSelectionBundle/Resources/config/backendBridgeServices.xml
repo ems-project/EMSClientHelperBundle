@@ -17,7 +17,7 @@
         <service id="emsch.client_request_factory" class="%emsch.client_request_factory.class%" public="false">
             <argument type="service" id="emsch.request.service" />
         </service>
-        <service id="emsch.client_request" class="%emsch.client_request.class%" public="falsegi">
+        <service id="emsch.client_request" class="%emsch.client_request.class%" public="false">
             <factory service="emsch.client_request_factory" method="create"/>
         </service>
 
