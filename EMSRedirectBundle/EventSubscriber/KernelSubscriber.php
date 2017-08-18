@@ -41,7 +41,7 @@ class KernelSubscriber implements EventSubscriberInterface
      * @return void
      */
     public function onKernelException(GetResponseForExceptionEvent $event)
-    {dump("kernel exception check");
+    {
         if (!$event->isMasterRequest()) {
             // don't do anything if it's not the master request
             return;
