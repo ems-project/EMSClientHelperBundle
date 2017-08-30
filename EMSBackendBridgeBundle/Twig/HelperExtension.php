@@ -15,6 +15,7 @@ class HelperExtension extends AbstractExtension
     {
         return [
             new TwigFilter('emsch_ouuid', array($this, 'getOuuid')),
+            new TwigFilter('dump', array($this, 'dump')),
         ];
     }
     
@@ -24,6 +25,12 @@ class HelperExtension extends AbstractExtension
     public function getOuuid($emsLink)
     {
         return ClientRequest::getOuuid($emsLink);
+    }
+    
+    public function dump($object) {
+        if(function_exists('dump')){
+            dump($object);
+        }
     }
 
         /**
