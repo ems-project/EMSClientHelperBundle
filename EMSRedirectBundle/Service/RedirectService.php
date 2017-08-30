@@ -5,6 +5,7 @@ namespace EMS\ClientHelperBundle\EMSRedirectBundle\Service;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
 use Symfony\Component\Debug\Exception\ContextErrorException;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 
 class RedirectService
@@ -80,21 +81,22 @@ class RedirectService
      */
     private function getRedirectDocument($uri, $locale)
     {
-        return $this->clientRequest->searchOne($this->redirectType, [
-            'query' => [
-                'bool' => [
-                    'must' => [
-                        'match' => [
-                            'url_'.$locale => [
-                                'query' => $uri,
-                                'operator' => 'AND',
-                                'boost' => 1
+        try {
+            return $this->clientRequest->searchOne($this->redirectType, [
+                'query' => [
+                    'bool' => [
+                        'must' => [
+                            'term' => [
+                                'url_'.$locale => $uri
                             ]
                         ]
                     ]
                 ]
-            ]
-        ]);
+            ]);
+        }
+        catch (\Exception $e) {
+            throw new NotFoundHttpException('Path not found: '.$uri);
+        }
     }
     
     /**
