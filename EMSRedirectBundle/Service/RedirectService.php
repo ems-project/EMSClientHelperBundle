@@ -66,7 +66,6 @@ class RedirectService
                 $source
             );
         } catch (\Exception $ex) {
-            throw $ex;
             return false;
         }
     }
@@ -81,22 +80,17 @@ class RedirectService
      */
     private function getRedirectDocument($uri, $locale)
     {
-        try {
-            return $this->clientRequest->searchOne($this->redirectType, [
-                'query' => [
-                    'bool' => [
-                        'must' => [
-                            'term' => [
-                                'url_'.$locale => $uri
-                            ]
+        return $this->clientRequest->searchOne($this->redirectType, [
+            'query' => [
+                'bool' => [
+                    'must' => [
+                        'term' => [
+                            'url_'.$locale => $uri
                         ]
                     ]
                 ]
-            ]);
-        }
-        catch (\Exception $e) {
-            throw new NotFoundHttpException('Path not found: '.$uri);
-        }
+            ]
+        ]);
     }
     
     /**
