@@ -116,8 +116,12 @@ class KernelSubscriber implements EventSubscriberInterface
             $destination = null;
         }
         
+        $languages = $this->languageService->getLanguages();
+        
         if ($session->has('_locale')) {
             $url = $request->getUriForPath('/'.$session->get('_locale').$destination);
+        } elseif (1 === count($languages)) {
+            $url = $request->getUriForPath('/'.$languages[0].$destination);
         } else {
             $url = $this->router->generate('language_selection', [
                 'destination' => $destination
