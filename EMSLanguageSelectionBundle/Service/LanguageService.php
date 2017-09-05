@@ -83,6 +83,23 @@ class LanguageService
     /**
      * @return array
      */
+    public function getLanguages()
+    {
+        $languages = [];
+                
+        foreach ($this->supportedLocale as $locale) {
+            if (!$this->getOption('language_select_'.$locale['locale'])) {
+                continue;
+            }
+            $languages[] = $locale['locale'];
+        }
+        
+        return $languages;       
+    }
+    
+    /**
+     * @return array
+     */
     public function getLanguageSelections()
     {
         $selections = [];
