@@ -76,6 +76,21 @@ class ClientRequest
         ]);
     }
     
+    public function analyze($text, $analyzer) {
+        $tokens = $this->client->indices()->analyze([
+            'index' => $this->getIndex(),
+            'analyzer' => $analyzer,
+            'text' => $text
+            
+        ]);
+        
+        $out = [];
+        foreach ($tokens['tokens'] as $token){
+            $out[] = $token['token'];
+        }
+        return $out;
+    }
+    
     /**
      * @param string $type
      * @param array  $body
