@@ -106,7 +106,6 @@ class QueryBuilderService{
         foreach ($searchValues as $searchValue) {
             $this->addSynonyms($searchValue, $analyzer);
         }
-        dump($searchValues);
         
         return $this->createBodyPerAnalyzer($searchValues, $analyzer);
     }
