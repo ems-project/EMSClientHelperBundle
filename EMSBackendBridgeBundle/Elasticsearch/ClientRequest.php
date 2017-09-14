@@ -36,7 +36,7 @@ class ClientRequest
         $this->requestService = $requestService;
         $this->indexPrefix = $indexPrefix;
     }
-       
+    
     /**
      * @param string $emsLink
      *
@@ -54,6 +54,22 @@ class ClientRequest
     }
     
     /**
+     * @param string $emsLink
+     *
+     * @return string|null
+     */
+    public static function getType($emsLink)
+    {
+        if (!strpos($emsLink, ':')) {
+            return $emsLink;
+        }
+        
+        $split = preg_split('/:/', $emsLink);
+        
+        return $split[0];
+    }
+    
+    /**
      * @return string
      */
     public function getLocale()
@@ -64,7 +80,7 @@ class ClientRequest
     /**
      * @param string $type
      * @param string $id
-     * 
+     *
      * @return array
      */
     public function get($type, $id)
@@ -74,6 +90,53 @@ class ClientRequest
             'type' => $type,
             'id' => $id,
         ]);
+    }
+    
+    /**
+     * @param string $type
+     * @param string $id
+     *
+     * @return array
+     */
+    public function getByOuuids($type, $ouuids)
+    {
+        
+        return $this->client->search([
+            'index' => $this->getIndex(),
+            'type' => $type,
+            'body' => [
+                'query' => [
+                    'terms' => [
+                        '_id' => $ouuids
+                    ]
+                ]
+            ]
+        ]);
+    }
+    
+    /**
+     * @param string $type
+     * @param string $id
+     *
+     * @return array
+     */
+    public function getByOuuid($type, $ouuid)
+    {
+        $result = $this->client->search([
+            'index' => $this->getIndex(),
+            'type' => $type,
+            'body' => [
+                'query' => [
+                    'term' => [
+                        '_id' => $ouuid
+                    ]
+                ]
+            ]
+        ]);
+        if(isset($result['hits']['hits'][0])) {
+            return $result['hits']['hits'][0];
+        }
+        return false;;
     }
     
     public function analyze($text, $searchField) {
@@ -114,6 +177,7 @@ class ClientRequest
      */
     public function search($type, array $body, $from = 0, $size = 10)
     {
+
         $params = [
             'index' => $this->getIndex(),
             'type' => $type,
@@ -193,6 +257,14 @@ class ClientRequest
      */
     private function getIndex()
     {
+        $prefixes = explode('|', $this->indexPrefix);
+        $out = [];
+        foreach ($prefixes as $prefix) {
+            $out[] = $prefix . $this->requestService->getEnvironment();
+        }
+        if(!empty($out)){
+            return $out;
+        }
         return $this->indexPrefix . $this->requestService->getEnvironment();
     }
 }
