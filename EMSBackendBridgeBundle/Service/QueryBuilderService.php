@@ -61,7 +61,7 @@ class QueryBuilderService{
         $documents = $analyzer->getClientRequest()->search($analyzer->getSynonymTypes(), [
             '_source' => false,
             'query' => $query,
-        ], 0, 2);
+        ], 0, 20);
         
         if($documents['hits']['total'] <= 20){
             foreach ($documents['hits']['hits'] as $document) {
