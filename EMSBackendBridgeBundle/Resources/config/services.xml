@@ -11,6 +11,7 @@
        <parameter key="emsch.twig.extension.trans.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Twig\TranslationExtension</parameter>
        
        <parameter key="emsch.request.service.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\RequestService</parameter>
+       <parameter key="emsch.query_builder.service.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\QueryBuilderService</parameter>
        <parameter key="emsch.client_request.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest</parameter>
        <parameter key="emsch.client_request_factory.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequestFactory</parameter>
     </parameters>
@@ -42,6 +43,8 @@
         <!-- emsch services -->
         <service id="emsch.request.service" class="%emsch.request.service.class%">
             <argument type="service" id="request_stack" />
+        </service>
+        <service id="emsch.query_builder.service" class="%emsch.query_builder.service.class%">
         </service>
         <service id="emsch.client_request_factory" class="%emsch.client_request_factory.class%" public="false">
             <argument type="service" id="emsch.request.service" />
