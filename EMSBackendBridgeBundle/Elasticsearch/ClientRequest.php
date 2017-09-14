@@ -136,7 +136,7 @@ class ClientRequest
     }
     
     /**
-     * @param string $type
+     * @param string|array $type
      * @param array  $body
      * @param int    $size
      * 
@@ -146,6 +146,7 @@ class ClientRequest
     {
         $params = [
             'preference' => '_primary', //see function description
+            //TODO: should be replace by an order by _ouid (in case of insert in the index the pagination will be inconsistent)
             'from' => 0,
             'size' => 0,
             'index' => $this->getIndex(),
