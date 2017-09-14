@@ -76,7 +76,22 @@ class ClientRequest
         ]);
     }
     
-    public function analyze($text, $analyzer) {
+    public function analyze($text, $searchField) {
+        $info = $this->client->indices()->getFieldMapping([
+            'index' => $this->getIndex(),
+            'field' => $searchField,
+        ]);
+        
+        $analyzer = 'standard';
+        while(is_array($info = array_shift($info)) ){
+            if(isset($info['analyzer'])) {
+                $analyzer = $info['analyzer'];
+            }
+            else if(isset($info['mapping'])) {
+                $info = $info['mapping'];
+            }
+        }
+        
         $tokens = $this->client->indices()->analyze([
             'index' => $this->getIndex(),
             'analyzer' => $analyzer,
@@ -120,7 +135,7 @@ class ClientRequest
      * 
      * @return array
      *
-     * @throws Exception
+     * @throws \Exception
      */
     public function searchOne($type, array $body)
     {
