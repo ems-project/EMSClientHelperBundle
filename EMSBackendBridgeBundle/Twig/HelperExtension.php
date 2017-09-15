@@ -16,6 +16,7 @@ class HelperExtension extends AbstractExtension
         return [
             new TwigFilter('emsch_ouuid', array($this, 'getOuuid')),
             new TwigFilter('dump', array($this, 'dump')),
+            new TwigFilter('format_bytes', array($this, 'formatBytes')),
         ];
     }
     
@@ -33,11 +34,24 @@ class HelperExtension extends AbstractExtension
         }
     }
 
-        /**
+    /**
      * {@inheritdoc}
      */
     public function getName()
     {
         return 'emsch_helper';
+    }    
+    
+    function formatBytes($bytes, $precision = 2)
+    {
+        $units = array('B', 'KB', 'MB', 'GB', 'TB');
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+        
+        // Uncomment one of the following alternatives
+        $bytes /= pow(1024, $pow);
+        
+        return round($bytes, $precision) . ' ' . $units[$pow];
     }
 }
