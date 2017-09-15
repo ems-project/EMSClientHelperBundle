@@ -70,6 +70,55 @@ class ClientRequest
     }
     
     /**
+     * @param string $emsLink
+     *
+     * @return string|null
+     */
+    public function searchBy($type, $parameters, $from = 0, $size = 10)
+    {
+        $body = [
+            'query' => [
+                'bool' => [
+                    'must' => [],
+                ],
+            ],
+        ];
+        
+        foreach ($parameters as $id => $value){
+            $body['query']['bool']['must'][] = [
+                'term' => [
+                    $id => [
+                        'value' => $value,
+                    ]
+                 ]
+            ];
+        }
+        
+        return $this->client->search([
+            'index' => $this->getIndex(),
+            'type' => $type,
+            'body' => $body,
+            'size' => $size,
+            'from' => $from,
+        ]);
+    }
+    
+    /**
+     * @param string $emsLink
+     *
+     * @return string|null
+     */
+    public function searchOneBy($type, $parameters)
+    {
+        $result = $this->searchBy($type, $parameters, 0, 1);
+        if($result['hits']['total'] == 1) {
+            return $result['hits']['hits'][0];
+        }
+        
+        return false;
+    }
+    
+    /**
      * @return string
      */
     public function getLocale()
@@ -177,7 +226,7 @@ class ClientRequest
      */
     public function search($type, array $body, $from = 0, $size = 10)
     {
-        
+
         $params = [
             'index' => $this->getIndex(),
             'type' => $type,
@@ -204,7 +253,6 @@ class ClientRequest
     public function searchOne($type, array $body)
     {
         $search = $this->search($type, $body);
-        
         
         $hits = $search['hits'];
         
