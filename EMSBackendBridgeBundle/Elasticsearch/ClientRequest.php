@@ -141,7 +141,7 @@ class ClientRequest
     
     public function analyze($text, $searchField) {
         $info = $this->client->indices()->getFieldMapping([
-            'index' => $this->getIndex(),
+            'index' => $this->getFirstIndex(),
             'field' => $searchField,
         ]);
         
@@ -156,7 +156,7 @@ class ClientRequest
         }
         
         $tokens = $this->client->indices()->analyze([
-            'index' => $this->getIndex(),
+            'index' => $this->getFirstIndex(),
             'analyzer' => $analyzer,
             'text' => $text
             
@@ -177,7 +177,7 @@ class ClientRequest
      */
     public function search($type, array $body, $from = 0, $size = 10)
     {
-
+        
         $params = [
             'index' => $this->getIndex(),
             'type' => $type,
@@ -187,7 +187,7 @@ class ClientRequest
         ];
         
         if ($from > 0) {
-            $params['preference'] = '_primary';
+//             $params['preference'] = '_primary';
         }
         
         return $this->client->search($params);
@@ -204,6 +204,7 @@ class ClientRequest
     public function searchOne($type, array $body)
     {
         $search = $this->search($type, $body);
+        
         
         $hits = $search['hits'];
         
@@ -266,5 +267,17 @@ class ClientRequest
             return $out;
         }
         return $this->indexPrefix . $this->requestService->getEnvironment();
+    }
+    
+    /**
+     * @return string
+     */
+    private function getFirstIndex()
+    {
+        $indexes = $this->getIndex();
+        if(is_array($indexes) && count($indexes) > 0){
+            return $indexes[0];
+        }
+        return $indexes;
     }
 }
