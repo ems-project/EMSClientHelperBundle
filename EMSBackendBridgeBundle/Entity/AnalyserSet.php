@@ -17,6 +17,11 @@ class AnalyserSet {
     private $synonymsSearchField;
     /**
      *
+     * @var string
+     */
+    private $filter;
+    /**
+     *
      * @var string|array
      */
     private $synonymsFilter;
@@ -36,9 +41,10 @@ class AnalyserSet {
      */
     private $searchSynonymsInField;
     
-    public function __construct(ClientRequest $clientRequest, $searchField, $synonymTypes, $synonymsSearchField, $searchSynonymsInField, $synonymsFilter=false){
+    public function __construct(ClientRequest $clientRequest, $searchField, $filter='', $synonymTypes=[], $synonymsSearchField=false, $searchSynonymsInField=false, $synonymsFilter=''){
         $this->clientRequest = $clientRequest;
         $this->searchField = $searchField;
+        $this->filter = $filter;
         $this->synonymTypes = $synonymTypes;
         $this->synonymsSearchField = $synonymsSearchField;
         $this->searchSynonymsInField = $searchSynonymsInField;
@@ -51,6 +57,17 @@ class AnalyserSet {
      */
     public function getSearchField(){
         return $this->searchField;
+    }
+    
+    /**
+     *
+     * @return string
+     */
+    public function getFilter(){
+        if(is_string($this->filter)) {
+            return json_decode($this->filter, true);            
+        }
+        return $this->filter;
     }
     
     /**
@@ -83,8 +100,9 @@ class AnalyserSet {
      * @return string|array
      */
     public function getSynonymsFilter(){
-        if(is_string($this->synonymsFilter))
-            return json_decode($this->synonymsFilter, true);
+        if(is_string($this->synonymsFilter)){
+            return json_decode($this->synonymsFilter, true);            
+        }
         return $this->synonymsFilter;
     }
     

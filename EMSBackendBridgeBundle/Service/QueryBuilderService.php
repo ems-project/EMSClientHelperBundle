@@ -83,6 +83,11 @@ class QueryBuilderService{
 
         $must = [];
         
+        if(!empty($analyzer->getFilter())) {
+            $must[] = $analyzer->getFilter();
+        }
+        
+        
         /**@var SearchValue $searchValue*/
         foreach ($searchValues as $searchValue) {
             $must[] = $searchValue->makeShould($analyzer->getSearchField(), $analyzer->getSearchSynonymsInField());//TODO: get serach field for analyzer set
@@ -95,18 +100,14 @@ class QueryBuilderService{
     }
     
     private function buildPerAnalyzer($queryString, AnalyserSet $analyzer){
-        
-        
         $tokens = $analyzer->getClientRequest()->analyze($queryString, $analyzer->getSearchField());
         
         $searchValues = $this->createSearchValues($tokens);
         
-        
-        
         foreach ($searchValues as $searchValue) {
             $this->addSynonyms($searchValue, $analyzer);
         }
-        
+
         return $this->createBodyPerAnalyzer($searchValues, $analyzer);
     }
     
@@ -114,7 +115,9 @@ class QueryBuilderService{
     
     public function getQuery($queryString, $analyzerSets){
         
-        
+        if(!$queryString){
+            return [];
+        }
         
         $should = [];
         foreach ($analyzerSets  as $analyzer) {
