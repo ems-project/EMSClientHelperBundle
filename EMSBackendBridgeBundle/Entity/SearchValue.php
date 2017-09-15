@@ -53,8 +53,10 @@ class SearchValue
 
         $should = [];
         $should[] = [
-            'match' => [
-                $searchFields => $this->getTerm(),
+            'query_string' => [
+                'default_field' => $searchFields,
+                'query' => $this->getTerm().'*',
+                'default_operator' => 'AND',
             ]
         ];
         
