@@ -41,16 +41,11 @@ class QueryBuilderService{
      * @param SearchValue $searchValue
      * @param AnalyserSet $analyzer
      */
-    private function addSynonyms(SearchValue &$searchValue, AnalyserSet $analyzer)
+    private function addSynonyms(SearchValue &$searchValue, AnalyserSet $analyzer, $analyzerField)
     {
         $query = [
             'bool' => [
-                'must' => [
-                    'query_string' => [
-                        'default_field' => $analyzer->getSynonymsSearchField(),
-                        'query' => $searchValue->getTerm().'*',
-                    ]
-                ]
+                'must' => $searchValue->getQuery($analyzer->getSynonymsSearchField(), $analyzerField)
             ]
         ];
         
@@ -78,7 +73,7 @@ class QueryBuilderService{
      *
      * @return array
      */
-    private function createBodyPerAnalyzer(array $searchValues, AnalyserSet $analyzer)
+    private function createBodyPerAnalyzer(array $searchValues, AnalyserSet $analyzer, $analyzerField)
     {
 
         $must = [];
@@ -90,7 +85,7 @@ class QueryBuilderService{
         
         /**@var SearchValue $searchValue*/
         foreach ($searchValues as $searchValue) {
-            $must[] = $searchValue->makeShould($analyzer->getSearchField(), $analyzer->getSearchSynonymsInField());//TODO: get serach field for analyzer set
+            $must[] = $searchValue->makeShould($analyzer->getSearchField(), $analyzer->getSearchSynonymsInField(), $analyzerField);//TODO: get serach field for analyzer set
             
         }
         
@@ -99,16 +94,18 @@ class QueryBuilderService{
         ]];
     }
     
-    private function buildPerAnalyzer($queryString, AnalyserSet $analyzer){
-        $tokens = $analyzer->getClientRequest()->analyze($queryString, $analyzer->getSearchField());
+    private function buildPerAnalyzer($queryString, AnalyserSet $analyzerSet){
+        
+        $analyzer = $analyzerSet->getClientRequest()->getFieldAnalyzer($analyzerSet->getSearchField());
+        $tokens = $analyzerSet->getClientRequest()->analyze($queryString, $analyzerSet->getSearchField());
         
         $searchValues = $this->createSearchValues($tokens);
         
         foreach ($searchValues as $searchValue) {
-            $this->addSynonyms($searchValue, $analyzer);
+            $this->addSynonyms($searchValue, $analyzerSet, $analyzer);
         }
 
-        return $this->createBodyPerAnalyzer($searchValues, $analyzer);
+        return $this->createBodyPerAnalyzer($searchValues, $analyzerSet, $analyzer);
     }
     
     

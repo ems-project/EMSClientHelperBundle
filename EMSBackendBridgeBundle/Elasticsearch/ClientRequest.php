@@ -185,15 +185,19 @@ class ClientRequest
         if(isset($result['hits']['hits'][0])) {
             return $result['hits']['hits'][0];
         }
-        return false;;
+        return false;
     }
     
-    public function analyze($text, $searchField) {
+    /**
+     * 
+     * @param unknown $field
+     */
+    public function getFieldAnalyzer($field) {
         $info = $this->client->indices()->getFieldMapping([
             'index' => $this->getFirstIndex(),
-            'field' => $searchField,
+            'field' => $field,
         ]);
-        
+
         $analyzer = 'standard';
         while(is_array($info = array_shift($info)) ){
             if(isset($info['analyzer'])) {
@@ -203,19 +207,13 @@ class ClientRequest
                 $info = $info['mapping'];
             }
         }
-        
-        $tokens = $this->client->indices()->analyze([
-            'index' => $this->getFirstIndex(),
-            'analyzer' => $analyzer,
-            'text' => $text
-            
-        ]);
-        
+        return $analyzer;
+    }
+    
+    public function analyze($text, $searchField) {
         $out = [];
-        foreach ($tokens['tokens'] as $token){
-            $out[] = $token['token'];
-        }
-        return $out;
+        preg_match_all('/"(?:\\\\.|[^\\\\"])*"|\S+/', $text, $out);
+        return $out[0];
     }
     
     /**

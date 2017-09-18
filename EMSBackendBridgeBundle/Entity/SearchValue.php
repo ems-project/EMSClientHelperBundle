@@ -48,21 +48,15 @@ class SearchValue
      *
      * @return [][]
      */
-    public function makeShould($searchFields, $synonymsSearchField)
+    public function makeShould($searchFields, $synonymsSearchField, $analyzerField)
     {
 
         $should = [];
-        $should[] = [
-            'query_string' => [
-                'default_field' => $searchFields,
-                'query' => $this->getTerm().'*',
-                'default_operator' => 'AND',
-            ]
-        ];
+        $should[] = $this->getQuery($searchFields, $analyzerField);
         
         foreach ($this->synonyms as $emsLink) {
             if(!empty($emsLink)){
-                $should[] = $this->makeQuery($synonymsSearchField, $emsLink);                
+                $should[] = $this->makeEmsLinkQuery($synonymsSearchField, $emsLink);                
             }
         }
         
@@ -77,14 +71,37 @@ class SearchValue
      *
      * @return string
      */
-    private function makeQuery($field, $query)
+    private function makeEmsLinkQuery($field, $query)
     {
         return [
             'query_string' => [
                 'default_field' => $field,
-                'query' => $query,
+                'query' => $query.'*',
                 'default_operator' => 'AND',
 //                 $field => $query,
+            ]
+        ];
+    }
+    
+    public function getQuery($field, $analyzer) {
+        
+        $matches = [];
+        preg_match_all('/^\"(.*)\"$/', $this->term, $matches);
+        
+        if(isset($matches[1][0])) {
+            return [
+                'match_phrase' => [
+                    ($field?$field:'_all') => [
+                        'analyzer' => $analyzer,
+                        'query' => $this->getTerm(),                        
+                    ]
+                    
+                ]
+            ];
+        }
+        return [
+            'match' => [
+                ($field?$field:'_all') => $this->getTerm(),
             ]
         ];
     }
