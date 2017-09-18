@@ -4,6 +4,7 @@ namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch;
 
 use Elasticsearch\Client;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\RequestService;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Entity\HierarchicalStructure;
 
 class ClientRequest
 {
@@ -67,6 +68,48 @@ class ClientRequest
         $split = preg_split('/:/', $emsLink);
         
         return $split[0];
+    }
+    
+    /**
+     * @param string $emsLink
+     *
+     * @return string|null
+     */
+    public function getHierarchy($emsKey, $childrenField)
+    {
+        $item = $this->getByEmsKey($emsKey);
+        $out = new HierarchicalStructure($item['_type'], $item['_id'], $item['_source']);
+        
+        if(isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
+            
+            foreach($item['_source'][$childrenField] as $key) {
+                $out->addChild($this->getHierarchy($key, $childrenField));
+            }
+            
+        }
+        return $out;
+        
+    }
+    
+    /**
+     * @param string $emsLink
+     *
+     * @return string|null
+     */
+    public function getAllChildren($emsKey, $childrenField)
+    {
+        $out = [$emsKey];
+        $item = $this->getByEmsKey($emsKey);
+        
+        if(isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
+            
+            foreach($item['_source'][$childrenField] as $key) {
+                $out = array_merge($out, $this->getAllChildren($key, $childrenField));
+            }
+            
+        }
+        return $out;
+        
     }
     
     /**

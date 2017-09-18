@@ -32,7 +32,7 @@ class SearchValue
      */
     public function addSynonym(array $document)
     {
-        $this->synonyms[] = sprintf('%s %s', $document['_type'], $document['_id']);
+        $this->synonyms[] = sprintf('%s:%s', $document['_type'], $document['_id']);
     }
     
     /**
@@ -74,11 +74,11 @@ class SearchValue
     private function makeEmsLinkQuery($field, $query)
     {
         return [
-            'query_string' => [
-                'default_field' => $field,
-                'query' => $query.'*',
-                'default_operator' => 'AND',
-//                 $field => $query,
+            'match' => [
+                $field => [
+                    'query' => $query,
+                    'operator' => 'AND',
+                ]
             ]
         ];
     }
