@@ -163,6 +163,11 @@ class ClientRequest
         ]);
     }
     
+    
+    public function getByEmsKey($emsLink) {
+        return $this->getByOuuid($this->getType($emsLink), $this->getOuuid($emsLink));
+    }
+    
     /**
      * @param string $type
      * @param string $id

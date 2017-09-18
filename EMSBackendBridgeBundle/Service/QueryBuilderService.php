@@ -75,23 +75,27 @@ class QueryBuilderService{
      */
     private function createBodyPerAnalyzer(array $searchValues, AnalyserSet $analyzer, $analyzerField)
     {
-
-        $must = [];
         
-        if(!empty($analyzer->getFilter())) {
-            $must[] = $analyzer->getFilter();
+        $filter = $analyzer->getFilter();
+        
+        if(empty($filter) || !isset($filter['bool'])) {
+            $filter['bool'] = [
+            ];
+        }
+        
+        if(!isset($filter['bool']['must'])) {
+            $filter['bool']['must'] = [
+            ];
         }
         
         
         /**@var SearchValue $searchValue*/
         foreach ($searchValues as $searchValue) {
-            $must[] = $searchValue->makeShould($analyzer->getSearchField(), $analyzer->getSearchSynonymsInField(), $analyzerField);//TODO: get serach field for analyzer set
+            $filter['bool']['must'][] = $searchValue->makeShould($analyzer->getSearchField(), $analyzer->getSearchSynonymsInField(), $analyzerField);
             
         }
         
-        return ['bool' => [
-            'must' => $must,
-        ]];
+        return $filter;
     }
     
     private function buildPerAnalyzer($queryString, AnalyserSet $analyzerSet){
@@ -127,7 +131,6 @@ class QueryBuilderService{
                 'should' => $should
             ]
         ];
-        
         
         return $out;
     }
