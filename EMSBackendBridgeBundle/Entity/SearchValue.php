@@ -73,9 +73,10 @@ class SearchValue
      */
     private function makeEmsLinkQuery($field, $query)
     {
+        $searchField = ($field?$field:'_all');
         return [
             'match' => [
-                $field => [
+                $searchField => [
                     'query' => $query,
                     'operator' => 'AND',
                 ]

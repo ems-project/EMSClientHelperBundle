@@ -105,8 +105,10 @@ class QueryBuilderService{
         
         $searchValues = $this->createSearchValues($tokens);
         
-        foreach ($searchValues as $searchValue) {
-            $this->addSynonyms($searchValue, $analyzerSet, $analyzer);
+        if(!empty($analyzerSet->getSynonymTypes())){            
+            foreach ($searchValues as $searchValue) {
+                $this->addSynonyms($searchValue, $analyzerSet, $analyzer);
+            }
         }
 
         return $this->createBodyPerAnalyzer($searchValues, $analyzerSet, $analyzer);
@@ -116,15 +118,18 @@ class QueryBuilderService{
     
     public function getQuery($queryString, $analyzerSets){
         
-        if(!$queryString){
-            return [];
-        }
-        
         $should = [];
-        foreach ($analyzerSets  as $analyzer) {
-            $should[] = $this->buildPerAnalyzer($queryString, $analyzer);
+        if(!$queryString){
+            /**@var AnalyserSet $analyzer*/
+            foreach ($analyzerSets  as $analyzer) {
+                $should[] = $analyzer->getFilter();
+            }            
         }
-        
+        else {
+            foreach ($analyzerSets  as $analyzer) {
+                $should[] = $this->buildPerAnalyzer($queryString, $analyzer);
+            }            
+        }
         
         $out = [
             'bool' => [
