@@ -24,6 +24,10 @@ class RequestService
      */
     public function getEnvironment()
     {
+        if (null === $this->requestStack->getCurrentRequest()) {
+            return '';
+        }
+        
         return $this->requestStack->getCurrentRequest()->get('_environment');
     }
     
@@ -32,6 +36,10 @@ class RequestService
      */
     public function getLocale()
     {
+        if (null === $this->requestStack->getCurrentRequest()) {
+            return '';
+        }
+        
         return $this->requestStack->getCurrentRequest()->get('_locale');
     }
 }
