@@ -61,13 +61,23 @@ class AnalyserSet {
     
     /**
      *
-     * @return string
+     * @return string|array
      */
     public function getFilter(){
         if(is_string($this->filter)) {
-            return json_decode($this->filter, true);            
+            return json_decode($this->filter, true);
         }
         return $this->filter;
+    }
+    
+    /**
+     * 
+     * @param string|array $filter
+     * @return \EMS\ClientHelperBundle\EMSBackendBridgeBundle\Entity\AnalyserSet
+     */
+    public function setFilter($filter){
+        $this->filter = $filter;
+        return $this;
     }
     
     /**
