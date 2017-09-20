@@ -15,11 +15,18 @@ class RoutingTemplateLoader implements \Twig_LoaderInterface
     private $clientRequest;
     
     /**
-     * @param ClientRequest $clientRequest injected by compiler pass
+     * @var bool
      */
-    public function __construct(ClientRequest $clientRequest) 
+    private $enableCache;
+    
+    /**
+     * @param ClientRequest $clientRequest injected by compiler pass
+     * @param bool          $enableCache
+     */
+    public function __construct(ClientRequest $clientRequest, $enableCache) 
     {
         $this->clientRequest = $clientRequest;
+        $this->enableCache = $enableCache;
     }
     
     /**
@@ -45,7 +52,7 @@ class RoutingTemplateLoader implements \Twig_LoaderInterface
      */
     public function isFresh($name, $time)
     {
-        return false;
+        return $this->enableCache;
     }
     
     /**
