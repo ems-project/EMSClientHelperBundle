@@ -22,6 +22,16 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->scalarNode('client_request')->cannotBeEmpty()->end()
+                ->booleanNode('twig_cache')->defaultTrue()->end()
+                ->arrayNode('paths')
+                    ->prototype('array')
+                    ->cannotBeEmpty()
+                        ->children()
+                            ->scalarNode('regex')->cannotBeEmpty()->end()
+                            ->scalarNode('path')->cannotBeEmpty()->end()
+                        ->end()
+                    ->end()
+                ->end()
             ->end();
 
         return $treeBuilder;
