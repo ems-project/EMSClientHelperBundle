@@ -8,12 +8,8 @@
         <defaults autowire="true" autoconfigure="true" public="false" />
         
         <prototype namespace="EMS\ClientHelperBundle\EMSRoutingBundle\" resource="../../../EMSRoutingBundle/*" />
-        
-        <service id="EMS\ClientHelperBundle\EMSRoutingBundle\Service\RoutingService">
-            <argument key="$configPaths">%ems_routing.paths%</argument>
-        </service>
-         <service id="EMS\ClientHelperBundle\EMSRoutingBundle\Twig\RoutingTemplateLoader">
-            <argument key="$enableCache">%ems_routing.twig_cache%</argument>
-        </service>
+        <prototype namespace="EMS\ClientHelperBundle\EMSRoutingBundle\Controller\" resource="../../../EMSRoutingBundle/Controller" public="true">
+            <tag name="controller.service_arguments" />
+        </prototype>
     </services>
 </container>

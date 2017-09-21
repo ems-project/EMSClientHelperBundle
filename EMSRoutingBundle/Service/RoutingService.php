@@ -3,7 +3,7 @@
 namespace EMS\ClientHelperBundle\EMSRoutingBundle\Service;
 
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
-use Symfony\Component\Routing\RouterInterface;
+use EMS\ClientHelperBundle\EMSRoutingBundle\EMSLink;
 
 class RoutingService
 {
@@ -13,9 +13,9 @@ class RoutingService
     private $clientRequest;
     
     /**
-     * @var RouterInterface
+     * @var UrlHelperService
      */
-    private $router;
+    private $urlHelperService;
     
     /**
      * @var \Twig_Environment
@@ -23,114 +23,81 @@ class RoutingService
     private $twig;
     
     /**
-     * @var array [][regex, path]
-     */
-    private $configPaths;
-    
-    /**
-     * Regex for getting the base URL without the phpApp
-     * So we can relative link to other applications
-     */
-    const REGEX_BASE_URL = '/^(?P<baseUrl>\/.*?)(?:(?P<phpApp>\/[\-_A-Za-z0-9]*.php)|\/|)$/i';
-    
-    /**
      * @param ClientRequest     $clientRequest injected by compiler pass
-     * @param RouterInterface   $router
+     * @param UrlHelperService  $urlHelperService
      * @param \Twig_Environment $twig
      */
     public function __construct(
         ClientRequest $clientRequest,
-        RouterInterface $router,
-        \Twig_Environment $twig,
-        array $configPaths
+        UrlHelperService $urlHelperService,
+        \Twig_Environment $twig
     ) {
         $this->clientRequest = $clientRequest;
-        $this->router = $router;
+        $this->urlHelperService = $urlHelperService;
         $this->twig = $twig;
-        $this->configPaths = $configPaths;
     }
     
     /**
-     * @param string $linkType
-     * @param string $contentType
-     * @param string $ouuid
-     * 
-     * @return false|string
+     * @param array $match [link_type, content_type, ouuid, query]
      */
-    public function generate($linkType, $contentType, $ouuid)
+    public function generate(array $match)
     {
         try {
-            if (!$document = $this->getDocument($contentType, $ouuid)) {
+            $emsLink = new EMSLink($match);
+            
+            if (!$emsLink->hasContentType()) {
                 return false;
             }
             
-            $template = $this->renderTemplate($document, $linkType);
+            $document = $this->getDocument($emsLink);
             
-            return $this->getBaseUrl($contentType) . $template;
-        } catch (\Twig_Error $ex) {
-            return 'Template errror: ' . $ex->getMessage();
+            $template = $this->renderTemplate($emsLink, $document);
+            $url = $this->urlHelperService->prependBaseUrl($emsLink, $template);
+            
+            return $url;
         } catch (\Exception $ex) {
             return $ex->getMessage();
+        }  
+    }
+    
+    /**
+     * @param EMSLink $emsLink
+     * @param array   $document
+     * 
+     * @return string
+     */
+    private function renderTemplate(EMSLink $emsLink, array $document)
+    {
+        try {
+            return $this->twig->render($document['_type'], [
+                'id'     => $document['_id'],
+                'source' => $document['_source'],
+                'locale' => $this->clientRequest->getLocale(),
+                'linkType' => $emsLink->getLinkType(),
+            ]);
+        } catch (\Twig_Error $ex) {
+            return 'Template errror: ' . $ex->getMessage();
         }
     }
     
     /**
-     * @param array  $document
-     * @param string $linkType
-     * 
-     * @return string
-     * 
-     * @throws \Twig_Error
-     */
-    private function renderTemplate(array $document, $linkType)
-    {
-        return $this->twig->render($document['_type'], [
-            'id'     => $document['_id'],
-            'source' => $document['_source'],
-            'locale' => $this->clientRequest->getLocale(),
-            'linkType' => $linkType,
-        ]);
-    }
-    
-    /**
-     * @param string $type
-     * @param string $ouuid
+     * @param EMSLink $emsLink
      *
      * @return array|false
-     */
-    private function getDocument($type, $ouuid)
-    {
-        return $this->clientRequest->getByOuuid($type, $ouuid);
-    }
-        
-    /**
-     * @param string $contentType
      * 
-     * @return string
+     * @throw \Exception
      */
-    private function getBaseUrl($contentType)
+    private function getDocument(EMSLink $emsLink)
     {
-        $baseUrl = $this->router->getContext()->getBaseUrl();
-        $match = ['phpApp' => ''];
+        $document = $this->clientRequest->getByOuuid(
+            $emsLink->getContentType(),
+            $emsLink->getOuuid()
+        );
         
-        preg_match(self::REGEX_BASE_URL, $baseUrl, $match);
-        
-        return $match['baseUrl'] . $this->getPath($contentType) . $match['phpApp'];
-    }
-    
-    /**
-     * @param string $contentType
-     *
-     * @return string
-     */
-    private function getPath($contentType)
-    {
-        foreach ($this->configPaths as $configPath) {
-            if (\preg_match($configPath['regex'], $contentType)) {
-                return $configPath['path'];
-            }
+        if (!$document) {
+            throw new \Exception('Document not found for : ' . $emsLink);
         }
         
-        return '';
+        return $document;
     }
 }

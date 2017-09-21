@@ -5,9 +5,9 @@ namespace EMS\ClientHelperBundle\EMSRoutingBundle\Twig;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
 
 /**
- * Routing Template Loader
+ * Template Loader
  */
-class RoutingTemplateLoader implements \Twig_LoaderInterface
+class TemplateLoader implements \Twig_LoaderInterface
 {
      /**
      * @var ClientRequest
@@ -15,18 +15,18 @@ class RoutingTemplateLoader implements \Twig_LoaderInterface
     private $clientRequest;
     
     /**
-     * @var bool
+     * Injected by the compiler pass
+     * 
+     * @var array
      */
-    private $enableCache;
+    private $config;
     
     /**
      * @param ClientRequest $clientRequest injected by compiler pass
-     * @param bool          $enableCache
      */
-    public function __construct(ClientRequest $clientRequest, $enableCache) 
+    public function __construct(ClientRequest $clientRequest) 
     {
         $this->clientRequest = $clientRequest;
-        $this->enableCache = $enableCache;
     }
     
     /**
@@ -44,7 +44,7 @@ class RoutingTemplateLoader implements \Twig_LoaderInterface
     {
         $document = $this->getDocument($name);
         
-        return $document['template'];
+        return $document[$this->config['field']];
     }
 
     /**
@@ -52,7 +52,15 @@ class RoutingTemplateLoader implements \Twig_LoaderInterface
      */
     public function isFresh($name, $time)
     {
-        return $this->enableCache;
+        return $this->config['cache'];
+    }
+    
+    /**
+     * @param array $config
+     */
+    public function setConfig(array $config)
+    {
+        $this->config = $config;
     }
     
     /**
@@ -64,9 +72,12 @@ class RoutingTemplateLoader implements \Twig_LoaderInterface
      */
     private function getDocument($name)
     {
-        $document = $this->clientRequest->searchOneBy('routing', [
-            'content_type' => $name
-        ]);
+        $search = \preg_replace('/\$template_name\$/', $name, $this->config['search']);
+        
+        $document = $this->clientRequest->searchOneBy(
+            $this->config['content_type'], 
+            json_decode($search, true)
+        );
         
         if (!$document) {
             throw new \Twig_Error_Loader('routing not found for template');

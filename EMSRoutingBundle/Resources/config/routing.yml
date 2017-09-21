@@ -1,0 +1,3 @@
+ems_routing:
+    resource: '@EMSRoutingBundle/Controller/'
+    type : annotation

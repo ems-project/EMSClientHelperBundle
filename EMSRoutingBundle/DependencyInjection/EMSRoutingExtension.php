@@ -24,7 +24,8 @@ class EMSRoutingExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
         
         $container->setParameter('ems_routing.client_request', $config['client_request']);
-        $container->setParameter('ems_routing.paths', $config['paths']);
-        $container->setParameter('ems_routing.twig_cache', $config['twig_cache']);
+        $container->setParameter('ems_routing.template_loader', $config['template_loader']);
+        $container->setParameter('ems_routing.file_manager', $config['file_manager']);
+        $container->setParameter('ems_routing.url_helper', $config['url_helper']);
     }
 }
