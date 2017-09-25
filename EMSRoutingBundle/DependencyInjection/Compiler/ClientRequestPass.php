@@ -2,30 +2,19 @@
 
 namespace EMS\ClientHelperBundle\EMSRoutingBundle\DependencyInjection\Compiler;
 
+use EMS\ClientHelperBundle\EMSRoutingBundle\Service\FileManager;
 use EMS\ClientHelperBundle\EMSRoutingBundle\Service\RoutingService;
-use EMS\ClientHelperBundle\EMSRoutingBundle\Twig\RoutingTemplateLoader;
+use EMS\ClientHelperBundle\EMSRoutingBundle\Twig\TemplateLoader;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 
-class LoadRoutingPass implements CompilerPassInterface
+class ClientRequestPass implements CompilerPassInterface
 {
     /**
      * @param ContainerBuilder $container
      */
     public function process(ContainerBuilder $container)
-    {
-        if ($container->hasParameter('ems_routing.client_request')) {
-            $this->injectClientRequest($container);
-        }
-    }
-    
-    /**
-     * @param ContainerBuilder $container
-     *
-     * @throws InvalidArgumentException
-     */
-    private function injectClientRequest(ContainerBuilder $container)
     {
         $id = $container->getParameter('ems_routing.client_request');
         
@@ -35,10 +24,13 @@ class LoadRoutingPass implements CompilerPassInterface
             );
         }
         
-        $twigExtension = $container->getDefinition(RoutingService::class);
-        $twigExtension->setArgument(0, $container->findDefinition($id));
+        $routingService = $container->getDefinition(RoutingService::class);
+        $routingService->setArgument(0, $container->findDefinition($id));
+
+        $fileManager = $container->getDefinition(FileManager::class);
+        $fileManager->setArgument(0, $container->findDefinition($id));
         
-        $twigLoader = $container->getDefinition(RoutingTemplateLoader::class);
+        $twigLoader = $container->getDefinition(TemplateLoader::class);
         $twigLoader->setArgument(0, $container->findDefinition($id));
     }
 }

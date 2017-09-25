@@ -16,11 +16,15 @@ class RoutingExtension extends \Twig_Extension
     
     /**
      * Regex for searching ems links in content
+     * content_type and query can be empty/optional
+     * 
+     * Regex101.com: 
+     * ems:\/\/(?P<link_type>.*?):(?:(?P<content_type>.*?):)?(?P<ouuid>[[:alnum:]|-]*)(?:\?(?P<query>.*?)(?:"|'|\s))?
      * 
      * Example: <a href="ems://object:page:AV44kX4b1tfmVMOaE61u">example</a>
      * link_type => object, content_type => page, ouuid => AV44kX4b1tfmVMOaE61u
      */
-    const EMS_LINK = '/ems:\/\/(?P<link_type>.*?):(?P<content_type>.*?):(?P<ouuid>[[:alnum:]|-]*)/i';
+    const EMS_LINK = '/ems:\/\/(?P<link_type>.*?):(?:(?P<content_type>.*?):)?(?P<ouuid>[[:alnum:]|-]*)(?:\?(?P<query>.*?)(?:"|\'|\s))?/i';
     
     /**
      * @param RoutingService $routingService
@@ -47,14 +51,11 @@ class RoutingExtension extends \Twig_Extension
      */
     public function transform($content)
     {
-        return preg_replace_callback(self::EMS_LINK, function ($m) {
-            $route = $this->routingService->generate(
-                $m['link_type'], 
-                $m['content_type'],
-                $m['ouuid']
-            );
+        return preg_replace_callback(self::EMS_LINK, function ($match) {
+            //array filter to remove empty capture groups
+            $route = $this->routingService->generate(array_filter($match));
             
-            return $route ? $route : $m[0];
+            return $route ? $route : $match[0];
         }, $content);
     }
 }

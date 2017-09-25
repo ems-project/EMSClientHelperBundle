@@ -2,7 +2,7 @@
 
 namespace EMS\ClientHelperBundle\EMSRoutingBundle;
 
-use EMS\ClientHelperBundle\EMSRoutingBundle\DependencyInjection\Compiler\LoadRoutingPass;
+use EMS\ClientHelperBundle\EMSRoutingBundle\DependencyInjection\Compiler;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
@@ -15,6 +15,7 @@ class EMSRoutingBundle extends Bundle
     {
         parent::build($container);
         
-        $container->addCompilerPass(new LoadRoutingPass());
+        $container->addCompilerPass(new Compiler\ConfigPass());
+        $container->addCompilerPass(new Compiler\ClientRequestPass());
     }
 }

@@ -214,12 +214,13 @@ class ClientRequest
     /**
      * @param string $type
      * @param string $id
+     * @param array  $sourceFields
      *
      * @return array
      */
-    public function getByOuuid($type, $ouuid)
+    public function getByOuuid($type, $ouuid, $sourceFields = [])
     {
-        $result = $this->client->search([
+        $body = [
             'index' => $this->getIndex(),
             'type' => $type,
             'body' => [
@@ -229,7 +230,13 @@ class ClientRequest
                     ]
                 ]
             ]
-        ]);
+        ];
+        
+        if(!empty($sourceFields)) {
+            $body['_source'] = $sourceFields;
+        }
+        
+        $result = $this->client->search($body);
         if(isset($result['hits']['hits'][0])) {
             return $result['hits']['hits'][0];
         }
