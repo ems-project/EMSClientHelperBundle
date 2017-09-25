@@ -22,7 +22,7 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder();
         /* @var $rootNode ArrayNodeDefinition */
-        $rootNode = $treeBuilder->root('ems_twig_list');
+        $rootNode = $treeBuilder->root('ems_routing_bundle');
         $rootNode
             ->children()
                 ->scalarNode('client_request')
