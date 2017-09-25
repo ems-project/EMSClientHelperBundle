@@ -51,7 +51,7 @@ class EMSLink
      */
     public function __toString()
     {
-        return vsprintf('EMS://%s:%s%s%s', [
+        return vsprintf('ems://%s:%s%s%s', [
             $this->linkType,
             ($this->contentType ? $this->contentType . ':' : ''),
             $this->ouuid,
