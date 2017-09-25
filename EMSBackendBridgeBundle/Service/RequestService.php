@@ -2,21 +2,22 @@
 
 namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service;
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class RequestService
 {
     /**
-     * @var RequestStack
+     * @var Request|null
      */
-    private $requestStack;
+    private $request;
     
     /**
      * @param RequestStack $requestStack
      */
     public function __construct(RequestStack $requestStack)
     {
-        $this->requestStack = $requestStack;
+        $this->request = $requestStack->getCurrentRequest();
     }
     
     /**
@@ -24,7 +25,7 @@ class RequestService
      */
     public function getEnvironment()
     {
-        return $this->requestStack->getCurrentRequest()->get('_environment');
+        return ($this->request ? $this->request->get('_environment') : '');
     }
     
     /**
@@ -32,6 +33,6 @@ class RequestService
      */
     public function getLocale()
     {
-        return $this->requestStack->getCurrentRequest()->get('_locale');
+        return ($this->request ? $this->request->get('_locale') : '');
     }
 }
