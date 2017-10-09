@@ -29,7 +29,7 @@ class ClientRequest
      * @param string         $indexPrefix
      */
     public function __construct(
-        Client $client, 
+        Client $client,
         RequestService $requestService,
         $indexPrefix
     ) {
@@ -80,15 +80,12 @@ class ClientRequest
         $item = $this->getByEmsKey($emsKey);
         $out = new HierarchicalStructure($item['_type'], $item['_id'], $item['_source']);
         
-        if(isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
-            
-            foreach($item['_source'][$childrenField] as $key) {
+        if (isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
+            foreach ($item['_source'][$childrenField] as $key) {
                 $out->addChild($this->getHierarchy($key, $childrenField));
             }
-            
         }
         return $out;
-        
     }
     
     /**
@@ -101,15 +98,12 @@ class ClientRequest
         $out = [$emsKey];
         $item = $this->getByEmsKey($emsKey);
         
-        if(isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
-            
-            foreach($item['_source'][$childrenField] as $key) {
+        if (isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
+            foreach ($item['_source'][$childrenField] as $key) {
                 $out = array_merge($out, $this->getAllChildren($key, $childrenField));
             }
-            
         }
         return $out;
-        
     }
     
     /**
@@ -127,7 +121,7 @@ class ClientRequest
             ],
         ];
         
-        foreach ($parameters as $id => $value){
+        foreach ($parameters as $id => $value) {
             $body['query']['bool']['must'][] = [
                 'term' => [
                     $id => [
@@ -154,7 +148,7 @@ class ClientRequest
     public function searchOneBy($type, $parameters)
     {
         $result = $this->searchBy($type, $parameters, 0, 1);
-        if($result['hits']['total'] == 1) {
+        if ($result['hits']['total'] == 1) {
             return $result['hits']['hits'][0];
         }
         
@@ -192,7 +186,6 @@ class ClientRequest
      */
     public function getByOuuids($type, $ouuids)
     {
-        
         return $this->client->search([
             'index' => $this->getIndex(),
             'type' => $type,
@@ -207,7 +200,8 @@ class ClientRequest
     }
     
     
-    public function getByEmsKey($emsLink) {
+    public function getByEmsKey($emsLink)
+    {
         return $this->getByOuuid($this->getType($emsLink), $this->getOuuid($emsLink));
     }
     
@@ -232,40 +226,41 @@ class ClientRequest
             ]
         ];
         
-        if(!empty($sourceFields)) {
+        if (!empty($sourceFields)) {
             $body['_source'] = $sourceFields;
         }
         
         $result = $this->client->search($body);
-        if(isset($result['hits']['hits'][0])) {
+        if (isset($result['hits']['hits'][0])) {
             return $result['hits']['hits'][0];
         }
         return false;
     }
     
     /**
-     * 
+     *
      * @param unknown $field
      */
-    public function getFieldAnalyzer($field) {
+    public function getFieldAnalyzer($field)
+    {
         $info = $this->client->indices()->getFieldMapping([
             'index' => $this->getFirstIndex(),
             'field' => $field,
         ]);
 
         $analyzer = 'standard';
-        while(is_array($info = array_shift($info)) ){
-            if(isset($info['analyzer'])) {
+        while (is_array($info = array_shift($info))) {
+            if (isset($info['analyzer'])) {
                 $analyzer = $info['analyzer'];
-            }
-            else if(isset($info['mapping'])) {
+            } elseif (isset($info['mapping'])) {
                 $info = $info['mapping'];
             }
         }
         return $analyzer;
     }
     
-    public function analyze($text, $searchField) {
+    public function analyze($text, $searchField)
+    {
         $out = [];
         preg_match_all('/"(?:\\\\.|[^\\\\"])*"|\S+/', $text, $out);
         return $out[0];
@@ -274,12 +269,11 @@ class ClientRequest
     /**
      * @param string $type
      * @param array  $body
-     * 
+     *
      * @return array
      */
     public function search($type, array $body, $from = 0, $size = 10)
     {
-
         $params = [
             'index' => $this->getIndex(),
             'type' => $type,
@@ -298,7 +292,7 @@ class ClientRequest
     /**
      * @param string $type
      * @param array  $body
-     * 
+     *
      * @return array
      *
      * @throws \Exception
@@ -320,7 +314,7 @@ class ClientRequest
      * @param string|array $type
      * @param array  $body
      * @param int    $size
-     * 
+     *
      * //http://stackoverflow.com/questions/10836142/elasticsearch-duplicate-results-with-paging
      */
     public function searchAll($type, array $body, $pageSize = 10)
@@ -341,14 +335,19 @@ class ClientRequest
         $results = [];
         $params['size'] = $pageSize;
         
-        while($params['from'] < $total){
+        while ($params['from'] < $total) {
             $search = $this->client->search($params);
             
-            foreach ($search["hits"]["hits"] as $document){
+            foreach ($search["hits"]["hits"] as $document) {
                 $results[] = $document;
             }
             
             $params['from'] += $pageSize;
+        }
+        
+        // If Use aggregations return an array with results and aggregations.
+        if (isset($totalSearch['aggregations'])) {
+            return array( 'results' => $results, 'aggregations' => $totalSearch['aggregations']);
         }
         
         return $results;
@@ -364,7 +363,7 @@ class ClientRequest
         foreach ($prefixes as $prefix) {
             $out[] = $prefix . $this->requestService->getEnvironment();
         }
-        if(!empty($out)){
+        if (!empty($out)) {
             return $out;
         }
         return $this->indexPrefix . $this->requestService->getEnvironment();
@@ -376,7 +375,7 @@ class ClientRequest
     private function getFirstIndex()
     {
         $indexes = $this->getIndex();
-        if(is_array($indexes) && count($indexes) > 0){
+        if (is_array($indexes) && count($indexes) > 0) {
             return $indexes[0];
         }
         return $indexes;
