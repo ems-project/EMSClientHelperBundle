@@ -83,7 +83,9 @@ class ClientRequest
         if(isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
             
             foreach($item['_source'][$childrenField] as $key) {
-                $out->addChild($this->getHierarchy($key, $childrenField));
+                if ($key){                    
+                    $out->addChild($this->getHierarchy($key, $childrenField));
+                }
             }
             
         }
