@@ -45,6 +45,17 @@ class UrlHelperService
     }
     
     /**
+     * @param string $relativePath
+     * @param string $path
+     *
+     * @return string
+     */
+    public function createUrl($relativePath, $path)
+    {
+        return $this->baseUrl . $relativePath . $this->phpApp . $path;
+    }
+    
+    /**
      * @param EMSLink $emsLink
      * @param string  $url
      *
