@@ -10,12 +10,12 @@ class UrlHelperService
     /**
      * @var string
      */
-    private $baseUrl;
+    private $baseUrl = '';
     
     /**
      * @var string
      */
-    private $phpApp;
+    private $phpApp = '';
     
     /**
      * @var array
@@ -35,8 +35,13 @@ class UrlHelperService
     {
         preg_match(self::REGEX_BASE_URL, $router->getContext()->getBaseUrl(), $match);
         
-        $this->baseUrl = $match['baseUrl'];
-        $this->phpApp = (isset($match['phpApp']) ? $match['phpApp'] : '');
+        if (isset($match['baseUrl'])) {
+            $this->baseUrl = $match['baseUrl'];
+        }
+
+        if (isset($match['phpApp'])) {
+            $this->phpApp = $match['phpApp'];
+        }
     }
     
     /**
