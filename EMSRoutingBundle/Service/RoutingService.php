@@ -38,6 +38,14 @@ class RoutingService
     }
     
     /**
+     * @return UrlHelperService
+     */
+    public function getUrlHelperService()
+    {
+        return $this->urlHelperService;
+    }
+    
+    /**
      * @param array $match [link_type, content_type, ouuid, query]
      */
     public function generate(array $match)
