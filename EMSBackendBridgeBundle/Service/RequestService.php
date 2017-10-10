@@ -24,7 +24,9 @@ class RequestService
      */
     public function getEnvironment()
     {
-        return $this->requestStack->getCurrentRequest()->get('_environment');
+        $current = $this->requestStack->getCurrentRequest();
+        
+        return ($current ? $current->get('_environment') : null);
     }
     
     /**
@@ -32,6 +34,8 @@ class RequestService
      */
     public function getLocale()
     {
-        return $this->requestStack->getCurrentRequest()->get('_locale');
+        $current = $this->requestStack->getCurrentRequest();
+        
+        return ($current ? $current->get('_locale') : null);
     }
 }
