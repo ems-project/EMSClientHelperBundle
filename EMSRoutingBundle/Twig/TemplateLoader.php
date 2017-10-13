@@ -7,7 +7,7 @@ use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
 /**
  * Template Loader
  */
-class TemplateLoader implements \Twig_LoaderInterface
+class TemplateLoader implements \Twig_LoaderInterface, \Twig_ExistsLoaderInterface
 {
      /**
      * @var ClientRequest
@@ -20,6 +20,8 @@ class TemplateLoader implements \Twig_LoaderInterface
      * @var array
      */
     private $config;
+    
+    const REGEX = '/(?P<template>.*?).ems.twig$/i';
     
     /**
      * @param ClientRequest $clientRequest injected by compiler pass
@@ -36,13 +38,22 @@ class TemplateLoader implements \Twig_LoaderInterface
     {
         return $name;
     }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function exists($name)
+    {
+        return preg_match(self::REGEX, $name);
+    }
 
     /**
      * {@inheritdoc}
      */
     public function getSource($name)
     {
-        $document = $this->getDocument($name);
+        preg_match(self::REGEX, $name, $match);
+        $document = $this->getDocument($match['template']);
         
         return $document[$this->config['field']];
     }
