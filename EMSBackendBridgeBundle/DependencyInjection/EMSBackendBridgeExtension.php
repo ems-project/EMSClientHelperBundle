@@ -35,11 +35,15 @@ class EMSBackendBridgeExtension extends Extension
             $this->loadProject($project, $projectConfig, $container);
         }
         
-        $requestListenerDef = $container->getDefinition('emsch.request_listener');
-        $requestListenerDef->replaceArgument(0, $config['request_environment']);
-
+        $eventListener = $container->getDefinition('emsch.request_listener');
+        foreach ($config['request_environments'] as $name => $config)
+        {
+            $eventListener->addMethodCall('addRequestEnvironment', [
+                $name, $config['regex'], $config['index']
+            ]);
+        }
     }
-    
+
     /**
      * @param string           $project
      * @param array            $config
