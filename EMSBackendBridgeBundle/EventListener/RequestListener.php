@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\EventListener;
 
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\RequestEnvironment;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
@@ -9,16 +10,18 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 class RequestListener
 {
     /**
-     * @var array
+     * @var RequestEnvironment[]
      */
-    private $requestEnvironment;
+    private $requestEnvironments = [];
     
     /**
-     * @param array $requestEnvironment
+     * @param string $name
+     * @param string $regex
+     * @param string $index
      */
-    public function __construct(array $requestEnvironment)
+    public function addRequestEnvironment($name, $regex, $index)
     {
-        $this->requestEnvironment = $requestEnvironment;
+        $this->requestEnvironments[] = new RequestEnvironment($name, $regex, $index);
     }
     
     /**
@@ -48,36 +51,16 @@ class RequestListener
      */
     private function setEnvironment(Request $request)
     {
-        if (null === $this->requestEnvironment) {
+        if (null == $this->requestEnvironments) {
             return;
         }
         
-        $environment = $this->getEnvironment($request);
-        
-        if ($environment) {
-            $request->attributes->set('_environment', $environment);
-        }
-    }
-    
-    /**
-     * @param Request $request
-     *
-     * @return string|false
-     */
-    private function getEnvironment(Request $request)
-    {
-        $url = vsprintf('%s://%s%s', [
-            $request->getScheme(),
-            $request->getHttpHost(),
-            $request->getBasePath(),
-        ]);
-        
-        foreach ($this->requestEnvironment as $env => $regex) {
-            if (null == $regex || preg_match($regex, $url)) {
-                return $env;
+        foreach ($this->requestEnvironments as $requestEnvironment) {
+            if ($requestEnvironment->match($request)) {
+                $request->attributes->set('_environment', $requestEnvironment->getIndex());
+                
+                return; //stop on match
             }
         }
-        
-        return false;
     }
 }

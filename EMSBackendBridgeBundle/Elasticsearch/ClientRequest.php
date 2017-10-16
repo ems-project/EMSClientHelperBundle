@@ -78,6 +78,11 @@ class ClientRequest
     public function getHierarchy($emsKey, $childrenField)
     {
         $item = $this->getByEmsKey($emsKey);
+        
+        if (!isset($item['_source'])) {
+            return null;
+        }
+        
         $out = new HierarchicalStructure($item['_type'], $item['_id'], $item['_source']);
         
         if(isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
