@@ -2,9 +2,11 @@
 
 namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\DependencyInjection;
 
+use Elasticsearch\Client;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Api\ApiClient;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Translation\TranslationLoader;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader;
@@ -12,9 +14,7 @@ use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 /**
- * This is the class that loads and manages your bundle configuration.
- *
- * @link http://symfony.com/doc/current/cookbook/bundles/extension.html
+ * Load ems backend bridge services and process configuration
  */
 class EMSBackendBridgeExtension extends Extension
 {
@@ -29,72 +29,118 @@ class EMSBackendBridgeExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
         
-        $elasticms = $config['elasticms'];
+        $this->processRequestEnvironments($container, $config['request_environments']);
+        $this->processElasticms($container, $config['elasticms']);
+        $this->processApi($container, $config['api']);
+    }
+    
+    /**
+     * @param ContainerBuilder $container
+     * @param array            $config
+     *
+     * @return void
+     */
+    private function processRequestEnvironments(ContainerBuilder $container, array $config)
+    {
+        $id = 'emsch.request_listener';
         
-        foreach ($elasticms as $project => $projectConfig) {
-            $this->loadProject($project, $projectConfig, $container);
+        if (!$container->hasDefinition($id)) {
+            return;
         }
         
         $eventListener = $container->getDefinition('emsch.request_listener');
-        foreach ($config['request_environments'] as $name => $config)
+        
+        foreach ($config as $environment => $options)
         {
             $eventListener->addMethodCall('addRequestEnvironment', [
-                $name, $config['regex'], $config['index']
+                $environment, $options['regex'], $options['index']
             ]);
         }
+    }
+    
+    /**
+     * @param ContainerBuilder $container
+     * @param array            $config
+     */
+    private function processElasticms(ContainerBuilder $container, array $config)
+    {
+        foreach ($config as $name => $options) {
+            $this->defineElasticsearchClient($container, $name, $options);
+            $this->defineClientRequest($container, $name, $options);
+            
+            if (null !== $options['translation_type']) {
+                $this->defineTranslationLoader($container, $name, $options);
+            }
+        }
+    }
+    
+    /**
+     * @param ContainerBuilder $container
+     * @param array            $config
+     */
+    private function processApi(ContainerBuilder $container, array $config)
+    {
+        foreach ($config as $name => $options) {
+            $definition = new Definition(ApiClient::class);
+            $definition->setArgument(0, $options['url']);
+            $definition->setArgument(1, $options['key']);
+
+            $container->setDefinition(sprintf('emsch.api.%s', $name), $definition);
+        }
+    }
+    
+    /**
+     * @param ContainerBuilder $container
+     * @param string           $name
+     * @param array            $options
+     */
+    private function defineElasticsearchClient(ContainerBuilder $container, $name, array $options)
+    {
+        $definition = new Definition(Client::class);
+        $definition
+           ->setFactory(['Elasticsearch\ClientBuilder', 'fromConfig'])
+           ->setArgument(0, ['hosts' => $options['hosts']])
+           ->setPublic(true);
+
+        $container->setDefinition(sprintf('elasticsearch.client.%s', $name), $definition);
+    }
+    
+    /**
+     * @param ContainerBuilder $container
+     * @param string           $name
+     * @param array            $options
+     */
+    private function defineClientRequest(ContainerBuilder $container, $name, array $options)
+    {
+        $definition = new Definition(ClientRequest::class);
+        $definition->setArguments([
+            new Reference( sprintf('elasticsearch.client.%s', $name)),
+            new Reference('emsch.request.service'),
+            $options['index_prefix']   
+        ]);
+
+        $container->setDefinition(sprintf('emsch.client_request.%s', $name), $definition);
     }
 
     /**
-     * @param string           $project
-     * @param array            $config
      * @param ContainerBuilder $container
+     * @param string           $name
+     * @param array            $options
      */
-    protected function loadProject($project, array $config, ContainerBuilder $container)
-    {
-        $container
-            ->setDefinition(
-                sprintf('elasticsearch.client.%s', $project), 
-                new ChildDefinition('elasticsearch.client')
-            )
-            ->setArguments([
-                ['hosts' => $config['hosts']]
-            ]);
-        
-        $container
-            ->setDefinition(
-                sprintf('emsch.client_request.%s', $project), 
-                new ChildDefinition('emsch.client_request')
-            )
-            ->setArguments([
-                new Reference(sprintf('elasticsearch.client.%s', $project)),
-                $config['index_prefix']
-            ]);
-        
-        if ($config['translation_type']) {
-            $this->loadProjectTranslations($project, $config, $container);
-        }
-    }
-    
-    /**
-     * @param string           $project
-     * @param array            $config
-     * @param ContainerBuilder $container
-     */
-    protected function loadProjectTranslations($project, array $config, ContainerBuilder $container)
+    protected function defineTranslationLoader(ContainerBuilder $container, $name, array $options)
     {
         $loader = new Definition(TranslationLoader::class);
         $loader->setArguments([
-            new Reference(sprintf('elasticsearch.client.%s', $project)),
-            $project,
-            $config['index_prefix'],
-            $config['translation_type']
+            new Reference(sprintf('elasticsearch.client.%s', $name)),
+            $name,
+            $options['index_prefix'],
+            $options['translation_type']
         ]);
-        $loader->addTag('translation.loader', ['alias' => $project]);
+        $loader->addTag('translation.loader', ['alias' => $name]);
         
         $container->setDefinition(
-            sprintf('translation.loader.%s', $project), 
+            sprintf('translation.loader.%s', $name), 
             $loader
         );
     }
-    
 }
