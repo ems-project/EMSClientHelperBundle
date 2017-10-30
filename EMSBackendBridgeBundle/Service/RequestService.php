@@ -36,6 +36,6 @@ class RequestService
     {
         $current = $this->requestStack->getCurrentRequest();
         
-        return ($current ? $current->get('_locale') : null);
+        return ($current ? $current->getLocale() : null);
     }
 }
