@@ -35,6 +35,25 @@ class FileController extends AbstractController
         $request->getSession()->save();
         $info = $this->fileManager->getFileInfo($ouuid);
         
+        return $this->fileResponseCache($info, $request);
+    }
+    
+    /**
+     * @Route("/file/asset/{sha1}", name="ems_routing_file_asset")
+     */
+    public function assetAction(Request $request, $sha1)
+    {
+        //http://blog.alterphp.com/2012/08/how-to-deal-with-asynchronous-request.html
+        $request->getSession()->save();
+        $filename = $request->get('filename', 'filename_unknown');
+        $mimetype = $request->get('mimetype', 'mimetype_unknown');
+        $info = new EMSFileInfo($filename, $mimetype, $sha1);
+        
+        return $this->fileResponeCache($info, $request);
+    }
+    
+    private function fileResponeCache(EMSFileInfo $info, Request $request)
+    {
         $response = new Response();
         $response->setPublic();
         $response->setEtag($info->getSha1());
@@ -43,7 +62,7 @@ class FileController extends AbstractController
             return $response; //cached
         }
         
-        return $this->FileResponse($info);
+        return $this->fileResponse($info);
     }
     
     /**
@@ -51,7 +70,7 @@ class FileController extends AbstractController
      *
      * @return BinaryFileResponse
      */
-    private function FileResponse(EMSFileInfo $info)
+    private function fileResponse(EMSFileInfo $info)
     {
         $file = $this->fileManager->getFile($info->getSha1());
         

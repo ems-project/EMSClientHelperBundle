@@ -34,7 +34,7 @@ class RoutingService
     ) {
         $this->clientRequest = $clientRequest;
         $this->urlHelperService = $urlHelperService;
-        $this->twig = $twig;
+        $this->twig = $twig;    
     }
     
     /**
@@ -52,6 +52,10 @@ class RoutingService
     {
         try {
             $emsLink = new EMSLink($match);
+            
+            if ($emsLink->isAsset()) {
+                return $this->renderAsset($emsLink);
+            }
             
             if (!$emsLink->hasContentType()) {
                 return false;
@@ -82,6 +86,23 @@ class RoutingService
                 'source' => $document['_source'],
                 'locale' => $this->clientRequest->getLocale(),
                 'linkType' => $emsLink->getLinkType(),
+            ]);
+        } catch (\Twig_Error $ex) {
+            return 'Template errror: ' . $ex->getMessage();
+        }
+    }
+    
+    /**
+     * @param EMSLink $emsLink
+     * exemple input: src="ems://asset:c71c8253399e87aaf2d549d00b697adee0664aa9?name=base_service_f.gif&amp;type=image/gif"
+     * @return string
+     */
+    private function renderAsset(EMSLink $emsLink) {
+        try {
+            return $this->twig->render('ems_asset.ems.twig', [
+                    'sha1'     => $emsLink->getOuuid(),
+                    'name'     => $emsLink->getQuery()['name'],
+                    'type'     => $emsLink->getQuery()['type']
             ]);
         } catch (\Twig_Error $ex) {
             return 'Template errror: ' . $ex->getMessage();
