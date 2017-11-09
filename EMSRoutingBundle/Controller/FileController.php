@@ -35,15 +35,7 @@ class FileController extends AbstractController
         $request->getSession()->save();
         $info = $this->fileManager->getFileInfo($ouuid);
         
-        $response = new Response();
-        $response->setPublic();
-        $response->setEtag($info->getSha1());
-        
-        if ($response->isNotModified($request)) {
-            return $response; //cached
-        }
-        
-        return $this->FileResponse($info);
+        return $this->fileResponseCache($info);
     }
     
     /**
@@ -57,16 +49,21 @@ class FileController extends AbstractController
         $filename = $request->get('filename', 'filename_unknown');
         $mimetype = $request->get('mimetype', 'mimetype_unknown');
         
+        $info = new EMSFileInfo($filename, $mimetype, $sha1);
+        return $this->fileResponeCache($info);
+    }
+    
+    private function fileResponeCache(EMSFileInfo $info)
+    {
         $response = new Response();
         $response->setPublic();
-        $response->setEtag($sha1);
+        $response->setEtag($info->getSha1());
         
         if ($response->isNotModified($request)) {
             return $response; //cached
         }
         
-        $info = new EMSFileInfo($filename, $mimetype, $sha1);
-        return $this->FileResponse($info);
+        return $this->fileResponse($info);
     }
     
     /**
@@ -74,7 +71,7 @@ class FileController extends AbstractController
      *
      * @return BinaryFileResponse
      */
-    private function FileResponse(EMSFileInfo $info)
+    private function fileResponse(EMSFileInfo $info)
     {
         $file = $this->fileManager->getFile($info->getSha1());
         
