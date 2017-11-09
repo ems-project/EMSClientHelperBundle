@@ -42,7 +42,7 @@ class EMSLink
         }
         
         if (isset($match['query'])) {
-            $this->query = $match['query'];
+            $this->query = html_entity_decode($match['query']);
         }
     }
     
@@ -82,6 +82,12 @@ class EMSLink
     {
         return $this->ouuid;
     }
+    
+    public function getQuery()
+    {
+        parse_str($this->query, $output);
+        return $output;
+    }
 
     /**
      * @return string
@@ -89,5 +95,13 @@ class EMSLink
     public function hasContentType()
     {
         return null !== $this->contentType;
+    }
+    
+    /**
+     * @return bool
+     */
+    public function isAsset()
+    {
+        return 'asset' === $this->getLinkType();
     }
 }

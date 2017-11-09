@@ -47,6 +47,29 @@ class FileController extends AbstractController
     }
     
     /**
+     * @Route("/file/asset/{sha1}", name="ems_routing_file_asset")
+     */
+    public function assetAction(Request $request, $sha1)
+    {
+        //http://blog.alterphp.com/2012/08/how-to-deal-with-asynchronous-request.html
+        $request->getSession()->save();
+        
+        $filename = $request->get('filename', 'filename_unknown');
+        $mimetype = $request->get('mimetype', 'mimetype_unknown');
+        
+        $response = new Response();
+        $response->setPublic();
+        $response->setEtag($sha1);
+        
+        if ($response->isNotModified($request)) {
+            return $response; //cached
+        }
+        
+        $info = new EMSFileInfo($filename, $mimetype, $sha1);
+        return $this->FileResponse($info);
+    }
+    
+    /**
      * @param EMSFileInfo $info
      *
      * @return BinaryFileResponse
