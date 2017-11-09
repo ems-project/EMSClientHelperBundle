@@ -35,7 +35,7 @@ class FileController extends AbstractController
         $request->getSession()->save();
         $info = $this->fileManager->getFileInfo($ouuid);
         
-        return $this->fileResponseCache($info);
+        return $this->fileResponseCache($info, $request);
     }
     
     /**
@@ -45,15 +45,14 @@ class FileController extends AbstractController
     {
         //http://blog.alterphp.com/2012/08/how-to-deal-with-asynchronous-request.html
         $request->getSession()->save();
-        
         $filename = $request->get('filename', 'filename_unknown');
         $mimetype = $request->get('mimetype', 'mimetype_unknown');
-        
         $info = new EMSFileInfo($filename, $mimetype, $sha1);
-        return $this->fileResponeCache($info);
+        
+        return $this->fileResponeCache($info, $request);
     }
     
-    private function fileResponeCache(EMSFileInfo $info)
+    private function fileResponeCache(EMSFileInfo $info, Request $request)
     {
         $response = new Response();
         $response->setPublic();
