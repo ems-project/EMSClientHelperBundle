@@ -61,6 +61,7 @@ class TranslationLoader implements LoaderInterface
                 ]
         ];
         
+        //TODO: we can remove the 'preference' parameter if we add a second sort field on _uid in the body.
         $param = [
             'preference' => '_primary', //http://stackoverflow.com/questions/10836142/elasticsearch-duplicate-results-with-paging
             'from' => 0,
