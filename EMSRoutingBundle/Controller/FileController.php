@@ -49,10 +49,10 @@ class FileController extends AbstractController
         $mimetype = $request->get('mimetype', 'mimetype_unknown');
         $info = new EMSFileInfo($filename, $mimetype, $sha1);
         
-        return $this->fileResponeCache($info, $request);
+        return $this->fileResponseCache($info, $request);
     }
     
-    private function fileResponeCache(EMSFileInfo $info, Request $request)
+    private function fileResponseCache(EMSFileInfo $info, Request $request)
     {
         $response = new Response();
         $response->setPublic();
