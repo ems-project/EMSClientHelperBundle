@@ -12,6 +12,8 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\ClearCacheService;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\EventListener\ClearCacheRequestListener;
 
 /**
  * Load ems backend bridge services and process configuration
@@ -32,6 +34,9 @@ class EMSBackendBridgeExtension extends Extension
         $this->processRequestEnvironments($container, $config['request_environments']);
         $this->processElasticms($container, $config['elasticms']);
         $this->processApi($container, $config['api']);
+        if (isset($config['clear_cache'])) {
+            $this->processClearCache($container, $config['clear_cache'], $config['elasticms']);
+        }
     }
     
     /**
@@ -91,6 +96,23 @@ class EMSBackendBridgeExtension extends Extension
     
     /**
      * @param ContainerBuilder $container
+     * @param array $config
+     */
+    private function processClearCache(ContainerBuilder $container, $domain, array $config)
+    {
+        if (!isset($config[$domain]['translation_type'])) {
+            return;
+        }
+        $clientRequest = 'elasticsearch.client.' . $domain;
+        
+        if ($container->hasDefinition($clientRequest)) {
+            $translationType = $config[$domain]['translation_type'];
+            $this->defineClearCacheListener($container, $domain, $translationType);
+        }
+    }
+    
+    /**
+     * @param ContainerBuilder $container
      * @param string           $name
      * @param array            $options
      */
@@ -142,5 +164,40 @@ class EMSBackendBridgeExtension extends Extension
             sprintf('translation.loader.%s', $name), 
             $loader
         );
+    }
+    
+    /**
+     * @param ContainerBuilder $container
+     * @param string           $name
+     * @param array            $options
+     */
+    protected function defineClearCacheListener(ContainerBuilder $container, $domain, $translationType)
+    {
+        $cachePath = $container->getParameter('kernel.cache_dir');
+        
+        $clearCacheService = new Definition(ClearCacheService::class);
+        $clearCacheService->setArguments([
+                $cachePath,
+                new Reference('translator'),
+                new Reference('emsch.request.service'),
+                new Reference('emsch.client_request.' . $domain),
+                $translationType
+                
+        ]);
+        $container->setDefinition('emsch.clear_cache.service', $clearCacheService);
+        
+        $clearCacheListener = new Definition(ClearCacheRequestListener::class);
+        $clearCacheListener->setArguments([
+                new Reference('emsch.clear_cache.service')
+        ]);
+        $clearCacheListener->addTag('kernel.event_listener', array(
+                'event' => 'kernel.request',
+                'priority' => 90
+                
+        ));
+        $container->setDefinition(
+                'emsch.clear_cache_listener',
+                $clearCacheListener
+                );
     }
 }
