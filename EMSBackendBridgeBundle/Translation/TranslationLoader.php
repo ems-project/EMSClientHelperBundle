@@ -5,6 +5,8 @@ namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Translation;
 use Elasticsearch\Client;
 use Symfony\Component\Translation\Loader\LoaderInterface;
 use Symfony\Component\Translation\MessageCatalogue;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\ClearCacheService;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Entity\Translation;
 
 class TranslationLoader implements LoaderInterface
 {
@@ -49,17 +51,40 @@ class TranslationLoader implements LoaderInterface
     {
         $catalogue = new MessageCatalogue($locale);
         $pageSize = 100;
+
+        $body = [
+                'sort' => [
+                    'modified_date' => [
+                        'order' => 'desc',
+                        'missing' => '_last'
+                    ]
+                ]
+        ];
         
         $param = [
             'preference' => '_primary', //http://stackoverflow.com/questions/10836142/elasticsearch-duplicate-results-with-paging
             'from' => 0,
-            'size' => 0,
+            'size' => 1,
             'index' => $this->prefix.$domain,
             'type' => $this->type,
+            'body' => $body,
         ];
+        
         
         $result = $this->client->search($param);
         $total = $result["hits"]["total"];
+
+        $newestTranslation = new Translation(reset($result["hits"]["hits"])["_source"]);
+        $date = $newestTranslation->getModifiedDate();
+        if (!$date) {
+            $date = (new \DateTime('19770209T160400'))->format('c');
+        }
+        
+        if ($domain !== 'messages') {
+            $key = ClearCacheService::TIMESTAMP_PREFIX . $domain;
+            $message = [$key => $date];
+            $catalogue->add($message, 'messages');
+        }
         
         $param['size'] = $pageSize;
         while($param['from'] < $total){

@@ -80,6 +80,9 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+                ->scalarNode('clear_cache')
+                    ->info('ems-project to use for clear cache with translations')
+                ->end()
             ->end()
         ;
     }
