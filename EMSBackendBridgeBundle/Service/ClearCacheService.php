@@ -93,17 +93,26 @@ class ClearCacheService
     }
     
     /**
-     * @return DateTime
+     * @return \DateTime
      */
     private function getLastTranslationDateInCache()
     {
+        if(!file_exists($this->translationCachePath)) {
+            return null;
+        }
+            
         $domain = $this->requestService->getEnvironment();
         $datestr = $this->translator->trans(self::TIMESTAMP_PREFIX . $domain);
-        return new \DateTime($datestr);
+        
+        if($datestr !== self::TIMESTAMP_PREFIX . $domain){            
+            return new \DateTime($datestr);
+        }
+        //date not defined yet
+        return new null;
     }
     
     /**
-     * @return DateTime
+     * @return \DateTime
      */
     private function getLastTranslationChangeDate()
     {
