@@ -56,7 +56,7 @@ class ClearCacheService
     )
     {
         $this->cachePath = $cachePath;
-        $this->translationCachePath = $cachePath . '\translations';
+        $this->translationCachePath = $cachePath . DIRECTORY_SEPARATOR . 'translations';
         
         $this->translator = $translator;
         $this->requestService = $requestService;
@@ -108,7 +108,7 @@ class ClearCacheService
             return new \DateTime($datestr);
         }
         //date not defined yet
-        return new null;
+        return null;
     }
     
     /**
