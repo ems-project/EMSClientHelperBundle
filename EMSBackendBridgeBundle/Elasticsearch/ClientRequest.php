@@ -290,13 +290,10 @@ class ClientRequest
         foreach ($words as $word) {
             $params['text'] = $word;
             $analyzed = $this->client->indices()->analyze($params);
-            if (
-                isset($analyzed['tokens']) &&
-                ! empty($analyzed['tokens'][0]) &&
-                isset($analyzed['tokens'][0]['token'])
-               ) {
-                   $withoutStopWords[] = $word;
-               }
+            if (isset($analyzed['tokens'][0]['token']))
+            {
+                $withoutStopWords[] = $word;
+            }
         }
         return $withoutStopWords;
     }
