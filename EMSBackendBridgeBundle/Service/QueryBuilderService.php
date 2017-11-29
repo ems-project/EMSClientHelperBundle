@@ -88,60 +88,14 @@ class QueryBuilderService{
             ];
         }
         
-
+        
         /**@var SearchValue $searchValue*/
         foreach ($searchValues as $searchValue) {
-            $partialQuery = $searchValue->makeShould($analyzer->getSearchField(), $analyzer->getSearchSynonymsInField(), $analyzerField);
-            
-            $combinedQuery = $this->combineBools($filter['bool']['must'], $partialQuery);
-            
-            if (empty($filter['bool']['must'])) {
-                $filter['bool']['must'][] = $combinedQuery;
-            } else {
-                $filter['bool']['must'] = $combinedQuery;
-            }
-            
+            $filter['bool']['must'][] = $searchValue->makeShould($analyzer->getSearchField(), $analyzer->getSearchSynonymsInField(), $analyzerField);
             
         }
-
+        
         return $filter;
-    }
-    
-    /**
-     * Bool, Must, Should keywords are unique per level of the json hierarchy.
-     * This function makes sure that multiple should and must clauses are combined into one clause (in stead of added and ignored).
-     * 
-     * @param array $query
-     * @param array $bool
-     * @return array
-     * @throws \Exception
-     */
-    private function combineBools($query, $bool)
-    {
-        if (!isset($bool['bool'])) {
-            throw new \Exception("bool parameter to combine with query does not contain a bool array.");
-        }
-
-        if (sizeof($query) > 1) {
-            throw new \Exception("malformed query, send an array with only one bool constraint at a time.");
-        }
-        
-        if (empty($query)) {
-            return $bool;
-        }
-        
-        $shouldOrMustKey = key($bool['bool']);
-
-        if (!isset($query[0]['bool'][$shouldOrMustKey])) {
-            $query[0]['bool'] = $bool['bool'];
-            return $query;
-        }
-        
-        foreach ($bool['bool'][$shouldOrMustKey] as $subquery) {
-            $query[0]['bool'][$shouldOrMustKey][] = $subquery;
-        }
-
-        return $query;
     }
     
     private function buildPerAnalyzer($queryString, AnalyserSet $analyzerSet){
@@ -163,18 +117,20 @@ class QueryBuilderService{
     
     
     public function getQuery($queryString, $analyzerSets){
+        
         $should = [];
         if(!$queryString){
             /**@var AnalyserSet $analyzer*/
             foreach ($analyzerSets  as $analyzer) {
                 $should[] = $analyzer->getFilter();
             }            
-        } else {
+        }
+        else {
             foreach ($analyzerSets  as $analyzer) {
                 $should[] = $this->buildPerAnalyzer($queryString, $analyzer);
             }            
         }
-
+        
         $out = [
             'bool' => [
                 'should' => $should

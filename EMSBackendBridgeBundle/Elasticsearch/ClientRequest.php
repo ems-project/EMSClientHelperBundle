@@ -5,6 +5,7 @@ namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch;
 use Elasticsearch\Client;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\RequestService;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Entity\HierarchicalStructure;
+use Elasticsearch\Namespaces\IndicesNamespace;
 
 class ClientRequest
 {
@@ -278,7 +279,23 @@ class ClientRequest
     public function analyze($text, $searchField) {
         $out = [];
         preg_match_all('/"(?:\\\\.|[^\\\\"])*"|\S+/', $text, $out);
-        return $out[0];
+        $words = $out[0];
+        
+        $withoutStopWords = [];
+        $params = [
+            'index' => $this->getFirstIndex(),
+            'field' => $searchField,
+            'text' => ''
+        ];
+        foreach ($words as $word) {
+            $params['text'] = $word;
+            $analyzed = $this->client->indices()->analyze($params);
+            if (isset($analyzed['tokens'][0]['token']))
+            {
+                $withoutStopWords[] = $word;
+            }
+        }
+        return $withoutStopWords;
     }
     
     /**
