@@ -76,9 +76,9 @@ class ClientRequest
      *
      * @return string|null
      */
-    public function getHierarchy($emsKey, $childrenField)
+    public function getHierarchy($emsKey, $childrenField, $depth = 100, $sourceFields = [])
     {
-        $item = $this->getByEmsKey($emsKey);
+        $item = $this->getByEmsKey($emsKey, $sourceFields);
         
         if (!isset($item['_source'])) {
             return null;
@@ -86,17 +86,17 @@ class ClientRequest
         
         $out = new HierarchicalStructure($item['_type'], $item['_id'], $item['_source']);
         
-        if(isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
-            
-            foreach($item['_source'][$childrenField] as $key) {
-                if ($key){
-                    $child = $this->getHierarchy($key, $childrenField);
-                    if($child){
-                        $out->addChild($child);                        
+        if($depth) {
+            if(isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
+                foreach($item['_source'][$childrenField] as $key) {
+                    if ($key){
+                        $child = $this->getHierarchy($key, $childrenField, $depth-1, $sourceFields);
+                        if($child){
+                            $out->addChild($child);
+                        }
                     }
                 }
             }
-            
         }
         return $out;
         
@@ -218,8 +218,8 @@ class ClientRequest
     }
     
     
-    public function getByEmsKey($emsLink) {
-        return $this->getByOuuid($this->getType($emsLink), $this->getOuuid($emsLink));
+    public function getByEmsKey($emsLink, $sourceFields = []) {
+        return $this->getByOuuid($this->getType($emsLink), $this->getOuuid($emsLink), $sourceFields);
     }
     
     /**
