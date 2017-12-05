@@ -5,7 +5,6 @@ namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch;
 use Elasticsearch\Client;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\RequestService;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Entity\HierarchicalStructure;
-use Elasticsearch\Namespaces\IndicesNamespace;
 
 class ClientRequest
 {
@@ -76,21 +75,21 @@ class ClientRequest
      *
      * @return string|null
      */
-    public function getHierarchy($emsKey, $childrenField, $depth = 100, $sourceFields = [])
+    public function getHierarchy($emsKey, $childrenField, $depth = null, $sourceFields = [])
     {
         $item = $this->getByEmsKey($emsKey, $sourceFields);
-        
-        if (!isset($item['_source'])) {
+
+        if (empty($item)) {
             return null;
         }
         
         $out = new HierarchicalStructure($item['_type'], $item['_id'], $item['_source']);
-        
-        if($depth) {
+
+        if( $depth === null || $depth ) {
             if(isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
                 foreach($item['_source'][$childrenField] as $key) {
                     if ($key){
-                        $child = $this->getHierarchy($key, $childrenField, $depth-1, $sourceFields);
+                        $child = $this->getHierarchy($key, $childrenField, ($depth === null? null : $depth-1), $sourceFields);
                         if($child){
                             $out->addChild($child);
                         }
