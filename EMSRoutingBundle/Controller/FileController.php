@@ -94,6 +94,7 @@ class FileController extends AbstractController
      * http://cubiq.org/the-perfect-php-clean-url-generator
      *
      * COPIED FROM EMSCoreBundle/Twig/AppExtension.php
+     * Modified to accept "." in result string
      * @param string $str
      * @return string
      */
@@ -113,7 +114,7 @@ class FileController extends AbstractController
             $clean = str_replace($a, $b, $str);
         }
     
-        $clean = preg_replace("/[^a-zA-Z0-9\_\|\ \-]/", '', $clean);
+        $clean = preg_replace("/[^a-zA-Z0-9\_\|\ \-\.]/", '', $clean);
         $clean = strtolower(trim($clean, '-'));
         $clean = preg_replace("/[\/\_\|\ \-]+/", '-', $clean);
     
