@@ -5,6 +5,7 @@ namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch;
 use Elasticsearch\Client;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\RequestService;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Entity\HierarchicalStructure;
+use Psr\Log\LoggerInterface;
 
 class ClientRequest
 {
@@ -24,18 +25,26 @@ class ClientRequest
     private $indexPrefix;
     
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+    
+    /**
      * @param Client         $client
      * @param RequestService $requestService
      * @param string         $indexPrefix
+     * @param LoggerInterface         $logger
      */
     public function __construct(
         Client $client, 
         RequestService $requestService,
-        $indexPrefix
+        $indexPrefix,
+        LoggerInterface $logger
     ) {
         $this->client = $client;
         $this->requestService = $requestService;
         $this->indexPrefix = $indexPrefix;
+        $this->logger = $logger;
     }
     
     /**
@@ -77,6 +86,7 @@ class ClientRequest
      */
     public function getHierarchy($emsKey, $childrenField, $depth = null, $sourceFields = [])
     {
+        $this->logger->debug('ClientRequest : getHierarchy for {emsKey}', ['emsKey' => $emsKey]);
         $item = $this->getByEmsKey($emsKey, $sourceFields);
 
         if (empty($item)) {
@@ -108,6 +118,8 @@ class ClientRequest
      */
     public function getAllChildren($emsKey, $childrenField)
     {
+        
+        $this->logger->debug('ClientRequest : getAllChildren for {emsKey}', ['emsKey' => $emsKey]);
         $out = [$emsKey];
         $item = $this->getByEmsKey($emsKey);
         
@@ -129,6 +141,7 @@ class ClientRequest
      */
     public function searchBy($type, $parameters, $from = 0, $size = 10)
     {
+        $this->logger->debug('ClientRequest : searchBy for type {type}', ['type'=>$type, 'parameters' => $parameters]);
         $body = [
             'query' => [
                 'bool' => [
@@ -147,6 +160,9 @@ class ClientRequest
             ];
         }
         
+        
+        
+        
         return $this->client->search([
             'index' => $this->getIndex(),
             'type' => $type,
@@ -163,6 +179,7 @@ class ClientRequest
      */
     public function searchOneBy($type, $parameters)
     {
+        $this->logger->debug('ClientRequest : searchOneBy for type {type}', ['type'=>$type, 'parameters' => $parameters]);
         $result = $this->searchBy($type, $parameters, 0, 1);
         if($result['hits']['total'] == 1) {
             return $result['hits']['hits'][0];
@@ -187,6 +204,7 @@ class ClientRequest
      */
     public function get($type, $id)
     {
+        $this->logger->debug('ClientRequest : get {type}:{id}', ['type'=>$type, 'id' => $id]);
         return $this->client->get([
             'index' => $this->getIndex(),
             'type' => $type,
@@ -203,6 +221,7 @@ class ClientRequest
     public function getByOuuids($type, $ouuids)
     {
         
+        $this->logger->debug('ClientRequest : getByOuuids {type}:{id}', ['type'=>$type, 'id' => $ouuids]);
         return $this->client->search([
             'index' => $this->getIndex(),
             'type' => $type,
@@ -228,8 +247,9 @@ class ClientRequest
      *
      * @return array
      */
-    public function getByOuuid($type, $ouuid, $sourceFields = [])
+    public function getByOuuid($type, $ouuid, $sourceFields = [], $source_exclude = [])
     {
+        $this->logger->debug('ClientRequest : getByOuuid {type}:{id}', ['type'=>$type, 'id'=>$ouuid]);
         $body = [
             'index' => $this->getIndex(),
             'type' => $type,
@@ -245,6 +265,9 @@ class ClientRequest
         if(!empty($sourceFields)) {
             $body['_source'] = $sourceFields;
         }
+        if(!empty($source_exclude)) {
+            $body['_source_exclude'] = $source_exclude;
+        }
         
         $result = $this->client->search($body);
         if(isset($result['hits']['hits'][0])) {
@@ -258,6 +281,7 @@ class ClientRequest
      * @param unknown $field
      */
     public function getFieldAnalyzer($field) {
+        $this->logger->debug('ClientRequest : getFieldAnalyzer {field}', ['field'=>$field]);
         $info = $this->client->indices()->getFieldMapping([
             'index' => $this->getFirstIndex(),
             'field' => $field,
@@ -276,6 +300,7 @@ class ClientRequest
     }
     
     public function analyze($text, $searchField) {
+        $this->logger->debug('ClientRequest : analyze {text} with {field}', ['text' => $text, 'field'=>$searchField]);
         $out = [];
         preg_match_all('/"(?:\\\\.|[^\\\\"])*"|\S+/', $text, $out);
         $words = $out[0];
@@ -305,7 +330,8 @@ class ClientRequest
      */
     public function search($type, array $body, $from = 0, $size = 10)
     {
-
+        
+        $this->logger->debug('ClientRequest : search for {type}', ['type' => $type, 'body'=>$body]);
         $params = [
             'index' => $this->getIndex(),
             'type' => $type,
@@ -331,6 +357,7 @@ class ClientRequest
      */
     public function searchOne($type, array $body)
     {
+        $this->logger->debug('ClientRequest : searchOne for {type}', ['type' => $type, 'body'=>$body]);
         $search = $this->search($type, $body);
         
         $hits = $search['hits'];
@@ -351,6 +378,7 @@ class ClientRequest
      */
     public function searchAll($type, array $body, $pageSize = 10)
     {
+        $this->logger->debug('ClientRequest : searchAll for {type}', ['type' => $type, 'body'=>$body]);
         $params = [
             'preference' => '_primary', //see function description
             //TODO: should be replace by an order by _ouid (in case of insert in the index the pagination will be inconsistent)

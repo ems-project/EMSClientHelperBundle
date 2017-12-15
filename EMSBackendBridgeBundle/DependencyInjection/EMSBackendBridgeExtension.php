@@ -138,7 +138,8 @@ class EMSBackendBridgeExtension extends Extension
         $definition->setArguments([
             new Reference( sprintf('elasticsearch.client.%s', $name)),
             new Reference('emsch.request.service'),
-            $options['index_prefix']   
+            $options['index_prefix'],
+            new Reference('logger'),
         ]);
 
         $container->setDefinition(sprintf('emsch.client_request.%s', $name), $definition);
