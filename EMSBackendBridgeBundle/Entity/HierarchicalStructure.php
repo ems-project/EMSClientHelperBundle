@@ -64,6 +64,14 @@ class HierarchicalStructure {
      *
      * @return \array*
      */
+    public function setChildren($children) {
+        $this->children = $children;
+    }
+    
+    /**
+     *
+     * @return \array*
+     */
     public function getData() {
         return $this->data;
     }
