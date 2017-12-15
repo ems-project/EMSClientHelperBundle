@@ -75,27 +75,27 @@ class ClientRequest
      *
      * @return string|null
      */
-    public function getHierarchy($emsKey, $childrenField)
+    public function getHierarchy($emsKey, $childrenField, $depth = null, $sourceFields = [])
     {
-        $item = $this->getByEmsKey($emsKey);
-        
-        if (!isset($item['_source'])) {
+        $item = $this->getByEmsKey($emsKey, $sourceFields);
+
+        if (empty($item)) {
             return null;
         }
         
         $out = new HierarchicalStructure($item['_type'], $item['_id'], $item['_source']);
-        
-        if(isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
-            
-            foreach($item['_source'][$childrenField] as $key) {
-                if ($key){
-                    $child = $this->getHierarchy($key, $childrenField);
-                    if($child){
-                        $out->addChild($child);                        
+
+        if( $depth === null || $depth ) {
+            if(isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
+                foreach($item['_source'][$childrenField] as $key) {
+                    if ($key){
+                        $child = $this->getHierarchy($key, $childrenField, ($depth === null? null : $depth-1), $sourceFields);
+                        if($child){
+                            $out->addChild($child);
+                        }
                     }
                 }
             }
-            
         }
         return $out;
         
@@ -217,8 +217,8 @@ class ClientRequest
     }
     
     
-    public function getByEmsKey($emsLink) {
-        return $this->getByOuuid($this->getType($emsLink), $this->getOuuid($emsLink));
+    public function getByEmsKey($emsLink, $sourceFields = []) {
+        return $this->getByOuuid($this->getType($emsLink), $this->getOuuid($emsLink), $sourceFields);
     }
     
     /**
@@ -278,7 +278,23 @@ class ClientRequest
     public function analyze($text, $searchField) {
         $out = [];
         preg_match_all('/"(?:\\\\.|[^\\\\"])*"|\S+/', $text, $out);
-        return $out[0];
+        $words = $out[0];
+        
+        $withoutStopWords = [];
+        $params = [
+            'index' => $this->getFirstIndex(),
+            'field' => $searchField,
+            'text' => ''
+        ];
+        foreach ($words as $word) {
+            $params['text'] = $word;
+            $analyzed = $this->client->indices()->analyze($params);
+            if (isset($analyzed['tokens'][0]['token']))
+            {
+                $withoutStopWords[] = $word;
+            }
+        }
+        return $withoutStopWords;
     }
     
     /**

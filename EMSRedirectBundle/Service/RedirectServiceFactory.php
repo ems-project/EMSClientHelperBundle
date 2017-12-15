@@ -14,7 +14,7 @@ use EMS\ClientHelperBundle\EMSRedirectBundle\EventSubscriber\KernelSubscriber;
 
 class RedirectServiceFactory
 {
-    public function create(
+    public static function create(
         ClientRequest $clientRequest,
         RedirectRouterServiceInterface $redirectRouter,
         $redirectType
