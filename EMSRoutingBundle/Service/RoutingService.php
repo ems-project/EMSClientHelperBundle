@@ -120,7 +120,9 @@ class RoutingService
     {
         $document = $this->clientRequest->getByOuuid(
             $emsLink->getContentType(),
-            $emsLink->getOuuid()
+            $emsLink->getOuuid(),
+            [],
+            ['*.content', '*.attachement', '*._attachement']
         );
         
         if (!$document) {
