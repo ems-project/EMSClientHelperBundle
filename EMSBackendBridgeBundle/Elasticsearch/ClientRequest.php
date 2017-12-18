@@ -328,7 +328,7 @@ class ClientRequest
      * 
      * @return array
      */
-    public function search($type, array $body, $from = 0, $size = 10)
+    public function search($type, array $body, $from = 0, $size = 10, $sourceExclude=[])
     {
         
         $this->logger->debug('ClientRequest : search for {type}', ['type' => $type, 'body'=>$body]);
@@ -342,6 +342,10 @@ class ClientRequest
         
         if ($from > 0) {
 //             $params['preference'] = '_primary';
+        }
+        
+        if(!empty($sourceExclude)){
+            $params['_source_exclude'] = $sourceExclude;
         }
         
         return $this->client->search($params);
