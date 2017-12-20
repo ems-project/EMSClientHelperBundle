@@ -331,7 +331,7 @@ class ClientRequest
     public function search($type, array $body, $from = 0, $size = 10, $sourceExclude=[])
     {
         
-        $this->logger->debug('ClientRequest : search for {type}', ['type' => $type, 'body'=>$body]);
+        $this->logger->debug('ClientRequest : search for {type}', ['type' => $type, 'body'=>$body, 'index'=>$this->getIndex()]);
         $params = [
             'index' => $this->getIndex(),
             'type' => $type,
