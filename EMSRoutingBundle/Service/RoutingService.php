@@ -48,7 +48,7 @@ class RoutingService
     /**
      * @param array $match [link_type, content_type, ouuid, query]
      */
-    public function generate(array $match)
+    public function generate(array $match, $locale=false)
     {
         try {
             $emsLink = new EMSLink($match);
@@ -63,7 +63,7 @@ class RoutingService
             
             $document = $this->getDocument($emsLink);
             
-            $template = $this->renderTemplate($emsLink, $document);
+            $template = $this->renderTemplate($emsLink, $document, $locale);
             $url = $this->urlHelperService->prependBaseUrl($emsLink, $template);
             
             return $url;
@@ -78,13 +78,13 @@ class RoutingService
      * 
      * @return string
      */
-    private function renderTemplate(EMSLink $emsLink, array $document)
+    private function renderTemplate(EMSLink $emsLink, array $document, $locale=false)
     {
         try {
             return $this->twig->render($document['_type'].'.ems.twig', [
                 'id'     => $document['_id'],
                 'source' => $document['_source'],
-                'locale' => $this->clientRequest->getLocale(),
+                'locale' => ($locale?$locale:$this->clientRequest->getLocale()),
                 'linkType' => $emsLink->getLinkType(),
             ]);
         } catch (\Twig_Error $ex) {

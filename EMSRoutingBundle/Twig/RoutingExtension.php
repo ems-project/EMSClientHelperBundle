@@ -80,11 +80,11 @@ class RoutingExtension extends \Twig_Extension
      *
      * @return string
      */
-    public function transform($content)
+    public function transform($content, $locale=false)
     {
-        return preg_replace_callback(self::EMS_LINK, function ($match) {
+        return preg_replace_callback(self::EMS_LINK, function ($match) use (&$locale) {
             //array filter to remove empty capture groups
-            $route = $this->routingService->generate(array_filter($match));
+            $route = $this->routingService->generate(array_filter($match), $locale);
 
             return $route ? $route : $match[0];
         }, $content);
