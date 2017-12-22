@@ -40,8 +40,13 @@ class AnalyserSet {
      * @var string
      */
     private $searchSynonymsInField;
+    /**
+     *
+     * @var float
+     */
+    private $boost;
     
-    public function __construct(ClientRequest $clientRequest, $searchField, $filter='', $synonymTypes=[], $synonymsSearchField=false, $searchSynonymsInField=false, $synonymsFilter=''){
+    public function __construct(ClientRequest $clientRequest, $searchField, $filter='', $synonymTypes=[], $synonymsSearchField=false, $searchSynonymsInField=false, $synonymsFilter='', $boost=1.0){
         $this->clientRequest = $clientRequest;
         $this->searchField = $searchField;
         $this->filter = $filter;
@@ -49,6 +54,7 @@ class AnalyserSet {
         $this->synonymsSearchField = $synonymsSearchField;
         $this->searchSynonymsInField = $searchSynonymsInField;
         $this->synonymsFilter = $synonymsFilter;
+        $this->boost = $boost;
     }
     
     /**
@@ -57,6 +63,14 @@ class AnalyserSet {
      */
     public function getSearchField(){
         return $this->searchField;
+    }
+    
+    /**
+     *
+     * @return float
+     */
+    public function getBoost(){
+        return $this->boost;
     }
     
     /**

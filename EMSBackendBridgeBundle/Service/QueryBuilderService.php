@@ -91,7 +91,7 @@ class QueryBuilderService{
         
         /**@var SearchValue $searchValue*/
         foreach ($searchValues as $searchValue) {
-            $filter['bool']['must'][] = $searchValue->makeShould($analyzer->getSearchField(), $analyzer->getSearchSynonymsInField(), $analyzerField);
+            $filter['bool']['must'][] = $searchValue->makeShould($analyzer->getSearchField(), $analyzer->getSearchSynonymsInField(), $analyzerField, $analyzer->getBoost());
             
         }
         

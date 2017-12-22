@@ -48,11 +48,11 @@ class SearchValue
      *
      * @return [][]
      */
-    public function makeShould($searchFields, $synonymsSearchField, $analyzerField)
+    public function makeShould($searchFields, $synonymsSearchField, $analyzerField, $boost=1.0)
     {
 
         $should = [];
-        $should[] = $this->getQuery($searchFields, $analyzerField);
+        $should[] = $this->getQuery($searchFields, $analyzerField, $boost);
         
         foreach ($this->synonyms as $emsLink) {
             if(!empty($emsLink)){
@@ -84,7 +84,7 @@ class SearchValue
         ];
     }
     
-    public function getQuery($field, $analyzer) {
+    public function getQuery($field, $analyzer, $boost=1.0) {
         
         $matches = [];
         preg_match_all('/^\"(.*)\"$/', $this->term, $matches);
@@ -94,7 +94,8 @@ class SearchValue
                 'match_phrase' => [
                     ($field?$field:'_all') => [
                         'analyzer' => $analyzer,
-                        'query' => $this->getTerm(),                        
+                        'query' => $this->getTerm(),  
+                        'boost' => $boost
                     ]
                     
                 ]
@@ -102,7 +103,10 @@ class SearchValue
         }
         return [
             'match' => [
-                ($field?$field:'_all') => $this->getTerm(),
+                ($field?$field:'_all') => [
+                    'query' => $this->getTerm(),
+                    'boost' => $boost,
+                 ],
             ]
         ];
     }
