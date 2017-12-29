@@ -1,0 +1,11 @@
+{
+    "bundles": {
+        "EMS\\ClientHelperBundle\\EMSBackendBridgeBundle\\EMSBackendBridgeBundle": ["all"]
+    },
+    "env": {
+        "elasticsearch_clusters": [
+        	"http://localhost:9200"
+        ]
+    },
+    "aliases": ["elasticms-client"]
+}
