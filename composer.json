@@ -15,7 +15,7 @@
 		"php" : ">=7.0",
 		"symfony/symfony" : "^4",
 		"symfony/finder" : "~3.4|~4.0",
-		"twig/twig" : "^3.3|^4.0",
+		"twig/twig": "~1.34|~2.4",
 		"guzzlehttp/guzzle" : "^6.3",
 		"elasticsearch/elasticsearch" : "^5.3"
 	},
