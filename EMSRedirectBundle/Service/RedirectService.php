@@ -5,6 +5,7 @@ namespace EMS\ClientHelperBundle\EMSRedirectBundle\Service;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
 use Symfony\Component\Debug\Exception\ContextErrorException;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 
 class RedirectService
@@ -65,7 +66,6 @@ class RedirectService
                 $source
             );
         } catch (\Exception $ex) {
-            throw $ex;
             return false;
         }
     }
@@ -84,12 +84,8 @@ class RedirectService
             'query' => [
                 'bool' => [
                     'must' => [
-                        'match' => [
-                            'url_'.$locale => [
-                                'query' => $uri,
-                                'operator' => 'AND',
-                                'boost' => 1
-                            ]
+                        'term' => [
+                            'url_'.$locale => $uri
                         ]
                     ]
                 ]

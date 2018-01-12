@@ -5,23 +5,27 @@
         http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
+       <parameter key="emsch.request.service.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\RequestService</parameter>
        <parameter key="emsch.request_listener.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\EventListener\RequestListener</parameter>
+       
+       <parameter key="emsch.query_builder.service.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\QueryBuilderService</parameter>
        
        <parameter key="emsch.twig.extension.helper.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Twig\HelperExtension</parameter>
        <parameter key="emsch.twig.extension.trans.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Twig\TranslationExtension</parameter>
-       
-       <parameter key="emsch.request.service.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\RequestService</parameter>
-       <parameter key="emsch.client_request.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest</parameter>
-       <parameter key="emsch.client_request_factory.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequestFactory</parameter>
     </parameters>
     
-    <services>        
+    <services>      
+        <service id="emsch.request.service" class="%emsch.request.service.class%">
+            <argument type="service" id="request_stack" />
+        </service>
+        
         <!-- event listeners -->
         <service id="emsch.request_listener" class="%emsch.request_listener.class%">
-            <argument></argument> <!-- will be filled in with request_environment config dynamically -->
             <tag name="kernel.event_listener" event="kernel.request" priority="100" />
             <tag name="kernel.event_listener" event="kernel.exception" priority="100" />
         </service>
+        
+        <service id="emsch.query_builder.service" class="%emsch.query_builder.service.class%"></service>
         
         <!-- twig extensions -->
         <service id="emsch.twig.extension.helper" class="%emsch.twig.extension.helper.class%">
@@ -31,23 +35,6 @@
             <argument type="service" id="translator" />
             <argument type="service" id="emsch.request.service" />
             <tag name="twig.extension" />
-        </service>
-                        
-        <!-- elasticsearch services -->
-        <service id="elasticsearch.factory" class="Elasticsearch\ClientBuilder"/>
-        <service id="elasticsearch.client" class="Elasticsearch\Client" abstract="true" >
-            <factory service="elasticsearch.factory" method="fromConfig"/>
-        </service>
-        
-        <!-- emsch services -->
-        <service id="emsch.request.service" class="%emsch.request.service.class%">
-            <argument type="service" id="request_stack" />
-        </service>
-        <service id="emsch.client_request_factory" class="%emsch.client_request_factory.class%" public="false">
-            <argument type="service" id="emsch.request.service" />
-        </service>
-        <service id="emsch.client_request" class="%emsch.client_request.class%" public="false">
-            <factory service="emsch.client_request_factory" method="create"/>
         </service>
     </services>
 </container>

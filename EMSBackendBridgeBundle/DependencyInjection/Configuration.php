@@ -7,9 +7,7 @@ use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
- * This is the class that validates and merges configuration from your app/config files.
- *
- * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/configuration.html}
+ * EMS Backend Bridge Bundle Configuration
  */
 class Configuration implements ConfigurationInterface
 {
@@ -21,37 +19,97 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         /* @var $rootNode ArrayNodeDefinition */
         $rootNode = $treeBuilder->root('ems_backend_bridge');
+        
+        $this->addRequestEnvironmentsSection($rootNode);
+        $this->addElasticmsSection($rootNode);
+        $this->addApiSection($rootNode);
+        
+        return $treeBuilder;
+    }
+    
+    /**
+     * @param ArrayNodeDefinition $rootNode
+     */
+    private function addRequestEnvironmentsSection(ArrayNodeDefinition $rootNode)
+    {
         $rootNode
             ->children()
-                    ->arrayNode('request_environment')
-                        ->info('environment name => regex for matching the base url')
-                        ->prototype('scalar')->end()
-                    ->end()
-                   ->arrayNode('elasticms')
-                        ->prototype('array')
-                            ->info('name for the ems-project')
-                            ->children()
-                                ->arrayNode('hosts')
-                                    ->info('elasticsearch hosts')
-                                    ->isRequired()
-                                    ->prototype('scalar')->end()
-                                ->end()
-                                
-                                ->scalarNode('index_prefix')
-                                    ->info("example: 'test_'")
-                                    ->isRequired()
-                                ->end()
-                                ->scalarNode('translation_type')
-                                    ->info("example: 'test_i18n'")
-                                    ->defaultValue(null)
-                                ->end()
+                ->arrayNode('request_environments')
+                    ->isRequired()
+                    ->requiresAtLeastOneElement()
+                    ->useAttributeAsKey('name')
+                    ->prototype('array')
+                        ->children()
+                            ->scalarNode('regex')
+                                ->defaultValue(null)
+                            ->end()
+                            ->scalarNode('index')
+                                ->defaultValue(null)
                             ->end()
                         ->end()
                     ->end()
                 ->end()
-            ->end();
-        
-
-        return $treeBuilder;
+            ->end()
+        ;
+    }
+    
+    /**
+     * @param ArrayNodeDefinition $rootNode
+     */
+    private function addElasticmsSection(ArrayNodeDefinition $rootNode)
+    {
+        $rootNode
+            ->children()
+                ->arrayNode('elasticms')
+                    ->prototype('array')
+                        ->info('name for the ems-project')
+                        ->children()
+                            ->arrayNode('hosts')
+                                ->info('elasticsearch hosts')
+                                ->isRequired()
+                                ->prototype('scalar')->end()
+                            ->end()
+                            ->scalarNode('index_prefix')
+                                ->info("example: 'test_'")
+                                ->defaultValue(null)
+                            ->end()
+                            ->scalarNode('translation_type')
+                                ->info("example: 'test_i18n'")
+                                ->defaultValue(null)
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
+                ->scalarNode('clear_cache')
+                    ->info('ems-project to use for clear cache with translations')
+                ->end()
+            ->end()
+        ;
+    }
+    
+    /**
+     * @param ArrayNodeDefinition $rootNode
+     */
+    private function addApiSection(ArrayNodeDefinition $rootNode)
+    {
+        $rootNode
+            ->children()
+                ->arrayNode('api')
+                    ->prototype('array')
+                        ->info('name for the ems-project')
+                        ->children()
+                            ->scalarNode('url')
+                                ->info("url of the elasticms withoud /api")
+                                ->isRequired()
+                            ->end()
+                            ->scalarNode('key')
+                                ->info("api key")
+                                ->isRequired()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
+            ->end()
+        ;
     }
 }
