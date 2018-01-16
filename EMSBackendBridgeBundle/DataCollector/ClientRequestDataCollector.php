@@ -31,7 +31,7 @@ class ClientRequestDataCollector extends DataCollector implements DataCollectorI
      */
     public function collect(Request $request, Response $response, \Exception $exception = null)
     {
-        $this->data = $this->clientRequest->getProfile();
+        $this->data = $this->clientRequest->getProfile()->getData();
     }
 
     public function reset()

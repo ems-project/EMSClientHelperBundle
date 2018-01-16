@@ -28,6 +28,11 @@ class ClientRequestProfile
         $this->stopwatch = $stopwatch;
     }
 
+    public function getData()
+    {
+        return $this->profiles;
+    }
+
     /**
      * Starts profiling
      *
