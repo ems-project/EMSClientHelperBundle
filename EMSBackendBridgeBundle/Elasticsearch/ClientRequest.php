@@ -3,6 +3,7 @@
 namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch;
 
 use Elasticsearch\Client;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Entity\ClientRequestProfile;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\RequestService;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Entity\HierarchicalStructure;
 use Psr\Log\LoggerInterface;
@@ -28,6 +29,11 @@ class ClientRequest
      * @var LoggerInterface
      */
     private $logger;
+
+    /**
+     * @var ClientRequestProfile
+     */
+    protected $profile;
     
     /**
      * @param Client         $client
@@ -39,14 +45,37 @@ class ClientRequest
         Client $client, 
         RequestService $requestService,
         $indexPrefix,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        ClientRequestProfile $profile = null
     ) {
         $this->client = $client;
         $this->requestService = $requestService;
         $this->indexPrefix = $indexPrefix;
         $this->logger = $logger;
+        $this->profile = $profile;
     }
-    
+
+    /**
+     * @return ClientRequestProfile | null
+     */
+    public function getProfile()
+    {
+        return $this->profile;
+    }
+
+    private function startProfiling($functionName, $arguments){
+        if ($this->profile) {
+            return $this->profile->startProfiling($functionName, $arguments);
+        }
+        return null;
+    }
+
+    private function stopProfiling($event, $result){
+        if ($this->profile) {
+            $this->profile->stopProfiling($event, $result);
+        }
+    }
+
     /**
      * @param string $emsLink
      *
@@ -80,9 +109,12 @@ class ClientRequest
     }
     
     /**
-     * @param string $emsLink
+     * @param string $emsKey
+     * @param string $childrenField
+     * @param integer $depth
+     * @param array $sourceFields
      *
-     * @return string|null
+     * @return HierarchicalStructure|null
      */
     public function getHierarchy($emsKey, $childrenField, $depth = null, $sourceFields = [])
     {
@@ -137,7 +169,7 @@ class ClientRequest
     /**
      * @param string $emsLink
      *
-     * @return string|null
+     * @return array|null
      */
     public function searchBy($type, $parameters, $from = 0, $size = 10)
     {
@@ -161,15 +193,19 @@ class ClientRequest
         }
         
         
-        
-        
-        return $this->client->search([
+        $arguments = [
             'index' => $this->getIndex(),
             'type' => $type,
             'body' => $body,
             'size' => $size,
             'from' => $from,
-        ]);
+        ];
+
+        $event = $this->startProfiling('searchBy', $arguments);
+        $result = $this->client->search($arguments);
+        $this->stopProfiling($event, $result);
+
+        return $result;
     }
     
     /**
@@ -205,11 +241,18 @@ class ClientRequest
     public function get($type, $id)
     {
         $this->logger->debug('ClientRequest : get {type}:{id}', ['type'=>$type, 'id' => $id]);
-        return $this->client->get([
+
+        $arguments = [
             'index' => $this->getIndex(),
             'type' => $type,
             'id' => $id,
-        ]);
+        ];
+
+        $event = $this->startProfiling('get', $arguments);
+        $result = $this->client->get($arguments);
+        $this->stopProfiling($event, $result);
+
+        return $result;
     }
     
     /**
@@ -222,7 +265,8 @@ class ClientRequest
     {
         
         $this->logger->debug('ClientRequest : getByOuuids {type}:{id}', ['type'=>$type, 'id' => $ouuids]);
-        return $this->client->search([
+
+        $arguments = [
             'index' => $this->getIndex(),
             'type' => $type,
             'body' => [
@@ -232,7 +276,13 @@ class ClientRequest
                     ]
                 ]
             ]
-        ]);
+        ];
+
+        $event = $this->startProfiling('getByOuuids', $arguments);
+        $result = $this->client->search($arguments);
+        $this->stopProfiling($event, $result);
+
+        return $result;
     }
     
     
@@ -268,8 +318,11 @@ class ClientRequest
         if(!empty($source_exclude)) {
             $body['_source_exclude'] = $source_exclude;
         }
-        
+
+        $event = $this->startProfiling('getByOuuid', $body);
         $result = $this->client->search($body);
+        $this->stopProfiling($event, $result);
+
         if(isset($result['hits']['hits'][0])) {
             return $result['hits']['hits'][0];
         }
@@ -347,8 +400,12 @@ class ClientRequest
         if(!empty($sourceExclude)){
             $params['_source_exclude'] = $sourceExclude;
         }
-        
-        return $this->client->search($params);
+
+        $event = $this->startProfiling('search', $params);
+        $result = $this->client->search($params);
+        $this->stopProfiling($event, $result);
+
+        return $result;
     }
     
     /**
@@ -392,8 +449,11 @@ class ClientRequest
             'type' => $type,
             'body' => $body,
         ];
-        
+
+        $event = $this->startProfiling('searchAll', $params);
         $totalSearch = $this->client->search($params);
+        $this->stopProfiling($event, $totalSearch);
+
         $total = $totalSearch["hits"]["total"];
         
         $results = [];

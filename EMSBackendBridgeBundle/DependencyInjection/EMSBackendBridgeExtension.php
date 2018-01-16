@@ -4,7 +4,9 @@ namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\DependencyInjection;
 
 use Elasticsearch\Client;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Api\ApiClient;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\DataCollector\ClientRequestDataCollector;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Entity\ClientRequestProfile;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Translation\TranslationLoader;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -126,7 +128,7 @@ class EMSBackendBridgeExtension extends Extension
 
         $container->setDefinition(sprintf('elasticsearch.client.%s', $name), $definition);
     }
-    
+
     /**
      * @param ContainerBuilder $container
      * @param string           $name
@@ -134,14 +136,47 @@ class EMSBackendBridgeExtension extends Extension
      */
     private function defineClientRequest(ContainerBuilder $container, $name, array $options)
     {
+        $profileDefinition = null;
+        if ($container->getParameter('kernel.debug')) {
+            $profileDefinition = new Definition(ClientRequestProfile::class);
+            $profileDefinition->setArgument(0, new Reference('debug.stopwatch'));
+        }
+
+
         $definition = new Definition(ClientRequest::class);
-        $definition->setArguments([
+        $arguments = [
             new Reference( sprintf('elasticsearch.client.%s', $name)),
             new Reference('emsch.request.service'),
             $options['index_prefix'],
             new Reference('logger'),
-        ]);
+        ];
 
+        if (! $profileDefinition) {
+            $this->setClientRequest($arguments, $definition, $name, $container);
+            return;
+        }
+
+        $arguments[] = $profileDefinition;
+        $this->setClientRequest($arguments, $definition, $name, $container);
+
+        $collectorDefinition = new Definition(ClientRequestDataCollector::class);
+        $collectorDefinition->setArgument(0, $definition);
+        $collectorDefinition->setTags([[
+            'name' => 'data_collector',
+            'template' => '@EMSClientHelperBundle/collector/client_request_collector.html.twig',
+            'id' => 'emsch.data_collector.client_request_data_collector'
+        ]]);
+    }
+
+    /**
+     * @param array             $arguments
+     * @param Definition        $definition
+     * @param string            $name
+     * @param ContainerBuilder  $container
+     */
+    private function setClientRequest(array $arguments, Definition $definition, $name, ContainerBuilder $container)
+    {
+        $definition->setArguments($arguments);
         $container->setDefinition(sprintf('emsch.client_request.%s', $name), $definition);
     }
 
