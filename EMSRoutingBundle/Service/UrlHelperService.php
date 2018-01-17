@@ -65,7 +65,7 @@ class UrlHelperService
     {
         $path = $this->getRelativePath($emsLink->getContentType());
         
-        return $path . $this->phpApp . $url;
+        return $this->baseUrl . $path . $this->phpApp . $url;
     }
     
     /**
@@ -95,7 +95,7 @@ class UrlHelperService
             }
         }
         
-        return $this->baseUrl;
+        return '';
     }
    
 }
