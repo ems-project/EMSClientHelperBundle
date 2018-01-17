@@ -3,6 +3,7 @@
 namespace EMS\ClientHelperBundle\EMSRedirectBundle\Service;
 
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Exception\MissingTranslationException;
 use Symfony\Component\Debug\Exception\ContextErrorException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -65,6 +66,8 @@ class RedirectService
                 $locale,
                 $source
             );
+        } catch (MissingTranslationException $mex) {
+            throw $mex;
         } catch (\Exception $ex) {
             return false;
         }
