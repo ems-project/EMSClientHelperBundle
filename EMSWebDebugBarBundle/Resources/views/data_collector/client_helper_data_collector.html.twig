@@ -1,0 +1,104 @@
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% import _self as helper %}
+
+{% block toolbar %}
+    {% set icon %}
+        {{ include('@EMSWebDebugBar/data_collector/client_helper_data_collector.svg') }}
+        <span class="sf-toolbar-value">{{ collector.numberOfElasticSearchQueries }}</span>
+        <span class="sf-toolbar-label">Queries</span>
+    {% endset %}
+
+    {% set text %}
+        <div class="sf-toolbar-info-piece">
+            <b>Number of ElasticSearch Queries</b>
+            <span class="sf-toolbar-status">{{ collector.numberOfElasticSearchQueries }}</span>
+        </div>
+    {% endset %}
+
+    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { link: true }) }}
+{% endblock %}
+
+{% block menu %}
+    <span class="label label-status">
+        <span class="icon">{{ include('@EMSWebDebugBar/data_collector/client_helper_data_collector.svg') }}</span>
+        <strong>ElasticMS</strong>
+        <span class="count">
+        <span>{{ collector.numberOfElasticSearchQueries }}</span>
+        </span>
+    </span>
+{% endblock %}
+
+{% block panel %}
+    <h2>ElasticMS Metrics</h2>
+    <div class="metrics">
+        <div class="metric">
+            <span class="value">{{ collector.numberOfElasticSearchQueries }}</span>
+            <span class="label">Number of ElasticSearch queries</span>
+        </div>
+        <div class="metric">
+            <span class="value">n/a</span>
+            <span class="label">Total ElasticSearch execution time</span>
+        </div>
+    </div>
+    
+    <h2>ElasticMS Messages</h2>
+    <div class="sf-tabs">
+        <div class="tab">
+            <h3 class="tab-title">ElasticSearch <span class="badge">{{ collector.numberOfElasticSearchQueries }}</span></h3>
+
+            <div class="tab-content">
+                <p class="help">
+                    Overview of all queries to ElasticSearch logged by ElasticMS
+                </p>
+                {% if collector.elasticSearchLogs is empty %}
+                    <div class="empty">
+                        <p>There are no messages of this category.</p>
+                    </div>
+                {% else %}
+                    {{ helper.render_table(collector.elasticSearchLogs) }}
+                {% endif %}
+            </div>
+        </div>
+        <div class="tab">
+            <h3 class="tab-title">All events Chronological <span class="badge ">n/a</span></h3>
+
+            <div class="tab-content">
+                <p class="help">
+                    Overview of all logged events by ElasticMS (chronological)
+                </p>
+                {% if collector.chronologicalLogs is empty %}
+                    <div class="empty">
+                        <p>There are no messages of this category.</p>
+                    </div>
+                {% else %}
+                    {{ helper.render_table(collector.chronologicalLogs) }}
+                {% endif %}
+            </div>
+        </div>
+{% endblock %}
+
+{% macro render_table(messages) %}
+    <table>
+        <thead>
+            <tr>
+                <th>Function</th>
+                <th>Arguments</th>
+                <th>Result</th>
+                <th>Duration</th>
+                <th>Memory usage</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for message in messages %}
+            <tr>
+                <td class="font-normal text-small">{{ message.function }}</td>
+                <td class="font-normal text-small text-bold nowrap">{{ message.arguments }}</td>
+                <td class="font-normal text-small">{#{ message.result }#}</td>
+                <td class="font-normal text-small">{#{ message.duration }#}</td>
+                <td class="prewrap">{#{ message.memoryUsage }#}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endmacro %}

@@ -3,9 +3,11 @@
 namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch;
 
 use Elasticsearch\Client;
-use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Entity\ClientRequestProfile;
-use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\RequestService;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Entity\HierarchicalStructure;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\RequestService;
+use EMS\ClientHelperBundle\EMSWebDebugBarBundle\Entity\ElasticSearchLog;
+use EMS\ClientHelperBundle\EMSWebDebugBarBundle\Logger\ClientHelperLogger;
+use Exception;
 use Psr\Log\LoggerInterface;
 
 class ClientRequest
@@ -31,9 +33,9 @@ class ClientRequest
     private $logger;
 
     /**
-     * @var ClientRequestProfile
+     * @var ClientHelperLogger
      */
-    protected $profile;
+    protected $clientHelperLogger;
     
     /**
      * @param Client         $client
@@ -42,38 +44,34 @@ class ClientRequest
      * @param LoggerInterface         $logger
      */
     public function __construct(
-        Client $client, 
+        Client $client,
         RequestService $requestService,
         $indexPrefix,
-        LoggerInterface $logger,
-        ClientRequestProfile $profile = null
+        LoggerInterface $logger
     ) {
         $this->client = $client;
         $this->requestService = $requestService;
         $this->indexPrefix = $indexPrefix;
         $this->logger = $logger;
-        $this->profile = $profile;
     }
 
     /**
-     * @return ClientRequestProfile | null
+     * @param ClientHelperLogger $clientHelperLogger
      */
-    public function getProfile()
+    public function setClientHelperLogger(ClientHelperLogger $clientHelperLogger)
     {
-        return $this->profile;
+        $this->clientHelperLogger = $clientHelperLogger;
     }
-
-    private function startProfiling($functionName, $arguments){
-        if ($this->profile) {
-            return $this->profile->startProfiling($functionName, $arguments);
+    
+    
+    private function log($function, $arguments)
+    {
+        if (! $this->clientHelperLogger) {
+            return;
         }
-        return null;
-    }
 
-    private function stopProfiling($event, $result){
-        if ($this->profile) {
-            $this->profile->stopProfiling($event, $result);
-        }
+        $log = new ElasticSearchLog($function, $arguments);
+        $this->clientHelperLogger->logElasticsearch($log);
     }
 
     /**
@@ -201,9 +199,8 @@ class ClientRequest
             'from' => $from,
         ];
 
-        $event = $this->startProfiling('searchBy', $arguments);
+        $this->log('searchBy', $arguments);
         $result = $this->client->search($arguments);
-        $this->stopProfiling($event, $result);
 
         return $result;
     }
@@ -248,9 +245,8 @@ class ClientRequest
             'id' => $id,
         ];
 
-        $event = $this->startProfiling('get', $arguments);
+        $this->log('get', $arguments);
         $result = $this->client->get($arguments);
-        $this->stopProfiling($event, $result);
 
         return $result;
     }
@@ -278,9 +274,8 @@ class ClientRequest
             ]
         ];
 
-        $event = $this->startProfiling('getByOuuids', $arguments);
+        $this->log('getByOuuids', $arguments);
         $result = $this->client->search($arguments);
-        $this->stopProfiling($event, $result);
 
         return $result;
     }
@@ -295,12 +290,12 @@ class ClientRequest
      * @param string $id
      * @param array  $sourceFields
      *
-     * @return array
+     * @return array | boolean
      */
     public function getByOuuid($type, $ouuid, $sourceFields = [], $source_exclude = [])
     {
         $this->logger->debug('ClientRequest : getByOuuid {type}:{id}', ['type'=>$type, 'id'=>$ouuid]);
-        $body = [
+        $arguments = [
             'index' => $this->getIndex(),
             'type' => $type,
             'body' => [
@@ -313,15 +308,15 @@ class ClientRequest
         ];
         
         if(!empty($sourceFields)) {
-            $body['_source'] = $sourceFields;
+            $arguments['_source'] = $sourceFields;
         }
         if(!empty($source_exclude)) {
-            $body['_source_exclude'] = $source_exclude;
+            $arguments['_source_exclude'] = $source_exclude;
         }
 
-        $event = $this->startProfiling('getByOuuid', $body);
-        $result = $this->client->search($body);
-        $this->stopProfiling($event, $result);
+
+        $this->log('getByOuuid', $arguments);
+        $result = $this->client->search($arguments);
 
         if(isset($result['hits']['hits'][0])) {
             return $result['hits']['hits'][0];
@@ -385,7 +380,7 @@ class ClientRequest
     {
         
         $this->logger->debug('ClientRequest : search for {type}', ['type' => $type, 'body'=>$body, 'index'=>$this->getIndex()]);
-        $params = [
+        $arguments = [
             'index' => $this->getIndex(),
             'type' => $type,
             'body' => $body,
@@ -398,12 +393,11 @@ class ClientRequest
         }
         
         if(!empty($sourceExclude)){
-            $params['_source_exclude'] = $sourceExclude;
+            $arguments['_source_exclude'] = $sourceExclude;
         }
 
-        $event = $this->startProfiling('search', $params);
-        $result = $this->client->search($params);
-        $this->stopProfiling($event, $result);
+        $this->log('search', $arguments);
+        $result = $this->client->search($arguments);
 
         return $result;
     }
@@ -414,7 +408,7 @@ class ClientRequest
      * 
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function searchOne($type, array $body)
     {
@@ -424,7 +418,7 @@ class ClientRequest
         $hits = $search['hits'];
         
         if (1 != $hits['total']) {
-            throw new \Exception(sprintf('expected 1 result, got %d', $hits['total']));
+            throw new Exception(sprintf('expected 1 result, got %d', $hits['total']));
         }
         
         return $hits['hits'][0];
@@ -440,7 +434,7 @@ class ClientRequest
     public function searchAll($type, array $body, $pageSize = 10)
     {
         $this->logger->debug('ClientRequest : searchAll for {type}', ['type' => $type, 'body'=>$body]);
-        $params = [
+        $arguments = [
             'preference' => '_primary', //see function description
             //TODO: should be replace by an order by _ouid (in case of insert in the index the pagination will be inconsistent)
             'from' => 0,
@@ -450,30 +444,30 @@ class ClientRequest
             'body' => $body,
         ];
 
-        $event = $this->startProfiling('searchAll', $params);
-        $totalSearch = $this->client->search($params);
-        $this->stopProfiling($event, $totalSearch);
+        $this->log('searchAll', $arguments);
+        $totalSearch = $this->client->search($arguments);
 
         $total = $totalSearch["hits"]["total"];
         
         $results = [];
-        $params['size'] = $pageSize;
+        $arguments['size'] = $pageSize;
         
-        while($params['from'] < $total){
-            $search = $this->client->search($params);
+        while($arguments['from'] < $total){
+            $this->log('searchAll', $arguments);
+            $search = $this->client->search($arguments);
             
             foreach ($search["hits"]["hits"] as $document){
                 $results[] = $document;
             }
             
-            $params['from'] += $pageSize;
+            $arguments['from'] += $pageSize;
         }
         
         return $results;
     }
     
     /**
-     * @return string
+     * @return string | array
      */
     private function getIndex()
     {
