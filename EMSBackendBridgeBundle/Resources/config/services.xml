@@ -14,7 +14,7 @@
        <parameter key="emsch.twig.extension.trans.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Twig\TranslationExtension</parameter>
     </parameters>
     
-    <services>      
+    <services>
         <service id="emsch.request.service" class="%emsch.request.service.class%">
             <argument type="service" id="request_stack" />
         </service>
