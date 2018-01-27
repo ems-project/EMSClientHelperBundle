@@ -418,7 +418,11 @@ class ClientRequest
         $hits = $search['hits'];
         
         if (1 != $hits['total']) {
+<<<<<<< Upstream, based on origin/master
             throw new Exception(sprintf('expected 1 result, got %d', $hits['total']));
+=======
+            throw new \ObjectNotFoundException(sprintf('expected 1 result, got %d', $hits['total']));
+>>>>>>> 7e7f496 Specific exception if object not found
         }
         
         return $hits['hits'][0];
