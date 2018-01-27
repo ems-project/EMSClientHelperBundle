@@ -69,6 +69,8 @@ class TranslationLoader implements LoaderInterface
             'index' => $this->prefix.$domain,
             'type' => $this->type,
             'body' => $body,
+        	'_source' => 'label_*,modified_date,key',
+        		
         ];
         
         
