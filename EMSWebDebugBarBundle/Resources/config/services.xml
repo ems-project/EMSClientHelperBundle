@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services
+        http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+       <parameter key="emsch.data_collector.class">EMS\ClientHelperBundle\EMSWebDebugBarBundle\DataCollector\ClientHelperDataCollector</parameter>
+       <parameter key="emsch.logger.class">EMS\ClientHelperBundle\EMSWebDebugBarBundle\Logger\ClientHelperLogger</parameter>
+    </parameters>
+    
+    <services>
+        <service id="emsch.logger" class="%emsch.logger.class%">
+            <argument type="service" id="debug.stopwatch" />
+        </service>
+        <service id="emsch.data_collector" class="%emsch.data_collector.class%">
+            <argument type="service" id="emsch.logger" />
+            <!-- priority="300" -->
+            <tag name="data_collector"
+                 template="@EMSWebDebugBar/data_collector/client_helper_data_collector.html.twig"
+                 id="emsch.data_collector"
+            />
+        </service>
+    </services>
+</container>
