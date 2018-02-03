@@ -9,6 +9,7 @@ use EMS\ClientHelperBundle\EMSWebDebugBarBundle\Entity\ElasticSearchLog;
 use EMS\ClientHelperBundle\EMSWebDebugBarBundle\Logger\ClientHelperLogger;
 use Exception;
 use Psr\Log\LoggerInterface;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Exception\ObjectNotFoundException;
 
 class ClientRequest
 {
@@ -418,11 +419,15 @@ class ClientRequest
         $hits = $search['hits'];
         
         if (1 != $hits['total']) {
+<<<<<<< HEAD
 <<<<<<< Upstream, based on origin/master
             throw new Exception(sprintf('expected 1 result, got %d', $hits['total']));
 =======
             throw new \ObjectNotFoundException(sprintf('expected 1 result, got %d', $hits['total']));
 >>>>>>> 7e7f496 Specific exception if object not found
+=======
+            throw new ObjectNotFoundException(sprintf('expected 1 result, got %d', $hits['total']));
+>>>>>>> branch 'flex' of https://github.com/ems-project/EMSClientHelperBundle.git
         }
         
         return $hits['hits'][0];
