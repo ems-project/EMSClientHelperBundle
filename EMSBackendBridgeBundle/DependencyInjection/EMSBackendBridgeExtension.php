@@ -48,7 +48,7 @@ class EMSBackendBridgeExtension extends Extension
     private function processRequestEnvironments(ContainerBuilder $container, array $config)
     {
         $id = 'emsch.request_listener';
-        
+
         if (!$container->hasDefinition($id)) {
             return;
         }

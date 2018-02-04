@@ -64,4 +64,12 @@ class ClientHelperDataCollector extends DataCollector
     {
         return 'emsch.data_collector';
     }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function reset()
+    {
+    	//TODO
+    }
 }
