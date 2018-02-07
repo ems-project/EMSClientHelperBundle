@@ -103,12 +103,19 @@ class RedirectService
      */
     private function getLinkedDocument($linkTo)
     {
+        $matches = [];
         preg_match('/(?P<type>.*):(?P<ouuid>.*)/i', $linkTo, $matches);
         
         if (!$matches) {
             return false;
         }
         
-        return $this->clientRequest->get($matches['type'], $matches['ouuid']);
+        return $this->clientRequest->searchOne($matches['type'], [
+            'query' => [
+                'term' => [
+                    '_id' => $matches['ouuid'],
+                ],
+            ],
+        ]);
     }
 }
