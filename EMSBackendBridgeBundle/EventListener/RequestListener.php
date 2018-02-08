@@ -9,19 +9,21 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 
 class RequestListener
 {
-    /**
-     * @var RequestEnvironment[]
-     */
-    private $requestEnvironments = [];
+	/**
+	 * @var RequestEnvironment[]
+	 */
+	private $requestEnvironments = [];
+    
     
     /**
      * @param string $name
      * @param string $regex
      * @param string $index
+     * @param string $backendLink
      */
-    public function addRequestEnvironment($name, $regex, $index)
+	public function addRequestEnvironment($name, $regex, $index, $backendUrl)
     {
-        $this->requestEnvironments[] = new RequestEnvironment($name, $regex, $index);
+    	$this->requestEnvironments[] = new RequestEnvironment($name, $regex, $index, $backendUrl);
     }
     
     /**
@@ -56,8 +58,9 @@ class RequestListener
         }
         
         foreach ($this->requestEnvironments as $requestEnvironment) {
-            if ($requestEnvironment->match($request)) {
-                $request->attributes->set('_environment', $requestEnvironment->getIndex());
+        	if ($requestEnvironment->match($request)) {
+        		$request->attributes->set('_environment', $requestEnvironment->getIndex());
+        		$request->attributes->set('_backend_url', $requestEnvironment->getBackendUrl());
                 
                 return; //stop on match
             }

@@ -24,9 +24,19 @@ class RequestService
      */
     public function getEnvironment()
     {
-        $current = $this->requestStack->getCurrentRequest();
-        
-        return ($current ? $current->get('_environment') : null);
+    	$current = $this->requestStack->getCurrentRequest();
+    	
+    	return ($current ? $current->get('_environment') : null);
+    }
+    
+    /**
+     * @return string
+     */
+    public function getBackendUrl()
+    {
+    	$current = $this->requestStack->getCurrentRequest();
+    	
+    	return ($current ? $current->get('_backend_url') : null);
     }
     
     /**
