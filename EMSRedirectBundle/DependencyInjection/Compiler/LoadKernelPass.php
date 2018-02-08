@@ -19,11 +19,13 @@ class LoadKernelPass implements CompilerPassInterface
 
         $redirectService = $container->findDefinition('EMS\ClientHelperBundle\EMSRedirectBundle\Service\RedirectService');
         $httpKernel = $container->getDefinition('http_kernel');
-
+        $router = $container->getDefinition('router.default');
+        
         $kernelDefinition = new Definition(KernelSubscriber::class);
         $kernelDefinition->setArguments([
             $redirectService,
-            $httpKernel
+            $httpKernel,
+            $router
         ]);
         $kernelDefinition->addTag('kernel.event_subscriber');
         $container->setDefinition(

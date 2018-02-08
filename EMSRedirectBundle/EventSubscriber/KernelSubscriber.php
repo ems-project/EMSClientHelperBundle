@@ -10,6 +10,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Routing\RouterInterface;
 
 class KernelSubscriber implements EventSubscriberInterface
 {
@@ -22,6 +24,11 @@ class KernelSubscriber implements EventSubscriberInterface
      * @var HttpKernel
      */
     private $kernel;
+    
+    /**
+     * @var RouterInterface
+     */
+    private $router;
 
     /**
      * @param RedirectService $redirectService
@@ -29,10 +36,12 @@ class KernelSubscriber implements EventSubscriberInterface
      */
     public function __construct(
         RedirectService $redirectService,
-        HttpKernel $kernel
+        HttpKernel $kernel,
+        RouterInterface $router
     ) {
         $this->redirectService = $redirectService;
         $this->kernel = $kernel;
+        $this->router = $router;
     }
     
     /**
@@ -86,17 +95,29 @@ class KernelSubscriber implements EventSubscriberInterface
      */
     public function forwardNotFound(GetResponseForExceptionEvent $event, $uri)
     {
-        $request = $event->getRequest();
-     
-        $attributes = array();
         
-        $server = array_merge($request->server->all(), ['REQUEST_URI' => $uri]);
-        $subRequest = $request->duplicate(null, null, $attributes, null,  null, $server);
-        
-        $subResponse = $this->kernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
-        $subResponse->headers->set('Link', $this->getHeaderLink($request, $uri));
-
-        $event->setResponse($subResponse);
+        try {
+            $this->router->match($uri);
+            
+            $request = $event->getRequest();
+         
+            $attributes = array();
+            
+            
+            $server = array_merge($request->server->all(), ['REQUEST_URI' => $uri]);
+            $subRequest = $request->duplicate(null, null, $attributes, null,  null, $server);
+            
+            $subResponse = $this->kernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
+            
+            $canonical = $this->getHeaderLink($request, $uri);
+            
+            $subResponse->headers->set('Link', $canonical);
+    
+            $event->setResponse($subResponse);
+        }
+        catch(\Exception $e) {
+            $event->setResponse(new RedirectResponse($uri));
+        }
         $event->allowCustomResponseCode();
     }
     
