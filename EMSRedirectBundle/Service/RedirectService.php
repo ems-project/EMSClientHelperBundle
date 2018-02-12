@@ -88,7 +88,7 @@ class RedirectService
                 'bool' => [
                     'must' => [
                         'term' => [
-                            'url_'.$locale => $uri
+                            'url_'.$locale => urldecode($uri)
                         ]
                     ]
                 ]
