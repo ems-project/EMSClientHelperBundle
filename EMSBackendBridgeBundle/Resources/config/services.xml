@@ -12,6 +12,8 @@
        
        <parameter key="emsch.twig.extension.helper.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Twig\HelperExtension</parameter>
        <parameter key="emsch.twig.extension.trans.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Twig\TranslationExtension</parameter>
+    
+       <parameter key="emsch.command.health_check.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Command\HealthCheckCommand</parameter>
     </parameters>
     
     <services>      
@@ -35,6 +37,12 @@
             <argument type="service" id="translator" />
             <argument type="service" id="emsch.request.service" />
             <tag name="twig.extension" />
+        </service>
+        
+        <!-- commands -->
+        <service id="emsch.command.health_check" class="%emsch.command.health_check.class%">
+            <argument type="service" id="emsch.request_listener" />
+            <tag name="console.command" />
         </service>
     </services>
 </container>

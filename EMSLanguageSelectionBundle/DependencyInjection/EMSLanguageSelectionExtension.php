@@ -60,7 +60,8 @@ class EMSLanguageSelectionExtension extends Extension
             )
             ->setArguments([
                 ['hosts' => $config['ems_hosts']]
-            ]);
+            ])
+            ->addTag('emsch.elasticsearch.client');
         $container
             ->setDefinition(
                 sprintf('emsch.client_request.%s', $emsClient),
@@ -69,6 +70,7 @@ class EMSLanguageSelectionExtension extends Extension
             ->setArguments([
                 new Reference(sprintf('elasticsearch.client.%s', $emsClient)),
                 $config['ems_index_prefix']
-            ]);
+            ])
+            ->addTag('emsch.client_request');
     }
 }

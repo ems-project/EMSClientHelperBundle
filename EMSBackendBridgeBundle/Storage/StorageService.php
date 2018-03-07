@@ -4,6 +4,7 @@ namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Storage;
 
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\File\File;
 
 class StorageService
@@ -40,4 +41,33 @@ class StorageService
         
         return new File($path);
     }
+    
+    /**
+     * @return bool
+     */
+    public function storageExists()
+    {
+        return file_exists($this->basePath);
+    }
+    
+    /**
+     * @return bool
+     */
+    public function storageIsEmpty()
+    {
+        $finder = new Finder();
+        $iterator = $finder->in($this->basePath)->getIterator();
+        $iterator->rewind();
+        return !$iterator->valid();
+    }
+    
+    /**
+     * @return string
+     */
+    public function getBasePath()
+    {
+        return $this->basePath;
+    }
+
+
 }

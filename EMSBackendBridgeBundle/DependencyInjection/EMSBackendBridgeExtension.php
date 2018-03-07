@@ -122,6 +122,7 @@ class EMSBackendBridgeExtension extends Extension
             ->setFactory(['Elasticsearch\ClientBuilder', 'fromConfig'])
             ->setArgument(0, ['hosts' => $options['hosts']])
             ->setPublic(true);
+        $definition->addTag('emsch.elasticsearch.client');
 
         $container->setDefinition(sprintf('elasticsearch.client.%s', $name), $definition);
     }
