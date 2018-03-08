@@ -97,7 +97,7 @@ class HealthCheckCommand extends Command
         $this->checkIndexes($io);
         $this->checkAssets($io, $input->getOption('skip-assets'));
         
-        $io->succes('Health check finished.');
+        $io->success('Health check finished.');
     }
     
     /**
@@ -126,7 +126,7 @@ class HealthCheckCommand extends Command
                 throw new ClusterHealthNotGreenException();
             }
         }
-        $io->succes('Elasticsearch is working.');
+        $io->success('Elasticsearch is working.');
     }
     
     /**
