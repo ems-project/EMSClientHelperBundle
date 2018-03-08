@@ -45,6 +45,14 @@ class RequestListener
     }
     
     /**
+     * @return RequestEnvironment[]
+     */
+    public function getRequestEnvironments()
+    {
+        return $this->requestEnvironments;
+    }
+    
+    /**
      * @param Request $request
      *
      * @return void

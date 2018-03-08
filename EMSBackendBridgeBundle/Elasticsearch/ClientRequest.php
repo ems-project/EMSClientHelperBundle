@@ -467,6 +467,14 @@ class ClientRequest
     }
     
     /**
+     * @return array
+     */
+    public function getPrefixes()
+    {
+        return explode('|', $this->indexPrefix);
+    }
+    
+    /**
      * @return string | array
      */
     private function getIndex()
