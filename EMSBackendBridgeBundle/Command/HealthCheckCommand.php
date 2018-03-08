@@ -16,6 +16,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 class HealthCheckCommand extends Command
 {
@@ -85,40 +86,41 @@ class HealthCheckCommand extends Command
     
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->writelnInfo($output, 'Performing Health Check: ');
+        $io = new SymfonyStyle($input, $output);
+        $io->title('Performing Health Check');
         
-        $this->checkElasticSearch($input, $output);
-        $this->checkIndexes($input, $output);
-        $this->checkAssets($input, $output);
+        $this->checkElasticSearch($io);
+        $this->checkIndexes($io);
+        $this->checkAssets($io);
         
-        $this->writelnInfo($output, 'Health Check OK.');
+        $io->succes('Health check finished.');
     }
     
-    private function checkElasticSearch(InputInterface $input, OutputInterface $output)
+    private function checkElasticSearch(SymfonyStyle $io)
     {
-        $this->writeInfo($output, 'Elasticsearch: ');
+        $io->section('Elasticsearch');
         if (empty($this->clients)){
-            $this->writelnError($output, 'No clients found');
+            $io->error('No clients found');
             throw new NoClientsFoundException();
         }
         
         foreach ($this->clients as $client) {
             if ('red' === $client->cluster()->health()){
-                $this->writelnError($output, 'Cluster health is RED');
+                $io->error('Cluster health is RED');
                 throw new ClusterHealthRedException();
             }
             
             if ($input->getOption('green') && 'green' !== $client->cluster()->health()){
-                $this->writelnError($output, 'Cluster health is NOT GREEN');
+                $io->error('Cluster health is NOT GREEN');
                 throw new ClusterHealthNotGreenException();
             }
         }
-        $this->writelnInfo($output, 'OK');
+        $io->succes('Elasticsearch is working.');
     }
     
-    private function checkIndexes(InputInterface $input, OutputInterface $output)
+    private function checkIndexes(SymfonyStyle $io)
     {
-        $this->writeInfo($output, 'Indexes: ');
+       $io->section('Indexes');
         
         $prefixes = [];
         foreach ($this->clientRequests as $clientRequest) {
@@ -139,59 +141,41 @@ class HealthCheckCommand extends Command
         
         foreach ($this->clients as $client) {
             if (!$client->indices()->exists(['index' => $index])){
-                $this->writelnError($output, 'Index '.$index.' not found');
+                $io->error('Index '.$index.' not found');
                 throw new IndexNotFoundException();
             }
         }
         
-        $this->writelnInfo($output, 'OK');
+        $io->success('Indexes are found.');
     }
     
-    private function checkAssets(InputInterface $input, OutputInterface $output)
+    private function checkAssets(SymfonyStyle $io)
     {
+        $io->section('Assets');
+        
         if ($input->getOption('skip-assets'))
         {
-            $this->writelnInfo($output, 'Skipping Asset Health Check.');
+            $io->note('Skipping Asset Health Check.');
             return;
         }
-        
-        $this->writeInfo($output, 'Assets: ');
         
         if(null === $this->storageService){
-            $this->writelnWarning($output, 'Skipping assets because health check has no access to a storageService, is your service tagged with emsch.storage_service ?');
+            $io->warning('Skipping assets because health check has no access to a storageService, is your service tagged with emsch.storage_service ?');
             return;
         }
         
-        $this->writeInfo($output, $this->storageService->getBasePath().': ');
+        $io->text($this->storageService->getBasePath());
         
         if(!$this->storageService->storageExists()){
-            $this->writelnError($output, 'Assets folder not found');
+            $io->error('Assets folder not found');
             throw new AssetsFolderNotFoundException();
         }
         
         if($this->storageService->storageIsEmpty()){
-            $this->writelnError($output, 'Assets folder is empty');
+            $io->error('Assets folder is empty');
             throw new AssetsFolderEmptyException();
         }
         
-        $this->writelnInfo($output, 'OK');
-    }
-    
-    
-    private function writelnInfo(OutputInterface $output, $text)
-    {
-        $output->writeln('<info>'.$text.'</info>');
-    }
-    private function writeInfo(OutputInterface $output, $text)
-    {
-        $output->write('<info>'.$text.'</info>');
-    }
-    private function writelnError(OutputInterface $output, $text)
-    {
-        $output->writeln('<error>'.$text.'</error>');
-    }
-    private function writelnWarning(OutputInterface $output, $text)
-    {
-        $output->writeln('<comment>'.$text.'</comment>');
+        $io->success('Assets are found.');
     }
 }
