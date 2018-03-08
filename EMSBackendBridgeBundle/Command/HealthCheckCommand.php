@@ -84,19 +84,30 @@ class HealthCheckCommand extends Command
             ->addOption('skip-assets', 's', InputOption::VALUE_NONE, 'Skip the assets folder health check.', null);
     }
     
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
         $io->title('Performing Health Check');
         
-        $this->checkElasticSearch($io);
+        $this->checkElasticSearch($io, $input->getOption('green'));
         $this->checkIndexes($io);
-        $this->checkAssets($io);
+        $this->checkAssets($io, $input->getOption('skip-assets'));
         
         $io->succes('Health check finished.');
     }
     
-    private function checkElasticSearch(SymfonyStyle $io)
+    /**
+     * @param SymfonyStyle $io
+     * @param bool $green
+     * @throws NoClientsFoundException
+     * @throws ClusterHealthRedException
+     * @throws ClusterHealthNotGreenException
+     */
+    private function checkElasticSearch(SymfonyStyle $io, $green)
     {
         $io->section('Elasticsearch');
         if (empty($this->clients)){
@@ -110,7 +121,7 @@ class HealthCheckCommand extends Command
                 throw new ClusterHealthRedException();
             }
             
-            if ($input->getOption('green') && 'green' !== $client->cluster()->health()){
+            if ($green && 'green' !== $client->cluster()->health()){
                 $io->error('Cluster health is NOT GREEN');
                 throw new ClusterHealthNotGreenException();
             }
@@ -118,6 +129,10 @@ class HealthCheckCommand extends Command
         $io->succes('Elasticsearch is working.');
     }
     
+    /**
+     * @param SymfonyStyle $io
+     * @throws IndexNotFoundException
+     */
     private function checkIndexes(SymfonyStyle $io)
     {
        $io->section('Indexes');
@@ -149,11 +164,18 @@ class HealthCheckCommand extends Command
         $io->success('Indexes are found.');
     }
     
-    private function checkAssets(SymfonyStyle $io)
+    /**
+     * @param SymfonyStyle $io
+     * @param bool $skip
+     * @return type
+     * @throws AssetsFolderNotFoundException
+     * @throws AssetsFolderEmptyException
+     */
+    private function checkAssets(SymfonyStyle $io, $skip)
     {
         $io->section('Assets');
         
-        if ($input->getOption('skip-assets'))
+        if ($skip)
         {
             $io->note('Skipping Asset Health Check.');
             return;
