@@ -19,9 +19,9 @@ class RequestListener
      * @param string $regex
      * @param string $index
      */
-    public function addRequestEnvironment($name, $regex, $index)
+    public function addRequestEnvironment($name, $regex, $index, $backend)
     {
-        $this->requestEnvironments[] = new RequestEnvironment($name, $regex, $index);
+        $this->requestEnvironments[] = new RequestEnvironment($name, $regex, $index, $backend);
     }
     
     /**
@@ -66,7 +66,9 @@ class RequestListener
         foreach ($this->requestEnvironments as $requestEnvironment) {
             if ($requestEnvironment->match($request)) {
                 $request->attributes->set('_environment', $requestEnvironment->getIndex());
-                
+                if(!empty($requestEnvironment->getBackend())) {
+                    $request->attributes->set('_backend', $requestEnvironment->getBackend());
+                }
                 return; //stop on match
             }
         }
