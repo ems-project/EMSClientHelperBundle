@@ -69,6 +69,8 @@ class TranslationLoader implements LoaderInterface
             'index' => $this->prefix.$domain,
             'type' => $this->type,
             'body' => $body,
+        	'_source' => 'label_*,modified_date,key',
+        		
         ];
         
         
@@ -92,7 +94,7 @@ class TranslationLoader implements LoaderInterface
             $result = $this->client->search($param);
             $messages = [];
             foreach ($result["hits"]["hits"] as $data){
-                if(isset($data['_source']['label_'.$locale])){
+            	if(isset($data['_source']['label_'.$locale]) && isset($data['_source']['key'])){
                     $messages[$data['_source']['key']] = $data['_source']['label_'.$locale];	
                 }
             }

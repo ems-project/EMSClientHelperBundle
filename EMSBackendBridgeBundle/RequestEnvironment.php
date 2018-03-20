@@ -22,15 +22,29 @@ class RequestEnvironment
     private $index;
     
     /**
+     * @var string
+     */
+    private $backendUrl;
+    
+    /**
      * @param string $name
      * @param string $regex
      * @param string $index
      */
-    public function __construct($name, $regex = null, $index = null)
+    public function __construct($name, $regex = null, $index = null, $backendUrl=null)
     {
         $this->name = $name;
         $this->regex = $regex;
         $this->index = $index;
+        $this->backendUrl= $backendUrl;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getBackendUrl()
+    {
+    	return $this->backendUrl;
     }
     
     /**

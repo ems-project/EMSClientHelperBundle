@@ -56,8 +56,8 @@ class EMSBackendBridgeExtension extends Extension
         $eventListener = $container->getDefinition('emsch.request_listener');
 
         foreach ($config as $environment => $options) {
-            $eventListener->addMethodCall('addRequestEnvironment', [
-                $environment, $options['regex'], $options['index']
+        	$eventListener->addMethodCall('addRequestEnvironment', [
+            		$environment, $options['regex'], $options['index'], $options['backend_url']
             ]);
         }
     }
@@ -120,7 +120,7 @@ class EMSBackendBridgeExtension extends Extension
         $definition = new Definition(Client::class);
         $definition
             ->setFactory(['Elasticsearch\ClientBuilder', 'fromConfig'])
-            ->setArgument(0, ['hosts' => $options['hosts']])
+            ->setArgument(0, ['hosts' => ($options['cluster']?$options['cluster']:$options['hosts'])])
             ->setPublic(true);
         $definition->addTag('emsch.elasticsearch.client');
 

@@ -9,6 +9,7 @@ use EMS\ClientHelperBundle\EMSWebDebugBarBundle\Entity\ElasticSearchLog;
 use EMS\ClientHelperBundle\EMSWebDebugBarBundle\Logger\ClientHelperLogger;
 use Exception;
 use Psr\Log\LoggerInterface;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Exception\ObjectNotFoundException;
 
 class ClientRequest
 {
@@ -376,7 +377,7 @@ class ClientRequest
      * 
      * @return array
      */
-    public function search($type, array $body, $from = 0, $size = 10, $sourceExclude=[])
+    public function search($type, array $body, $from = 0, $size = 10, $sourceExclude=[], $sourceInclude=[])
     {
         
         $this->logger->debug('ClientRequest : search for {type}', ['type' => $type, 'body'=>$body, 'index'=>$this->getIndex()]);
@@ -385,15 +386,13 @@ class ClientRequest
             'type' => $type,
             'body' => $body,
             'size' => $size,
-            'from' => $from
+        	'from' => $from,
+        	'_source_exclude' => $sourceExclude, 
+        	'_source_include' => $sourceInclude,
         ];
         
         if ($from > 0) {
 //             $params['preference'] = '_primary';
-        }
-        
-        if(!empty($sourceExclude)){
-            $arguments['_source_exclude'] = $sourceExclude;
         }
 
         $this->log('search', $arguments);
@@ -410,15 +409,15 @@ class ClientRequest
      *
      * @throws Exception
      */
-    public function searchOne($type, array $body)
+    public function searchOne($type, array $body, $sourceExclude=[], $sourceInclude=[])
     {
-        $this->logger->debug('ClientRequest : searchOne for {type}', ['type' => $type, 'body'=>$body]);
-        $search = $this->search($type, $body);
+    	$this->logger->debug('ClientRequest : searchOne for {type}', ['type' => $type, 'body'=>$body]);
+    	$search = $this->search($type, $body, 0, 1, $sourceExclude, $sourceInclude);
         
         $hits = $search['hits'];
         
         if (1 != $hits['total']) {
-            throw new Exception(sprintf('expected 1 result, got %d', $hits['total']));
+            throw new ObjectNotFoundException(sprintf('expected 1 result, got %d', $hits['total']));
         }
         
         return $hits['hits'][0];

@@ -36,6 +36,7 @@
         <service id="emsch.twig.extension.trans" class="%emsch.twig.extension.trans.class%">
             <argument type="service" id="translator" />
             <argument type="service" id="emsch.request.service" />
+            <argument type="service" id="assets.packages" />
             <tag name="twig.extension" />
         </service>
         
