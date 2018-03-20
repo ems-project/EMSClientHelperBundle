@@ -45,3 +45,7 @@ Create empty translation files in (/app/Resources/translations) in the following
     ```
     {{ 'type:AV02131ywJBP0ULmVzID'|emsch_ouuid }} #returns AV02131ywJBP0ULmVzID
     ```
+- emsch_admin_menu (Twig\EditionExtension)
+    ```
+    {{ emsch_admin_menu('type:AV02131ywJBP0ULmVzID') }} #returns data attributes like : key, type ... for js manipulation
+    ```

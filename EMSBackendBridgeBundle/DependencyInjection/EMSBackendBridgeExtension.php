@@ -57,7 +57,7 @@ class EMSBackendBridgeExtension extends Extension
 
         foreach ($config as $environment => $options) {
             $eventListener->addMethodCall('addRequestEnvironment', [
-                $environment, $options['regex'], $options['index']
+                $environment, $options['regex'], $options['index'], $options['backend']
             ]);
         }
     }

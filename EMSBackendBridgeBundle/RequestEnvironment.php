@@ -20,17 +20,24 @@ class RequestEnvironment
      * @var string
      */
     private $index;
+
+    /**
+     * @var string
+     */
+    private $backend;
     
     /**
      * @param string $name
      * @param string $regex
      * @param string $index
+     * @param string $backend
      */
-    public function __construct($name, $regex = null, $index = null)
+    public function __construct($name, $regex = null, $index = null, $backend = null)
     {
         $this->name = $name;
         $this->regex = $regex;
         $this->index = $index;
+        $this->backend = $backend;
     }
     
     /**
@@ -39,6 +46,14 @@ class RequestEnvironment
     public function getIndex()
     {
         return ($this->index ? $this->index : $this->name);
+    }
+
+    /**
+     * @return string
+     */
+    public function getBackend()
+    {
+        return $this->backend;
     }
 
     /**
