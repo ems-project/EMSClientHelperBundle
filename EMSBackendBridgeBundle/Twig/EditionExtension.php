@@ -46,8 +46,7 @@ class EditionExtension extends AbstractExtension
     {
         $request = $this->requestStack->getCurrentRequest();
 
-        if( isset($request->get('_backend')) )
-        {
+        if(null !== $request->get('_backend')){
             $ouuid = ClientRequest::getOuuid($emsLink);
             $type = ClientRequest::getType($emsLink);
             $backend = $request->get('_backend'); 
