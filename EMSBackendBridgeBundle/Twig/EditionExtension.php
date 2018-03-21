@@ -42,7 +42,7 @@ class EditionExtension extends AbstractExtension
      * @param  string  $emsLink
      * @return string
      */
-    public function showAdminMenu($emsLink): string
+    public function showAdminMenu($emsLink)
     {
         $request = $this->requestStack->getCurrentRequest();
 
