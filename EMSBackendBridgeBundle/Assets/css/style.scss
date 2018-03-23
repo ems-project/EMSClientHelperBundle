@@ -1,17 +1,2 @@
-.admin-menu-wrapper {
-	content: '';
-	position:relative;
-	display:inline-block;
-	.admin-menu-content {
-		position:absolute;
-		z-index:1000;
-		top:-30px;
-		left:10px;
-		min-width:60px;
-		.dropdown-menu>li>a {
-		    text-decoration:none !important;
-		    color:#333 !important;
-		    font-weight:normal  !important;
-		}
-	}
-}
+@import 'partials/mixins';
+@import 'partials/admin-menu';

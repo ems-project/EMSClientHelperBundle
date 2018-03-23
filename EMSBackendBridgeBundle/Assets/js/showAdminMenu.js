@@ -13,28 +13,18 @@ export default function showAdminMenu() {
 			type 	= $(this).data('emsType');
 			url 	= $(this).data('emsUrl');
 			admWrapper = $('<div>',  {class: 'admin-menu-wrapper hide'});
-			admCont = $('<div>',  {class: 'admin-menu-content dropdown'});
-			admBtn = $('<button>', 
+			admBtn = $('<a>', 
 				{
-					id: 'admin-menu-' + index,
-					class: 'btn btn-primary btn-xs',
-					'data-toggle': 'dropdown',
-					'aria-haspopup': true,
-					'aria-expanded': false,
-					type: 'button',
-					html: 'Edit <span class="caret"></span>'
+					id: 	'admin-menu-' + index,
+					class: 	'btn btn-primary btn-xs emsch',
+					type: 	'button',
+					html: 	'Back to ems',
+					href: 	url +'/data/revisions/'+ type +':'+ ouuid,
+					target: '_blank'
 				});
-
-			admUl = $('<ul>', {class:'dropdown-menu', 'aria-labelledby': 'admin-menu-' + index});
-			admLiRev = $('<li>', {html: '<a href="'+ url +'/data/revisions/'+ type +':'+ ouuid +'" target="_blank">See this revision</a>'});
-			admLiEdit = $('<li>', {html: '<a href="'+ url +'/data/new-draft/'+ type +'/'+ ouuid +'" target="_blank">Edit this revision</a>'});
 			
 			$(this).append(admWrapper
-						.append(admCont
-						.append(admBtn)
-						.append(admUl
-							.append(admLiRev)
-							.append(admLiEdit))));
+						.append(admBtn));
 		});
 	}
 
