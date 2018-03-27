@@ -113,7 +113,7 @@ class RoutingService
             return $this->twig->render($document['_type'].'.ems.twig', [
                 'id'     => $document['_id'],
                 'source' => $document['_source'],
-                'locale' => ($locale!==null?$locale:$this->clientRequest->getLocale()),
+                'locale' => ($locale?$locale:$this->clientRequest->getLocale()),
                 'linkType' => $emsLink->getLinkType(),
             ]);
         } catch (\Twig_Error $ex) {

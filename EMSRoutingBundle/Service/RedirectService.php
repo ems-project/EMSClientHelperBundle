@@ -64,10 +64,8 @@ class RedirectService
             );
             $linkTo = $document['_source']['link_to'];
 
-            return $this->routingService->transform('ems://object:'.$linkTo, $locale);
+            return $this->routingService->transform('ems://object:' . $linkTo, $locale);
 
-        } catch (MissingTranslationException $mex) {
-            throw $mex;
         } catch (\Exception $ex) {
             return false;
         }
