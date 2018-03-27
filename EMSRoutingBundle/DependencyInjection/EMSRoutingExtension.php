@@ -27,5 +27,6 @@ class EMSRoutingExtension extends Extension
         $container->setParameter('ems_routing.template_loader', $config['template_loader']);
         $container->setParameter('ems_routing.file_manager', $config['file_manager']);
         $container->setParameter('ems_routing.url_helper', $config['url_helper']);
+        $container->setParameter('ems_routing.redirection', $config['redirection']);
     }
 }

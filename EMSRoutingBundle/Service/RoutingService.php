@@ -21,7 +21,19 @@ class RoutingService
      * @var \Twig_Environment
      */
     private $twig;
-    
+
+    /**
+     * Regex for searching ems links in content
+     * content_type and query can be empty/optional
+     *
+     * Regex101.com:
+     * ems:\/\/(?P<link_type>.*?):(?:(?P<content_type>.*?):)?(?P<ouuid>([[:alnum:]]|-|_)*)(?:\?(?P<query>(?:[^"|\'|\s]*)))?
+     *
+     * Example: <a href="ems://object:page:AV44kX4b1tfmVMOaE61u">example</a>
+     * link_type => object, content_type => page, ouuid => AV44kX4b1tfmVMOaE61u
+     */
+    const EMS_LINK = '/ems:\/\/(?P<link_type>.*?):(?:(?P<content_type>.*?):)?(?P<ouuid>([[:alnum:]]|-|_)*)(?:\?(?P<query>(?:[^"|\'|\s]*)))?/';
+
     /**
      * @param ClientRequest     $clientRequest injected by compiler pass
      * @param UrlHelperService  $urlHelperService
@@ -47,8 +59,9 @@ class RoutingService
     
     /**
      * @param array $match [link_type, content_type, ouuid, query]
+     * @param string $locale
      */
-    public function generate(array $match, $locale=false)
+    public function generate(array $match, $locale=null)
     {
         try {
             $emsLink = new EMSLink($match);
@@ -71,20 +84,36 @@ class RoutingService
             return $ex->getMessage();
         }  
     }
+
+    /**
+     * @param string $content
+     * @param string $locale
+     * @return null|string|string[]
+     */
+    public function transform($content, $locale=null)
+    {
+        return preg_replace_callback(self::EMS_LINK, function ($match) use (&$locale) {
+            //array filter to remove empty capture groups
+            $route = $this->generate(array_filter($match), $locale);
+
+            return $route ? $route : $match[0];
+        }, $content);
+    }
     
     /**
      * @param EMSLink $emsLink
      * @param array   $document
+     * @param string  $locale
      * 
      * @return string
      */
-    private function renderTemplate(EMSLink $emsLink, array $document, $locale=false)
+    private function renderTemplate(EMSLink $emsLink, array $document, $locale=null)
     {
         try {
             return $this->twig->render($document['_type'].'.ems.twig', [
                 'id'     => $document['_id'],
                 'source' => $document['_source'],
-                'locale' => ($locale?$locale:$this->clientRequest->getLocale()),
+                'locale' => ($locale!==null?$locale:$this->clientRequest->getLocale()),
                 'linkType' => $emsLink->getLinkType(),
             ]);
         } catch (\Twig_Error $ex) {
