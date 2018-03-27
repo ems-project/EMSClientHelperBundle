@@ -32,7 +32,5 @@ class ClientRequestPass implements CompilerPassInterface
         
         $twigLoader = $container->getDefinition(TemplateLoader::class);
         $twigLoader->setArgument(0, $container->findDefinition($id));
-
-
     }
 }
