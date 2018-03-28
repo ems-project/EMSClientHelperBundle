@@ -15,18 +15,6 @@ class RoutingExtension extends \Twig_Extension
     private $routingService;
     
     /**
-     * Regex for searching ems links in content
-     * content_type and query can be empty/optional
-     * 
-     * Regex101.com: 
-     * ems:\/\/(?P<link_type>.*?):(?:(?P<content_type>.*?):)?(?P<ouuid>([[:alnum:]]|-|_)*)(?:\?(?P<query>(?:[^"|\'|\s]*)))?
-     * 
-     * Example: <a href="ems://object:page:AV44kX4b1tfmVMOaE61u">example</a>
-     * link_type => object, content_type => page, ouuid => AV44kX4b1tfmVMOaE61u
-     */
-    const EMS_LINK = '/ems:\/\/(?P<link_type>.*?):(?:(?P<content_type>.*?):)?(?P<ouuid>([[:alnum:]]|-|_)*)(?:\?(?P<query>(?:[^"|\'|\s]*)))?/';
-    
-    /**
      * @param RoutingService $routingService
      */
     public function __construct(RoutingService $routingService)
@@ -77,16 +65,12 @@ class RoutingExtension extends \Twig_Extension
     
     /**
      * @param string $content
+     * @param string $locale
      *
      * @return string
      */
-    public function transform($content, $locale=false)
+    public function transform($content, $locale=null)
     {
-        return preg_replace_callback(self::EMS_LINK, function ($match) use (&$locale) {
-            //array filter to remove empty capture groups
-            $route = $this->routingService->generate(array_filter($match), $locale);
-
-            return $route ? $route : $match[0];
-        }, $content);
+        return $this->routingService->transform($content, $locale);
     }
 }

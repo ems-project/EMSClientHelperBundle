@@ -4,6 +4,7 @@ namespace EMS\ClientHelperBundle\EMSRoutingBundle\DependencyInjection;
 
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\EMSRoutingBundle\Service\FileManager;
+use EMS\ClientHelperBundle\EMSRoutingBundle\Service\RedirectService;
 use EMS\ClientHelperBundle\EMSRoutingBundle\Service\UrlHelperService;
 use EMS\ClientHelperBundle\EMSRoutingBundle\Twig\TemplateLoader;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
@@ -35,6 +36,7 @@ class Configuration implements ConfigurationInterface
         $this->addTemplateLoaderSection($rootNode);
         $this->addFileManagerSection($rootNode);
         $this->addUrlHelperSection($rootNode);
+        $this->addRedirectSection($rootNode);
 
         return $treeBuilder;
     }
@@ -122,5 +124,28 @@ class Configuration implements ConfigurationInterface
                 ->end()
             ->end()
         ;
+    }
+
+    /**
+     * @param ArrayNodeDefinition $rootNode
+     */
+    private function addRedirectSection(ArrayNodeDefinition $rootNode)
+    {
+        $rootNode
+            ->children()
+                ->arrayNode('redirection')
+                    ->info(RedirectService::class)
+                    ->children()
+                        ->scalarNode('redirect_type')
+                            ->cannotBeEmpty()
+                            ->info('content type used to define redirection')
+                        ->end()
+                        ->scalarNode('client_request')
+                            ->cannotBeEmpty()
+                            ->info('elasticms client defined in EMSBackendBridgeBundle')
+                        ->end()
+                    ->end()
+                ->end()
+            ->end();
     }
 }
