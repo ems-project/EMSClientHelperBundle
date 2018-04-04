@@ -1,20 +1,14 @@
 .admin-menu-wrapper {
 	content: '';
-	position:relative;
 	display:inline-block;
 	a {
-		position:absolute !important;
-		z-index:1000;
-		top:-50px !important;
-		left:5px !important;
+		padding-right:22px !important;
 		&.emsch {
 			background-image: icon(emsch, '#FFFFFF', '16', '16');
 			background-repeat: no-repeat;
 			background-position: 99% 50%;
 		}
-		padding-right:22px;
-		&[href^="http://"]:after, 
-		&[href^="https://"]:after {
+		&:after{
 			content:none !important;
 			margin-left:0 !important;
 		}
