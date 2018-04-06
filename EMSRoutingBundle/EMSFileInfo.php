@@ -31,6 +31,10 @@ class EMSFileInfo
      */
     public function __construct($filename, $mimetype, $sha1)
     {
+        if ("image/svg xml" === $mimetype){
+            $mimetype = "image/svg+xml";
+        }
+
         $this->filename = $filename;
         $this->mimetype = $mimetype;
         $this->sha1 = $sha1;
