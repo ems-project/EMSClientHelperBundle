@@ -6,6 +6,7 @@
 
     <parameters>
        <parameter key="emsch.request.service.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\RequestService</parameter>
+       <parameter key="emsch.api.service.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\ApiService</parameter>
        <parameter key="emsch.request_listener.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\EventListener\RequestListener</parameter>
        
        <parameter key="emsch.query_builder.service.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\QueryBuilderService</parameter>
@@ -19,6 +20,9 @@
     <services>      
         <service id="emsch.request.service" class="%emsch.request.service.class%">
             <argument type="service" id="request_stack" />
+        </service>
+        <service id="emsch.api.service" class="%emsch.api.service.class%">
+            <argument type="service" id="Symfony\Component\Routing\Generator\UrlGeneratorInterface" />
         </service>
         
         <!-- event listeners -->

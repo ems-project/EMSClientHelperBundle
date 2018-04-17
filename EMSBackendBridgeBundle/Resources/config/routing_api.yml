@@ -1,0 +1,3 @@
+ems_api:
+    resource: '@EMSBackendBridgeBundle/Controller/'
+    type : annotation
