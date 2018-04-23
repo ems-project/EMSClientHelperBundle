@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\EMSLanguageSelectionBundle\DependencyInjection;
 
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\EMSLanguageSelectionBundle\Service\LanguageService;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
@@ -69,7 +70,7 @@ class EMSLanguageSelectionExtension extends Extension
             )
             ->setArguments([
                 new Reference(sprintf('elasticsearch.client.%s', $emsClient)),
-                $config['ems_index_prefix']
+                [ClientRequest::OPTION_INDEX_PREFIX => $config['ems_index_prefix']]
             ])
             ->addTag('emsch.client_request');
     }

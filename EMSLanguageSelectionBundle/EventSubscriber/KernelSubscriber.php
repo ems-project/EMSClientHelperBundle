@@ -50,7 +50,13 @@ class KernelSubscriber implements EventSubscriberInterface
      */
     public function onKernelRequest(GetResponseEvent $event)
     {
-        $locale = $this->checkLocale($event->getRequest());
+        $request = $event->getRequest();
+
+        if (preg_match('/(emsch_api_).*/', $request->attributes->get('_route'))) {
+            return;
+        }
+
+        $locale = $this->checkLocale($request);
         
         if ($locale) {
             $event->getRequest()->getSession()->set('_locale', $locale);
@@ -96,6 +102,10 @@ class KernelSubscriber implements EventSubscriberInterface
     private function handleNotFoundException(GetResponseForExceptionEvent $event)
     {
         $request = $event->getRequest();
+
+        if (preg_match('/(emsch_api_).*/', $request->attributes->get('_route'))) {
+            return;
+        }
        
         if (false === $this->checkLocale($request)) {
             $this->redirectMissingLocale($event);

@@ -30,17 +30,17 @@ class ClientRequestFactory
     
     /**
      * @param Client $client
-     * @param string $indexPrefix
+     * @param array  $options
      *
      * @return ClientRequest
      */
-    public function create(Client $client, $indexPrefix)
+    public function create(Client $client, array $options)
     {
         return new ClientRequest(
             $client, 
             $this->requestService, 
-            $indexPrefix,
-            $this->logger
+            $this->logger,
+            $options
         );
     }
 }

@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle;
 
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\DependencyInjection\Compiler\ApiClientPass;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\DependencyInjection\Compiler\HealthCheckPass;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\DependencyInjection\Compiler\LoadDebugBarPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -15,5 +16,6 @@ class EMSBackendBridgeBundle extends Bundle
 
         $container->addCompilerPass(new LoadDebugBarPass());
         $container->addCompilerPass(new HealthCheckPass());
+        $container->addCompilerPass(new ApiClientPass());
     }
 }
