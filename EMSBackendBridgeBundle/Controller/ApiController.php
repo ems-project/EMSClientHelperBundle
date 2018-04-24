@@ -38,7 +38,7 @@ class ApiController extends AbstractController
     {
         $scrollId = $request->query->get('scroll');
         $size = $request->query->get('size');
-        $filter = $request->query->get('filter');
+        $filter = $request->query->get('filter', []);
 
         return $this->getApi()->getContentType($apiName, $contentType, $filter, $size, $scrollId)->getResponse();
     }
