@@ -61,4 +61,24 @@ class ApiClient
         
         return \json_decode($response->getBody()->getContents(), true);
     }
+
+    /**
+     * @param \SplFileInfo $file
+     *
+     * @return array [uploaded, fileName, url]
+     */
+    public function postFile(\SplFileInfo $file)
+    {
+        $response = $this->client->post('api/file', [
+            'multipart' => [
+                [
+                    'name'     => 'upload',
+                    'contents' => fopen($file->getPathname(), 'r'),
+                    'filename' => $file->getFilename(),
+                ],
+            ]
+        ]);
+
+        return \json_decode($response->getBody()->getContents(), true);
+    }
 }
