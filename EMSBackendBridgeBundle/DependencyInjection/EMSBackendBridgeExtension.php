@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\DependencyInjection;
 
+use Composer\CaBundle\CaBundle;
 use Elasticsearch\Client;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Api\ApiClient;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
@@ -122,7 +123,7 @@ class EMSBackendBridgeExtension extends Extension
 
         foreach ($options['hosts'] as $host){
             if((substr($host, 0, 8) === 'https://')){
-                $caBundle = \Composer\CaBundle\CaBundle::getBundledCaBundlePath();
+                $caBundle = CaBundle::getBundledCaBundlePath();
                 $config['sSLVerification'] = $caBundle;
                 break;
             }
