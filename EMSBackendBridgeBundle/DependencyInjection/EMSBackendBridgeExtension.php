@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\DependencyInjection;
 
+use Composer\CaBundle\CaBundle;
 use Elasticsearch\Client;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Api\ApiClient;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
@@ -118,12 +119,22 @@ class EMSBackendBridgeExtension extends Extension
     private function defineElasticsearchClient(ContainerBuilder $container, $name, array $options)
     {
         $definition = new Definition(Client::class);
+        $config = ['hosts' => $options['hosts']];
+
+        foreach ($options['hosts'] as $host){
+            if((substr($host, 0, 8) === 'https://')){
+                $caBundle = CaBundle::getBundledCaBundlePath();
+                $config['sSLVerification'] = $caBundle;
+                break;
+            }
+        }
+
         $definition
             ->setFactory(['Elasticsearch\ClientBuilder', 'fromConfig'])
-            ->setArgument(0, ['hosts' => $options['hosts']])
+            ->setArgument(0, $config)
             ->setPublic(true);
         $definition->addTag('emsch.elasticsearch.client');
-
+        
         $container->setDefinition(sprintf('elasticsearch.client.%s', $name), $definition);
     }
 

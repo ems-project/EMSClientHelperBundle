@@ -17,6 +17,7 @@
 		"symfony/finder" : "^3.2",
 		"twig/twig" : "^1.0||^2.0",
 		"guzzlehttp/guzzle" : "^6.3",
+		"composer/ca-bundle" : "^1.0",
 		"elasticsearch/elasticsearch" : "^5.2"
 	},
 	"require-dev" : {
