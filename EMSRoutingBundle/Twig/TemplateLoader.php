@@ -3,6 +3,7 @@
 namespace EMS\ClientHelperBundle\EMSRoutingBundle\Twig;
 
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
+use Twig_Source;
 
 /**
  * Template Loader
@@ -49,6 +50,19 @@ class TemplateLoader implements \Twig_LoaderInterface, \Twig_ExistsLoaderInterfa
 
     /**
      * {@inheritdoc}
+     */
+    public function getSourceContext($name)
+    {
+        preg_match(self::REGEX, $name, $match);
+        $document = $this->getDocument($match['template']);
+
+        return new Twig_Source($document[$this->config['field']], $name);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @deprecated used for php < 7
      */
     public function getSource($name)
     {
