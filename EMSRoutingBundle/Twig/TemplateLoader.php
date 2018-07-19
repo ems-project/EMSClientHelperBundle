@@ -53,10 +53,7 @@ class TemplateLoader implements \Twig_LoaderInterface, \Twig_ExistsLoaderInterfa
      */
     public function getSourceContext($name)
     {
-        preg_match(self::REGEX, $name, $match);
-        $document = $this->getDocument($match['template']);
-
-        return new Twig_Source($document[$this->config['field']], $name);
+        return new Twig_Source($this->getTemplate($name), $name);
     }
 
     /**
@@ -66,10 +63,7 @@ class TemplateLoader implements \Twig_LoaderInterface, \Twig_ExistsLoaderInterfa
      */
     public function getSource($name)
     {
-        preg_match(self::REGEX, $name, $match);
-        $document = $this->getDocument($match['template']);
-        
-        return $document[$this->config['field']];
+        return $this->getTemplate($name);
     }
 
     /**
@@ -95,9 +89,11 @@ class TemplateLoader implements \Twig_LoaderInterface, \Twig_ExistsLoaderInterfa
      *
      * @throws \Twig_Error_Loader
      */
-    private function getDocument($name)
+    private function getTemplate($name)
     {
-        $search = \preg_replace('/\$template_name\$/', $name, $this->config['search']);
+        preg_match(self::REGEX, $name, $match);
+
+        $search = \preg_replace('/\$template_name\$/', $match['template'], $this->config['search']);
         
         $document = $this->clientRequest->searchOneBy(
             $this->config['content_type'], 
@@ -108,6 +104,8 @@ class TemplateLoader implements \Twig_LoaderInterface, \Twig_ExistsLoaderInterfa
             throw new \Twig_Error_Loader('routing not found for template');
         }
         
-        return $document['_source'];
+        $source = $document['_source'];
+
+        return $source[$this->config['field']];
     }
 }
