@@ -19,7 +19,7 @@ class ApiController extends AbstractController
      *
      * @return JsonResponse
      */
-    public function contentTypesAction($apiName)
+    public function contentTypesAction(ApiService $apiService, $apiName)
     {
         return $this->getApi()->getContentTypes($apiName)->getResponse();
     }
