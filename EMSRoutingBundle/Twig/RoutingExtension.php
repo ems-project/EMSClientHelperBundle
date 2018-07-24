@@ -66,11 +66,12 @@ class RoutingExtension extends \Twig_Extension
     /**
      * @param string $content
      * @param string $locale
+     * @param string $baseUrl
      *
      * @return string
      */
-    public function transform($content, $locale=null)
+    public function transform($content, $locale = null, $baseUrl = null)
     {
-        return $this->routingService->transform($content, $locale);
+        return $this->routingService->transform($content, $locale, $baseUrl);
     }
 }

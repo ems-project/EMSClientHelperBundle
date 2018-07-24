@@ -88,15 +88,18 @@ class RoutingService
     /**
      * @param string $content
      * @param string $locale
+     * @param string $baseUrl
+     *
      * @return null|string|string[]
      */
-    public function transform($content, $locale=null)
+    public function transform($content, $locale = null, $baseUrl = null)
     {
-        return preg_replace_callback(self::EMS_LINK, function ($match) use (&$locale) {
+        return preg_replace_callback(self::EMS_LINK, function ($match) use ($locale, $baseUrl) {
             //array filter to remove empty capture groups
-            $route = $this->generate(array_filter($match), $locale);
+            $generation = $this->generate(array_filter($match), $locale);
+            $route = $generation ? $generation : $match[0];
 
-            return $route ? $route : $match[0];
+            return $baseUrl . $route;
         }, $content);
     }
     
