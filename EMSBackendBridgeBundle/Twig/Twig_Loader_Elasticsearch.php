@@ -75,7 +75,16 @@ class Twig_Loader_Elasticsearch implements Twig_LoaderInterface
      */
     public function isFresh($name, $time)
     {
-        $date = new \DateTime($this->findTemplate($name)['_published_datetime']);
+        $template = $this->findTemplate($name);
+        $date = new \DateTime();
+        if( isset($template['_published_datetime']) )
+        {
+            $date = new \DateTime($template['_published_datetime']);
+        }
+        if( isset($template['_finalization_datetime']) )
+        {
+            $date = new \DateTime($template['_finalization_datetime']);
+        }
         return  $date->getTimestamp() <= $time;
     }
 
@@ -98,7 +107,7 @@ class Twig_Loader_Elasticsearch implements Twig_LoaderInterface
                             'key' => $matches[2]
                         ]
                     ],
-                    '_source' => ['body', '_published_datetime'],
+                    '_source' => ['body', '_published_datetime', '_finalization_datetime'],
                 ]);
                 return $result['_source'];
             }

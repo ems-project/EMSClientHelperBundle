@@ -21,9 +21,9 @@ class ZeController extends AbstractController
     {
         
         try{
-            $object = $client->getPage('/'. $slug);
+            $object = $client->getPage($slug?'/'. $slug:'Homepage');
             return $this->render('@EMSCH/'.$object['template'], [
-                'object' => $object,
+                'source' => $object,
             ]);
         }
         catch (SingleResultException $e)
