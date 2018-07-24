@@ -7,7 +7,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -21,7 +20,7 @@ class KernelSubscriber implements EventSubscriberInterface
     private $redirectService;
     
     /**
-     * @var HttpKernel
+     * @var HttpKernelInterface
      */
     private $kernel;
     
@@ -31,12 +30,13 @@ class KernelSubscriber implements EventSubscriberInterface
     private $router;
 
     /**
-     * @param RedirectService $redirectService
-     * @param HttpKernel      $kernel
+     * @param RedirectService     $redirectService
+     * @param HttpKernelInterface $kernel
+     * @param RouterInterface     $router
      */
     public function __construct(
         RedirectService $redirectService,
-        HttpKernel $kernel,
+        HttpKernelInterface $kernel,
         RouterInterface $router
     ) {
         $this->redirectService = $redirectService;

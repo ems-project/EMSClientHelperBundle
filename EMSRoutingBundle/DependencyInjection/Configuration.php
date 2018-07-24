@@ -135,6 +135,7 @@ class Configuration implements ConfigurationInterface
             ->children()
                 ->arrayNode('redirection')
                     ->info(RedirectService::class)
+                    ->canBeEnabled()
                     ->children()
                         ->scalarNode('redirect_type')
                             ->cannotBeEmpty()
