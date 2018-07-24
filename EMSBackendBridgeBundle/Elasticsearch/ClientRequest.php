@@ -4,6 +4,8 @@ namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch;
 
 use Elasticsearch\Client;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Entity\HierarchicalStructure;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Exception\EnvironmentNotFoundException;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\RequestService;
 use EMS\ClientHelperBundle\EMSWebDebugBarBundle\Entity\ElasticSearchLog;
 use EMS\ClientHelperBundle\EMSWebDebugBarBundle\Logger\ClientHelperLogger;
@@ -110,7 +112,14 @@ class ClientRequest
         ];
 
         $this->log('get', $arguments);
-        $result = $this->client->get($arguments);
+        $result = $this->searchOne($type, [
+            'query' => [
+                'term' => [
+                    '_id' => $id
+                ]
+            ],
+        ]);
+        //$result = $this->client->get($arguments);
 
         return $result;
     }
@@ -471,6 +480,17 @@ class ClientRequest
 
         return $result;
     }
+    
+    public function getPage($key, $keyField = 'key') {
+        $result = $this->searchOne('page', [
+            'query' => [
+                'term' => [
+                    $keyField => $key
+                ]
+            ],
+        ]);
+        return $result['_source'];
+    }
 
     /**
      * @param string $type
@@ -488,7 +508,7 @@ class ClientRequest
         $hits = $search['hits'];
 
         if (1 != $hits['total']) {
-            throw new \Exception(sprintf('expected 1 result, got %d', $hits['total']));
+            throw new SingleResultException(sprintf('expected 1 result, got %d', $hits['total']));
         }
 
         return $hits['hits'][0];
@@ -560,15 +580,21 @@ class ClientRequest
      */
     private function getIndex()
     {
+        $environment = $this->requestService->getEnvironment();
+
+        if($environment === null) {
+            throw new EnvironmentNotFoundException();
+        }
+
         $prefixes = explode('|', $this->indexPrefix);
         $out = [];
         foreach ($prefixes as $prefix) {
-            $out[] = $prefix . $this->requestService->getEnvironment();
+            $out[] = $prefix . $environment;
         }
         if (!empty($out)) {
             return $out;
         }
-        return $this->indexPrefix . $this->requestService->getEnvironment();
+        return $this->indexPrefix . $environment;
     }
 
     /**
