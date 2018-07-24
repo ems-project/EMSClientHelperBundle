@@ -6,7 +6,7 @@ class Translation
 {
     private $modifiedDate;
     
-    const MODIFIED_DATE = 'modified_date';
+    const MODIFIED_DATE = '_published_datetime';
     
     public function __construct($source)
     {

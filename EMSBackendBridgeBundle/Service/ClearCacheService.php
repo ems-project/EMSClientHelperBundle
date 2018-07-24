@@ -118,18 +118,18 @@ class ClearCacheService
     {
         $body = [
                 'sort' => [
-                    'modified_date' => [
+                    '_published_datetime' => [
                         'order' => 'desc',
                         'missing' => '_last'
                     ]
                 ],
-               '_source' => 'modified_date'
+               '_source' => '_published_datetime'
         ];
         
         $result = $this->clientRequest->search($this->translationType, $body, 0, 1);
 
-        if ($result['hits']['total'] > 0 && isset($result['hits']['hits']['0']['_source']['modified_date'])) {
-            return new \DateTime($result['hits']['hits']['0']['_source']['modified_date']);
+        if ($result['hits']['total'] > 0 && isset($result['hits']['hits']['0']['_source']['_published_datetime'])) {
+            return new \DateTime($result['hits']['hits']['0']['_source']['_published_datetime']);
         }
         return null;
     }
