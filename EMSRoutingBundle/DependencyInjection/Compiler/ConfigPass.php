@@ -36,8 +36,10 @@ class ConfigPass implements CompilerPassInterface
             [$container->getParameter('ems_routing.url_helper')]
         );
 
-        $redirectService = $container->getDefinition(RedirectService::class);
-        $this->configureRedirectService($container, $redirectService, $container->getParameter('ems_routing.redirection'));
+        if ($container->getParameter('ems_routing.redirection')['enabled']) {
+            $redirectService = $container->getDefinition(RedirectService::class);
+            $this->configureRedirectService($container, $redirectService, $container->getParameter('ems_routing.redirection'));
+        }
     }
 
     private function configureRedirectService(ContainerBuilder $container, Definition $redirectService, array $config)
