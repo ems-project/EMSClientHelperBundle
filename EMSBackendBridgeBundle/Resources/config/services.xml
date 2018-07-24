@@ -17,7 +17,9 @@
        <parameter key="emsch.command.health_check.class">EMS\ClientHelperBundle\EMSBackendBridgeBundle\Command\HealthCheckCommand</parameter>
     </parameters>
     
-    <services>      
+    <services>
+        <defaults autowire="true" autoconfigure="true" public="false" />
+
         <service id="emsch.request.service" class="%emsch.request.service.class%">
             <argument type="service" id="request_stack" />
         </service>
@@ -52,5 +54,9 @@
             <argument type="service" id="emsch.request_listener" />
             <tag name="console.command" />
         </service>
+
+        <prototype namespace="EMS\ClientHelperBundle\EMSBackendBridgeBundle\Controller\" resource="../../Controller">
+            <tag name="controller.service_arguments" />
+        </prototype>
     </services>
 </container>
