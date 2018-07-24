@@ -7,6 +7,7 @@ use Elasticsearch\Client;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Api\ApiClient;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Translation\TranslationLoader;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Twig\Twig_Loader_Elasticsearch;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -76,6 +77,9 @@ class EMSBackendBridgeExtension extends Extension
             if (null !== $options['translation_type']) {
                 $this->defineTranslationLoader($container, $name, $options);
             }
+            if (null !== $options['template_type']) {
+                $this->defineTemplateLoader($container, $name, $options);
+            }
         }
     }
 
@@ -121,13 +125,13 @@ class EMSBackendBridgeExtension extends Extension
         $definition = new Definition(Client::class);
         $config = ['hosts' => $options['hosts']];
 
-        foreach ($options['hosts'] as $host){
-            if((substr($host, 0, 8) === 'https://')){
+//        foreach ($options['hosts'] as $host){
+//            if((substr($host, 0, 8) === 'https://')){
                 $caBundle = CaBundle::getBundledCaBundlePath();
                 $config['sSLVerification'] = $caBundle;
-                break;
-            }
-        }
+//                break;
+//            }
+//        }
 
         $definition
             ->setFactory(['Elasticsearch\ClientBuilder', 'fromConfig'])
@@ -175,6 +179,30 @@ class EMSBackendBridgeExtension extends Extension
 
         $container->setDefinition(
             sprintf('translation.loader.%s', $name),
+            $loader
+        );
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param string $name
+     * @param array $options
+     */
+    protected function defineTemplateLoader(ContainerBuilder $container, $name, array $options)
+    {
+        $loader = new Definition(Twig_Loader_Elasticsearch::class);
+        $loader->setArguments([
+            new Reference(sprintf('emsch.client_request.%s', $name)),
+//            new Reference('emsch.request.service'),
+//            new Reference(sprintf('elasticsearch.client.%s', $name)),
+            $name,
+            $options['index_prefix'],
+            $options['template_type']
+        ]);
+        $loader->addTag('twig.loader', ['alias' => $name, 'priority' => 1]);
+
+        $container->setDefinition(
+            sprintf('twig.loader.%s', $name),
             $loader
         );
     }
