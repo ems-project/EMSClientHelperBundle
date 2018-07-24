@@ -54,7 +54,7 @@ class TranslationLoader implements LoaderInterface
 
         $body = [
                 'sort' => [
-                    'modified_date' => [
+                    '_published_datetime' => [
                         'order' => 'desc',
                         'missing' => '_last'
                     ]
