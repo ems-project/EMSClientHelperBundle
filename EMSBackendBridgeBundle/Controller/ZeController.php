@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class ZeController extends AbstractController
 {
     /**
-     * @Route("/{slug}", defaults={"slug": false}, requirements={"slug": ".+"}, name="page")
+     * @Route("/{slug}", defaults={"slug": false}, requirements={"slug": ".+"}, name="emsch_ze_page")
      */
     public function pageAction($slug, Request $request, ClientRequest $client)
     {
