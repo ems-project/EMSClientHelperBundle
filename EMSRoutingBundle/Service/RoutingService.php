@@ -113,7 +113,7 @@ class RoutingService
     private function renderTemplate(EMSLink $emsLink, array $document, $locale=null)
     {
         try {
-            return $this->twig->render($document['_type'].'.ems.twig', [
+            return $this->twig->render('@EMSCH/template/'.$document['_type'].'.ems.twig', [
                 'id'     => $document['_id'],
                 'source' => $document['_source'],
                 'locale' => ($locale?$locale:$this->clientRequest->getLocale()),

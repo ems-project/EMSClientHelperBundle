@@ -480,17 +480,6 @@ class ClientRequest
 
         return $result;
     }
-    
-    public function getPage($key, $keyField = 'key') {
-        $result = $this->searchOne('page', [
-            'query' => [
-                'term' => [
-                    $keyField => $key
-                ]
-            ],
-        ]);
-        return $result['_source'];
-    }
 
     /**
      * @param string $type
@@ -498,7 +487,7 @@ class ClientRequest
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws SingleResultException
      */
     public function searchOne($type, array $body)
     {
@@ -577,6 +566,8 @@ class ClientRequest
 
     /**
      * @return string|array
+     *
+     * @throws EnvironmentNotFoundException
      */
     private function getIndex()
     {

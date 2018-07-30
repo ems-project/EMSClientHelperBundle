@@ -5,9 +5,21 @@
         http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
-        <defaults autowire="true" autoconfigure="true" public="false" />
+        <defaults autowire="false" autoconfigure="false" public="false" />
+
+
+        <service id="EMS\ClientHelperBundle\EMSRoutingBundle\Routing\Router">
+            <argument><!-- clientRequest injected by configPass --></argument>
+            <argument type="service" id="router"/>
+            <argument type="service" id="templating"/>
+            <tag name="controller.service_arguments" />
+        </service>
+        <service id="EMS\ClientHelperBundle\EMSRoutingBundle\Routing\RouteLoader">
+            <argument type="string">%kernel.project_dir%</argument>
+            <tag name="routing.loader" />
+        </service>
         
-        <prototype namespace="EMS\ClientHelperBundle\EMSRoutingBundle\" resource="../../../EMSRoutingBundle/*" />
+        <prototype namespace="EMS\ClientHelperBundle\EMSRoutingBundle\" resource="../../../EMSRoutingBundle/*" exclude="../../../EMSRoutingBundle/Routing" />
         <prototype namespace="EMS\ClientHelperBundle\EMSRoutingBundle\Controller\" resource="../../../EMSRoutingBundle/Controller" public="true">
             <tag name="controller.service_arguments" />
         </prototype>
