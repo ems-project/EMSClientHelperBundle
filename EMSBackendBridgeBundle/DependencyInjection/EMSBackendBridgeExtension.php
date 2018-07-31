@@ -8,6 +8,7 @@ use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Api\ApiClient;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Translation\TranslationLoader;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Twig\TemplateLoader;
+use EMS\CommonBundle\Elasticsearch\Factory;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -130,7 +131,7 @@ class EMSBackendBridgeExtension extends Extension
         ];
 
         $definition
-            ->setFactory(['Elasticsearch\ClientBuilder', 'fromConfig'])
+            ->setFactory([new Reference(Factory::class), 'fromConfig'])
             ->setArgument(0, $config)
             ->setPublic(true);
         $definition->addTag('emsch.elasticsearch.client');
