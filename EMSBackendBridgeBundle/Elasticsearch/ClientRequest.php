@@ -7,8 +7,6 @@ use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Entity\HierarchicalStructure;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\RequestService;
-use EMS\ClientHelperBundle\EMSWebDebugBarBundle\Entity\ElasticSearchLog;
-use EMS\ClientHelperBundle\EMSWebDebugBarBundle\Logger\ClientHelperLogger;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -40,9 +38,9 @@ class ClientRequest
     private $options;
 
     /**
-     * @var ClientHelperLogger
+     * @var string
      */
-    protected $clientHelperLogger;
+    private $name;
 
     const OPTION_INDEX_PREFIX = 'index_prefix';
 
@@ -51,12 +49,14 @@ class ClientRequest
      * @param RequestService  $requestService
      * @param LoggerInterface $logger
      * @param array           $options
+     * @param string          $name
      */
     public function __construct(
         Client $client,
         RequestService $requestService,
         LoggerInterface $logger,
-        array $options = []
+        array $options = [],
+        $name
     )
     {
         $this->client = $client;
@@ -64,6 +64,7 @@ class ClientRequest
         $this->logger = $logger;
         $this->options = $options;
         $this->indexPrefix = isset($options[self::OPTION_INDEX_PREFIX]) ? $options[self::OPTION_INDEX_PREFIX] : null;
+        $this->name = $name;
     }
 
     /**
@@ -100,28 +101,20 @@ class ClientRequest
      * @param string $id
      *
      * @return array
+     *
+     * @throws SingleResultException
      */
     public function get($type, $id)
     {
         $this->logger->debug('ClientRequest : get {type}:{id}', ['type' => $type, 'id' => $id]);
 
-        $arguments = [
-            'index' => $this->getIndex(),
-            'type' => $type,
-            'id' => $id,
-        ];
-
-        $this->log('get', $arguments);
-        $result = $this->searchOne($type, [
+        return $this->searchOne($type, [
             'query' => [
                 'term' => [
                     '_id' => $id
                 ]
             ],
         ]);
-        //$result = $this->client->get($arguments);
-
-        return $result;
     }
 
     /**
@@ -188,13 +181,12 @@ class ClientRequest
             $arguments['_source_exclude'] = $source_exclude;
         }
 
-
-        $this->log('getByOuuid', $arguments);
         $result = $this->client->search($arguments);
 
         if (isset($result['hits']['hits'][0])) {
             return $result['hits']['hits'][0];
         }
+
         return false;
     }
 
@@ -208,7 +200,7 @@ class ClientRequest
     {
         $this->logger->debug('ClientRequest : getByOuuids {type}:{id}', ['type' => $type, 'id' => $ouuids]);
 
-        $arguments = [
+        return $this->client->search([
             'index' => $this->getIndex(),
             'type' => $type,
             'body' => [
@@ -218,12 +210,7 @@ class ClientRequest
                     ]
                 ]
             ]
-        ];
-
-        $this->log('getByOuuids', $arguments);
-        $result = $this->client->search($arguments);
-
-        return $result;
+        ]);
     }
 
     /**
@@ -387,10 +374,7 @@ class ClientRequest
             $arguments['_source_exclude'] = $sourceExclude;
         }
 
-        $this->log('search', $arguments);
-        $result = $this->client->search($arguments);
-
-        return $result;
+        return $this->client->search($arguments);
     }
 
     /**
@@ -415,16 +399,13 @@ class ClientRequest
             'body' => $body,
         ];
 
-        $this->log('searchAll', $arguments);
         $totalSearch = $this->client->search($arguments);
-
         $total = $totalSearch["hits"]["total"];
 
         $results = [];
         $arguments['size'] = $pageSize;
 
         while ($arguments['from'] < $total) {
-            $this->log('searchAll', $arguments);
             $search = $this->client->search($arguments);
 
             foreach ($search["hits"]["hits"] as $document) {
@@ -466,19 +447,13 @@ class ClientRequest
             ];
         }
 
-
-        $arguments = [
+        return $this->client->search([
             'index' => $this->getIndex(),
             'type' => $type,
             'body' => $body,
             'size' => $size,
             'from' => $from,
-        ];
-
-        $this->log('searchBy', $arguments);
-        $result = $this->client->search($arguments);
-
-        return $result;
+        ]);
     }
 
     /**
@@ -523,14 +498,6 @@ class ClientRequest
     }
 
     /**
-     * @param ClientHelperLogger $clientHelperLogger
-     */
-    public function setClientHelperLogger(ClientHelperLogger $clientHelperLogger)
-    {
-        $this->clientHelperLogger = $clientHelperLogger;
-    }
-
-    /**
      * @param string $type
      * @param array  $filter
      * @param int    $size
@@ -562,6 +529,16 @@ class ClientRequest
         }
 
         return $this->client->search($params);
+    }
+
+    /**
+     * @return string
+     */
+    public function getTranslationDomain()
+    {
+        $environment = $this->requestService->getEnvironment();
+
+        return $this->name . '_' . $environment;
     }
 
     /**
@@ -598,19 +575,5 @@ class ClientRequest
             return $indexes[0];
         }
         return $indexes;
-    }
-
-    /**
-     * @param string $function
-     * @param array  $arguments
-     */
-    private function log($function, $arguments)
-    {
-        if (!$this->clientHelperLogger) {
-            return;
-        }
-
-        $log = new ElasticSearchLog($function, $arguments);
-        $this->clientHelperLogger->logElasticsearch($log);
     }
 }

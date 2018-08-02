@@ -7,6 +7,7 @@ use Elasticsearch\Client;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Api\ApiClient;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Controller\TwigListController;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\LanguageSelectionService;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Translation\TranslationLoader;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Twig\TemplateLoader;
 use EMS\CommonBundle\Elasticsearch\Factory;
@@ -48,7 +49,12 @@ class EMSBackendBridgeExtension extends Extension
             $definition = $container->getDefinition(TwigListController::class);
             $definition->replaceArgument(1, $config['twig_list']['templates']);
         }
+
+        $this->processLanguageSelection($container, $loader, $config['language_selection']);
+
     }
+
+
 
     /**
      * @param ContainerBuilder $container
@@ -110,7 +116,8 @@ class EMSBackendBridgeExtension extends Extension
 
     /**
      * @param ContainerBuilder $container
-     * @param array $config
+     * @param string           $domain
+     * @param array            $config
      */
     private function processClearCache(ContainerBuilder $container, $domain, array $config)
     {
@@ -159,7 +166,8 @@ class EMSBackendBridgeExtension extends Extension
             new Reference(sprintf('elasticsearch.client.%s', $name)),
             new Reference('emsch.request.service'),
             new Reference('logger'),
-            $options
+            $options,
+            $name
         ]);
         $definition->addTag('emsch.client_request');
 
@@ -235,5 +243,23 @@ class EMSBackendBridgeExtension extends Extension
             'emsch.clear_cache_listener',
             $clearCacheListener
         );
+    }
+
+    /**
+     * @param ContainerBuilder     $container
+     * @param Loader\XmlFileLoader $loader
+     * @param array                $config
+     */
+    private function processLanguageSelection(ContainerBuilder $container, Loader\XmlFileLoader $loader, array $config)
+    {
+        if (!$config['enabled']) {
+            return;
+        }
+
+        $container->setParameter('emsch.language_selection.client_request', $config['client_request']);
+        $container->setParameter('emsch.language_selection.option_type', $config['option_type']);
+        $container->setParameter('emsch.language_selection.supported_locale', $config['supported_locale']);
+
+        $loader->load('language_selection.xml');
     }
 }

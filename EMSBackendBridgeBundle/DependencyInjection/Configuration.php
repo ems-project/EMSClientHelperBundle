@@ -24,6 +24,7 @@ class Configuration implements ConfigurationInterface
         $this->addElasticmsSection($rootNode);
         $this->addApiSection($rootNode);
         $this->addTwigListSection($rootNode);
+        $this->addLanguageSelection($rootNode);
         
         return $treeBuilder;
     }
@@ -157,6 +158,42 @@ class Configuration implements ConfigurationInterface
                                 ->children()
                                     ->scalarNode('path')->cannotBeEmpty()->end()
                                     ->scalarNode('namespace')->defaultNull()->end()
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
+            ->end()
+        ;
+    }
+
+    /**
+     * @param ArrayNodeDefinition $rootNode
+     */
+    private function addLanguageSelection(ArrayNodeDefinition $rootNode)
+    {
+        $rootNode
+            ->children()
+                ->arrayNode('language_selection')
+                    ->canBeEnabled()
+                    ->children()
+                        ->scalarNode('client_request')
+                            ->isRequired()
+                            ->beforeNormalization()
+                                ->always(function ($v) { return 'emsch.client_request.'.$v; })
+                            ->end()
+                        ->end()
+                        ->scalarNode('option_type')
+                            ->isRequired()
+                            ->info('elasticsearch document type for the language options')
+                        ->end()
+                        ->arrayNode('supported_locale')
+                            ->isRequired()
+                            ->requiresAtLeastOneElement()
+                            ->prototype('array')
+                                ->children()
+                                    ->scalarNode('locale')->cannotBeEmpty()->end()
+                                    ->scalarNode('logo_path')->cannotBeEmpty()->end()
                                 ->end()
                             ->end()
                         ->end()

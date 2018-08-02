@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services
+        http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <defaults public="false" />
+
+        <service id="emsch.language_selection" class="EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\LanguageSelectionService">
+            <argument/>
+            <argument type="string">%emsch.language_selection.supported_locale%</argument>
+            <argument type="string">%emsch.language_selection.option_type%</argument>
+        </service>
+        <service id="emsch.controller.language_selection" class="EMS\ClientHelperBundle\EMSBackendBridgeBundle\Controller\LanguageSelectionController" public="true">
+            <argument type="service" id="emsch.language_selection" />
+        </service>
+
+        <service id="emsch.locale.listener" class="EMS\ClientHelperBundle\EMSBackendBridgeBundle\EventListener\LocaleListener">
+            <argument type="service" id="emsch.language_selection" />
+            <argument type="service" id="http_kernel" />
+            <argument type="service" id="router" />
+            <tag name="kernel.event_subscriber" />
+        </service>
+    </services>
+</container>
