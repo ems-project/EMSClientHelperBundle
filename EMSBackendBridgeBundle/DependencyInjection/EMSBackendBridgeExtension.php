@@ -5,6 +5,7 @@ namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\DependencyInjection;
 use Composer\CaBundle\CaBundle;
 use Elasticsearch\Client;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Api\ApiClient;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Controller\TwigListController;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Translation\TranslationLoader;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Twig\TemplateLoader;
@@ -39,6 +40,13 @@ class EMSBackendBridgeExtension extends Extension
         $this->processApi($container, $config['api']);
         if (isset($config['clear_cache'])) {
             $this->processClearCache($container, $config['clear_cache'], $config['elasticms']);
+        }
+
+        $this->processRequestEnvironments($container, $config['request_environments']);
+
+        if (isset($config['twig_list'])) {
+            $definition = $container->getDefinition(TwigListController::class);
+            $definition->replaceArgument(1, $config['twig_list']['templates']);
         }
     }
 

@@ -55,8 +55,16 @@
             <tag name="console.command" />
         </service>
 
-        <prototype namespace="EMS\ClientHelperBundle\EMSBackendBridgeBundle\Controller\" resource="../../Controller">
+        <!-- controllers -->
+        <service id="EMS\ClientHelperBundle\EMSBackendBridgeBundle\Controller\TwigListController" public="true">
+            <argument type="service" id="kernel" />
+            <argument/>
+        </service>
+
+
+
+<!--        <prototype namespace="EMS\ClientHelperBundle\EMSBackendBridgeBundle\Controller\" resource="../../Controller">
             <tag name="controller.service_arguments" />
-        </prototype>
+        </prototype>-->
     </services>
 </container>
