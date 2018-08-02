@@ -1,3 +1,0 @@
-ems_language_selection:
-    resource: '@EMSLanguageSelectionBundle/Controller/'
-    type : annotation
