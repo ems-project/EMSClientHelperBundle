@@ -167,7 +167,7 @@ class HealthCheckCommand extends Command
     /**
      * @param SymfonyStyle $io
      * @param bool $skip
-     * @return type
+     * @return void
      * @throws AssetsFolderNotFoundException
      * @throws AssetsFolderEmptyException
      */

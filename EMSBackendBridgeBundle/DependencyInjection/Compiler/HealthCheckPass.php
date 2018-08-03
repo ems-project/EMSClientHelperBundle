@@ -36,7 +36,7 @@ class HealthCheckPass implements CompilerPassInterface
     
     /**
      * @param ContainerBuilder $container
-     * @param Definition $command
+     * @param Definition       $command
      */
     private function addClientRequests(ContainerBuilder $container, $command)
     {

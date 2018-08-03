@@ -1,10 +1,10 @@
 <?php
 
-namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Api;
+namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\Api;
 
-use GuzzleHttp\Client;
+use GuzzleHttp\Client as BaseClient;
 
-class ApiClient
+class Client
 {
     /**
      * @var Client
@@ -23,7 +23,7 @@ class ApiClient
     public function __construct($baseUrl, $key)
     {
         $this->key = $key;
-        $this->client = new Client([
+        $this->client = new BaseClient([
             'base_uri' => $baseUrl,
             'headers' => ['X-Auth-Token' => $this->key]
         ]);

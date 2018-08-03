@@ -1,10 +1,10 @@
 <?php
 
-namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Model;
+namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\Api;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-class ApiResponse
+class Response
 {
     /**
      * @var array

@@ -1,10 +1,9 @@
 <?php
 
-namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service;
+namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\Api;
 
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
-use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Exception\ApiNotFoundException;
-use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Model\ApiResponse;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ApiService
@@ -33,9 +32,7 @@ class ApiService
      */
     public function addClientRequest(ClientRequest $clientRequest)
     {
-        if (true === $clientRequest->getOption('[api][enabled]')) {
-            $name = $clientRequest->getOption('[api][name]');
-
+        if ($name = $clientRequest->getOption('[api][name]', false)) {
             $this->clientRequests[$name] = $clientRequest;
         }
     }
@@ -43,13 +40,13 @@ class ApiService
     /**
      * @param string $apiName
      *
-     * @return ApiResponse
+     * @return Response
      *
-     * @throws ApiNotFoundException
+     * @throws NotFoundHttpException
      */
     public function getContentTypes($apiName)
     {
-        $response = new ApiResponse();
+        $response = new Response();
         $contentTypes = $this->getClientRequest($apiName)->getContentTypes();
 
         foreach ($contentTypes as $contentType) {
@@ -61,7 +58,7 @@ class ApiService
             $response->addData('content_types', [
                 'name' => $contentType,
                 '_links' => [
-                    ApiResponse::createLink('self', $url, $contentType)
+                    Response::createLink('self', $url, $contentType)
                 ]
             ]);
         }
@@ -76,14 +73,14 @@ class ApiService
      * @param string $size
      * @param string $scrollId
      *
-     * @return ApiResponse
+     * @return Response
      */
     public function getContentType($apiName, $contentType, array $filter = [], $size = null, $scrollId = null)
     {
-        $response = new ApiResponse();
+        $response = new Response();
 
         $urlParent = $this->urlGenerator->generate('emsch_api_content_types', ['apiName' => $apiName]);
-        $response->addData('_links', [ApiResponse::createLink('content-types', $urlParent, 'content types')]);
+        $response->addData('_links', [Response::createLink('content-types', $urlParent, 'content types')]);
 
         $results = $this->getClientRequest($apiName)->scroll($contentType, $filter, $size, $scrollId);
 
@@ -101,7 +98,7 @@ class ApiService
             ]);
 
             $data = array_merge_recursive(['id' => $document['_id']], $document['_source']);
-            $data['_links'] = [ApiResponse::createLink('self', $url, $contentType)];
+            $data['_links'] = [Response::createLink('self', $url, $contentType)];
 
             $response->addData('all', $data);
         }
@@ -114,7 +111,7 @@ class ApiService
      * @param string $contentType
      * @param string $ouuid
      *
-     * @return ApiResponse
+     * @return Response
      */
     public function getDocument($apiName, $contentType, $ouuid)
     {
@@ -125,8 +122,8 @@ class ApiService
 
         $document = $this->getClientRequest($apiName)->get($contentType, $ouuid);
 
-        $response = new ApiResponse();
-        $response->addData('_links', [ApiResponse::createLink('all', $urlParent, $contentType)]);
+        $response = new Response();
+        $response->addData('_links', [Response::createLink('all', $urlParent, $contentType)]);
         $response->addData($contentType, array_merge_recursive(['id' => $document['_id']], $document['_source']));
 
         return $response;
@@ -137,12 +134,12 @@ class ApiService
      *
      * @return ClientRequest
      *
-     * @throws ApiNotFoundException
+     * @throws NotFoundHttpException
      */
     private function getClientRequest($apiName)
     {
         if (!isset($this->clientRequests[$apiName])) {
-            throw new ApiNotFoundException();
+            throw new NotFoundHttpException();
         }
 
         return $this->clientRequests[$apiName];

@@ -100,7 +100,7 @@ class Configuration implements ConfigurationInterface
                                     ->scalarNode('name')
                                         ->isRequired()
                                     ->end()
-                                    ->booleanNode('protected')
+                                    ->booleanNode('protected') // @todo is this used?
                                         ->defaultTrue()
                                     ->end()
                                 ->end()
@@ -127,7 +127,7 @@ class Configuration implements ConfigurationInterface
                         ->info('name for the ems-project')
                         ->children()
                             ->scalarNode('url')
-                                ->info("url of the elasticms withoud /api")
+                                ->info("url of the elasticms without /api")
                                 ->isRequired()
                             ->end()
                             ->scalarNode('key')

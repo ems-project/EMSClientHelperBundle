@@ -4,7 +4,6 @@ namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Twig;
 
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
 use Twig\Extension\AbstractExtension;
-use Twig\TwigFunctions;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class EditionExtension extends AbstractExtension
@@ -17,7 +16,6 @@ class EditionExtension extends AbstractExtension
 
     /**
      * @param RequestStack $requestStack
-     * @param ContainerInterface $container
      */
     public function __construct(
         RequestStack $requestStack

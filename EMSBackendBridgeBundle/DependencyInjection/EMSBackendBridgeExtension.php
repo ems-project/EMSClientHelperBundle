@@ -4,17 +4,15 @@ namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\DependencyInjection;
 
 use Composer\CaBundle\CaBundle;
 use Elasticsearch\Client;
-use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Api\ApiClient;
-use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Controller\TwigListController;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\Api\Client as ApiClient;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
-use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\LanguageSelectionService;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Translation\TranslationLoader;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Twig\TemplateLoader;
 use EMS\CommonBundle\Elasticsearch\Factory;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Loader;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\ClearCacheService;
@@ -30,14 +28,14 @@ class EMSBackendBridgeExtension extends Extension
      */
     public function load(array $configs, ContainerBuilder $container)
     {
-        $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
 
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
         $this->processRequestEnvironments($container, $config['request_environments']);
-        $this->processElasticms($container, $config['elasticms']);
+        $this->processElasticms($container, $loader, $config['elasticms']);
         $this->processApi($container, $config['api']);
         if (isset($config['clear_cache'])) {
             $this->processClearCache($container, $config['clear_cache'], $config['elasticms']);
@@ -46,15 +44,13 @@ class EMSBackendBridgeExtension extends Extension
         $this->processRequestEnvironments($container, $config['request_environments']);
 
         if (isset($config['twig_list'])) {
-            $definition = $container->getDefinition(TwigListController::class);
+            $definition = $container->getDefinition('emsch.controller.twig_list');
             $definition->replaceArgument(1, $config['twig_list']['templates']);
         }
 
         $this->processLanguageSelection($container, $loader, $config['language_selection']);
 
     }
-
-
 
     /**
      * @param ContainerBuilder $container
@@ -81,13 +77,14 @@ class EMSBackendBridgeExtension extends Extension
 
     /**
      * @param ContainerBuilder $container
-     * @param array $config
+     * @param XmlFileLoader    $loader
+     * @param array            $config
      */
-    private function processElasticms(ContainerBuilder $container, array $config)
+    private function processElasticms(ContainerBuilder $container, XmlFileLoader $loader, array $config)
     {
         foreach ($config as $name => $options) {
             $this->defineElasticsearchClient($container, $name, $options);
-            $this->defineClientRequest($container, $name, $options);
+            $this->defineClientRequest($container, $loader, $name, $options);
 
             if (null !== $options['translation_type']) {
                 $this->defineTranslationLoader($container, $name, $options);
@@ -110,7 +107,7 @@ class EMSBackendBridgeExtension extends Extension
             $definition->setArgument(0, $options['url']);
             $definition->setArgument(1, $options['key']);
 
-            $container->setDefinition(sprintf('emsch.api.%s', $name), $definition);
+            $container->setDefinition(sprintf('emsch.api_client.%s', $name), $definition);
         }
     }
 
@@ -146,7 +143,7 @@ class EMSBackendBridgeExtension extends Extension
         ];
 
         $definition
-            ->setFactory([new Reference(Factory::class), 'fromConfig'])
+            ->setFactory([new Reference('ems_common.elasticsearch.factory'), 'fromConfig'])
             ->setArgument(0, $config)
             ->setPublic(true);
         $definition->addTag('emsch.elasticsearch.client');
@@ -156,10 +153,11 @@ class EMSBackendBridgeExtension extends Extension
 
     /**
      * @param ContainerBuilder $container
-     * @param string $name
-     * @param array $options
+     * @param XmlFileLoader    $loader
+     * @param string           $name
+     * @param array            $options
      */
-    private function defineClientRequest(ContainerBuilder $container, $name, array $options)
+    private function defineClientRequest(ContainerBuilder $container, XmlFileLoader $loader, $name, array $options)
     {
         $definition = new Definition(ClientRequest::class);
         $definition->setArguments([
@@ -170,8 +168,26 @@ class EMSBackendBridgeExtension extends Extension
             $name
         ]);
         $definition->addTag('emsch.client_request');
-
         $container->setDefinition(sprintf('emsch.client_request.%s', $name), $definition);
+
+        if ($options['api']['enabled']) {
+            $this->loadClientRequestApi($loader);
+        }
+    }
+
+    /**
+     * @param XmlFileLoader $loader
+     */
+    private function loadClientRequestApi(XmlFileLoader $loader)
+    {
+        static $loaded = false;
+
+        if ($loaded) {
+            return;
+        }
+
+        $loader->load('api.xml');
+        $loaded = true;
     }
 
     /**
@@ -179,7 +195,7 @@ class EMSBackendBridgeExtension extends Extension
      * @param string $name
      * @param array $options
      */
-    protected function defineTranslationLoader(ContainerBuilder $container, $name, array $options)
+    private function defineTranslationLoader(ContainerBuilder $container, $name, array $options)
     {
         $loader = new Definition(TranslationLoader::class);
         $loader->setArguments([
@@ -198,7 +214,7 @@ class EMSBackendBridgeExtension extends Extension
      * @param string           $name
      * @param array            $options
      */
-    protected function defineTemplateLoader(ContainerBuilder $container, $name, array $options)
+    private function defineTemplateLoader(ContainerBuilder $container, $name, array $options)
     {
         $loader = new Definition(TemplateLoader::class);
         $loader->setArguments([
@@ -212,10 +228,10 @@ class EMSBackendBridgeExtension extends Extension
 
     /**
      * @param ContainerBuilder $container
-     * @param string $name
-     * @param array $options
+     * @param string           $domain
+     * @param string           $translationType
      */
-    protected function defineClearCacheListener(ContainerBuilder $container, $domain, $translationType)
+    private function defineClearCacheListener(ContainerBuilder $container, $domain, $translationType)
     {
         $cachePath = $container->getParameter('kernel.cache_dir');
 
@@ -246,11 +262,11 @@ class EMSBackendBridgeExtension extends Extension
     }
 
     /**
-     * @param ContainerBuilder     $container
-     * @param Loader\XmlFileLoader $loader
-     * @param array                $config
+     * @param ContainerBuilder $container
+     * @param XmlFileLoader    $loader
+     * @param array            $config
      */
-    private function processLanguageSelection(ContainerBuilder $container, Loader\XmlFileLoader $loader, array $config)
+    private function processLanguageSelection(ContainerBuilder $container, XmlFileLoader $loader, array $config)
     {
         if (!$config['enabled']) {
             return;

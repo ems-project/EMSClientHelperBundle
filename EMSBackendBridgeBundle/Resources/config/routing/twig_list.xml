@@ -4,6 +4,10 @@
         xsi:schemaLocation="http://symfony.com/schema/routing
         http://symfony.com/schema/routing/routing-1.0.xsd">
     <!-- only load in dev environment! -->
-    <route id="_emsch_templates" controller="EMSBackendBridgeBundle:TwigList:list" path="/templates" />
-    <route id="_emsch_template" controller="EMSBackendBridgeBundle:TwigList:template" path="/template" />
+    <route id="_emsch_templates" path="/templates">
+        <default key="_controller">emsch.controller.twig_list::listAction</default>
+    </route>
+    <route id="_emsch_template" path="/template">
+        <default key="_controller">emsch.controller.twig_list::templateAction</default>
+    </route>
 </routes>

@@ -4,14 +4,14 @@ namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Controller;
 
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Exception\SingleResultException;
-use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\ApiService;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+/**
+ * @todo remove
+ */
 class ZeController extends AbstractController
 {
     /**
