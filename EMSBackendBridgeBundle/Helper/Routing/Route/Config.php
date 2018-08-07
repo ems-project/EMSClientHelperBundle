@@ -1,8 +1,7 @@
 <?php
 
-namespace EMS\ClientHelperBundle\EMSRoutingBundle\Routing;
+namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\Routing\Route;
 
-use EMS\ClientHelperBundle\EMSRoutingBundle\Controller\DynamicController;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\Route;
@@ -60,7 +59,7 @@ class Config
         $resolver = new OptionsResolver();
         $resolver
             ->setDefaults([
-                'defaults' => ['_controller' => Router::class . ':handle'],
+                'defaults' => ['_controller' => 'emsch.routing.router::handle'],
                 'requirements' => [],
                 'options' => [],
                 'template' => null,

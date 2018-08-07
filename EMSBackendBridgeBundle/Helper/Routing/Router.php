@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\EMSRoutingBundle\Routing;
+namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\Routing;
 
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Exception\SingleResultException;

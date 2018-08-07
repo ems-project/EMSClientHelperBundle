@@ -24,7 +24,6 @@ class EMSRoutingExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
         
         $container->setParameter('ems_routing.client_request', $config['client_request']);
-        $container->setParameter('ems_routing.file_manager', $config['file_manager']);
         $container->setParameter('ems_routing.url_helper', $config['url_helper']);
         $container->setParameter('ems_routing.redirection', $config['redirection']);
     }

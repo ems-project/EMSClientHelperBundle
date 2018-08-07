@@ -34,5 +34,9 @@ class InjectClientRequestPass implements CompilerPassInterface
         if ($container->hasDefinition('emsch.file_manager')) {
             $container->getDefinition('emsch.file_manager')->setArgument(0, $clientRequest);
         }
+
+        if ($container->hasDefinition('emsch.routing.router')) {
+            $container->getDefinition('emsch.routing.router')->setArgument(0, $clientRequest);
+        }
     }
 }

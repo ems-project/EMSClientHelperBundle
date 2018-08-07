@@ -30,8 +30,5 @@ class ClientRequestPass implements CompilerPassInterface
         
         $routingService = $container->getDefinition(RoutingService::class);
         $routingService->setArgument(0, $container->findDefinition($id));
-        
-        $twigLoader = $container->getDefinition(Router::class);
-        $twigLoader->setArgument(0, $container->findDefinition($id));
     }
 }

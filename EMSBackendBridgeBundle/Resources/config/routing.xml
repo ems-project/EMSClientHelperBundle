@@ -7,7 +7,16 @@
     <services>
         <defaults public="false" />
 
-
+        <service id="emsch.routing.router" class="EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\Routing\Router" public="true">
+            <argument/>
+            <argument type="service" id="router"/>
+            <argument type="service" id="templating"/>
+            <tag name="controller.service_arguments" />
+        </service>
+        <service id="emsch.routing.loader" class="EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\Routing\Route\Loader">
+            <argument type="string">%kernel.project_dir%</argument>
+            <tag name="routing.loader" />
+        </service>
 
     </services>
 </container>

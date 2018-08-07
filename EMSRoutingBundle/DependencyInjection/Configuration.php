@@ -33,36 +33,10 @@ class Configuration implements ConfigurationInterface
             ->end()
         ;
 
-        $this->addFileManagerSection($rootNode);
         $this->addUrlHelperSection($rootNode);
         $this->addRedirectSection($rootNode);
 
         return $treeBuilder;
-    }
-
-    /**
-     * @param ArrayNodeDefinition $rootNode
-     */
-    private function addFileManagerSection(ArrayNodeDefinition $rootNode)
-    {
-        $rootNode
-            ->children()
-                ->arrayNode('file_manager')
-                    ->info(FileManager::class)
-                    ->canBeEnabled()
-                    ->children()
-                        ->scalarNode('content_type')->cannotBeEmpty()->end()
-                        ->arrayNode('property_paths')
-                            ->children()
-                                ->scalarNode('filename')->cannotBeEmpty()->end()
-                                ->scalarNode('mimetype')->cannotBeEmpty()->end()
-                                ->scalarNode('sha1')->cannotBeEmpty()->end()
-                            ->end()
-                        ->end()
-                    ->end()
-                ->end()
-            ->end()
-        ;
     }
 
     /**
