@@ -5,6 +5,7 @@ namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Translation\TranslatorInterface;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\Routing\RequestHelper;
 
 class ClearCacheService
 {
@@ -19,9 +20,9 @@ class ClearCacheService
     private $translator;
     
     /**
-     * @var RequestService
+     * @var RequestHelper
      */
-    private $requestService;
+    private $requestHelper;
     
     /**
      * @var ClientRequest
@@ -41,16 +42,16 @@ class ClearCacheService
     const TIMESTAMP_PREFIX = 'cache_timestamp_';
         
     /**
-     * @param string $cachePath
+     * @param string              $cachePath
      * @param TranslatorInterface $translator
-     * @param RequestService $requestService
-     * @param ClientRequest $clientRequest
-     * @param string $translationType
+     * @param RequestHelper       $requestHelper
+     * @param ClientRequest       $clientRequest
+     * @param string              $translationType
      */
     public function __construct(
             $cachePath, 
             TranslatorInterface $translator,
-            RequestService $requestService,
+            RequestHelper $requestHelper,
             ClientRequest $clientRequest,
             $translationType
     )
@@ -59,7 +60,7 @@ class ClearCacheService
         $this->translationCachePath = $cachePath . DIRECTORY_SEPARATOR . 'translations';
         
         $this->translator = $translator;
-        $this->requestService = $requestService;
+        $this->requestHelper = $requestHelper;
         $this->clientRequest = $clientRequest;
         $this->translationType = $translationType;
     }
@@ -101,7 +102,7 @@ class ClearCacheService
             return null;
         }
             
-        $domain = $this->requestService->getEnvironment();
+        $domain = $this->requestHelper->getEnvironment();
         $datestr = $this->translator->trans(self::TIMESTAMP_PREFIX . $domain);
         
         if($datestr !== self::TIMESTAMP_PREFIX . $domain){            

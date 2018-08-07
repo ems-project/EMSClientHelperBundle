@@ -1,0 +1,20 @@
+{# This file is part of the EMSClientHelperBundle #}
+
+{% extends '@EMSBackendBridge/TwigList/base.html.twig' %}
+
+{% block info %}
+	<div class="info">
+		<p>'This is the {{ template }} template. Feel free to override it.' </p>
+   		<p>To do so, find the original file in <span>{{ path }}</span><br/> and copy it to your project's <span>app/Resources/EMSClientHelperBundle/TwigList/views/</span> folder whith respect to the original folder structure</p>
+   	</div>
+{% endblock %}
+
+{% block body %}
+    <div id="wrapper">
+        <div id="container">
+            <div id="welcome">
+                <h1><span>Welcome to {{ template }}.html.twig</span></h1>
+            </div>
+        </div>
+    </div>
+{% endblock %}

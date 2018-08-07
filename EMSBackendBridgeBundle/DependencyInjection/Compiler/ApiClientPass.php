@@ -13,10 +13,11 @@ class ApiClientPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        if (!$container->has('emsch.api.service')) {
+        if (!$container->has('emsch.api')) {
             return;
         }
-        $apiService = $container->findDefinition('emsch.api.service');
+
+        $apiService = $container->findDefinition('emsch.api');
         $clientRequests = $container->findTaggedServiceIds('emsch.client_request');
 
         foreach ($clientRequests as $id => $tags) {

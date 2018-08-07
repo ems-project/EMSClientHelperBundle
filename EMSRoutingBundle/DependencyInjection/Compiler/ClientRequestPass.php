@@ -2,6 +2,10 @@
 
 namespace EMS\ClientHelperBundle\EMSRoutingBundle\DependencyInjection\Compiler;
 
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\EMSRoutingBundle\Controller\DynamicController;
+use EMS\ClientHelperBundle\EMSRoutingBundle\Routing\EMSLoader;
+use EMS\ClientHelperBundle\EMSRoutingBundle\Routing\Router;
 use EMS\ClientHelperBundle\EMSRoutingBundle\Service\FileManager;
 use EMS\ClientHelperBundle\EMSRoutingBundle\Service\RoutingService;
 use EMS\ClientHelperBundle\EMSRoutingBundle\Twig\TemplateLoader;
@@ -26,11 +30,8 @@ class ClientRequestPass implements CompilerPassInterface
         
         $routingService = $container->getDefinition(RoutingService::class);
         $routingService->setArgument(0, $container->findDefinition($id));
-
-        $fileManager = $container->getDefinition(FileManager::class);
-        $fileManager->setArgument(0, $container->findDefinition($id));
         
-        $twigLoader = $container->getDefinition(TemplateLoader::class);
+        $twigLoader = $container->getDefinition(Router::class);
         $twigLoader->setArgument(0, $container->findDefinition($id));
     }
 }

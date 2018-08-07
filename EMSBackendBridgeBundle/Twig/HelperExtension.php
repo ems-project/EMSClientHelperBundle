@@ -15,7 +15,7 @@ class HelperExtension extends AbstractExtension
     private $requestStack;
 
     /**
-     * @param RequestService       $requestService
+     * @param RequestStack $requestStack
      */
     public function __construct( RequestStack $requestStack )
     {

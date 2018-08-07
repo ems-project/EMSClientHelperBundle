@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\DependencyInjection;
 
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\File\FileManager;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -23,6 +24,9 @@ class Configuration implements ConfigurationInterface
         $this->addRequestEnvironmentsSection($rootNode);
         $this->addElasticmsSection($rootNode);
         $this->addApiSection($rootNode);
+        $this->addTwigListSection($rootNode);
+        $this->addLanguageSelection($rootNode);
+        $this->addRoutingSelection($rootNode);
         
         return $treeBuilder;
     }
@@ -70,7 +74,6 @@ class Configuration implements ConfigurationInterface
                             ->variableNode('hosts')
                                 ->info('elasticsearch hosts')
                                 ->isRequired()
-                                //->prototype('scalar')->end()
                             ->end()
                             ->scalarNode('index_prefix')
                                 ->info("example: 'test_'")
@@ -80,21 +83,12 @@ class Configuration implements ConfigurationInterface
                                 ->info("example: 'test_i18n'")
                                 ->defaultValue(null)
                             ->end()
-                            ->scalarNode('template_type')
-                                ->info("example: 'test_template'")
-                                ->defaultValue(null)
+                            ->variableNode('templates')
+                                ->example('{"template": {"name": "key","code": "body"}}')
                             ->end()
-                            ->arrayNode('api')
-                                ->canBeEnabled()
+                            ->variableNode('api')
                                 ->info('api for content exposing')
-                                ->children()
-                                    ->scalarNode('name')
-                                        ->isRequired()
-                                    ->end()
-                                    ->booleanNode('protected')
-                                        ->defaultTrue()
-                                    ->end()
-                                ->end()
+                                ->example('{"enable": true, "name": "api"}')
                             ->end()
                         ->end()
                     ->end()
@@ -118,7 +112,7 @@ class Configuration implements ConfigurationInterface
                         ->info('name for the ems-project')
                         ->children()
                             ->scalarNode('url')
-                                ->info("url of the elasticms withoud /api")
+                                ->info("url of the elasticms without /api")
                                 ->isRequired()
                             ->end()
                             ->scalarNode('key')
@@ -127,6 +121,104 @@ class Configuration implements ConfigurationInterface
                             ->end()
                         ->end()
                     ->end()
+                ->end()
+            ->end()
+        ;
+    }
+
+    /**
+     * @param ArrayNodeDefinition $rootNode
+     */
+    private function addTwigListSection(ArrayNodeDefinition $rootNode)
+    {
+        $rootNode
+            ->children()
+                ->arrayNode('twig_list')
+                    ->children()
+                        ->arrayNode('templates')
+                            ->defaultValue([
+                                ['path'  => '@EMSBackendBridgeBundle/Resources/views/TwigList', 'namespace'  => '@EMSBackendBridgeBundle/TwigList']
+                            ])
+                            ->prototype('array')
+                                ->children()
+                                    ->scalarNode('path')->cannotBeEmpty()->end()
+                                    ->scalarNode('namespace')->defaultNull()->end()
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
+            ->end()
+        ;
+    }
+
+    /**
+     * @param ArrayNodeDefinition $rootNode
+     */
+    private function addLanguageSelection(ArrayNodeDefinition $rootNode)
+    {
+        $rootNode
+            ->children()
+                ->arrayNode('language_selection')
+                    ->canBeEnabled()
+                    ->children()
+                        ->scalarNode('client_request')
+                            ->isRequired()
+                            ->beforeNormalization()
+                                ->always(function ($v) { return 'emsch.client_request.'.$v; })
+                            ->end()
+                        ->end()
+                        ->scalarNode('option_type')
+                            ->isRequired()
+                            ->info('elasticsearch document type for the language options')
+                        ->end()
+                        ->arrayNode('supported_locale')
+                            ->isRequired()
+                            ->requiresAtLeastOneElement()
+                            ->prototype('array')
+                                ->children()
+                                    ->scalarNode('locale')->cannotBeEmpty()->end()
+                                    ->scalarNode('logo_path')->cannotBeEmpty()->end()
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
+            ->end()
+        ;
+    }
+
+    /**
+     * @param ArrayNodeDefinition $rootNode
+     */
+    private function addRoutingSelection(ArrayNodeDefinition $rootNode)
+    {
+        $rootNode
+            ->children()
+                ->arrayNode('routing')
+                ->canBeEnabled()
+                ->children()
+                    ->scalarNode('client_request')
+                        ->isRequired()
+                        ->beforeNormalization()
+                            ->always(function ($v) { return 'emsch.client_request.'.$v; })
+                        ->end()
+                    ->end()
+                    ->arrayNode('file_manager')
+                        ->info(FileManager::class)
+                        ->canBeEnabled()
+                        ->children()
+                            ->scalarNode('content_type')->cannotBeEmpty()->end()
+                            ->arrayNode('property_paths')
+                                ->children()
+                                    ->scalarNode('filename')->cannotBeEmpty()->end()
+                                    ->scalarNode('mimetype')->cannotBeEmpty()->end()
+                                    ->scalarNode('sha1')->cannotBeEmpty()->end()
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+
                 ->end()
             ->end()
         ;

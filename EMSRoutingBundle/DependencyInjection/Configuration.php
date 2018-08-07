@@ -32,46 +32,12 @@ class Configuration implements ConfigurationInterface
                 ->end()
             ->end()
         ;
-        
-        $this->addTemplateLoaderSection($rootNode);
+
         $this->addFileManagerSection($rootNode);
         $this->addUrlHelperSection($rootNode);
         $this->addRedirectSection($rootNode);
 
         return $treeBuilder;
-    }
-
-    /**
-     * @param ArrayNodeDefinition $rootNode
-     */
-    private function addTemplateLoaderSection(ArrayNodeDefinition $rootNode)
-    {
-        $rootNode
-            ->children()
-                ->arrayNode('template_loader')
-                    ->info(TemplateLoader::class)
-                    ->children()
-                        ->scalarNode('content_type')
-                            ->cannotBeEmpty()
-                            ->defaultValue('routing')
-                        ->end()
-                        ->scalarNode('search')
-                            ->info('json body for searching the template, placeholder $template$')
-                            ->cannotBeEmpty()
-                        ->end()
-                        ->scalarNode('field')
-                            ->info('document template field')
-                            ->cannotBeEmpty()
-                            ->defaultValue('template')
-                        ->end()
-                        ->booleanNode('cache')
-                            ->info('enable twig cache')
-                            ->defaultTrue()
-                        ->end()
-                    ->end()
-                ->end()
-            ->end()
-        ;
     }
 
     /**
