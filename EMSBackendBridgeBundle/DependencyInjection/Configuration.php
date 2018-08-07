@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\DependencyInjection;
 
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\File\FileManager;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -25,6 +26,7 @@ class Configuration implements ConfigurationInterface
         $this->addApiSection($rootNode);
         $this->addTwigListSection($rootNode);
         $this->addLanguageSelection($rootNode);
+        $this->addRoutingSelection($rootNode);
         
         return $treeBuilder;
     }
@@ -81,29 +83,12 @@ class Configuration implements ConfigurationInterface
                                 ->info("example: 'test_i18n'")
                                 ->defaultValue(null)
                             ->end()
-                            ->arrayNode('templates')
-                                ->prototype('array')
-                                    ->children()
-                                        ->scalarNode('name')
-                                            ->defaultValue('name')
-                                        ->end()
-                                        ->scalarNode('code')
-                                            ->defaultValue('body')
-                                        ->end()
-                                    ->end()
-                                ->end()
+                            ->variableNode('templates')
+                                ->example('{"template": {"name": "key","code": "body"}}')
                             ->end()
-                            ->arrayNode('api')
-                                ->canBeEnabled()
+                            ->variableNode('api')
                                 ->info('api for content exposing')
-                                ->children()
-                                    ->scalarNode('name')
-                                        ->isRequired()
-                                    ->end()
-                                    ->booleanNode('protected') // @todo is this used?
-                                        ->defaultTrue()
-                                    ->end()
-                                ->end()
+                                ->example('{"enable": true, "name": "api"}')
                             ->end()
                         ->end()
                     ->end()
@@ -198,6 +183,42 @@ class Configuration implements ConfigurationInterface
                             ->end()
                         ->end()
                     ->end()
+                ->end()
+            ->end()
+        ;
+    }
+
+    /**
+     * @param ArrayNodeDefinition $rootNode
+     */
+    private function addRoutingSelection(ArrayNodeDefinition $rootNode)
+    {
+        $rootNode
+            ->children()
+                ->arrayNode('routing')
+                ->canBeEnabled()
+                ->children()
+                    ->scalarNode('client_request')
+                        ->isRequired()
+                        ->beforeNormalization()
+                            ->always(function ($v) { return 'emsch.client_request.'.$v; })
+                        ->end()
+                    ->end()
+                    ->arrayNode('file_manager')
+                        ->info(FileManager::class)
+                        ->canBeEnabled()
+                        ->children()
+                            ->scalarNode('content_type')->cannotBeEmpty()->end()
+                            ->arrayNode('property_paths')
+                                ->children()
+                                    ->scalarNode('filename')->cannotBeEmpty()->end()
+                                    ->scalarNode('mimetype')->cannotBeEmpty()->end()
+                                    ->scalarNode('sha1')->cannotBeEmpty()->end()
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+
                 ->end()
             ->end()
         ;

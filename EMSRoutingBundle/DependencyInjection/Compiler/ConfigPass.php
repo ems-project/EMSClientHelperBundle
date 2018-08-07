@@ -18,12 +18,6 @@ class ConfigPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        $fileManager = $container->getDefinition(FileManager::class);
-        $fileManager->addMethodCall(
-            'setConfig',
-            [$container->getParameter('ems_routing.file_manager')]
-        );
-        
         $urlGenerator = $container->getDefinition(UrlHelperService::class);
         $urlGenerator->addMethodCall(
             'setConfig',

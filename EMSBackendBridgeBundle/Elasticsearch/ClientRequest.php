@@ -6,7 +6,7 @@ use Elasticsearch\Client;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Entity\HierarchicalStructure;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Exception\SingleResultException;
-use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\RequestService;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\Routing\RequestHelper;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -18,9 +18,9 @@ class ClientRequest
     private $client;
 
     /**
-     * @var RequestService
+     * @var RequestHelper
      */
-    private $requestService;
+    private $requestHelper;
 
     /**
      * @var string
@@ -46,21 +46,21 @@ class ClientRequest
 
     /**
      * @param Client          $client
-     * @param RequestService  $requestService
+     * @param RequestHelper   $requestHelper
      * @param LoggerInterface $logger
      * @param array           $options
      * @param string          $name
      */
     public function __construct(
         Client $client,
-        RequestService $requestService,
+        RequestHelper $requestHelper,
         LoggerInterface $logger,
         array $options = [],
         $name
     )
     {
         $this->client = $client;
-        $this->requestService = $requestService;
+        $this->requestHelper = $requestHelper;
         $this->logger = $logger;
         $this->options = $options;
         $this->indexPrefix = isset($options[self::OPTION_INDEX_PREFIX]) ? $options[self::OPTION_INDEX_PREFIX] : null;
@@ -289,7 +289,7 @@ class ClientRequest
      */
     public function getLocale()
     {
-        return $this->requestService->getLocale();
+        return $this->requestHelper->getLocale();
     }
 
     /**
@@ -536,7 +536,7 @@ class ClientRequest
      */
     public function getTranslationDomain()
     {
-        $environment = $this->requestService->getEnvironment();
+        $environment = $this->requestHelper->getEnvironment();
 
         return $this->name . '_' . $environment;
     }
@@ -548,7 +548,7 @@ class ClientRequest
      */
     private function getIndex()
     {
-        $environment = $this->requestService->getEnvironment();
+        $environment = $this->requestHelper->getEnvironment();
 
         if($environment === null) {
             throw new EnvironmentNotFoundException();

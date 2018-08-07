@@ -1,7 +1,7 @@
 <?php
 namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Twig;
 
-use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
 
 class TemplateLoader implements \Twig_LoaderInterface
 {

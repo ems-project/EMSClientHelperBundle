@@ -1,10 +1,9 @@
 <?php
 
-namespace EMS\ClientHelperBundle\EMSRoutingBundle\Service;
+namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\File;
 
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Storage\StorageService;
-use EMS\ClientHelperBundle\EMSRoutingBundle\EMSFileInfo;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
@@ -48,13 +47,13 @@ class FileManager
     /**
      * @param string $ouuid
      * 
-     * @return EMSFileInfo
+     * @return FileInfo
      */
     public function getFileInfo($ouuid)
     {
         $document = $this->getDocument($ouuid);
         
-        return new EMSFileInfo(
+        return new FileInfo(
             $this->getDocumentValue($document, 'filename'),
             $this->getDocumentValue($document, 'mimetype'),
             $this->getDocumentValue($document, 'sha1')

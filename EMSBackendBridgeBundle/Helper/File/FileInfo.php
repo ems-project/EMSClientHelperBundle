@@ -1,13 +1,11 @@
 <?php
 
-namespace EMS\ClientHelperBundle\EMSRoutingBundle;
-
-use Symfony\Component\HttpFoundation\File\File;
+namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\File;
 
 /**
  * Document elasticsearch
  */
-class EMSFileInfo
+class FileInfo
 {
     /**
      * @var string
