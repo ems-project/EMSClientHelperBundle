@@ -20,8 +20,5 @@
         </service>
         
         <prototype namespace="EMS\ClientHelperBundle\EMSRoutingBundle\" resource="../../../EMSRoutingBundle/*" exclude="../../../EMSRoutingBundle/Routing" />
-        <prototype namespace="EMS\ClientHelperBundle\EMSRoutingBundle\Controller\" resource="../../../EMSRoutingBundle/Controller" public="true">
-            <tag name="controller.service_arguments" />
-        </prototype>
     </services>
 </container>

@@ -8,7 +8,6 @@ use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\Api\Client as ApiClient
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Translation\TranslationLoader;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Twig\TemplateLoader;
-use EMS\CommonBundle\Elasticsearch\Factory;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -37,11 +36,10 @@ class EMSBackendBridgeExtension extends Extension
         $this->processRequestEnvironments($container, $config['request_environments']);
         $this->processElasticms($container, $loader, $config['elasticms']);
         $this->processApi($container, $config['api']);
+
         if (isset($config['clear_cache'])) {
             $this->processClearCache($container, $config['clear_cache'], $config['elasticms']);
         }
-
-        $this->processRequestEnvironments($container, $config['request_environments']);
 
         if (isset($config['twig_list'])) {
             $definition = $container->getDefinition('emsch.controller.twig_list');
@@ -49,7 +47,7 @@ class EMSBackendBridgeExtension extends Extension
         }
 
         $this->processLanguageSelection($container, $loader, $config['language_selection']);
-
+        $this->processRoutingSelection($container, $loader, $config['routing']);
     }
 
     /**
@@ -90,7 +88,7 @@ class EMSBackendBridgeExtension extends Extension
                 $this->defineTranslationLoader($container, $name, $options);
             }
 
-            if ($options['templates']) {
+            if (isset($options['templates'])) {
                 $this->defineTemplateLoader($container, $name, $options['templates']);
             }
         }
@@ -170,7 +168,7 @@ class EMSBackendBridgeExtension extends Extension
         $definition->addTag('emsch.client_request');
         $container->setDefinition(sprintf('emsch.client_request.%s', $name), $definition);
 
-        if ($options['api']['enabled']) {
+        if (isset($options['api'])) {
             $this->loadClientRequestApi($loader);
         }
     }
@@ -214,7 +212,7 @@ class EMSBackendBridgeExtension extends Extension
      * @param string           $name
      * @param array            $options
      */
-    private function defineTemplateLoader(ContainerBuilder $container, $name, array $options)
+    private function defineTemplateLoader(ContainerBuilder $container, $name, $options)
     {
         $loader = new Definition(TemplateLoader::class);
         $loader->setArguments([
@@ -277,5 +275,24 @@ class EMSBackendBridgeExtension extends Extension
         $container->setParameter('emsch.language_selection.supported_locale', $config['supported_locale']);
 
         $loader->load('language_selection.xml');
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param XmlFileLoader    $loader
+     * @param array            $config
+     */
+    private function processRoutingSelection(ContainerBuilder $container, XmlFileLoader $loader, array $config)
+    {
+        if (!$config['enabled']) {
+            return;
+        }
+
+        $container->setParameter('emsch.routing.client_request', $config['client_request']);
+
+        if ($config['file_manager']['enabled']) {
+            $container->setParameter('emsch.file_manager.config', $config['file_manager']);
+            $loader->load('file.xml');
+        }
     }
 }

@@ -7,9 +7,7 @@
     <services>
         <defaults autowire="true" autoconfigure="true" public="false" />
 
-        <service id="emsch.request.service" class="EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\RequestService">
-            <argument type="service" id="request_stack" />
-        </service>
+
 
         <!-- event listeners -->
         <service id="emsch.request_listener" class="EMS\ClientHelperBundle\EMSBackendBridgeBundle\EventListener\RequestListener">
@@ -43,6 +41,10 @@
         <service id="emsch.controller.twig_list" class="EMS\ClientHelperBundle\EMSBackendBridgeBundle\Controller\TwigListController" public="true">
             <argument type="service" id="kernel" />
             <argument/>
+        </service>
+
+        <service id="emsch.request.service" class="EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\Routing\RequestHelper">
+            <argument type="service" id="request_stack" />
         </service>
     </services>
 </container>

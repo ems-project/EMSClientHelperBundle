@@ -1,10 +1,10 @@
 <?php
 
-namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service;
+namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\Routing;
 
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class RequestService
+class RequestHelper
 {
     /**
      * @var RequestStack

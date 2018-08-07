@@ -3,11 +3,8 @@
 namespace EMS\ClientHelperBundle\EMSRoutingBundle\Service;
 
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
-use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Exception\MissingTranslationException;
-use EMS\ClientHelperBundle\EMSRoutingBundle\Service\RoutingService;
 use Symfony\Component\Debug\Exception\ContextErrorException;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class RedirectService
 {

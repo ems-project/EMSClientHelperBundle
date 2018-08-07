@@ -32,7 +32,9 @@ class ApiService
      */
     public function addClientRequest(ClientRequest $clientRequest)
     {
-        if ($name = $clientRequest->getOption('[api][name]', false)) {
+        $name = $clientRequest->getOption('[api][name]', false);
+
+        if ($name) {
             $this->clientRequests[$name] = $clientRequest;
         }
     }
