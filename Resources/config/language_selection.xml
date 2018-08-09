@@ -14,6 +14,7 @@
         </service>
         <service id="emsch.controller.language_selection" class="EMS\ClientHelperBundle\Controller\LanguageSelectionController" public="true">
             <argument type="service" id="emsch.language_selection" />
+            <argument type="string">%emsch.language_selection.template%</argument>
         </service>
 
         <service id="emsch.locale.listener" class="EMS\ClientHelperBundle\EventListener\LocaleListener">

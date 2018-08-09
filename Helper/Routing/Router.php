@@ -59,7 +59,7 @@ class Router
 
             $content = $this->templating->render($template, [
                 'source' => $document['_source'],
-                'translation_domain' => $this->client->getNameEnv(),
+                'trans_default_domain' => $this->client->getNameEnv(),
             ]);
 
             return new Response($content, 200);

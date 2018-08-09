@@ -111,7 +111,7 @@ class Transformer
     private function renderTemplate(EMSUrl $emsLink, array $document, $locale=null)
     {
         try {
-            return $this->twig->render('@EMSCH/template/'.$document['_type'].'.ems.twig', [
+            return $this->twig->render('@EMSCH/routing/'.$document['_type'], [
                 'id'     => $document['_id'],
                 'source' => $document['_source'],
                 'locale' => ($locale?$locale:$this->clientRequest->getLocale()),

@@ -269,6 +269,7 @@ class EMSClientHelperExtension extends Extension
         }
 
         $container->setParameter('emsch.language_selection.client_request', $config['client_request']);
+        $container->setParameter('emsch.language_selection.template', $config['template']);
         $container->setParameter('emsch.language_selection.option_type', $config['option_type']);
         $container->setParameter('emsch.language_selection.supported_locale', $config['supported_locale']);
 

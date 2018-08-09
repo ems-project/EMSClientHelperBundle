@@ -15,11 +15,18 @@ class LanguageSelectionController extends AbstractController
     private $service;
 
     /**
-     * @param LanguageSelectionService $service
+     * @var string
      */
-    public function __construct(LanguageSelectionService $service)
+    private $template;
+
+    /**
+     * @param LanguageSelectionService $service
+     * @param string                   $template
+     */
+    public function __construct(LanguageSelectionService $service, string $template)
     {
         $this->service = $service;
+        $this->template = $template;
     }
 
     /**
@@ -29,10 +36,10 @@ class LanguageSelectionController extends AbstractController
      */
     public function select(Request $request)
     {
-        return $this->render('@EMSClientHelper/LanguageSelection/selection.html.twig', [
+        return $this->render($this->template, [
             'destination' => $request->get('destination', ''),
             'selections' => $this->service->getLanguageSelections(),
-            'translation_domain' => $this->service->getClient()->getNameEnv(),
+            'trans_default_domain' => $this->service->getClient()->getNameEnv(),
         ]);
     }
 }
