@@ -3,7 +3,7 @@
 namespace EMS\ClientHelperBundle\Command;
 
 use Elasticsearch\Client;
-use EMS\ClientHelperBundle\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
 use EMS\ClientHelperBundle\EventListener\RequestListener;
 use EMS\ClientHelperBundle\Exception\AssetsFolderEmptyException;
 use EMS\ClientHelperBundle\Exception\AssetsFolderNotFoundException;

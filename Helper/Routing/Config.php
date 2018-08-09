@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\Helper\Routing\Route;
+namespace EMS\ClientHelperBundle\Helper\Routing;
 
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;

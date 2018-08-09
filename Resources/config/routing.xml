@@ -13,16 +13,16 @@
             <argument type="service" id="twig"/>
             <tag name="controller.service_arguments" />
         </service>
-        <service id="emsch.routing.loader" class="EMS\ClientHelperBundle\Helper\Routing\Route\Loader">
+        <service id="emsch.routing.loader" class="EMS\ClientHelperBundle\Helper\Routing\RoutingLoader">
             <argument type="string">%kernel.project_dir%</argument>
             <tag name="routing.loader" />
         </service>
 
-        <service id="emsch.routing.link.generator" class="EMS\ClientHelperBundle\Helper\Routing\Link\Generator">
+        <service id="emsch.routing.link.generator" class="EMS\ClientHelperBundle\Helper\Routing\Url\Generator">
             <argument type="service" id="Symfony\Component\Routing\RouterInterface" />
             <argument>%emsch.routing.relative_paths%</argument>
         </service>
-        <service id="emsch.routing.link.transformer" class="EMS\ClientHelperBundle\Helper\Routing\Link\Transformer">
+        <service id="emsch.routing.link.transformer" class="EMS\ClientHelperBundle\Helper\Routing\Url\Transformer">
             <argument><!-- clientRequest injected --></argument>
             <argument type="service" id="emsch.routing.link.generator" />
             <argument type="service" id="twig" />

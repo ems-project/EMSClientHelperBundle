@@ -1,9 +1,14 @@
 <?php
-namespace EMS\ClientHelperBundle\Twig;
+namespace EMS\ClientHelperBundle\Helper\Twig;
 
-use EMS\ClientHelperBundle\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
 
-class TemplateLoader implements \Twig_LoaderInterface
+/**
+ * Defined for each elasticms config with the option 'templates'
+ *
+ * @see EMSClientHelperExtension::defineTwigLoader()
+ */
+class TwigLoader implements \Twig_LoaderInterface
 {
     /**
      * @var ClientRequest

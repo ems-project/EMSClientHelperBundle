@@ -2,7 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Twig;
 
-use EMS\ClientHelperBundle\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
 use Twig\Extension\AbstractExtension;
 use Symfony\Component\HttpFoundation\RequestStack;
 

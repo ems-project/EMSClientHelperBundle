@@ -2,8 +2,8 @@
 
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
-use EMS\ClientHelperBundle\Elasticsearch\ClientRequest;
-use EMS\ClientHelperBundle\Helper\Routing\Link\Transformer;
+use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Routing\Url\Transformer;
 use Symfony\Component\HttpFoundation\Request;
 
 class RedirectHelper

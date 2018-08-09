@@ -2,7 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Twig;
 
-use EMS\ClientHelperBundle\Helper\Routing\Link\Transformer;
+use EMS\ClientHelperBundle\Helper\Routing\Url\Transformer;
 
 class RoutingExtension extends \Twig_Extension
 {

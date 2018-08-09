@@ -2,7 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Helper\File;
 
-use EMS\ClientHelperBundle\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
 use EMS\ClientHelperBundle\Storage\StorageService;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\PropertyAccess\PropertyAccess;

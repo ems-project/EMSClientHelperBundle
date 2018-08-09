@@ -2,9 +2,9 @@
 
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
-use EMS\ClientHelperBundle\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
-use EMS\ClientHelperBundle\Twig\TemplateLoader;
+use EMS\ClientHelperBundle\Helper\Twig\TwigLoader;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;

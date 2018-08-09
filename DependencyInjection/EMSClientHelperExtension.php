@@ -5,9 +5,9 @@ namespace EMS\ClientHelperBundle\DependencyInjection;
 use Composer\CaBundle\CaBundle;
 use Elasticsearch\Client;
 use EMS\ClientHelperBundle\Helper\Api\Client as ApiClient;
-use EMS\ClientHelperBundle\Elasticsearch\ClientRequest;
-use EMS\ClientHelperBundle\Translation\TranslationLoader;
-use EMS\ClientHelperBundle\Twig\TemplateLoader;
+use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Translation\TranslationLoader;
+use EMS\ClientHelperBundle\Helper\Twig\TwigLoader;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -87,7 +87,7 @@ class EMSClientHelperExtension extends Extension
             }
 
             if (isset($options['templates'])) {
-                $this->defineTemplateLoader($container, $name, $options['templates']);
+                $this->defineTwigLoader($container, $name, $options['templates']);
             }
         }
     }
@@ -158,7 +158,7 @@ class EMSClientHelperExtension extends Extension
         $definition = new Definition(ClientRequest::class);
         $definition->setArguments([
             new Reference(sprintf('elasticsearch.client.%s', $name)),
-            new Reference('emsch.request.service'),
+            new Reference('emsch.request.helper'),
             new Reference('logger'),
             $options,
             $name
@@ -200,9 +200,9 @@ class EMSClientHelperExtension extends Extension
             $options['index_prefix'],
             $options['translation_type']
         ]);
-        $loader->addTag('translation.loader', ['alias' => $name]);
+        $loader->addTag('TranslationLoader', ['alias' => $name]);
 
-        $container->setDefinition(sprintf('translation.loader.%s', $name), $loader);
+        $container->setDefinition(sprintf('emsch.translation.loader.%s', $name), $loader);
     }
 
     /**
@@ -210,16 +210,16 @@ class EMSClientHelperExtension extends Extension
      * @param string           $name
      * @param array            $options
      */
-    private function defineTemplateLoader(ContainerBuilder $container, $name, $options)
+    private function defineTwigLoader(ContainerBuilder $container, $name, $options)
     {
-        $loader = new Definition(TemplateLoader::class);
+        $loader = new Definition(TwigLoader::class);
         $loader->setArguments([
             new Reference(sprintf('emsch.client_request.%s', $name)),
             $options
         ]);
         $loader->addTag('twig.loader', ['alias' => $name, 'priority' => 1]);
 
-        $container->setDefinition(sprintf('twig.loader.%s', $name), $loader);
+        $container->setDefinition(sprintf('emsch.twig.loader.%s', $name), $loader);
     }
 
     /**
@@ -235,7 +235,7 @@ class EMSClientHelperExtension extends Extension
         $clearCacheService->setArguments([
             $cachePath,
             new Reference('translator'),
-            new Reference('emsch.request.service'),
+            new Reference('emsch.request.helper'),
             new Reference('emsch.client_request.' . $domain),
             $translationType
 

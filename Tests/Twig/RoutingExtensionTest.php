@@ -2,7 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Tests\Twig;
 
-use EMS\ClientHelperBundle\Helper\Routing\Link\Transformer;
+use EMS\ClientHelperBundle\Helper\Routing\Url\Transformer;
 use EMS\ClientHelperBundle\Twig\RoutingExtension;
 use Mockery;
 use Mockery\Mock;

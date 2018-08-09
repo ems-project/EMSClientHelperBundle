@@ -2,7 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Entity;
 
-use EMS\ClientHelperBundle\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
 
 class AnalyserSet {
     /**
@@ -132,7 +132,7 @@ class AnalyserSet {
     
     /**
      * 
-     * @return \EMS\ClientHelperBundle\Elasticsearch\ClientRequest
+     * @return \EMS\ClientHelperBundle\Helper\Request\ClientRequest
      */
     public function getClientRequest(){
         return $this->clientRequest;

@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\Helper\Routing\Link;
+namespace EMS\ClientHelperBundle\Helper\Routing\Url;
 
 use Symfony\Component\Routing\RouterInterface;
 
@@ -58,12 +58,12 @@ class Generator
     }
     
     /**
-     * @param Link   $emsLink
+     * @param EMSUrl $emsLink
      * @param string $url
      *
      * @return string
      */
-    public function prependBaseUrl(Link $emsLink, $url)
+    public function prependBaseUrl(EMSUrl $emsLink, $url)
     {
         $path = $this->getRelativePath($emsLink->getContentType());
         

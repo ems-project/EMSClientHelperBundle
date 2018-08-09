@@ -2,7 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Controller;
 
-use EMS\ClientHelperBundle\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

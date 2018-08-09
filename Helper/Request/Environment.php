@@ -1,10 +1,10 @@
 <?php
 
-namespace EMS\ClientHelperBundle\Helper\Routing;
+namespace EMS\ClientHelperBundle\Helper\Request;
 
 use Symfony\Component\HttpFoundation\Request;
 
-class RequestEnvironment
+class Environment
 {
     /**
      * @var string

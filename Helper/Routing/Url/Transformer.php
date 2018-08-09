@@ -1,8 +1,8 @@
 <?php
 
-namespace EMS\ClientHelperBundle\Helper\Routing\Link;
+namespace EMS\ClientHelperBundle\Helper\Routing\Url;
 
-use EMS\ClientHelperBundle\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
 
 class Transformer
 {
@@ -62,7 +62,7 @@ class Transformer
     public function generate(array $match, $locale=null)
     {
         try {
-            $emsLink = new Link($match);
+            $emsLink = new EMSUrl($match);
             
             if ($emsLink->isAsset()) {
                 return $this->renderAsset($emsLink);
@@ -102,13 +102,13 @@ class Transformer
     }
     
     /**
-     * @param Link $emsLink
-     * @param array   $document
-     * @param string  $locale
+     * @param EMSUrl $emsLink
+     * @param array  $document
+     * @param string $locale
      * 
      * @return string
      */
-    private function renderTemplate(Link $emsLink, array $document, $locale=null)
+    private function renderTemplate(EMSUrl $emsLink, array $document, $locale=null)
     {
         try {
             return $this->twig->render('@EMSCH/template/'.$document['_type'].'.ems.twig', [
@@ -123,11 +123,11 @@ class Transformer
     }
     
     /**
-     * @param Link $emsLink
+     * @param EMSUrl $emsLink
      * exemple input: src="ems://asset:c71c8253399e87aaf2d549d00b697adee0664aa9?name=base_service_f.gif&amp;type=image/gif"
      * @return string
      */
-    private function renderAsset(Link $emsLink) {
+    private function renderAsset(EMSUrl $emsLink) {
         try {
             return $this->twig->render('ems_asset.ems.twig', [
                     'sha1'     => $emsLink->getOuuid(),
@@ -140,13 +140,13 @@ class Transformer
     }
     
     /**
-     * @param Link $emsLink
+     * @param EMSUrl $emsLink
      *
      * @return array|false
      * 
      * @throw \Exception
      */
-    private function getDocument(Link $emsLink)
+    private function getDocument(EMSUrl $emsLink)
     {
         $document = $this->clientRequest->getByOuuid(
             $emsLink->getContentType(),

@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\Helper\Routing;
+namespace EMS\ClientHelperBundle\Helper\Request;
 
 use Symfony\Component\HttpFoundation\RequestStack;
 

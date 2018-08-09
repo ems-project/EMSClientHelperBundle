@@ -2,7 +2,7 @@
 
 namespace EMS\ClientHelperBundle\EventListener;
 
-use EMS\ClientHelperBundle\Helper\Routing\RequestEnvironment;
+use EMS\ClientHelperBundle\Helper\Request\Environment;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
@@ -10,18 +10,19 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 class RequestListener
 {
     /**
-     * @var RequestEnvironment[]
+     * @var Environment[]
      */
-    private $requestEnvironments = [];
-    
+    private $environments = [];
+
     /**
      * @param string $name
      * @param string $regex
      * @param string $index
+     * @param string $backend
      */
     public function addRequestEnvironment($name, $regex, $index, $backend)
     {
-        $this->requestEnvironments[] = new RequestEnvironment($name, $regex, $index, $backend);
+        $this->environments[] = new Environment($name, $regex, $index, $backend);
     }
     
     /**
@@ -45,11 +46,11 @@ class RequestListener
     }
     
     /**
-     * @return RequestEnvironment[]
+     * @return Environment[]
      */
-    public function getRequestEnvironments()
+    public function getEnvironments()
     {
-        return $this->requestEnvironments;
+        return $this->environments;
     }
     
     /**
@@ -59,15 +60,15 @@ class RequestListener
      */
     private function setEnvironment(Request $request)
     {
-        if (null == $this->requestEnvironments) {
+        if (null == $this->environments) {
             return;
         }
         
-        foreach ($this->requestEnvironments as $requestEnvironment) {
-            if ($requestEnvironment->match($request)) {
-                $request->attributes->set('_environment', $requestEnvironment->getIndex());
-                if(!empty($requestEnvironment->getBackend())) {
-                    $request->attributes->set('_backend', $requestEnvironment->getBackend());
+        foreach ($this->environments as $env) {
+            if ($env->match($request)) {
+                $request->attributes->set('_environment', $env->getIndex());
+                if(!empty($env->getBackend())) {
+                    $request->attributes->set('_backend', $env->getBackend());
                 }
                 return; //stop on match
             }

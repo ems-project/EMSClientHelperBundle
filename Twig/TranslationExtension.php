@@ -2,7 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Twig;
 
-use EMS\ClientHelperBundle\Helper\Routing\RequestHelper;
+use EMS\ClientHelperBundle\Helper\Request\RequestHelper;
 use Symfony\Bridge\Twig\Extension\TranslationExtension as BaseExtension;
 use Symfony\Component\Translation\TranslatorInterface;
 use Twig\NodeVisitor\NodeVisitorInterface;

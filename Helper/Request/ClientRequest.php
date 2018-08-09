@@ -1,12 +1,11 @@
 <?php
 
-namespace EMS\ClientHelperBundle\Elasticsearch;
+namespace EMS\ClientHelperBundle\Helper\Request;
 
 use Elasticsearch\Client;
 use EMS\ClientHelperBundle\Entity\HierarchicalStructure;
 use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
-use EMS\ClientHelperBundle\Helper\Routing\RequestHelper;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 

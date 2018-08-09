@@ -1,12 +1,12 @@
 <?php
 
-namespace EMS\ClientHelperBundle\Helper\Routing\Route;
+namespace EMS\ClientHelperBundle\Helper\Routing;
 
-use Symfony\Component\Config\Loader\Loader as SymfonyLoader;
+use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Yaml\Yaml;
 
-class Loader extends SymfonyLoader
+class RoutingLoader extends Loader
 {
     /**
      * @var string

@@ -1,13 +1,19 @@
 <?php
 
-namespace EMS\ClientHelperBundle\Translation;
+namespace EMS\ClientHelperBundle\Helper\Translation;
 
 use Elasticsearch\Client;
+use EMS\ClientHelperBundle\DependencyInjection\EMSClientHelperExtension;
 use Symfony\Component\Translation\Loader\LoaderInterface;
 use Symfony\Component\Translation\MessageCatalogue;
 use EMS\ClientHelperBundle\Service\ClearCacheService;
 use EMS\ClientHelperBundle\Entity\Translation;
 
+/**
+ * Defined for each elasticms config with the option 'translation_type'
+ *
+ * @see EMSClientHelperExtension::defineTranslationLoader()
+ */
 class TranslationLoader implements LoaderInterface
 {
     /**

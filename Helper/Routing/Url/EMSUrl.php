@@ -1,11 +1,11 @@
 <?php
 
-namespace EMS\ClientHelperBundle\Helper\Routing\Link;
+namespace EMS\ClientHelperBundle\Helper\Routing\Url;
 
 /**
  * Ems Link
  */
-class Link
+class EMSUrl
 {
     /**
      * Object, asset, ...
