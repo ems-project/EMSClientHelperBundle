@@ -30,11 +30,11 @@ class HelperExtension extends AbstractExtension
     public function getFilters()
     {
         return [
-            new TwigFilter('emsch_ouuid', array($this, 'getOuuid')),
-            new TwigFilter('dump', array($this, 'dump')),
-            new TwigFilter('format_bytes', array($this, 'formatBytes')),
-            new TwigFilter('array_key', array($this, 'arrayKey')),
-            new TwigFilter('locale_attr', array($this, 'localeAttribute')),
+            new TwigFilter('emsch_ouuid', [$this, 'getOuuid']),
+            new TwigFilter('dump', [$this, 'dump']),
+            new TwigFilter('format_bytes', [$this, 'formatBytes']),
+            new TwigFilter('array_key', [$this, 'arrayKey']),
+            new TwigFilter('locale_attr', [$this, 'localeAttribute']),
         ];
     }
 
@@ -96,7 +96,7 @@ class HelperExtension extends AbstractExtension
     
     function formatBytes($bytes, $precision = 2)
     {
-        $units = array('B', 'KB', 'MB', 'GB', 'TB');
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
         $bytes = max($bytes, 0);
         $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
         $pow = min($pow, count($units) - 1);

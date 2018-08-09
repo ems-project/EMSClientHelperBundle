@@ -36,14 +36,14 @@ class TranslationExtension extends BaseExtension
     public function getFilters()
     {
         return [
-            new TwigFilter('emsch_trans', array($this, 'trans')),
+            new TwigFilter('emsch_trans', [$this, 'trans']),
         ];
     }
     
     /**
      * {@inheritdoc}
      */
-    public function trans($message, array $arguments = array(), $domain = null, $locale = null)
+    public function trans($message, array $arguments = [], $domain = null, $locale = null)
     {
         $environment = $this->requestHelper->getEnvironment();
         

@@ -29,7 +29,7 @@ class LanguageSelectionController extends AbstractController
      */
     public function selectAction(Request $request)
     {
-        return $this->render('@EMSBackendBridge/LanguageSelection/selection.html.twig', [
+        return $this->render('@EMSClientHelper/LanguageSelection/selection.html.twig', [
             'destination' => $request->get('destination', ''),
             'selections' => $this->service->getLanguageSelections(),
             'trans_default_domain' => $this->service->getClient()->getTranslationDomain(),

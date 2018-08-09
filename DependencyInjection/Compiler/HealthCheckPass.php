@@ -4,6 +4,7 @@ namespace EMS\ClientHelperBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
 class HealthCheckPass implements CompilerPassInterface
@@ -22,9 +23,9 @@ class HealthCheckPass implements CompilerPassInterface
     
     /**
      * @param ContainerBuilder $container
-     * @param Definition $command
+     * @param Definition       $command
      */
-    private function addClients(ContainerBuilder $container, $command)
+    private function addClients(ContainerBuilder $container, Definition $command)
     {
         $taggedServices = $container->findTaggedServiceIds('emsch.elasticsearch.client');
         $clients = [];
@@ -38,7 +39,7 @@ class HealthCheckPass implements CompilerPassInterface
      * @param ContainerBuilder $container
      * @param Definition       $command
      */
-    private function addClientRequests(ContainerBuilder $container, $command)
+    private function addClientRequests(ContainerBuilder $container, Definition $command)
     {
         $taggedServices = $container->findTaggedServiceIds('emsch.client_request');
         $clients = [];
@@ -50,9 +51,9 @@ class HealthCheckPass implements CompilerPassInterface
     
     /**
      * @param ContainerBuilder $container
-     * @param Definition $command
+     * @param Definition       $command
      */
-    private function addStorageService(ContainerBuilder $container, $command)
+    private function addStorageService(ContainerBuilder $container, Definition $command)
     {
         $taggedServices = $container->findTaggedServiceIds('emsch.storage_service');
         foreach ($taggedServices as $id => $tags) {

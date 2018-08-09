@@ -1,20 +1,19 @@
 {# This file is part of the EMSClientHelperBundle #}
-
 <!DOCTYPE html>
 <html>
     <head>
         <meta charset="UTF-8" />
         <title>{% block title %}Welcome on your base template!{% endblock %}</title>
         {% block stylesheets %}{% endblock %}
-        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+        <link rel="icon" type="image/x-icon" href="public/favicon.ico" />
     </head>
     <body>
     	{% block info %} {% endblock %} 
-    	{% include ('@EMSBackendBridge/TwigList/Elements/header.html.twig') %}
+    	{% include ('@EMSClientHelper/TwigList/Elements/header.html.twig') %}
         
         {% block body %}{% endblock %}
         {% block javascripts %}{% endblock %}
         
-        {% include ('@EMSBackendBridge/TwigList/Elements/footer.html.twig')  %}
+        {% include ('@EMSClientHelper/TwigList/Elements/footer.html.twig')  %}
     </body>
 </html>

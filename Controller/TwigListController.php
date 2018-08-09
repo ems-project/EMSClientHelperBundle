@@ -62,7 +62,7 @@ class TwigListController extends AbstractController
             }
         }
 
-        return $this->render('@EMSBackendBridge/TwigList/Default/templates.html.twig', [
+        return $this->render('@EMSClientHelper/TwigList/Default/templates.html.twig', [
             'templates' => $list
         ]);
     }

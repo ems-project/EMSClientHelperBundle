@@ -17,9 +17,6 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use EMS\ClientHelperBundle\Service\ClearCacheService;
 use EMS\ClientHelperBundle\EventListener\ClearCacheRequestListener;
 
-/**
- * Load ems backend bridge services and process configuration
- */
 class EMSClientHelperExtension extends Extension
 {
     /**
