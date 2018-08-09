@@ -31,7 +31,7 @@ class FileController extends AbstractController
      *
      * @return BinaryFileResponse|Response
      */
-    public function viewAction(Request $request, string $ouuid)
+    public function view(Request $request, string $ouuid)
     {
         //http://blog.alterphp.com/2012/08/how-to-deal-with-asynchronous-request.html
         $request->getSession()->save();
@@ -46,7 +46,7 @@ class FileController extends AbstractController
      *
      * @return BinaryFileResponse|Response
      */
-    public function assetAction(Request $request, string $sha1)
+    public function asset(Request $request, string $sha1)
     {
         //http://blog.alterphp.com/2012/08/how-to-deal-with-asynchronous-request.html
         $request->getSession()->save();

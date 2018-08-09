@@ -5,6 +5,6 @@
         http://symfony.com/schema/routing/routing-1.0.xsd">
 
     <route id="emsch_language_selection" path="/language_selection" methods="GET">
-        <default key="_controller">emsch.controller.language_selection::selectAction</default>
+        <default key="_controller">emsch.controller.language_selection::select</default>
     </route>
 </routes>

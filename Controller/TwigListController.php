@@ -34,7 +34,7 @@ class TwigListController extends AbstractController
     /**
      * @return Response
      */
-    public function listAction()
+    public function list()
     {
         $list = [];
 
@@ -72,7 +72,7 @@ class TwigListController extends AbstractController
      *
      * @return Response
      */
-    public function templateAction(Request $request)
+    public function template(Request $request)
     {
         $view = $request->get('view');
 

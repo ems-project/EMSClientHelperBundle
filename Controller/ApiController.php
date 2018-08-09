@@ -26,7 +26,7 @@ class ApiController
      *
      * @return JsonResponse
      */
-    public function contentTypesAction($apiName)
+    public function contentTypes($apiName)
     {
         return $this->service->getContentTypes($apiName)->getResponse();
     }
@@ -38,7 +38,7 @@ class ApiController
      *
      * @return JsonResponse
      */
-    public function contentTypeAction(Request $request, $apiName, $contentType)
+    public function contentType(Request $request, $apiName, $contentType)
     {
         $scrollId = $request->query->get('scroll');
         $size = $request->query->get('size');
@@ -54,7 +54,7 @@ class ApiController
      *
      * @return JsonResponse
      */
-    public function documentAction($apiName, $contentType, $ouuid)
+    public function document($apiName, $contentType, $ouuid)
     {
         return $this->service->getDocument($apiName, $contentType, $ouuid)->getResponse();
     }

@@ -27,7 +27,7 @@ class LanguageSelectionController extends AbstractController
      *
      * @return Response
      */
-    public function selectAction(Request $request)
+    public function select(Request $request)
     {
         return $this->render('@EMSClientHelper/LanguageSelection/selection.html.twig', [
             'destination' => $request->get('destination', ''),
