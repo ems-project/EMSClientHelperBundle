@@ -5,6 +5,10 @@ namespace EMS\ClientHelperBundle\EventListener;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use EMS\ClientHelperBundle\Service\ClearCacheService;
 
+/**
+ * @todo move logic to RequestListener
+ * @todo clear cache logic not the same for translations and twigs
+ */
 class ClearCacheRequestListener
 {
     /**

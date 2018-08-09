@@ -2,29 +2,25 @@
 
 namespace EMS\ClientHelperBundle\EventListener;
 
-use EMS\ClientHelperBundle\Helper\Request\Environment;
-use Symfony\Component\HttpFoundation\Request;
+use EMS\ClientHelperBundle\Helper\Request\RequestHelper;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 
 class RequestListener
 {
     /**
-     * @var Environment[]
+     * @var RequestHelper
      */
-    private $environments = [];
+    private $requestHelper;
 
     /**
-     * @param string $name
-     * @param string $regex
-     * @param string $index
-     * @param string $backend
+     * @param RequestHelper $requestHelper
      */
-    public function addRequestEnvironment($name, $regex, $index, $backend)
+    public function __construct(RequestHelper $requestHelper)
     {
-        $this->environments[] = new Environment($name, $regex, $index, $backend);
+        $this->requestHelper = $requestHelper;
     }
-    
+
     /**
      * @param GetResponseEvent $event
      *
@@ -32,7 +28,7 @@ class RequestListener
      */
     public function onKernelRequest(GetResponseEvent $event)
     {
-        $this->setEnvironment($event->getRequest());
+        $this->requestHelper->bindEnvironment($event->getRequest());
     }
     
     /**
@@ -42,36 +38,6 @@ class RequestListener
      */
     public function onKernelException(GetResponseForExceptionEvent $event)
     {
-        $this->setEnvironment($event->getRequest());
-    }
-    
-    /**
-     * @return Environment[]
-     */
-    public function getEnvironments()
-    {
-        return $this->environments;
-    }
-    
-    /**
-     * @param Request $request
-     *
-     * @return void
-     */
-    private function setEnvironment(Request $request)
-    {
-        if (null == $this->environments) {
-            return;
-        }
-        
-        foreach ($this->environments as $env) {
-            if ($env->match($request)) {
-                $request->attributes->set('_environment', $env->getIndex());
-                if(!empty($env->getBackend())) {
-                    $request->attributes->set('_backend', $env->getBackend());
-                }
-                return; //stop on match
-            }
-        }
+        $this->requestHelper->bindEnvironment($event->getRequest());
     }
 }

@@ -55,7 +55,7 @@ class TwigLoader implements \Twig_LoaderInterface
      */
     public function getCacheKey($name)
     {
-        return $name;
+        return $this->client->getNameEnv() . $name;
     }
 
     /**

@@ -62,10 +62,10 @@ class EMSClientHelperExtension extends Extension
             return;
         }
 
-        $eventListener = $container->getDefinition('emsch.request_listener');
+        $eventListener = $container->getDefinition('emsch.request.helper');
 
         foreach ($config as $environment => $options) {
-            $eventListener->addMethodCall('addRequestEnvironment', [
+            $eventListener->addMethodCall('addEnvironment', [
                 $environment, $options['regex'], $options['index'], $options['backend']
             ]);
         }
@@ -200,7 +200,7 @@ class EMSClientHelperExtension extends Extension
             $options['index_prefix'],
             $options['translation_type']
         ]);
-        $loader->addTag('TranslationLoader', ['alias' => $name]);
+        $loader->addTag('translation.loader', ['alias' => $name]);
 
         $container->setDefinition(sprintf('emsch.translation.loader.%s', $name), $loader);
     }

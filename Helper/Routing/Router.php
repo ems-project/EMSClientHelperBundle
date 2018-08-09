@@ -58,7 +58,8 @@ class Router
             $template = $this->getTemplate($route, $document);
 
             $content = $this->templating->render($template, [
-                'source' => $document['_source']
+                'source' => $document['_source'],
+                'translation_domain' => $this->client->getNameEnv(),
             ]);
 
             return new Response($content, 200);
@@ -114,12 +115,12 @@ class Router
     {
         $template = $route->getOption('template');
 
-        if (substr($template, 0, 6) === TemplateLoader::PREFIX) {
+        if (substr($template, 0, 6) === TwigLoader::PREFIX) {
             return $template;
         }
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
 
-        return TemplateLoader::PREFIX . '/' . $propertyAccessor->getValue($document, '[_source]'.$template);
+        return TwigLoader::PREFIX . '/' . $propertyAccessor->getValue($document, '[_source]'.$template);
     }
 }

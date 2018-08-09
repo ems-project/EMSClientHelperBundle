@@ -531,9 +531,9 @@ class ClientRequest
     }
 
     /**
-     * @return string
+     * @return string name_env
      */
-    public function getTranslationDomain()
+    public function getNameEnv()
     {
         $environment = $this->requestHelper->getEnvironment();
 

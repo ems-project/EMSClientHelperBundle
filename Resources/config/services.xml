@@ -15,6 +15,7 @@
 
         <!-- event listeners -->
         <service id="emsch.request_listener" class="EMS\ClientHelperBundle\EventListener\RequestListener">
+            <argument type="service" id="emsch.request.helper"/>
             <tag name="kernel.event_listener" event="kernel.request" priority="100" />
             <tag name="kernel.event_listener" event="kernel.exception" priority="100" />
         </service>

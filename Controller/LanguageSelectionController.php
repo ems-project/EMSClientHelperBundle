@@ -32,7 +32,7 @@ class LanguageSelectionController extends AbstractController
         return $this->render('@EMSClientHelper/LanguageSelection/selection.html.twig', [
             'destination' => $request->get('destination', ''),
             'selections' => $this->service->getLanguageSelections(),
-            'trans_default_domain' => $this->service->getClient()->getTranslationDomain(),
+            'translation_domain' => $this->service->getClient()->getNameEnv(),
         ]);
     }
 }
