@@ -1,0 +1,50 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services
+        http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <defaults public="false" />
+
+        <service id="emsch.query_builder.service" class="EMS\ClientHelperBundle\Service\QueryBuilderService"/>
+
+        <service id="emsch.request.service" class="EMS\ClientHelperBundle\Helper\Routing\RequestHelper">
+            <argument type="service" id="request_stack" />
+        </service>
+
+        <!-- event listeners -->
+        <service id="emsch.request_listener" class="EMS\ClientHelperBundle\EventListener\RequestListener">
+            <tag name="kernel.event_listener" event="kernel.request" priority="100" />
+            <tag name="kernel.event_listener" event="kernel.exception" priority="100" />
+        </service>
+
+        <!-- twig extensions -->
+        <service id="emsch.twig.extension.helper" class="EMS\ClientHelperBundle\Twig\HelperExtension">
+            <argument type="service" id="request_stack"/>
+            <tag name="twig.extension" />
+        </service>
+        <service id="emsch.twig.extension.trans" class="EMS\ClientHelperBundle\Twig\TranslationExtension">
+            <argument type="service" id="translator" />
+            <argument type="service" id="emsch.request.service" />
+            <tag name="twig.extension" />
+        </service>
+        <service id="emsch.twig.extension.edition" class="EMS\ClientHelperBundle\Twig\EditionExtension">
+            <argument type="service" id="request_stack" />
+            <tag name="twig.extension" />
+        </service>
+        
+        <!-- commands -->
+        <service id="emsch.command.health_check" class="EMS\ClientHelperBundle\Command\HealthCheckCommand">
+            <argument type="service" id="emsch.request_listener" />
+            <tag name="console.command" />
+        </service>
+
+        <!-- controllers -->
+        <service id="emsch.controller.twig_list" class="EMS\ClientHelperBundle\Controller\TwigListController" public="true">
+            <argument type="service" id="kernel" />
+            <argument/>
+        </service>
+
+    </services>
+</container>

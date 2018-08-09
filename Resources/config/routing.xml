@@ -1,0 +1,50 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services
+        http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <defaults public="false" />
+
+        <service id="emsch.routing.router" class="EMS\ClientHelperBundle\Helper\Routing\Router" public="true">
+            <argument><!-- clientRequest injected --></argument>
+            <argument type="service" id="Symfony\Component\Routing\RouterInterface"/>
+            <argument type="service" id="twig"/>
+            <tag name="controller.service_arguments" />
+        </service>
+        <service id="emsch.routing.loader" class="EMS\ClientHelperBundle\Helper\Routing\Route\Loader">
+            <argument type="string">%kernel.project_dir%</argument>
+            <tag name="routing.loader" />
+        </service>
+
+        <service id="emsch.routing.link.generator" class="EMS\ClientHelperBundle\Helper\Routing\Link\Generator">
+            <argument type="service" id="Symfony\Component\Routing\RouterInterface" />
+            <argument>%emsch.routing.relative_paths%</argument>
+        </service>
+        <service id="emsch.routing.link.transformer" class="EMS\ClientHelperBundle\Helper\Routing\Link\Transformer">
+            <argument><!-- clientRequest injected --></argument>
+            <argument type="service" id="emsch.routing.link.generator" />
+            <argument type="service" id="twig" />
+        </service>
+
+        <service id="emsch.routing.redirect_helper" class="EMS\ClientHelperBundle\Helper\Routing\RedirectHelper">
+            <argument><!-- clientRequest injected --></argument>
+            <argument type="service" id="emsch.routing.link.transformer" />
+            <argument type="string">%emsch.routing.redirect_type%</argument>
+        </service>
+
+        <service id="emsch.redirect_listener" class="EMS\ClientHelperBundle\EventListener\RedirectListener">
+            <argument type="service" id="emsch.routing.redirect_helper"/>
+            <argument type="service" id="http_kernel"/>
+            <argument type="service" id="Symfony\Component\Routing\RouterInterface"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="emsch.twig.extension.routing" class="EMS\ClientHelperBundle\Twig\RoutingExtension">
+            <argument type="service" id="emsch.routing.link.transformer" />
+            <tag name="twig.extension" />
+        </service>
+
+    </services>
+</container>
