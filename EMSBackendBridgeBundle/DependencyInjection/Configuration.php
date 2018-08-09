@@ -3,6 +3,8 @@
 namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\DependencyInjection;
 
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\File\FileManager;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\Routing\Link\Generator;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\Routing\RedirectHelper;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -204,6 +206,21 @@ class Configuration implements ConfigurationInterface
                             ->always(function ($v) { return 'emsch.client_request.'.$v; })
                         ->end()
                     ->end()
+                    ->scalarNode('redirect_type')
+                        ->isRequired()
+                        ->info('content type used to define redirection')
+                    ->end()
+                    ->arrayNode('relative_paths')
+                        ->prototype('array')
+                            ->children()
+                                ->scalarNode('regex')
+                                    ->info('regex for matching the content_type')
+                                    ->isRequired()
+                                ->end()
+                                ->scalarNode('path')->cannotBeEmpty()->end()
+                            ->end()
+                        ->end()
+                    ->end()
                     ->arrayNode('file_manager')
                         ->info(FileManager::class)
                         ->canBeEnabled()
@@ -218,7 +235,6 @@ class Configuration implements ConfigurationInterface
                             ->end()
                         ->end()
                     ->end()
-
                 ->end()
             ->end()
         ;

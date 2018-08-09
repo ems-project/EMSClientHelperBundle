@@ -5,9 +5,9 @@
         http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
-        <defaults autowire="true" autoconfigure="true" public="false" />
+        <defaults public="false" />
 
-
+        <service id="emsch.query_builder.service" class="EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\QueryBuilderService"/>
 
         <!-- event listeners -->
         <service id="emsch.request_listener" class="EMS\ClientHelperBundle\EMSBackendBridgeBundle\EventListener\RequestListener">
@@ -15,8 +15,6 @@
             <tag name="kernel.event_listener" event="kernel.exception" priority="100" />
         </service>
 
-        <service id="emsch.query_builder.service" class="EMS\ClientHelperBundle\EMSBackendBridgeBundle\Service\QueryBuilderService"/>
-        
         <!-- twig extensions -->
         <service id="emsch.twig.extension.helper" class="EMS\ClientHelperBundle\EMSBackendBridgeBundle\Twig\HelperExtension">
             <tag name="twig.extension" />
@@ -42,7 +40,6 @@
             <argument type="service" id="kernel" />
             <argument/>
         </service>
-
         <service id="emsch.request.service" class="EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\Routing\RequestHelper">
             <argument type="service" id="request_stack" />
         </service>

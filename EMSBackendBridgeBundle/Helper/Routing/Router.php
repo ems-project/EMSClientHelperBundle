@@ -26,20 +26,17 @@ class Router
     private $client;
 
     /**
-     * @var EngineInterface
+     * @var \Twig_Environment
      */
     private $templating;
 
     /**
-     * @param ClientRequest   $clientRequest
-     * @param RouterInterface $router
-     * @param EngineInterface $templating
+     * @param ClientRequest     $clientRequest
+     * @param RouterInterface   $router
+     * @param \Twig_Environment $templating
      */
-    public function __construct(
-        ClientRequest $clientRequest,
-        RouterInterface $router,
-        EngineInterface $templating
-    ) {
+    public function __construct(ClientRequest $clientRequest, RouterInterface $router, \Twig_Environment $templating)
+    {
         $this->router = $router;
         $this->client = $clientRequest;
         $this->templating = $templating;

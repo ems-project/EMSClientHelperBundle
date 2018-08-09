@@ -2,8 +2,8 @@
 
 namespace EMS\ClientHelperBundle\Tests\EMSRoutingBundle\Twig;
 
-use EMS\ClientHelperBundle\EMSRoutingBundle\Service\RoutingService;
-use EMS\ClientHelperBundle\EMSRoutingBundle\Twig\RoutingExtension;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Helper\Routing\Link\Transformer;
+use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Twig\RoutingExtension;
 use Mockery;
 use Mockery\Mock;
 use PHPUnit\Framework\TestCase;
@@ -22,19 +22,19 @@ class RoutingExtensionTest extends TestCase
     /**
      * @var Mock
      */
-    private $routingService;
+    private $transformer;
     
     protected function setUp()
     {
-        $this->routingService = Mockery::mock(RoutingService::class);
-        $this->extension = new RoutingExtension($this->routingService);
+        $this->transformer = Mockery::mock(Transformer::class);
+        $this->extension = new RoutingExtension($this->transformer);
     }
     
     public function testTransformEmsLink()
     {
         $content = 'ems://asset:standards_asset:169ac02da0f0bf4b116cfb248226fb8';
         
-        $this->routingService
+        $this->transformer
             ->shouldReceive('generate')
             ->once()
             ->with(\Mockery::on(function (array $match){
@@ -56,7 +56,7 @@ class RoutingExtensionTest extends TestCase
     {
         $content = 'ems://object:30420d1a9afb2bcb60335812569af4435a59ce17';
         
-        $this->routingService
+        $this->transformer
             ->shouldReceive('generate')
             ->once()
             ->with(\Mockery::on(function (array $match){
@@ -79,7 +79,7 @@ class RoutingExtensionTest extends TestCase
     {
         $content = '<a href="ems://asset:30420d1a9afb2bcb60335812569af4435a59ce17?name=Desert.jpg&amp;type=image/jpeg " >test</a>';
     
-        $this->routingService
+        $this->transformer
             ->shouldReceive('generate')
             ->once()
             ->with(\Mockery::on(function (array $match){
