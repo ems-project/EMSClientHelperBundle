@@ -1,7 +1,7 @@
 <?php
 namespace EMS\ClientHelperBundle\Helper\Twig;
 
-use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 
 /**
  * Defined for each elasticms config with the option 'templates'

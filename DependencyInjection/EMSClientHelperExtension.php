@@ -5,7 +5,7 @@ namespace EMS\ClientHelperBundle\DependencyInjection;
 use Composer\CaBundle\CaBundle;
 use Elasticsearch\Client;
 use EMS\ClientHelperBundle\Helper\Api\Client as ApiClient;
-use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Translation\TranslationLoader;
 use EMS\ClientHelperBundle\Helper\Twig\TwigLoader;
 use Symfony\Component\Config\FileLocator;

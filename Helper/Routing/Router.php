@@ -2,7 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
-use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Twig\TwigLoader;
 use Symfony\Component\HttpFoundation\Request;
@@ -58,6 +58,7 @@ class Router
             $template = $this->getTemplate($route, $document);
 
             $content = $this->templating->render($template, [
+                'document' => $document,
                 'source' => $document['_source'],
                 'trans_default_domain' => $this->client->getNameEnv(),
             ]);

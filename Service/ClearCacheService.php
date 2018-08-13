@@ -4,7 +4,7 @@ namespace EMS\ClientHelperBundle\Service;
 
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Translation\TranslatorInterface;
-use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Request\RequestHelper;
 
 class ClearCacheService

@@ -2,7 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Helper\Api;
 
-use EMS\CommonBundle\Http\ClientFactory;
+use EMS\CommonBundle\Common\HttpClientFactory;
 
 class Client
 {
@@ -23,7 +23,7 @@ class Client
     public function __construct($baseUrl, $key)
     {
         $this->key = $key;
-        $this->client = ClientFactory::create($baseUrl, ['X-Auth-Token' => $this->key]);
+        $this->client = HttpClientFactory::create($baseUrl, ['X-Auth-Token' => $this->key]);
     }
     
     /**

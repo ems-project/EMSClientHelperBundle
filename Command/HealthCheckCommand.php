@@ -3,7 +3,7 @@
 namespace EMS\ClientHelperBundle\Command;
 
 use Elasticsearch\Client;
-use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Exception\ClusterHealthNotGreenException;
 use EMS\ClientHelperBundle\Exception\ClusterHealthRedException;
 use EMS\ClientHelperBundle\Exception\IndexNotFoundException;

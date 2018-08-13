@@ -2,7 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Helper\Routing\Url;
 
-use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 
 class Transformer
 {
@@ -62,15 +62,19 @@ class Transformer
     public function generate(array $match, $locale=null)
     {
         try {
-            $emsLink = new EMSUrl($match);
+            $emsUrl = new EMSUrl($match);
 
-            if (!$emsLink->hasContentType()) {
+            if ('asset' === $emsUrl->getLinkType()) {
+                return '/file/view/' . $emsUrl->getOuuid() . '?' . http_build_query($emsUrl->getQuery());
+            }
+
+            if (!$emsUrl->hasContentType()) {
                 return false;
             }
             
-            $document = $this->getDocument($emsLink);
-            $template = $this->renderTemplate($emsLink, $document, $locale);
-            $url = $this->generator->prependBaseUrl($emsLink, $template);
+            $document = $this->getDocument($emsUrl);
+            $template = $this->renderTemplate($emsUrl, $document, $locale);
+            $url = $this->generator->prependBaseUrl($emsUrl, $template);
 
             return $url;
         } catch (\Exception $ex) {

@@ -2,7 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Service;
 
-use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
 
 class LanguageSelectionService

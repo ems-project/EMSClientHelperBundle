@@ -2,7 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
-use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Routing\Url\Transformer;
 use Symfony\Component\HttpFoundation\Request;
 

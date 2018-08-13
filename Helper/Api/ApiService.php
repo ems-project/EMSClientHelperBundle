@@ -2,8 +2,8 @@
 
 namespace EMS\ClientHelperBundle\Helper\Api;
 
-use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
-use EMS\CommonBundle\Http\ClientFactory;
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
+use EMS\CommonBundle\Common\HttpClientFactory;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 

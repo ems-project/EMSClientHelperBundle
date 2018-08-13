@@ -2,7 +2,6 @@
 
 namespace EMS\ClientHelperBundle\DependencyInjection;
 
-use EMS\ClientHelperBundle\Helper\File\FileManager;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -217,20 +216,6 @@ class Configuration implements ConfigurationInterface
                                     ->isRequired()
                                 ->end()
                                 ->scalarNode('path')->cannotBeEmpty()->end()
-                            ->end()
-                        ->end()
-                    ->end()
-                    ->arrayNode('file_manager')
-                        ->info(FileManager::class)
-                        ->canBeEnabled()
-                        ->children()
-                            ->scalarNode('content_type')->cannotBeEmpty()->end()
-                            ->arrayNode('property_paths')
-                                ->children()
-                                    ->scalarNode('filename')->cannotBeEmpty()->end()
-                                    ->scalarNode('mimetype')->cannotBeEmpty()->end()
-                                    ->scalarNode('sha1')->cannotBeEmpty()->end()
-                                ->end()
                             ->end()
                         ->end()
                     ->end()
