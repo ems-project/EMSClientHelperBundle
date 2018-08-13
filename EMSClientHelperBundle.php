@@ -15,9 +15,6 @@ class EMSClientHelperBundle extends Bundle
     {
         parent::build($container);
 
-        $container->addCompilerPass(new LoadDebugBarPass());
-        $container->addCompilerPass(new HealthCheckPass());
-        $container->addCompilerPass(new ApiClientPass());
         $container->addCompilerPass(new InjectClientRequestPass());
     }
 }

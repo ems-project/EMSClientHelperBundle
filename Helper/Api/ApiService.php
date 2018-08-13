@@ -3,6 +3,7 @@
 namespace EMS\ClientHelperBundle\Helper\Api;
 
 use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
+use EMS\CommonBundle\Http\ClientFactory;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -20,11 +21,12 @@ class ApiService
 
     /**
      * @param UrlGeneratorInterface $urlGenerator
+     * @param iterable              $clientRequests
      */
-    public function __construct(UrlGeneratorInterface $urlGenerator)
+    public function __construct(UrlGeneratorInterface $urlGenerator, iterable $clientRequests =  [])
     {
         $this->urlGenerator = $urlGenerator;
-        $this->clientRequests = [];
+        $this->clientRequests = $clientRequests;
     }
 
     /**
@@ -140,10 +142,12 @@ class ApiService
      */
     private function getClientRequest($apiName)
     {
-        if (!isset($this->clientRequests[$apiName])) {
-            throw new NotFoundHttpException();
+        foreach ($this->clientRequests as $clientRequest) {
+            if ($apiName === $clientRequest->getOption('[api][name]', false)) {
+                return $clientRequest;
+            }
         }
 
-        return $this->clientRequests[$apiName];
+        throw new NotFoundHttpException();
     }
 }

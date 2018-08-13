@@ -37,7 +37,10 @@
         
         <!-- commands -->
         <service id="emsch.command.health_check" class="EMS\ClientHelperBundle\Command\HealthCheckCommand">
-            <argument type="service" id="emsch.request_listener" />
+            <argument type="service" id="emsch.request.helper" />
+            <argument type="tagged" tag="emsch.elasticsearch.client" on-invalid="null"/>
+            <argument type="tagged" tag="emsch.client_request" on-invalid="null" />
+            <argument type="service" id="ems_common.storage.manager" on-invalid="null" />
             <tag name="console.command" />
         </service>
 

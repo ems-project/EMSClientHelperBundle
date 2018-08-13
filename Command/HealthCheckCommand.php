@@ -4,14 +4,12 @@ namespace EMS\ClientHelperBundle\Command;
 
 use Elasticsearch\Client;
 use EMS\ClientHelperBundle\Helper\Request\ClientRequest;
-use EMS\ClientHelperBundle\EventListener\RequestListener;
-use EMS\ClientHelperBundle\Exception\AssetsFolderEmptyException;
-use EMS\ClientHelperBundle\Exception\AssetsFolderNotFoundException;
 use EMS\ClientHelperBundle\Exception\ClusterHealthNotGreenException;
 use EMS\ClientHelperBundle\Exception\ClusterHealthRedException;
 use EMS\ClientHelperBundle\Exception\IndexNotFoundException;
 use EMS\ClientHelperBundle\Exception\NoClientsFoundException;
-use EMS\ClientHelperBundle\Storage\StorageService;
+use EMS\ClientHelperBundle\Helper\Request\RequestHelper;
+use EMS\CommonBundle\Storage\StorageManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -24,52 +22,33 @@ class HealthCheckCommand extends Command
      * @var Client[]
      */
     private $clients = [];
-    
-    /**
-     * @var StorageService
-     */
-    private $storageService;
-    
-    /**
-     * @var RequestListener
-     */
-    private $requestListener;
-    
+
     /**
      * @var ClientRequest[]
      */
     private $clientRequests;
-    
+
     /**
-     * @param array $clients
+     * @var RequestHelper
      */
-    public function setClients(array $clients)
+    private $requestHelper;
+
+    /**
+     * @var StorageManager
+     */
+    private $storageManager;
+
+    /**
+     * @param RequestHelper $requestHelper
+     * @param iterable      $clients
+     * @param iterable      $clientRequests
+     */
+    public function __construct(RequestHelper $requestHelper, iterable $clients = [], iterable $clientRequests = [], StorageManager $storageManager = null)
     {
+        $this->requestHelper = $requestHelper;
         $this->clients = $clients;
-    }
-    
-    /**
-     * @param StorageService $storageService
-     */
-    public function setStorageService(StorageService $storageService)
-    {
-        $this->storageService = $storageService;
-    }
-    
-    /**
-     * @param array $clientRequests
-     */
-    public function setClientRequests(array $clientRequests)
-    {
         $this->clientRequests = $clientRequests;
-    }
-    
-    /**
-     * @param RequestListener $requestListener
-     */
-    public function __construct(RequestListener $requestListener)
-    {
-        $this->requestListener = $requestListener;
+        $this->storageManager = $storageManager;
          
         parent::__construct();
     }
@@ -81,11 +60,11 @@ class HealthCheckCommand extends Command
             ->setDescription('Performs system health check.')
             ->setHelp('Verify that the assets folder exists and is not empty. Verify that the Elasticsearch cluster is at least yellow and that the configured indexes exist.')
             ->addOption('green', 'g', InputOption::VALUE_NONE, 'Require a green Elasticsearch cluster health.', null)
-            ->addOption('skip-assets', 's', InputOption::VALUE_NONE, 'Skip the assets folder health check.', null);
+            ->addOption('skip-storage', 's', InputOption::VALUE_NONE, 'Skip the storage health check.', null);
     }
     
     /**
-     * @param InputInterface $input
+     * @param InputInterface  $input
      * @param OutputInterface $output
      */
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -95,14 +74,15 @@ class HealthCheckCommand extends Command
         
         $this->checkElasticSearch($io, $input->getOption('green'));
         $this->checkIndexes($io);
-        $this->checkAssets($io, $input->getOption('skip-assets'));
-        
+        $this->checkStorage($io, $input->getOption('skip-storage'));
+
         $io->success('Health check finished.');
     }
     
     /**
      * @param SymfonyStyle $io
-     * @param bool $green
+     * @param bool         $green
+     *
      * @throws NoClientsFoundException
      * @throws ClusterHealthRedException
      * @throws ClusterHealthNotGreenException
@@ -142,7 +122,7 @@ class HealthCheckCommand extends Command
            $prefixes = array_merge($prefixes, $clientRequest->getPrefixes());
         }
         $postfixes = [];
-        foreach ($this->requestListener->getRequestEnvironments() as $environment) {
+        foreach ($this->requestHelper->getEnvironments() as $environment) {
             $postfixes[] = $environment->getIndex();
         }
         $indexes = [];
@@ -166,38 +146,31 @@ class HealthCheckCommand extends Command
     
     /**
      * @param SymfonyStyle $io
-     * @param bool $skip
+     * @param bool         $skip
+     *
      * @return void
-     * @throws AssetsFolderNotFoundException
-     * @throws AssetsFolderEmptyException
      */
-    private function checkAssets(SymfonyStyle $io, $skip)
+    private function checkStorage(SymfonyStyle $io, $skip)
     {
-        $io->section('Assets');
+        $io->section('Storage');
         
         if ($skip)
         {
-            $io->note('Skipping Asset Health Check.');
+            $io->note('Skipping Storage Health Check.');
             return;
         }
         
-        if(null === $this->storageService){
-            $io->warning('Skipping assets because health check has no access to a storageService, is your service tagged with emsch.storage_service ?');
+        if(null === $this->storageManager){
+            $io->warning('Skipping assets because health check has no access to a storageManager, enable storage ?');
             return;
         }
-        
-        $io->text($this->storageService->getBasePath());
-        
-        if(!$this->storageService->storageExists()){
-            $io->error('Assets folder not found');
-            throw new AssetsFolderNotFoundException();
+
+        $adapters = [];
+
+        foreach ($this->storageManager->getAdapters() as $adapter) {
+            $adapters[] = get_class($adapter) . ' -> ' . ($adapter->health() ? 'green' : 'red');
         }
-        
-        if($this->storageService->storageIsEmpty()){
-            $io->error('Assets folder is empty');
-            throw new AssetsFolderEmptyException();
-        }
-        
-        $io->success('Assets are found.');
+
+        $io->listing($adapters);
     }
 }

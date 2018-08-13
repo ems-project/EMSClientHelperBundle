@@ -63,20 +63,15 @@ class Transformer
     {
         try {
             $emsLink = new EMSUrl($match);
-            
-            if ($emsLink->isAsset()) {
-                return $this->renderAsset($emsLink);
-            }
-            
+
             if (!$emsLink->hasContentType()) {
                 return false;
             }
             
             $document = $this->getDocument($emsLink);
-            
             $template = $this->renderTemplate($emsLink, $document, $locale);
             $url = $this->generator->prependBaseUrl($emsLink, $template);
-            
+
             return $url;
         } catch (\Exception $ex) {
             return $ex->getMessage();
@@ -102,20 +97,20 @@ class Transformer
     }
     
     /**
-     * @param EMSUrl $emsLink
+     * @param EMSUrl $url
      * @param array  $document
      * @param string $locale
      * 
      * @return string
      */
-    private function renderTemplate(EMSUrl $emsLink, array $document, $locale=null)
+    private function renderTemplate(EMSUrl $url, array $document, $locale=null)
     {
         try {
             return $this->twig->render('@EMSCH/routing/'.$document['_type'], [
                 'id'     => $document['_id'],
                 'source' => $document['_source'],
                 'locale' => ($locale?$locale:$this->clientRequest->getLocale()),
-                'linkType' => $emsLink->getLinkType(),
+                'url'    => $url,
             ]);
         } catch (\Twig_Error $ex) {
             return 'Template errror: ' . $ex->getMessage();
@@ -123,40 +118,23 @@ class Transformer
     }
     
     /**
-     * @param EMSUrl $emsLink
-     * exemple input: src="ems://asset:c71c8253399e87aaf2d549d00b697adee0664aa9?name=base_service_f.gif&amp;type=image/gif"
-     * @return string
-     */
-    private function renderAsset(EMSUrl $emsLink) {
-        try {
-            return $this->twig->render('ems_asset.ems.twig', [
-                    'sha1'     => $emsLink->getOuuid(),
-                    'name'     => $emsLink->getQuery()['name'],
-                    'type'     => $emsLink->getQuery()['type']
-            ]);
-        } catch (\Twig_Error $ex) {
-            return 'Template errror: ' . $ex->getMessage();
-        }
-    }
-    
-    /**
-     * @param EMSUrl $emsLink
+     * @param EMSUrl $url
      *
      * @return array|false
      * 
      * @throw \Exception
      */
-    private function getDocument(EMSUrl $emsLink)
+    private function getDocument(EMSUrl $url)
     {
         $document = $this->clientRequest->getByOuuid(
-            $emsLink->getContentType(),
-            $emsLink->getOuuid(),
+            $url->getContentType(),
+            $url->getOuuid(),
             [],
             ['*.content', '*.attachement', '*._attachement']
         );
         
         if (!$document) {
-            throw new \Exception('Document not found for : ' . $emsLink);
+            throw new \Exception('Document not found for : ' . $url);
         }
         
         return $document;

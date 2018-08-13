@@ -18,19 +18,19 @@
             <tag name="routing.loader" />
         </service>
 
-        <service id="emsch.routing.link.generator" class="EMS\ClientHelperBundle\Helper\Routing\Url\Generator">
+        <service id="emsch.routing.url.generator" class="EMS\ClientHelperBundle\Helper\Routing\Url\Generator">
             <argument type="service" id="Symfony\Component\Routing\RouterInterface" />
             <argument>%emsch.routing.relative_paths%</argument>
         </service>
-        <service id="emsch.routing.link.transformer" class="EMS\ClientHelperBundle\Helper\Routing\Url\Transformer">
+        <service id="emsch.routing.url.transformer" class="EMS\ClientHelperBundle\Helper\Routing\Url\Transformer">
             <argument><!-- clientRequest injected --></argument>
-            <argument type="service" id="emsch.routing.link.generator" />
+            <argument type="service" id="emsch.routing.url.generator" />
             <argument type="service" id="twig" />
         </service>
 
         <service id="emsch.routing.redirect_helper" class="EMS\ClientHelperBundle\Helper\Routing\RedirectHelper">
             <argument><!-- clientRequest injected --></argument>
-            <argument type="service" id="emsch.routing.link.transformer" />
+            <argument type="service" id="emsch.routing.url.transformer" />
             <argument type="string">%emsch.routing.redirect_type%</argument>
         </service>
 
@@ -42,7 +42,7 @@
         </service>
 
         <service id="emsch.twig.extension.routing" class="EMS\ClientHelperBundle\Twig\RoutingExtension">
-            <argument type="service" id="emsch.routing.link.transformer" />
+            <argument type="service" id="emsch.routing.url.transformer" />
             <tag name="twig.extension" />
         </service>
 

@@ -37,6 +37,14 @@ class RequestHelper
     }
 
     /**
+     * @return Environment[]
+     */
+    public function getEnvironments(): array
+    {
+        return $this->environments;
+    }
+
+    /**
      * @param Request $request
      *
      * @return void

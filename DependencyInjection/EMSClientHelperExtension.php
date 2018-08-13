@@ -164,11 +164,13 @@ class EMSClientHelperExtension extends Extension
             $name
         ]);
         $definition->addTag('emsch.client_request');
-        $container->setDefinition(sprintf('emsch.client_request.%s', $name), $definition);
 
         if (isset($options['api'])) {
             $this->loadClientRequestApi($loader);
+            $definition->addTag('esmch.client_request.api');
         }
+
+        $container->setDefinition(sprintf('emsch.client_request.%s', $name), $definition);
     }
 
     /**
@@ -290,10 +292,5 @@ class EMSClientHelperExtension extends Extension
         $container->setParameter('emsch.routing.client_request', $config['client_request']);
         $container->setParameter('emsch.routing.redirect_type', $config['redirect_type']);
         $container->setParameter('emsch.routing.relative_paths', $config['relative_paths']);
-
-        if ($config['file_manager']['enabled']) {
-            $container->setParameter('emsch.file_manager.config', $config['file_manager']);
-            $loader->load('file.xml');
-        }
     }
 }

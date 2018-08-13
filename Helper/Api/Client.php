@@ -2,7 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Helper\Api;
 
-use GuzzleHttp\Client as BaseClient;
+use EMS\CommonBundle\Http\ClientFactory;
 
 class Client
 {
@@ -23,10 +23,7 @@ class Client
     public function __construct($baseUrl, $key)
     {
         $this->key = $key;
-        $this->client = new BaseClient([
-            'base_uri' => $baseUrl,
-            'headers' => ['X-Auth-Token' => $this->key]
-        ]);
+        $this->client = ClientFactory::create($baseUrl, ['X-Auth-Token' => $this->key]);
     }
     
     /**

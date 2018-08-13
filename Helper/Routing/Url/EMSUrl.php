@@ -2,9 +2,6 @@
 
 namespace EMS\ClientHelperBundle\Helper\Routing\Url;
 
-/**
- * Ems Link
- */
 class EMSUrl
 {
     /**
@@ -95,13 +92,5 @@ class EMSUrl
     public function hasContentType()
     {
         return null !== $this->contentType;
-    }
-    
-    /**
-     * @return bool
-     */
-    public function isAsset()
-    {
-        return 'asset' === $this->getLinkType();
     }
 }
