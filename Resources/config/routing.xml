@@ -41,9 +41,9 @@
             <tag name="kernel.event_subscriber"/>
         </service>
 
-        <service id="emsch.twig.extension.routing" class="EMS\ClientHelperBundle\Twig\RoutingExtension">
+        <service id="emsch.twig.runtime.routing" class="EMS\ClientHelperBundle\Twig\RoutingRuntime">
             <argument type="service" id="emsch.routing.url.transformer" />
-            <tag name="twig.extension" />
+            <tag name="twig.runtime" />
         </service>
 
     </services>

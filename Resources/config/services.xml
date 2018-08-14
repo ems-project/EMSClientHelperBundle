@@ -8,9 +8,11 @@
         <defaults public="false" />
 
         <service id="emsch.query_builder.service" class="EMS\ClientHelperBundle\Service\QueryBuilderService"/>
-
         <service id="emsch.request.helper" class="EMS\ClientHelperBundle\Helper\Request\RequestHelper">
             <argument type="service" id="request_stack" />
+        </service>
+        <service id="emsch.manager.client_request" class="EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager">
+            <argument type="tagged" tag="emsch.client_request"/>
         </service>
 
         <!-- event listeners -->
@@ -20,21 +22,15 @@
             <tag name="kernel.event_listener" event="kernel.exception" priority="100" />
         </service>
 
-        <!-- twig extensions -->
+        <!-- twig -->
         <service id="emsch.twig.extension.helper" class="EMS\ClientHelperBundle\Twig\HelperExtension">
-            <argument type="service" id="request_stack"/>
             <tag name="twig.extension" />
         </service>
-        <service id="emsch.twig.extension.trans" class="EMS\ClientHelperBundle\Twig\TranslationExtension">
-            <argument type="service" id="translator" />
-            <argument type="service" id="emsch.request.helper" />
-            <tag name="twig.extension" />
+        <service id="emsch.twig.runtime.request_helper" class="EMS\ClientHelperBundle\Twig\RequestHelperRuntime">
+            <argument type="service" id="emsch.request.helper"/>
+            <tag name="twig.runtime" />
         </service>
-        <service id="emsch.twig.extension.edition" class="EMS\ClientHelperBundle\Twig\EditionExtension">
-            <argument type="service" id="request_stack" />
-            <tag name="twig.extension" />
-        </service>
-        
+
         <!-- commands -->
         <service id="emsch.command.health_check" class="EMS\ClientHelperBundle\Command\HealthCheckCommand">
             <argument type="service" id="emsch.request.helper" />

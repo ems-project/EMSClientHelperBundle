@@ -2,108 +2,28 @@
 
 namespace EMS\ClientHelperBundle\Twig;
 
-use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Extension\AbstractExtension;
-use Twig\TwigFilter;
 
 class HelperExtension extends AbstractExtension
 {
-    /**
-     * @var RequestStack
-     */
-    private $requestStack;
-
-    /**
-     * @param RequestStack $requestStack
-     */
-    public function __construct( RequestStack $requestStack )
-    {
-        $this->requestStack = $requestStack;
-    }
-
-
-
     /**
      * {@inheritdoc}
      */
     public function getFilters()
     {
         return [
-            new TwigFilter('emsch_ouuid', [$this, 'getOuuid']),
-            new TwigFilter('dump', [$this, 'dump']),
-            new TwigFilter('format_bytes', [$this, 'formatBytes']),
-            new TwigFilter('array_key', [$this, 'arrayKey']),
-            new TwigFilter('locale_attr', [$this, 'localeAttribute']),
+            new \Twig_SimpleFilter('emsch_routing', [RoutingRuntime::class, 'transform'], ['is_safe' => ['html']]),
         ];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function localeAttribute($array, $attribute)
+    public function getFunctions()
     {
-        $locale = $this->requestStack->getCurrentRequest()->getLocale();
-        if(isset($array[$attribute.$locale]))
-        {
-            return $array[$attribute.$locale];
-        }
-        return '';
-
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function arrayKey($array, $arrayKey='key')
-    {
-        $out = [];
-        foreach ($array as $id => $item)
-        {
-            if (isset($item[$arrayKey]))
-            {
-                $out[$item[$arrayKey]] =  $item;
-            }
-            else
-            {
-                $out[$id] =  $item;
-            }
-        }
-        return $out;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getOuuid($emsLink)
-    {
-        return ClientRequest::getOuuid($emsLink);
-    }
-    
-    public function dump($object) {
-        if(function_exists('dump')){
-            dump($object);
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getName()
-    {
-        return 'emsch_helper';
-    }    
-    
-    function formatBytes($bytes, $precision = 2)
-    {
-        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        $bytes = max($bytes, 0);
-        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
-        $pow = min($pow, count($units) - 1);
-        
-        // Uncomment one of the following alternatives
-        $bytes /= pow(1024, $pow);
-        
-        return round($bytes, $precision) . ' ' . $units[$pow];
+        return [
+            new \Twig_SimpleFunction('emsch_admin_menu', [RequestHelperRuntime::class, 'showAdminMenu'], ['is_safe' => ['html']]),
+            new \Twig_SimpleFunction('emsch_route', [RoutingRuntime::class, 'createUrl']),
+        ];
     }
 }

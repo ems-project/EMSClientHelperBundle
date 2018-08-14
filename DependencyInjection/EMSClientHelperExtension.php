@@ -62,10 +62,10 @@ class EMSClientHelperExtension extends Extension
             return;
         }
 
-        $eventListener = $container->getDefinition('emsch.request.helper');
+        $requestHelper = $container->getDefinition('emsch.request.helper');
 
         foreach ($config as $environment => $options) {
-            $eventListener->addMethodCall('addEnvironment', [
+            $requestHelper->addMethodCall('addEnvironment', [
                 $environment, $options['regex'], $options['index'], $options['backend']
             ]);
         }
@@ -144,7 +144,7 @@ class EMSClientHelperExtension extends Extension
             ->setPublic(true);
         $definition->addTag('emsch.elasticsearch.client');
         
-        $container->setDefinition(sprintf('elasticsearch.client.%s', $name), $definition);
+        $container->setDefinition(sprintf('ems_common.elasticsearch.%s', $name), $definition);
     }
 
     /**
@@ -157,7 +157,7 @@ class EMSClientHelperExtension extends Extension
     {
         $definition = new Definition(ClientRequest::class);
         $definition->setArguments([
-            new Reference(sprintf('elasticsearch.client.%s', $name)),
+            new Reference(sprintf('ems_common.elasticsearch.%s', $name)),
             new Reference('emsch.request.helper'),
             new Reference('logger'),
             $options,
@@ -197,7 +197,7 @@ class EMSClientHelperExtension extends Extension
     {
         $loader = new Definition(TranslationLoader::class);
         $loader->setArguments([
-            new Reference(sprintf('elasticsearch.client.%s', $name)),
+            new Reference(sprintf('ems_common.elasticsearch.%s', $name)),
             $name,
             $options['index_prefix'],
             $options['translation_type']

@@ -64,6 +64,33 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->arrayNode('elasticms')
+                    ->beforeNormalization()
+                        ->ifArray()
+                        ->then(function ($v) {
+                            if (1 === count($v)) {
+                                $v[key($v)]['default'] = true;
+                                return $v;
+                            }
+
+                            $default = [];
+
+                            foreach ($v as $name => $options) {
+                                if (isset($options['default']) && $options['default']) {
+                                    $default[] = $name;
+                                }
+                            }
+
+                            if (empty($default)) {
+                                throw new \InvalidArgumentException('no default elasticms configured');
+                            }
+
+                            if (count($default) > 1) {
+                                throw new \InvalidArgumentException('there can only be 1 default elasticms');
+                            }
+
+                            return $v;
+                        })
+                    ->end()
                     ->prototype('array')
                         ->info('name for the ems-project')
                         ->children()
@@ -75,6 +102,7 @@ class Configuration implements ConfigurationInterface
                                 ->info("example: 'test_'")
                                 ->defaultValue(null)
                             ->end()
+                            ->booleanNode('default')->end()
                             ->scalarNode('translation_type')
                                 ->info("example: 'test_i18n'")
                                 ->defaultValue(null)

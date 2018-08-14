@@ -3,6 +3,7 @@
 namespace EMS\ClientHelperBundle\Helper\Routing\Url;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
+use EMS\CommonBundle\Common\EMSLink;
 
 class Transformer
 {
@@ -20,18 +21,6 @@ class Transformer
      * @var \Twig_Environment
      */
     private $twig;
-
-    /**
-     * Regex for searching ems links in content
-     * content_type and query can be empty/optional
-     *
-     * Regex101.com:
-     * ems:\/\/(?P<link_type>.*?):(?:(?P<content_type>.*?):)?(?P<ouuid>([[:alnum:]]|-|_)*)(?:\?(?P<query>(?:[^"|\'|\s]*)))?
-     *
-     * Example: <a href="ems://object:page:AV44kX4b1tfmVMOaE61u">example</a>
-     * link_type => object, content_type => page, ouuid => AV44kX4b1tfmVMOaE61u
-     */
-    const EMS_LINK = '/ems:\/\/(?P<link_type>.*?):(?:(?P<content_type>.*?):)?(?P<ouuid>([[:alnum:]]|-|_)*)(?:\?(?P<query>(?:[^"|\'|\s]*)))?/';
 
     /**
      * @param ClientRequest     $clientRequest injected by compiler pass
@@ -62,19 +51,19 @@ class Transformer
     public function generate(array $match, $locale=null)
     {
         try {
-            $emsUrl = new EMSUrl($match);
+            $emsLink = EMSLink::fromMatch($match);
 
-            if ('asset' === $emsUrl->getLinkType()) {
-                return '/file/view/' . $emsUrl->getOuuid() . '?' . http_build_query($emsUrl->getQuery());
+            if ('asset' === $emsLink->getLinkType()) {
+                return '/file/view/' . $emsLink->getOuuid() . '?' . http_build_query($emsLink->getQuery());
             }
 
-            if (!$emsUrl->hasContentType()) {
+            if (!$emsLink->hasContentType()) {
                 return false;
             }
             
-            $document = $this->getDocument($emsUrl);
-            $template = $this->renderTemplate($emsUrl, $document, $locale);
-            $url = $this->generator->prependBaseUrl($emsUrl, $template);
+            $document = $this->getDocument($emsLink);
+            $template = $this->renderTemplate($emsLink, $document, $locale);
+            $url = $this->generator->prependBaseUrl($emsLink, $template);
 
             return $url;
         } catch (\Exception $ex) {
@@ -91,7 +80,7 @@ class Transformer
      */
     public function transform($content, $locale = null, $baseUrl = null)
     {
-        return preg_replace_callback(self::EMS_LINK, function ($match) use ($locale, $baseUrl) {
+        return preg_replace_callback(EMSLink::REGEX, function ($match) use ($locale, $baseUrl) {
             //array filter to remove empty capture groups
             $generation = $this->generate(array_filter($match), $locale);
             $route = $generation ? $generation : $match[0];
@@ -101,20 +90,20 @@ class Transformer
     }
     
     /**
-     * @param EMSUrl $url
-     * @param array  $document
-     * @param string $locale
+     * @param EMSLink $emsLink
+     * @param array   $document
+     * @param string  $locale
      * 
      * @return string
      */
-    private function renderTemplate(EMSUrl $url, array $document, $locale=null)
+    private function renderTemplate(EMSLink $emsLink, array $document, $locale=null)
     {
         try {
             return $this->twig->render('@EMSCH/routing/'.$document['_type'], [
                 'id'     => $document['_id'],
                 'source' => $document['_source'],
                 'locale' => ($locale?$locale:$this->clientRequest->getLocale()),
-                'url'    => $url,
+                'url'    => $emsLink,
             ]);
         } catch (\Twig_Error $ex) {
             return 'Template errror: ' . $ex->getMessage();
@@ -122,23 +111,23 @@ class Transformer
     }
     
     /**
-     * @param EMSUrl $url
+     * @param EMSLink $emsLink
      *
      * @return array|false
      * 
      * @throw \Exception
      */
-    private function getDocument(EMSUrl $url)
+    private function getDocument(EMSLink $emsLink)
     {
         $document = $this->clientRequest->getByOuuid(
-            $url->getContentType(),
-            $url->getOuuid(),
+            $emsLink->getContentType(),
+            $emsLink->getOuuid(),
             [],
             ['*.content', '*.attachement', '*._attachement']
         );
         
         if (!$document) {
-            throw new \Exception('Document not found for : ' . $url);
+            throw new \Exception('Document not found for : ' . $emsLink);
         }
         
         return $document;

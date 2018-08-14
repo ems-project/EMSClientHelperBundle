@@ -532,6 +532,14 @@ class ClientRequest
     }
 
     /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
      * @return string name_env
      */
     public function getNameEnv()

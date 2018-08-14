@@ -56,14 +56,28 @@ class RequestHelper
         }
 
         foreach ($this->environments as $env) {
-            if ($env->match($request)) {
-                $request->attributes->set('_environment', $env->getIndex());
-                if(!empty($env->getBackend())) {
-                    $request->attributes->set('_backend', $env->getBackend());
-                }
-                return; //stop on match
+            if (!$env->match($request)) {
+                continue;
             }
+
+            $request->attributes->set('_environment', $env->getIndex());
+
+            if(!empty($env->getBackend())) {
+                $request->attributes->set('_backend', $env->getBackend());
+            }
+
+            return; //stop on match
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function getBackend()
+    {
+        $current = $this->requestStack->getCurrentRequest();
+
+        return ($current ? $current->get('_backend') : null);
     }
 
     /**

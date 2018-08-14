@@ -5,6 +5,7 @@ namespace EMS\ClientHelperBundle\Helper\Routing;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Twig\TwigLoader;
+use EMS\CommonBundle\Common\EMSLink;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -60,6 +61,7 @@ class Router
             $content = $this->templating->render($template, [
                 'document' => $document,
                 'source' => $document['_source'],
+                'emsLink' => EMSLink::fromDocument($document),
                 'trans_default_domain' => $this->client->getNameEnv(),
             ]);
 

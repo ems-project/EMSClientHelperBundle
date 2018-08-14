@@ -3,8 +3,9 @@
 namespace EMS\ClientHelperBundle\Twig;
 
 use EMS\ClientHelperBundle\Helper\Routing\Url\Transformer;
+use Twig\Extension\RuntimeExtensionInterface;
 
-class RoutingExtension extends \Twig_Extension
+class RoutingRuntime implements RuntimeExtensionInterface
 {
     /**
      * @var Transformer
@@ -18,27 +19,7 @@ class RoutingExtension extends \Twig_Extension
     {
         $this->transformer = $transformer;
     }
-    
-    /**
-     * {@inheritdoc}
-     */
-    public function getFilters()
-    {
-        return [
-            new \Twig_SimpleFilter('emsch_routing', [$this, 'transform'], ['is_safe' => ['html']]),
-        ];
-    }
-    
-    /**
-     * {@inheritdoc}
-     */
-    public function getFunctions()
-    {
-        return [
-            new \Twig_SimpleFunction('emsch_route', [$this, 'createUrl']),
-        ];
-    }
-    
+
     /**
      * @param string $relativePath
      * @param string $path
@@ -48,16 +29,13 @@ class RoutingExtension extends \Twig_Extension
      */
     public function createUrl($relativePath, $path, array $parameters = [])
     {
-        $url = $this->transformer
-            ->getGenerator()
-            ->createUrl($relativePath, $path);
+        $url = $this->transformer->getGenerator()->createUrl($relativePath, $path);
         
         if ($parameters) {
             $url .= '?' . http_build_query($parameters);
         }
         
         return $url;
-        
     }
     
     /**
