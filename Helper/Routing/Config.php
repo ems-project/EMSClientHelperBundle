@@ -45,7 +45,10 @@ class Config
             $this->options['path'],
             $this->options['defaults'],
             $this->options['requirements'],
-            $this->options['options']
+            $this->options['options'],
+            null,
+            null,
+            ['GET']
         );
     }
 
@@ -59,7 +62,7 @@ class Config
         $resolver = new OptionsResolver();
         $resolver
             ->setDefaults([
-                'defaults' => ['_controller' => 'emsch.routing.router::handle'],
+                'defaults' => ['_controller' => 'emsch.controller.dynamic::handle'],
                 'requirements' => [],
                 'options' => [],
                 'template' => null,

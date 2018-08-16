@@ -12,6 +12,10 @@ class InjectClientRequestPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
+        //override the default symfony router, with the chain router
+        $container->setAlias('router', 'emch.routing.chain_router');
+        $container->getAlias('router')->setPublic(true);
+
         if ($container->hasDefinition('emsch.language_selection')) {
             $languageSelection = $container->findDefinition($container->getParameter('emsch.language_selection.client_request'));
             $container->getDefinition('emsch.language_selection')->setArgument(0, $languageSelection);
@@ -30,10 +34,6 @@ class InjectClientRequestPass implements CompilerPassInterface
         }
 
         $clientRequest = $container->findDefinition($container->getParameter('emsch.routing.client_request'));
-
-        if ($container->hasDefinition('emsch.routing.router')) {
-            $container->getDefinition('emsch.routing.router')->setArgument(0, $clientRequest);
-        }
 
         if ($container->hasDefinition('emsch.routing.url.transformer')) {
             $container->getDefinition('emsch.routing.url.transformer')->setArgument(0, $clientRequest);

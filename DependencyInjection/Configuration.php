@@ -110,6 +110,7 @@ class Configuration implements ConfigurationInterface
                             ->variableNode('templates')
                                 ->example('{"template": {"name": "key","code": "body"}}')
                             ->end()
+                            ->variableNode('routes')->end()
                             ->variableNode('api')
                                 ->info('api for content exposing')
                                 ->example('{"enable": true, "name": "api"}')

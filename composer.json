@@ -21,6 +21,7 @@
 		"elasticms/common-bundle": "^1.0",
 		"composer/ca-bundle": "^1.1",
 		"symfony/framework-bundle" : "~3.0|~4.0",
+		"symfony-cmf/routing": "^2.1.0",
 		"twig/twig" : "~2.4"
 	},
 	"require-dev" : {

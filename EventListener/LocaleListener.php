@@ -12,6 +12,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Router;
+use Symfony\Component\Routing\RouterInterface;
 
 class LocaleListener implements EventSubscriberInterface
 {
@@ -33,12 +34,12 @@ class LocaleListener implements EventSubscriberInterface
     /**
      * @param LanguageSelectionService $languageService
      * @param HttpKernel               $kernel
-     * @param Router                   $router
+     * @param RouterInterface          $router
      */
     public function __construct(
         LanguageSelectionService $languageService,
         HttpKernel $kernel,
-        Router $router
+        RouterInterface $router
     ) {
         $this->languageService = $languageService;
         $this->kernel = $kernel;

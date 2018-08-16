@@ -2,128 +2,122 @@
 
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
-use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
-use EMS\ClientHelperBundle\Exception\SingleResultException;
-use EMS\ClientHelperBundle\Helper\Twig\TwigLoader;
-use EMS\CommonBundle\Common\EMSLink;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\Routing\Route;
+use Symfony\Component\Routing\Matcher\UrlMatcher;
+use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
 
-class Router
+class Router implements RouterInterface, RequestMatcherInterface
 {
     /**
-     * @var RouterInterface
+     * @var array
      */
-    private $router;
+    private $routes;
 
     /**
-     * @var ClientRequest
+     * @var RequestContext
      */
-    private $client;
+    private $context;
 
     /**
-     * @var \Twig_Environment
+     * @var RouteCollection
      */
-    private $templating;
+    private $collection;
 
     /**
-     * @param ClientRequest     $clientRequest
-     * @param RouterInterface   $router
-     * @param \Twig_Environment $templating
+     * @var UrlMatcher
      */
-    public function __construct(ClientRequest $clientRequest, RouterInterface $router, \Twig_Environment $templating)
+    private $matcher;
+
+    /**
+     * @param array $routes
+     */
+    public function __construct(array $routes)
     {
-        $this->router = $router;
-        $this->client = $clientRequest;
-        $this->templating = $templating;
+        $this->routes = $routes;
     }
 
     /**
-     * Handle ems routes
-     * @param Request $request
-     *
-     * @return Response
+     * @inheritdoc
      */
-    public function handle(Request $request)
+    public function getContext()
     {
-        $route = $this->getRoute($request);
-        $type = $route->getOption('type');
-
-        try {
-            $body = $this->createSearchBody($request, $route);
-            $document = $this->client->searchOne($type, $body);
-            $template = $this->getTemplate($route, $document);
-
-            $content = $this->templating->render($template, [
-                'document' => $document,
-                'source' => $document['_source'],
-                'emsLink' => EMSLink::fromDocument($document),
-                'trans_default_domain' => $this->client->getNameEnv(),
-            ]);
-
-            return new Response($content, 200);
-        } catch (SingleResultException $e) {
-            throw new NotFoundHttpException();
-        }
+        return $this->context;
     }
 
     /**
-     * @param Request $request
-     *
-     * @return null|Route
+     * @inheritdoc
      */
-    private function getRoute(Request $request)
+    public function setContext(RequestContext $context)
     {
-        $name = $request->attributes->get('_route');
-        $route = $this->router->getRouteCollection()->get($name);
+        $this->context = $context;
+    }
 
-        if (null === $route) {
-            throw new NotFoundHttpException('ems route not found');
+    /**
+     * @inheritdoc
+     */
+    public function getRouteCollection()
+    {
+        if (null === $this->collection) {
+            $this->collection = $this->buildCollection();
         }
 
-        return $route;
+        return $this->collection;
     }
 
     /**
-     * Replaces all %values% parameters in the route query string,
-     * with request attributes.
-     *
-     * @param Request $request
-     * @param Route   $route
-     *
-     * @return array
+     * @inheritdoc
      */
-    private function createSearchBody(Request $request, Route $route)
+    public function match($pathinfo)
     {
-        $pattern = '/%(?<parameter>(_|)[[:alnum:]]*)%/m';
-
-        $json = preg_replace_callback($pattern, function ($match) use ($request) {
-            return $request->get($match['parameter'], $match[0]);
-        }, $route->getOption('query'));
-
-        return json_decode($json, true);
+        return $this->getMatcher()->match($pathinfo);
     }
 
     /**
-     * @param Route $route
-     * @param array $document
-     *
-     * @return string
+     * @inheritdoc
      */
-    private function getTemplate(Route $route, array $document)
+    public function matchRequest(Request $request)
     {
-        $template = $route->getOption('template');
+        return $this->getMatcher()->matchRequest($request);
+    }
 
-        if (substr($template, 0, 6) === TwigLoader::PREFIX) {
-            return $template;
+    /**
+     * @inheritdoc
+     */
+    public function generate($name, $parameters = [], $referenceType = self::ABSOLUTE_PATH)
+    {
+        return null; // @todo implement generation
+    }
+
+    /**
+     * @return UrlMatcher
+     */
+    private function getMatcher(): UrlMatcher
+    {
+        if (null === $this->matcher) {
+            $this->matcher = new UrlMatcher($this->getRouteCollection(), $this->getContext());
         }
 
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        return $this->matcher;
+    }
 
-        return TwigLoader::PREFIX . '/' . $propertyAccessor->getValue($document, '[_source]'.$template);
+    /**
+     * @return RouteCollection
+     */
+    private function buildCollection(): RouteCollection
+    {
+        $configs = array_map(function (string $name, array $options) {
+            return new Config($name, $options);
+        }, array_keys($this->routes), $this->routes);
+
+        $collection = new RouteCollection();
+
+        foreach ($configs as $config) {
+            $collection->add($config->getName(), $config->getRoute());
+        }
+
+        return $collection;
     }
 }

@@ -22,7 +22,7 @@ class ClientRequestManager
         foreach ($clientRequests as $clientRequest) {
             $this->clientRequests[$clientRequest->getName()] = $clientRequest;
 
-            if ($clientRequest->getOption('default', false)) {
+            if ($clientRequest->getOption('[default]', false)) {
                 $this->default = $clientRequest;
             }
         }

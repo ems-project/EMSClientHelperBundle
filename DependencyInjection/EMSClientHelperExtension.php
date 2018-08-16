@@ -6,6 +6,7 @@ use Composer\CaBundle\CaBundle;
 use Elasticsearch\Client;
 use EMS\ClientHelperBundle\Helper\Api\Client as ApiClient;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Routing\Router;
 use EMS\ClientHelperBundle\Helper\Translation\TranslationLoader;
 use EMS\ClientHelperBundle\Helper\Twig\TwigLoader;
 use Symfony\Component\Config\FileLocator;
@@ -81,6 +82,7 @@ class EMSClientHelperExtension extends Extension
         foreach ($config as $name => $options) {
             $this->defineElasticsearchClient($container, $name, $options);
             $this->defineClientRequest($container, $loader, $name, $options);
+            $this->defineEMSRouter($container, $name, $options);
 
             if (null !== $options['translation_type']) {
                 $this->defineTranslationLoader($container, $name, $options);
@@ -89,6 +91,8 @@ class EMSClientHelperExtension extends Extension
             if (isset($options['templates'])) {
                 $this->defineTwigLoader($container, $name, $options['templates']);
             }
+
+            $container->setParameter('emsch_routes', $options['routes']);
         }
     }
 
@@ -171,6 +175,20 @@ class EMSClientHelperExtension extends Extension
         }
 
         $container->setDefinition(sprintf('emsch.client_request.%s', $name), $definition);
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param string           $name
+     * @param array            $options
+     */
+    private function defineEMSRouter(ContainerBuilder $container, string $name, array $options)
+    {
+        $definition = new Definition(Router::class);
+        $definition->setArguments([$options['routes']]);
+        $definition->addTag('emsch.router');
+
+        $container->setDefinition(sprintf('emsch.router.%s', $name), $definition);
     }
 
     /**
