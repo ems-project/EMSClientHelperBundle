@@ -1,0 +1,233 @@
+<?php
+
+namespace EMS\ClientHelperBundle\DependencyInjection;
+
+use Composer\CaBundle\CaBundle;
+use Elasticsearch\Client;
+use EMS\ClientHelperBundle\Helper\Api\Client as ApiClient;
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Routing\Router;
+use EMS\ClientHelperBundle\Helper\Translation\TranslationLoader;
+use EMS\ClientHelperBundle\Helper\Twig\TwigLoader;
+use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+use EMS\ClientHelperBundle\Service\ClearCacheService;
+use EMS\ClientHelperBundle\EventListener\ClearCacheRequestListener;
+
+class EMSClientHelperExtension extends Extension
+{
+    /**
+     * {@inheritdoc}
+     */
+    public function load(array $configs, ContainerBuilder $container)
+    {
+        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader->load('services.xml');
+        $loader->load('routing.xml');
+
+        $configuration = new Configuration();
+        $config = $this->processConfiguration($configuration, $configs);
+
+        $this->processRequestEnvironments($container, $config['request_environments']);
+        $this->processElasticms($container, $loader, $config['elasticms']);
+        $this->processApi($container, $config['api']);
+        $this->processLanguageSelection($container, $loader, $config['language_selection']);
+        $this->processRoutingSelection($container, $loader, $config['routing']);
+
+        if (isset($config['twig_list'])) {
+            $definition = $container->getDefinition('emsch.controller.twig_list');
+            $definition->replaceArgument(1, $config['twig_list']['templates']);
+        }
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param array $config
+     *
+     * @return void
+     */
+    private function processRequestEnvironments(ContainerBuilder $container, array $config)
+    {
+        $id = 'emsch.request_listener';
+
+        if (!$container->hasDefinition($id)) {
+            return;
+        }
+
+        $requestHelper = $container->getDefinition('emsch.request.helper');
+
+        foreach ($config as $environment => $options) {
+            $requestHelper->addMethodCall('addEnvironment', [
+                $environment, $options['regex'], $options['index'], $options['backend']
+            ]);
+        }
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param XmlFileLoader    $loader
+     * @param array            $config
+     */
+    private function processElasticms(ContainerBuilder $container, XmlFileLoader $loader, array $config)
+    {
+        foreach ($config as $name => $options) {
+            $this->defineElasticsearchClient($container, $name, $options);
+            $this->defineClientRequest($container, $loader, $name, $options);
+            $this->defineRouter($container, $name, $options);
+
+            if (isset($options['templates'])) {
+                $this->defineTwigLoader($container, $name, $options['templates']);
+            }
+
+            $container->setParameter('emsch_routes', $options['routes']);
+        }
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param array $config
+     */
+    private function processApi(ContainerBuilder $container, array $config)
+    {
+        foreach ($config as $name => $options) {
+            $definition = new Definition(ApiClient::class);
+            $definition->setArgument(0, $options['url']);
+            $definition->setArgument(1, $options['key']);
+
+            $container->setDefinition(sprintf('emsch.api_client.%s', $name), $definition);
+        }
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param string $name
+     * @param array $options
+     */
+    private function defineElasticsearchClient(ContainerBuilder $container, $name, array $options)
+    {
+        $definition = new Definition(Client::class);
+        $config = [
+            'hosts' => $options['hosts'],
+            'sSLVerification' => CaBundle::getBundledCaBundlePath(),
+        ];
+
+        $definition
+            ->setFactory([new Reference('ems_common.elasticsearch.factory'), 'fromConfig'])
+            ->setArgument(0, $config)
+            ->setPublic(true);
+        $definition->addTag('emsch.elasticsearch.client');
+        
+        $container->setDefinition(sprintf('ems_common.elasticsearch.%s', $name), $definition);
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param XmlFileLoader    $loader
+     * @param string           $name
+     * @param array            $options
+     */
+    private function defineClientRequest(ContainerBuilder $container, XmlFileLoader $loader, $name, array $options)
+    {
+        $definition = new Definition(ClientRequest::class);
+        $definition->setArguments([
+            new Reference(sprintf('ems_common.elasticsearch.%s', $name)),
+            new Reference('emsch.request.helper'),
+            new Reference('logger'),
+            $options,
+            $name
+        ]);
+        $definition->addTag('emsch.client_request');
+
+        if (isset($options['api'])) {
+            $this->loadClientRequestApi($loader);
+            $definition->addTag('esmch.client_request.api');
+        }
+
+        $container->setDefinition(sprintf('emsch.client_request.%s', $name), $definition);
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param string           $name
+     * @param array            $options
+     */
+    private function defineRouter(ContainerBuilder $container, string $name, array $options)
+    {
+        $definition = new Definition(Router::class);
+        $definition->setArguments([$options['routes']]);
+        $definition->addTag('emsch.router');
+
+        $container->setDefinition(sprintf('emsch.router.%s', $name), $definition);
+    }
+
+    /**
+     * @param XmlFileLoader $loader
+     */
+    private function loadClientRequestApi(XmlFileLoader $loader)
+    {
+        static $loaded = false;
+
+        if ($loaded) {
+            return;
+        }
+
+        $loader->load('api.xml');
+        $loaded = true;
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param string           $name
+     * @param array            $options
+     */
+    private function defineTwigLoader(ContainerBuilder $container, $name, $options)
+    {
+        $loader = new Definition(TwigLoader::class);
+        $loader->setArguments([
+            new Reference(sprintf('emsch.client_request.%s', $name)),
+            $options
+        ]);
+        $loader->addTag('twig.loader', ['alias' => $name, 'priority' => 1]);
+
+        $container->setDefinition(sprintf('emsch.twig.loader.%s', $name), $loader);
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param XmlFileLoader    $loader
+     * @param array            $config
+     */
+    private function processLanguageSelection(ContainerBuilder $container, XmlFileLoader $loader, array $config)
+    {
+        if (!$config['enabled']) {
+            return;
+        }
+
+        $container->setParameter('emsch.language_selection.client_request', $config['client_request']);
+        $container->setParameter('emsch.language_selection.template', $config['template']);
+        $container->setParameter('emsch.language_selection.option_type', $config['option_type']);
+        $container->setParameter('emsch.language_selection.supported_locale', $config['supported_locale']);
+
+        $loader->load('language_selection.xml');
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param XmlFileLoader    $loader
+     * @param array            $config
+     */
+    private function processRoutingSelection(ContainerBuilder $container, XmlFileLoader $loader, array $config)
+    {
+        if (!$config['enabled']) {
+            return;
+        }
+
+        $container->setParameter('emsch.routing.client_request', $config['client_request']);
+        $container->setParameter('emsch.routing.redirect_type', $config['redirect_type']);
+        $container->setParameter('emsch.routing.relative_paths', $config['relative_paths']);
+    }
+}
