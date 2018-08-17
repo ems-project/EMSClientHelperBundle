@@ -115,6 +115,7 @@ class Router implements RouterInterface, RequestMatcherInterface
         $collection = new RouteCollection();
 
         foreach ($configs as $config) {
+            /* @var $config Config */
             $collection->add($config->getName(), $config->getRoute());
         }
 

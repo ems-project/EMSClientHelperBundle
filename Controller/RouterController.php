@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Controller;
 
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Twig\TwigLoader;
@@ -13,8 +14,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouterInterface;
 
-
-class DynamicController
+class RouterController
 {
     /**
      * @var ClientRequestManager
@@ -50,29 +50,26 @@ class DynamicController
      */
     public function handle(Request $request)
     {
-        $route = $this->getRoute($request);
-        $type = $route->getOption('type');
-
         try {
-            $client = $this->manager->getDefault();
+            $route = $this->getRoute($request);
 
-            $body = $this->createSearchBody($request, $route);
-            $document = $client->searchOne($type, $body);
+            $client = $this->manager->getDefault();
+            $context = ['trans_default_domain' => $client->getCacheKey()];
+
+            $document = $this->getDocument($client, $request, $route);
             $template = $this->getTemplate($route, $document);
 
-            $content = $this->templating->render($template, [
-                'document' => $document,
-                'source' => $document['_source'],
-                'emsLink' => EMSLink::fromDocument($document),
-                'trans_default_domain' => $client->getNameEnv(),
-            ]);
+            if ($document) {
+                $context['document'] = $document;
+                $context['source'] = $document['_source'];
+                $context['emsLink'] = EMSLink::fromDocument($document);
+            }
 
-            return new Response($content, 200);
+            return new Response($this->templating->render($template, $context), 200);
         } catch (SingleResultException $e) {
             throw new NotFoundHttpException();
         }
     }
-
 
     /**
      * @param Request $request
@@ -92,23 +89,29 @@ class DynamicController
     }
 
     /**
-     * Replaces all %values% parameters in the route query string,
-     * with request attributes.
+     * @param ClientRequest $client
+     * @param Request       $request
+     * @param Route         $route
      *
-     * @param Request $request
-     * @param Route   $route
+     * @return array|null
      *
-     * @return array
+     * @throws SingleResultException
      */
-    private function createSearchBody(Request $request, Route $route)
+    public function getDocument(ClientRequest $client, Request $request, Route $route)
     {
+        $query = $route->getOption('query');
+
+        if (null === $query) {
+            return null;
+        }
+
         $pattern = '/%(?<parameter>(_|)[[:alnum:]]*)%/m';
 
         $json = preg_replace_callback($pattern, function ($match) use ($request) {
             return $request->get($match['parameter'], $match[0]);
-        }, $route->getOption('query'));
+        }, $query);
 
-        return json_decode($json, true);
+        return $client->searchOne($route->getOption('type'), json_decode($json, true));
     }
 
     /**
@@ -117,11 +120,11 @@ class DynamicController
      *
      * @return string
      */
-    private function getTemplate(Route $route, array $document)
+    private function getTemplate(Route $route, array $document = null)
     {
         $template = $route->getOption('template');
 
-        if (substr($template, 0, 6) === TwigLoader::PREFIX) {
+        if (null === $document || substr($template, 0, 6) === TwigLoader::PREFIX) {
             return $template;
         }
 

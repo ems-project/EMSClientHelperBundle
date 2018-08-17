@@ -309,6 +309,16 @@ class ClientRequest
     }
 
     /**
+     * @param string $option
+     *
+     * @return bool
+     */
+    public function hasOption(string $option): bool
+    {
+        return isset($this->options[$option]) && null != $this->options[$option];
+    }
+
+    /**
      * @param string $propertyPath
      * @param string $default
      *
@@ -507,7 +517,7 @@ class ClientRequest
      */
     public function scroll($type, $filter = [], $size = 10, $scrollId = null)
     {
-        $scrollTimeout = '5m';
+        $scrollTimeout = '30s';
 
         if ($scrollId) {
             return $this->client->scroll([
@@ -532,11 +542,57 @@ class ClientRequest
     }
 
     /**
+     * @param array  $params
+     * @param string $timeout
+     *
+     * @return \Generator
+     *
+     * @throws EnvironmentNotFoundException
+     */
+    public function scrollAll(array $params, string $timeout = '30s'): iterable
+    {
+        $params['scroll'] = $timeout;
+
+        if (!isset($params['index'])) {
+            $params['index'] = $this->getIndex();
+        }
+
+        $response = $this->client->search($params);
+
+        while (isset($response['hits']['hits']) && count($response['hits']['hits']) > 0) {
+            $scrollId = $response['_scroll_id'];
+
+            foreach ($response['hits']['hits'] as $hit) {
+                yield $hit;
+            }
+
+            $response = $this->client->scroll([
+                'scroll_id' => $scrollId,
+                'scroll' => $timeout
+            ]);
+        }
+    }
+
+    /**
      * @return string
      */
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * @param string $prefix
+     *
+     * @return string
+     *
+     * @throws EnvironmentNotFoundException
+     */
+    public function getCacheKey(string $prefix = ''): string
+    {
+        $index = $this->getIndex();
+
+        return $prefix . (is_array($index) ? implode('_', $index) : $index);
     }
 
     /**

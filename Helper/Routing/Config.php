@@ -62,12 +62,12 @@ class Config
         $resolver = new OptionsResolver();
         $resolver
             ->setDefaults([
-                'defaults' => ['_controller' => 'emsch.controller.dynamic::handle'],
+                'defaults' => ['_controller' => 'emsch.controller.router::handle'],
                 'requirements' => [],
                 'options' => [],
-                'template' => null,
+                'query' => null,
             ])
-            ->setRequired(['path', 'type', 'query'])
+            ->setRequired(['path', 'type', 'template'])
             ->setNormalizer('options', function(Options $options, $value) {
                 $value['type'] = $options['type'];
                 $value['query'] = $options['query'];

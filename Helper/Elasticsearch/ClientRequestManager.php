@@ -5,9 +5,9 @@ namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 class ClientRequestManager
 {
     /**
-     * @var ClientRequest[[
+     * @var ClientRequest[]
      */
-    private $clientRequests;
+    private $clientRequests = [];
 
     /**
      * @var ClientRequest
@@ -34,6 +34,14 @@ class ClientRequestManager
     public function getDefault(): ClientRequest
     {
         return $this->default;
+    }
+
+    /**
+     * @return ClientRequest[]
+     */
+    public function all(): array
+    {
+        return $this->clientRequests;
     }
 
     /**

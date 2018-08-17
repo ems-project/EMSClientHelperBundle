@@ -35,18 +35,13 @@ class EMSClientHelperExtension extends Extension
         $this->processRequestEnvironments($container, $config['request_environments']);
         $this->processElasticms($container, $loader, $config['elasticms']);
         $this->processApi($container, $config['api']);
-
-        if (isset($config['clear_cache'])) {
-            $this->processClearCache($container, $config['clear_cache'], $config['elasticms']);
-        }
+        $this->processLanguageSelection($container, $loader, $config['language_selection']);
+        $this->processRoutingSelection($container, $loader, $config['routing']);
 
         if (isset($config['twig_list'])) {
             $definition = $container->getDefinition('emsch.controller.twig_list');
             $definition->replaceArgument(1, $config['twig_list']['templates']);
         }
-
-        $this->processLanguageSelection($container, $loader, $config['language_selection']);
-        $this->processRoutingSelection($container, $loader, $config['routing']);
     }
 
     /**
@@ -82,11 +77,7 @@ class EMSClientHelperExtension extends Extension
         foreach ($config as $name => $options) {
             $this->defineElasticsearchClient($container, $name, $options);
             $this->defineClientRequest($container, $loader, $name, $options);
-            $this->defineEMSRouter($container, $name, $options);
-
-            if (null !== $options['translation_type']) {
-                $this->defineTranslationLoader($container, $name, $options);
-            }
+            $this->defineRouter($container, $name, $options);
 
             if (isset($options['templates'])) {
                 $this->defineTwigLoader($container, $name, $options['templates']);
@@ -108,24 +99,6 @@ class EMSClientHelperExtension extends Extension
             $definition->setArgument(1, $options['key']);
 
             $container->setDefinition(sprintf('emsch.api_client.%s', $name), $definition);
-        }
-    }
-
-    /**
-     * @param ContainerBuilder $container
-     * @param string           $domain
-     * @param array            $config
-     */
-    private function processClearCache(ContainerBuilder $container, $domain, array $config)
-    {
-        if (!isset($config[$domain]['translation_type'])) {
-            return;
-        }
-        $clientRequest = 'elasticsearch.client.' . $domain;
-
-        if ($container->hasDefinition($clientRequest)) {
-            $translationType = $config[$domain]['translation_type'];
-            $this->defineClearCacheListener($container, $domain, $translationType);
         }
     }
 
@@ -182,7 +155,7 @@ class EMSClientHelperExtension extends Extension
      * @param string           $name
      * @param array            $options
      */
-    private function defineEMSRouter(ContainerBuilder $container, string $name, array $options)
+    private function defineRouter(ContainerBuilder $container, string $name, array $options)
     {
         $definition = new Definition(Router::class);
         $definition->setArguments([$options['routes']]);
@@ -208,25 +181,6 @@ class EMSClientHelperExtension extends Extension
 
     /**
      * @param ContainerBuilder $container
-     * @param string $name
-     * @param array $options
-     */
-    private function defineTranslationLoader(ContainerBuilder $container, $name, array $options)
-    {
-        $loader = new Definition(TranslationLoader::class);
-        $loader->setArguments([
-            new Reference(sprintf('ems_common.elasticsearch.%s', $name)),
-            $name,
-            $options['index_prefix'],
-            $options['translation_type']
-        ]);
-        $loader->addTag('translation.loader', ['alias' => $name]);
-
-        $container->setDefinition(sprintf('emsch.translation.loader.%s', $name), $loader);
-    }
-
-    /**
-     * @param ContainerBuilder $container
      * @param string           $name
      * @param array            $options
      */
@@ -240,41 +194,6 @@ class EMSClientHelperExtension extends Extension
         $loader->addTag('twig.loader', ['alias' => $name, 'priority' => 1]);
 
         $container->setDefinition(sprintf('emsch.twig.loader.%s', $name), $loader);
-    }
-
-    /**
-     * @param ContainerBuilder $container
-     * @param string           $domain
-     * @param string           $translationType
-     */
-    private function defineClearCacheListener(ContainerBuilder $container, $domain, $translationType)
-    {
-        $cachePath = $container->getParameter('kernel.cache_dir');
-
-        $clearCacheService = new Definition(ClearCacheService::class);
-        $clearCacheService->setArguments([
-            $cachePath,
-            new Reference('translator'),
-            new Reference('emsch.request.helper'),
-            new Reference('emsch.client_request.' . $domain),
-            $translationType
-
-        ]);
-        $container->setDefinition('emsch.clear_cache.service', $clearCacheService);
-
-        $clearCacheListener = new Definition(ClearCacheRequestListener::class);
-        $clearCacheListener->setArguments([
-            new Reference('emsch.clear_cache.service')
-        ]);
-        $clearCacheListener->addTag('kernel.event_listener', [
-            'event' => 'kernel.request',
-            'priority' => 90
-
-        ]);
-        $container->setDefinition(
-            'emsch.clear_cache_listener',
-            $clearCacheListener
-        );
     }
 
     /**

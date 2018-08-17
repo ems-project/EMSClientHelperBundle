@@ -15,11 +15,17 @@
             <argument type="tagged" tag="emsch.client_request"/>
         </service>
 
+        <service id="emsch.helper.translation" class="EMS\ClientHelperBundle\Helper\Translation\TranslationHelper">
+            <argument type="service" id="emsch.manager.client_request" />
+            <argument type="service" id="translator.default" />
+            <argument type="service" id="cache.app" />
+        </service>
+
         <!-- event listeners -->
         <service id="emsch.request_listener" class="EMS\ClientHelperBundle\EventListener\RequestListener">
             <argument type="service" id="emsch.request.helper"/>
-            <tag name="kernel.event_listener" event="kernel.request" priority="100" />
-            <tag name="kernel.event_listener" event="kernel.exception" priority="100" />
+            <argument type="service" id="emsch.helper.translation" />
+            <tag name="kernel.event_subscriber" />
         </service>
 
         <!-- twig -->

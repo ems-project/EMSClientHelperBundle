@@ -16,7 +16,7 @@
                 <argument type="service" id="router.request_context" />
             </call>
         </service>
-        <service id="emsch.controller.dynamic" class="EMS\ClientHelperBundle\Controller\DynamicController">
+        <service id="emsch.controller.router" class="EMS\ClientHelperBundle\Controller\RouterController">
             <argument type="service" id="emsch.manager.client_request" />
             <argument type="service" id="router" />
             <argument type="service" id="twig"/>
