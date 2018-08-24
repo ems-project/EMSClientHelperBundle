@@ -28,11 +28,11 @@ class RedirectHelper
      * @param Transformer   $transformer
      * @param string        $redirectType
      */
-    public function __construct(ClientRequest $clientRequest, Transformer $transformer, string $redirectType)
+    public function __construct(ClientRequest $clientRequest, Transformer $transformer, $redirectType)
     {
         $this->clientRequest = $clientRequest;
         $this->transformer = $transformer;
-        $this->redirectType = $redirectType;
+        $this->redirectType = $redirectType ?: 'redirect';
     }
 
     /**

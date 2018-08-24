@@ -6,7 +6,7 @@ use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\Route;
 
-class Config
+class RouteConfig
 {
     /**
      * @var string

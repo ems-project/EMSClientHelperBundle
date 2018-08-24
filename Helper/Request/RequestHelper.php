@@ -81,13 +81,21 @@ class RequestHelper
     }
 
     /**
+     * Important for twig loader  on kernel terminate we don't have a current request.
+     * So this function remembers it's environment and can still return it.
+     *
      * @return string
      */
     public function getEnvironment()
     {
-        $current = $this->requestStack->getCurrentRequest();
-        
-        return ($current ? $current->get('_environment') : null);
+        static $env = false;
+
+        if (!$env) {
+            $current = $this->requestStack->getCurrentRequest();
+            $env = ($current ? $current->get('_environment') : null);
+        }
+
+        return $env;
     }
     
     /**

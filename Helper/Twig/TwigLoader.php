@@ -20,6 +20,11 @@ class TwigLoader implements \Twig_LoaderInterface
      */
     private $config;
 
+    /**
+     * @var string
+     */
+    private $cacheKey;
+
     const PREFIX = '@EMSCH';
 
     /**
@@ -55,7 +60,7 @@ class TwigLoader implements \Twig_LoaderInterface
      */
     public function getCacheKey($name)
     {
-        return $this->client->getNameEnv() . $name;
+        return $this->client->getCacheKey('twig_') . $name;
     }
 
     /**

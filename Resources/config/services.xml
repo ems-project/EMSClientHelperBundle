@@ -8,23 +8,30 @@
         <defaults public="false" />
 
         <service id="emsch.query_builder.service" class="EMS\ClientHelperBundle\Service\QueryBuilderService"/>
-        <service id="emsch.request.helper" class="EMS\ClientHelperBundle\Helper\Request\RequestHelper">
-            <argument type="service" id="request_stack" />
-        </service>
+
         <service id="emsch.manager.client_request" class="EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager">
             <argument type="tagged" tag="emsch.client_request"/>
         </service>
 
-        <service id="emsch.helper.translation" class="EMS\ClientHelperBundle\Helper\Translation\TranslationHelper">
+        <service id="emsch.helper_request" class="EMS\ClientHelperBundle\Helper\Request\RequestHelper">
+            <argument type="service" id="request_stack" />
+        </service>
+        <service id="emsch.helper_locale" class="EMS\ClientHelperBundle\Helper\Request\LocaleHelper">
+            <argument type="service" id="router"/>
+            <argument type="string">%emsch.locales%</argument>
+        </service>
+        <service id="emsch.helper_translation" class="EMS\ClientHelperBundle\Helper\Translation\TranslationHelper">
             <argument type="service" id="emsch.manager.client_request" />
             <argument type="service" id="translator.default" />
             <argument type="service" id="cache.app" />
         </service>
 
         <!-- event listeners -->
-        <service id="emsch.request_listener" class="EMS\ClientHelperBundle\EventListener\RequestListener">
-            <argument type="service" id="emsch.request.helper"/>
-            <argument type="service" id="emsch.helper.translation" />
+        <service id="emsch.kernel_listener" class="EMS\ClientHelperBundle\EventListener\KernelListener">
+            <argument type="service" id="emsch.helper_request"/>
+            <argument type="service" id="emsch.helper_translation" />
+            <argument type="service" id="emsch.helper_locale" />
+
             <tag name="kernel.event_subscriber" />
         </service>
 
@@ -33,23 +40,28 @@
             <tag name="twig.extension" />
         </service>
         <service id="emsch.twig.runtime.request_helper" class="EMS\ClientHelperBundle\Twig\RequestHelperRuntime">
-            <argument type="service" id="emsch.request.helper"/>
+            <argument type="service" id="emsch.helper_request"/>
             <tag name="twig.runtime" />
+        </service>
+
+        <!-- controllers -->
+        <service id="emsch.controller.language_select" class="EMS\ClientHelperBundle\Controller\LanguageSelectController" public="true">
+            <argument type="service" id="emsch.manager.client_request" />
+            <argument type="string">%emsch.locales%</argument>
+            <argument type="string">%emsch.template_language%</argument>
+        </service>
+        <service id="emsch.controller.twig_list" class="EMS\ClientHelperBundle\Controller\TwigListController" public="true">
+            <argument type="service" id="kernel" />
+            <argument/>
         </service>
 
         <!-- commands -->
         <service id="emsch.command.health_check" class="EMS\ClientHelperBundle\Command\HealthCheckCommand">
-            <argument type="service" id="emsch.request.helper" />
+            <argument type="service" id="emsch.helper_request" />
             <argument type="tagged" tag="emsch.elasticsearch.client" on-invalid="null"/>
             <argument type="tagged" tag="emsch.client_request" on-invalid="null" />
             <argument type="service" id="ems_common.storage.manager" on-invalid="null" />
             <tag name="console.command" />
-        </service>
-
-        <!-- controllers -->
-        <service id="emsch.controller.twig_list" class="EMS\ClientHelperBundle\Controller\TwigListController" public="true">
-            <argument type="service" id="kernel" />
-            <argument/>
         </service>
     </services>
 </container>
