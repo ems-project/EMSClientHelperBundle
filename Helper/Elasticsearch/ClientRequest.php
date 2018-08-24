@@ -596,16 +596,6 @@ class ClientRequest
     }
 
     /**
-     * @return string name_env
-     */
-    public function getNameEnv()
-    {
-        $environment = $this->requestHelper->getEnvironment();
-
-        return $this->name . '_' . $environment;
-    }
-
-    /**
      * @return string|array
      *
      * @throws EnvironmentNotFoundException

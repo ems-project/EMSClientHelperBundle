@@ -11,11 +11,10 @@
         <div id="wrapper">
             <div class="container-fluid">
                 <ul>
-                    {% for locale, selection in selections %}
+                    {% for locale in locales %}
                         <li lang="{{ locale }}">
                             <a href="{{ locale }}{{ destination }}">
                                 <div class="logo">
-                                    <img src="{{ asset(selection.logo) }}" alt="{{ 'general.name'|trans }}">
                                     <span>{{ 'header.logo.title'|trans }}</span>
                                 </div>
                                 <button class="btn btn-default">{{ 'language.select.continue'|trans }}</button>

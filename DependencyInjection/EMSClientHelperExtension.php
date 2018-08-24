@@ -32,10 +32,12 @@ class EMSClientHelperExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
+        $container->setParameter('emsch.locales', $config['locales']);
+        $container->setParameter('emsch.template_language', $config['template_language']);
+
         $this->processRequestEnvironments($container, $config['request_environments']);
         $this->processElasticms($container, $loader, $config['elasticms']);
         $this->processApi($container, $config['api']);
-        $this->processLanguageSelection($container, $loader, $config['language_selection']);
         $this->processRoutingSelection($container, $loader, $config['routing']);
 
         if (isset($config['twig_list'])) {
@@ -52,13 +54,7 @@ class EMSClientHelperExtension extends Extension
      */
     private function processRequestEnvironments(ContainerBuilder $container, array $config)
     {
-        $id = 'emsch.request_listener';
-
-        if (!$container->hasDefinition($id)) {
-            return;
-        }
-
-        $requestHelper = $container->getDefinition('emsch.request.helper');
+        $requestHelper = $container->getDefinition('emsch.helper_request');
 
         foreach ($config as $environment => $options) {
             $requestHelper->addMethodCall('addEnvironment', [
@@ -135,7 +131,7 @@ class EMSClientHelperExtension extends Extension
         $definition = new Definition(ClientRequest::class);
         $definition->setArguments([
             new Reference(sprintf('ems_common.elasticsearch.%s', $name)),
-            new Reference('emsch.request.helper'),
+            new Reference('emsch.helper_request'),
             new Reference('logger'),
             $options,
             $name
@@ -158,7 +154,7 @@ class EMSClientHelperExtension extends Extension
     private function defineRouter(ContainerBuilder $container, string $name, array $options)
     {
         $definition = new Definition(Router::class);
-        $definition->setArguments([$options['routes']]);
+        $definition->setArguments([$options['routes'], ['nl', 'fr']]);
         $definition->addTag('emsch.router');
 
         $container->setDefinition(sprintf('emsch.router.%s', $name), $definition);
@@ -194,25 +190,6 @@ class EMSClientHelperExtension extends Extension
         $loader->addTag('twig.loader', ['alias' => $name, 'priority' => 1]);
 
         $container->setDefinition(sprintf('emsch.twig.loader.%s', $name), $loader);
-    }
-
-    /**
-     * @param ContainerBuilder $container
-     * @param XmlFileLoader    $loader
-     * @param array            $config
-     */
-    private function processLanguageSelection(ContainerBuilder $container, XmlFileLoader $loader, array $config)
-    {
-        if (!$config['enabled']) {
-            return;
-        }
-
-        $container->setParameter('emsch.language_selection.client_request', $config['client_request']);
-        $container->setParameter('emsch.language_selection.template', $config['template']);
-        $container->setParameter('emsch.language_selection.option_type', $config['option_type']);
-        $container->setParameter('emsch.language_selection.supported_locale', $config['supported_locale']);
-
-        $loader->load('language_selection.xml');
     }
 
     /**

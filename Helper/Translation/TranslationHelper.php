@@ -66,7 +66,7 @@ class TranslationHelper
     private function createCatalogue(ClientRequest $client, string $locale): MessageCatalogue
     {
         $lastChanged = $this->getLastChangeDate($client);
-        $cacheItem = $this->cache->getItem($client->getCacheKey('translations_'));
+        $cacheItem = $this->cache->getItem($client->getCacheKey('translations_'.$locale));
 
         if (!$cacheItem->isHit() || !$this->cacheIsValid($lastChanged, $cacheItem)) {
             $messages = $this->createMessages($client, $cacheItem, $locale, $lastChanged);

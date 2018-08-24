@@ -3,8 +3,10 @@
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
@@ -32,11 +34,23 @@ class Router implements RouterInterface, RequestMatcherInterface
     private $matcher;
 
     /**
-     * @param array $routes
+     * @var UrlGenerator
      */
-    public function __construct(array $routes)
+    private $generator;
+
+    /**
+     * @var array
+     */
+    private $locales;
+
+    /**
+     * @param array $routes
+     * @param array $locales
+     */
+    public function __construct(array $routes, array $locales)
     {
         $this->routes = $routes;
+        $this->locales = $locales;
     }
 
     /**
@@ -88,7 +102,7 @@ class Router implements RouterInterface, RequestMatcherInterface
      */
     public function generate($name, $parameters = [], $referenceType = self::ABSOLUTE_PATH)
     {
-        return null; // @todo implement generation
+        return $this->getGenerator()->generate($name, $parameters, $referenceType);
     }
 
     /**
@@ -104,19 +118,37 @@ class Router implements RouterInterface, RequestMatcherInterface
     }
 
     /**
+     * @return UrlGenerator
+     */
+    private function getGenerator(): UrlGenerator
+    {
+        if (null === $this->generator) {
+            $this->generator = new UrlGenerator($this->getRouteCollection(), $this->getContext());
+        }
+
+        return $this->generator;
+    }
+
+    /**
      * @return RouteCollection
      */
     private function buildCollection(): RouteCollection
     {
         $configs = array_map(function (string $name, array $options) {
-            return new Config($name, $options);
+            return new RouteConfig($name, $options);
         }, array_keys($this->routes), $this->routes);
 
         $collection = new RouteCollection();
 
         foreach ($configs as $config) {
-            /* @var $config Config */
+            /* @var $config RouteConfig */
             $collection->add($config->getName(), $config->getRoute());
+        }
+
+        if (count($this->locales) > 1) {
+            $collection->add('emsch_language_selection', new Route('/language-selection', [
+                '_controller' => 'emsch.controller.language_select::view'
+            ]));
         }
 
         return $collection;
