@@ -116,7 +116,7 @@ class QueryBuilderService{
     
     
     
-    public function getQuery($queryString, $analyzerSets){
+    public function getQuery($queryString, $analyzerSets, array $facets=[]){
         
         $should = [];
         if(!$queryString){
@@ -136,6 +136,11 @@ class QueryBuilderService{
                 'should' => $should
             ]
         ];
+
+        //add aggs per facet index
+
+        //add a must terms if there is at least one facets
+
         
         return $out;
     }

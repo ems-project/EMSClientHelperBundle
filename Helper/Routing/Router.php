@@ -135,7 +135,7 @@ class Router implements RouterInterface, RequestMatcherInterface
     private function buildCollection(): RouteCollection
     {
         $configs = array_map(function (string $name, array $options) {
-            return new RouteConfig($name, $options);
+            return new RouteConfig($name, $options, true);
         }, array_keys($this->routes), $this->routes);
 
         $collection = new RouteCollection();
@@ -146,10 +146,18 @@ class Router implements RouterInterface, RequestMatcherInterface
         }
 
         if (count($this->locales) > 1) {
-            $collection->add('emsch_language_selection', new Route('/language-selection', [
-                '_controller' => 'emsch.controller.language_select::view'
-            ]));
+            $langSelectConfig = new RouteConfig('language_selection', [
+                'path' => '/language-selection',
+                'controller' => 'emsch.controller.language_select::view'
+            ]);
+            $collection->add($langSelectConfig->getName(), $langSelectConfig->getRoute());
         }
+
+        $searchConfig = new RouteConfig('search', [
+            'path' => '/search',
+            'controller' => 'emsch.controller.search::results'
+        ]);
+        $collection->add($searchConfig->getName(), $searchConfig->getRoute());
 
         return $collection;
     }
