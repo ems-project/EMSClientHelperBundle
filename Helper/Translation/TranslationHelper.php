@@ -142,6 +142,6 @@ class TranslationHelper
             return new \DateTime($result['hits']['hits']['0']['_source']['_published_datetime']);
         }
 
-        return null;
+        return new \DateTime('Wed, 09 Feb 1977 16:00:00 GMT');
     }
 }
