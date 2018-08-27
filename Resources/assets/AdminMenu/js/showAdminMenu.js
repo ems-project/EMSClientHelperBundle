@@ -1,34 +1,32 @@
 /**
  * Show admin edit button in FE
  */
-export default function showAdminMenu() { 
-	var targets = $('[data-ems-key]');
-	var ouuid, type, url, admWrapper, admCont, admUl, admLiRev, admLiEdit, admBtn;
+export default function showAdminMenu() {
+    const targets = document.querySelectorAll('[data-ems-key]');
+        [].forEach.call(targets, function(target, index) {
 
-	if (typeof targets !== 'undefined' && targets.length > 0) {
+        const ouuid = target.getAttribute('data-ems-key');
+        const type = target.getAttribute('data-ems-type');
+        const url = target.getAttribute('data-ems-url');
 
-		targets.each( function(index){
+        const admBtn = document.createElement('a');
+        admBtn.innerHTML = 'Back to ems';
+        admBtn.id = 'admin-menu-' + index;
+        admBtn.setAttribute('class', 'btn btn-primary btn-xs emsch');
+        admBtn.type = 'button';
+        admBtn.href  = url +'/data/revisions/'+ type +':'+ ouuid;
+        admBtn.target  = '_blank';
 
-			ouuid 	= $(this).data('emsKey');
-			type 	= $(this).data('emsType');
-			url 	= $(this).data('emsUrl');
-			admWrapper = $('<div>',  {class: 'admin-menu-wrapper hide'});
-			admBtn = $('<a>', 
-				{
-					id: 	'admin-menu-' + index,
-					class: 	'btn btn-primary btn-xs emsch',
-					type: 	'button',
-					html: 	'Back to ems',
-					href: 	url +'/data/revisions/'+ type +':'+ ouuid,
-					target: '_blank'
-				});
-			
-			$(this).append(admWrapper
-						.append(admBtn));
-		});
-	}
+        const admWrapper = document.createElement('div');
+        admWrapper.setAttribute('class', 'admin-menu-wrapper hide');
+        admWrapper.insertAdjacentElement('beforeend', admBtn);
 
-	$('.admin-menu-wrapper').parent().hover(function() {
-		$(this).find('.admin-menu-wrapper').toggleClass('hide');
-	});
+        target.insertAdjacentElement('beforeend', admWrapper);
+        target.onmouseover = function() {
+            admWrapper.classList.remove("hide");
+        }
+        target.onmouseout = function() {
+            admWrapper.classList.add("hide");
+        }
+    });
 }
