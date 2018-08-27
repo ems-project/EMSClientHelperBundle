@@ -54,6 +54,9 @@
             <argument type="service" id="kernel" />
             <argument/>
         </service>
+        <service id="EMS\ClientHelperBundle\Controller\EmbedController" public="true">
+            <argument type="service" id="emsch.manager.client_request" />
+        </service>
 
         <!-- commands -->
         <service id="emsch.command.health_check" class="EMS\ClientHelperBundle\Command\HealthCheckCommand">
