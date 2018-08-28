@@ -116,21 +116,25 @@ class QueryBuilderService{
     
     
     
-    public function getQuery($queryString, $analyzerSets, array $facets=[]){
+    public function getQuery($queryString, $analyzerSets){
         
         $should = [];
         if(!$queryString){
             /**@var AnalyserSet $analyzer*/
             foreach ($analyzerSets  as $analyzer) {
-                $should[] = $analyzer->getFilter();
-            }            
+                $filter = $analyzer->getFilter();
+                if($filter)
+                {
+                    $should[] = $filter;
+                }
+            }
         }
         else {
             foreach ($analyzerSets  as $analyzer) {
                 $should[] = $this->buildPerAnalyzer($queryString, $analyzer);
             }            
         }
-        
+
         $out = [
             'bool' => [
                 'should' => $should
