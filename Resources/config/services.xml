@@ -41,6 +41,7 @@
         </service>
         <service id="emsch.twig.runtime.request_helper" class="EMS\ClientHelperBundle\Twig\RequestHelperRuntime">
             <argument type="service" id="emsch.helper_request"/>
+            <argument type="service" id="emsch.manager.client_request" />
             <tag name="twig.runtime" />
         </service>
 
