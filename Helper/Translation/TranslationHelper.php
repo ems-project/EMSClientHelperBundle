@@ -128,7 +128,7 @@ class TranslationHelper
     /**
      * @param ClientRequest $client
      *
-     * @return \DateTime|null
+     * @return \DateTime
      */
     private function getLastChangeDate(ClientRequest $client)
     {

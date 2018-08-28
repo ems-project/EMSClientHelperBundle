@@ -19,13 +19,22 @@ class RouteConfig
     private $options;
 
     /**
+     * Dynamic route from elasticms
+     *
+     * @var bool
+     */
+    private $emsRoute;
+
+    /**
      * @param string $name
      * @param array  $options
+     * @param bool   $emsRoute
      */
-    public function __construct(string $name, array $options)
+    public function __construct(string $name, array $options, bool $emsRoute = false)
     {
         $this->name = $name;
-        $this->options = $this->resolveOptions($options);
+        $this->options = $this->resolveOptions($options, $emsRoute);
+        $this->emsRoute = $emsRoute;
     }
 
     /**
@@ -33,7 +42,9 @@ class RouteConfig
      */
     public function getName()
     {
-        return 'ems_'.$this->name;
+        $prefix = ($this->emsRoute ? 'ems_' : 'emsch_');
+
+        return $prefix.$this->name;
     }
 
     /**
@@ -48,34 +59,48 @@ class RouteConfig
             $this->options['options'],
             null,
             null,
-            ['GET']
+            [$this->options['method']]
         );
     }
 
     /**
      * @param array $options
+     * @param bool  $emsRoute
      *
      * @return array
      */
-    private function resolveOptions(array $options)
+    private function resolveOptions(array $options, bool $emsRoute = false)
     {
         $resolver = new OptionsResolver();
         $resolver
+            ->setRequired(['path'])
             ->setDefaults([
-                'defaults' => ['_controller' => 'emsch.controller.router::handle'],
+                'controller' => 'emsch.controller.router::handle',
+                'defaults' => [],
                 'requirements' => [],
                 'options' => [],
-                'query' => null,
+                'method' => 'GET',
             ])
-            ->setRequired(['path', 'type', 'template'])
-            ->setNormalizer('options', function(Options $options, $value) {
-                $value['type'] = $options['type'];
-                $value['query'] = $options['query'];
-                $value['template'] = $options['template'];
-
-                return $value;
+            ->setNormalizer('defaults', function(Options $options, $value) {
+                return array_merge($value, [
+                    '_controller' => $options['controller']
+                ]);
             })
         ;
+
+        if ($emsRoute) {
+            $resolver
+                ->setDefaults(['query' => null])
+                ->setRequired(['type', 'template'])
+                ->setNormalizer('options', function(Options $options, $value) {
+                    $value['type'] = $options['type'];
+                    $value['query'] = $options['query'];
+                    $value['template'] = $options['template'];
+
+                    return $value;
+                })
+            ;
+        }
         
         return $resolver->resolve($options);
     }
