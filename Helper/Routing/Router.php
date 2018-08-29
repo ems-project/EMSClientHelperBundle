@@ -154,7 +154,7 @@ class Router implements RouterInterface, RequestMatcherInterface
         }
 
         $searchConfig = new RouteConfig('search', [
-            'path' => '/search',
+            'path' => '/{_locale}/search',
             'controller' => 'emsch.controller.search::results'
         ]);
         $collection->add($searchConfig->getName(), $searchConfig->getRoute());
