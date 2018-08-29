@@ -140,11 +140,6 @@ class Router implements RouterInterface, RequestMatcherInterface
 
         $collection = new RouteCollection();
 
-        foreach ($configs as $config) {
-            /* @var $config RouteConfig */
-            $collection->add($config->getName(), $config->getRoute());
-        }
-
         if (count($this->locales) > 1) {
             $langSelectConfig = new RouteConfig('language_selection', [
                 'path' => '/language-selection',
@@ -158,6 +153,11 @@ class Router implements RouterInterface, RequestMatcherInterface
             'controller' => 'emsch.controller.search::results'
         ]);
         $collection->add($searchConfig->getName(), $searchConfig->getRoute());
+
+        foreach ($configs as $config) {
+            /* @var $config RouteConfig */
+            $collection->add($config->getName(), $config->getRoute());
+        }
 
         return $collection;
     }
