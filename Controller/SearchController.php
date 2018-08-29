@@ -32,12 +32,14 @@ class SearchController extends AbstractController
         $clientRequest = $this->manager->getClientRequest();
         $queryString = $request->get('q', false);
         $facets = $request->get('f', []);
+        $sortBy = $request->get('s', false);
+        $page = $request->get('p', 0);
 
 
         // @todo search template should be parameter
         return $this->render('@EMSCH/template/services-list.html.twig', [
             'trans_default_domain' => $clientRequest->getCacheKey(),
-            'results' => $this->manager->search($queryString, $facets, $request->getLocale()),
+            'results' => $this->manager->search($queryString, $facets, $request->getLocale(), $sortBy, $page),
             'query' => $queryString,
             'facets' => $facets,
         ]);

@@ -24,6 +24,12 @@ class Manager
      */
     private $facets;
 
+
+    /**
+     * @var int
+     */
+    private $itemPerPage;
+
     /**
      * @param ClientRequestManager $clientRequestManager
      */
@@ -32,6 +38,7 @@ class Manager
         $this->clientRequestManager = $clientRequestManager;
         $this->synonyms = ['typology', 'organization'];
         $this->facets = ['typology' => 15, 'ownership' => 15];
+        $this->itemPerPage = 1000;
     }
 
     /**
@@ -42,7 +49,7 @@ class Manager
         return $this->clientRequestManager->getDefault();
     }
 
-    public function search($queryString, array $facets, $locale)
+    public function search($queryString, array $facets, $locale, $sortBy, $page, $sortOrder='asc')
     {
         $clientRequest = $this->getClientRequest();
 
@@ -78,9 +85,21 @@ class Manager
             }
         }
 
-        return $this->getClientRequest()->search('service', [
+        $body = [
             'query' => $query,
             'aggs' => $aggs,
-        ]);
+        ];
+
+        if($sortBy) {
+            $body['sort'] = [
+                $sortBy => [
+                    'order' => $sortOrder,
+                    'missing' => '_last',
+                    'unmapped_type' => 'long',
+                ]
+            ];
+        }
+
+        return $this->getClientRequest()->search('service', $body, $page*$this->itemPerPage, $this->itemPerPage);
     }
 }
