@@ -65,7 +65,9 @@ class RouterController
                 $context['emsLink'] = EMSLink::fromDocument($document);
             }
 
-            return new Response($this->templating->render($template, $context), 200);
+            $content = $this->templating->render($template, $context);
+
+            return new Response($content, 200);
         } catch (SingleResultException $e) {
             throw new NotFoundHttpException();
         }
