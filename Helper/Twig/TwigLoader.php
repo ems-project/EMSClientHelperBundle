@@ -79,18 +79,15 @@ class TwigLoader implements \Twig_LoaderInterface
     /**
      * @param string $name
      *
-     * @return array|false
+     * @return array
      */
     private function getTemplate($name)
     {
-        if (false === $match = $this->match($name)) {
-            return false;
-        }
-
+        $match = $this->match($name);
         list($contentType, $searchValue, $searchTerm) = $match;
 
         if (!isset($this->config[$contentType])) {
-            return false;
+            throw new TwigException('Missing config EMSCH_TEMPLATES');
         }
 
         $config = $this->config[$contentType];
@@ -102,7 +99,7 @@ class TwigLoader implements \Twig_LoaderInterface
     /**
      * @param string $name
      *
-     * @return array|false
+     * @return array
      */
     private function match($name)
     {
@@ -118,7 +115,7 @@ class TwigLoader implements \Twig_LoaderInterface
             return [$matchName['content_type'], $matchName['search_val'], null];
         }
 
-        return false;
+        throw new TwigException(sprintf('Invalid template name: ', $name));
     }
 
     /**
@@ -127,7 +124,7 @@ class TwigLoader implements \Twig_LoaderInterface
      * @param string $searchTerm  _id, key, name
      * @param string $code        code field in document
      *
-     * @return array|false
+     * @return array
      */
     private function search($contentType, $searchVal, $searchTerm, $code)
     {
@@ -153,7 +150,7 @@ class TwigLoader implements \Twig_LoaderInterface
 
             return ['fresh_time' => $date->getTimestamp(), 'code' => $source[$code]];
         } catch (\Exception $e) {
-            return false;
+            throw new TwigException(sprintf('Template not found %s:%s', $contentType, $searchVal));
         }
     }
 }

@@ -3,6 +3,7 @@
 namespace EMS\ClientHelperBundle\Helper\Routing\Url;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Twig\TwigException;
 use EMS\CommonBundle\Common\EMSLink;
 
 class Transformer
@@ -60,12 +61,14 @@ class Transformer
             if (!$emsLink->hasContentType()) {
                 return false;
             }
-            
+
             $document = $this->getDocument($emsLink);
             $template = $this->renderTemplate($emsLink, $document, $locale);
             $url = $this->generator->prependBaseUrl($emsLink, $template);
 
             return $url;
+        } catch (TwigException $ex) {
+            throw $ex;
         } catch (\Exception $ex) {
             return $ex->getMessage();
         }  

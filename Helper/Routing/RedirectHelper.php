@@ -4,6 +4,7 @@ namespace EMS\ClientHelperBundle\Helper\Routing;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Routing\Url\Transformer;
+use EMS\ClientHelperBundle\Helper\Twig\TwigException;
 use Symfony\Component\HttpFoundation\Request;
 
 class RedirectHelper
@@ -51,7 +52,8 @@ class RedirectHelper
             $linkTo = $document['_source']['link_to'];
 
             return $this->transformer->transform('ems://object:' . $linkTo, $locale);
-
+        } catch (TwigException $ex) {
+            throw $ex;
         } catch (\Exception $ex) {
             return false;
         }
