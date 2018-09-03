@@ -24,10 +24,13 @@ class SearchController extends AbstractController
 
     /**
      * @param Request $request
+     * @param string  $template
+     *
      * @return Response
+     *
      * @throws \EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException
      */
-    public function results(Request $request)
+    public function results(Request $request, string $template)
     {
         $clientRequest = $this->manager->getClientRequest();
         $queryString = $request->get('q', false);
@@ -35,9 +38,7 @@ class SearchController extends AbstractController
         $sortBy = $request->get('s', false);
         $page = $request->get('p', 0);
 
-
-        // @todo search template should be parameter
-        return $this->render('@EMSCH/template/services-list.html.twig', [
+        return $this->render($template, [
             'trans_default_domain' => $clientRequest->getCacheKey(),
             'results' => $this->manager->search($queryString, $facets, $request->getLocale(), $sortBy, $page),
             'query' => $queryString,
