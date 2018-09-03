@@ -35,8 +35,8 @@ class EMSClientHelperExtension extends Extension
 
         $container->setParameter('emsch.locales', $config['locales']);
         $container->setParameter('emsch.template_language', $config['template_language']);
+        $container->setParameter('emsch.request_environments', $config['request_environments']);
 
-        $this->processRequestEnvironments($container, $config['request_environments']);
         $this->processElasticms($container, $loader, $config['elasticms']);
         $this->processApi($container, $config['api']);
         $this->processRoutingSelection($container, $loader, $config['routing']);
@@ -44,23 +44,6 @@ class EMSClientHelperExtension extends Extension
         if (isset($config['twig_list'])) {
             $definition = $container->getDefinition('emsch.controller.twig_list');
             $definition->replaceArgument(1, $config['twig_list']['templates']);
-        }
-    }
-
-    /**
-     * @param ContainerBuilder $container
-     * @param array $config
-     *
-     * @return void
-     */
-    private function processRequestEnvironments(ContainerBuilder $container, array $config)
-    {
-        $requestHelper = $container->getDefinition('emsch.helper_request');
-
-        foreach ($config as $environment => $options) {
-            $requestHelper->addMethodCall('addEnvironment', [
-                $environment, $options['regex'], $options['index'], $options['backend']
-            ]);
         }
     }
 

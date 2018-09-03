@@ -15,6 +15,7 @@
 
         <service id="emsch.helper_request" class="EMS\ClientHelperBundle\Helper\Request\RequestHelper">
             <argument type="service" id="request_stack" />
+            <argument type="string">%emsch.request_environments%</argument>
         </service>
         <service id="emsch.helper_locale" class="EMS\ClientHelperBundle\Helper\Request\LocaleHelper">
             <argument type="service" id="router"/>
