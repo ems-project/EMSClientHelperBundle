@@ -19,21 +19,15 @@ class RequestHelper
     
     /**
      * @param RequestStack $requestStack
+     * @param array        $environments
      */
-    public function __construct(RequestStack $requestStack)
+    public function __construct(RequestStack $requestStack, array $environments)
     {
         $this->requestStack = $requestStack;
-    }
 
-    /**
-     * @param string $name
-     * @param string $regex
-     * @param string $index
-     * @param string $backend
-     */
-    public function addEnvironment($name, $regex, $index, $backend)
-    {
-        $this->environments[] = new Environment($name, $regex, $index, $backend);
+        foreach ($environments as $name => $config) {
+            $this->environments[] = new Environment($name, $config);
+        }
     }
 
     /**

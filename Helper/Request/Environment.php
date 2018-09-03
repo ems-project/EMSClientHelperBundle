@@ -25,19 +25,18 @@ class Environment
      * @var string
      */
     private $backend;
-    
+
     /**
      * @param string $name
-     * @param string $regex
-     * @param string $index
-     * @param string $backend
+     * @param array  $config
      */
-    public function __construct($name, $regex = null, $index = null, $backend = null)
+    public function __construct($name, array $config)
     {
         $this->name = $name;
-        $this->regex = $regex;
-        $this->index = $index;
-        $this->backend = $backend;
+
+        $this->index = $config['index'];
+        $this->regex = $config['regex'] ?? '*';
+        $this->backend = $config['backend'] ?? '*';
     }
     
     /**
@@ -49,7 +48,7 @@ class Environment
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getBackend()
     {

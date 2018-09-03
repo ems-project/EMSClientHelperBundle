@@ -19,47 +19,18 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
+                ->variableNode('request_environments')->isRequired()->end()
                 ->variableNode('locales')->isRequired()->end()
                 ->scalarNode('template_language')->end()
             ->end()
         ;
-        
-        $this->addRequestEnvironmentsSection($rootNode);
+
         $this->addElasticmsSection($rootNode);
         $this->addApiSection($rootNode);
         $this->addTwigListSection($rootNode);
         $this->addRoutingSelection($rootNode);
         
         return $treeBuilder;
-    }
-    
-    /**
-     * @param ArrayNodeDefinition $rootNode
-     */
-    private function addRequestEnvironmentsSection(ArrayNodeDefinition $rootNode)
-    {
-        $rootNode
-            ->children()
-                ->arrayNode('request_environments')
-                    ->isRequired()
-                    ->requiresAtLeastOneElement()
-                    ->useAttributeAsKey('name')
-                    ->prototype('array')
-                        ->children()
-                            ->scalarNode('regex')
-                                ->defaultValue(null)
-                            ->end()
-                            ->scalarNode('index')
-                                ->defaultValue(null)
-                            ->end()
-                            ->scalarNode('backend')
-                                ->defaultValue(null)
-                            ->end()
-                        ->end()
-                    ->end()
-                ->end()
-            ->end()
-        ;
     }
     
     /**
