@@ -41,7 +41,9 @@ class SearchController extends AbstractController
             'trans_default_domain' => $clientRequest->getCacheKey(),
             'results' => $this->manager->search($queryString, $facets, $request->getLocale(), $sortBy, $page),
             'query' => $queryString,
+            'sort' => $sortBy,
             'facets' => $facets,
+            'page' => $page,
         ]);
     }
 }
