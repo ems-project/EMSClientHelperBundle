@@ -20,32 +20,24 @@ class LanguageSelectController extends AbstractController
     private $locales;
 
     /**
-     * @var string
-     */
-    private $template;
-
-    const DEFAULT_TEMPLATE = '@EMSClientHelper/language_select.html.twig';
-
-    /**
      * @param ClientRequestManager $clientRequestManager
      * @param array                $locales
-     * @param string               $template
      */
-    public function __construct(ClientRequestManager $clientRequestManager, array $locales, $template)
+    public function __construct(ClientRequestManager $clientRequestManager, array $locales)
     {
         $this->clientRequestManager = $clientRequestManager;
         $this->locales = $locales;
-        $this->template = $template ?: self::DEFAULT_TEMPLATE;
     }
 
     /**
      * @param Request $request
+     * @param string  $template
      *
      * @return Response
      */
-    public function view(Request $request)
+    public function view(Request $request, string $template)
     {
-        return $this->render($this->template, [
+        return $this->render($template, [
             'destination' => $request->get('destination', ''),
             'locales' => $this->locales,
             'trans_default_domain' => $this->clientRequestManager->getDefault()->getCacheKey(),

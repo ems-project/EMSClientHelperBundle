@@ -21,7 +21,14 @@ class Configuration implements ConfigurationInterface
             ->children()
                 ->variableNode('request_environments')->isRequired()->end()
                 ->variableNode('locales')->isRequired()->end()
-                ->scalarNode('template_language')->end()
+                ->arrayNode('templates')
+                    ->children()
+                        ->scalarNode('language')->end()
+                        ->scalarNode('search')->end()
+                        ->scalarNode('error')->end()
+                    ->end()
+                ->end()
+
             ->end()
         ;
 

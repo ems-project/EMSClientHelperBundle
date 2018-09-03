@@ -6,6 +6,7 @@ use Composer\CaBundle\CaBundle;
 use Elasticsearch\Client;
 use EMS\ClientHelperBundle\Helper\Api\Client as ApiClient;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Routing\EMSRouter;
 use EMS\ClientHelperBundle\Helper\Routing\Router;
 use EMS\ClientHelperBundle\Helper\Translation\TranslationLoader;
 use EMS\ClientHelperBundle\Helper\Twig\TwigLoader;
@@ -34,8 +35,11 @@ class EMSClientHelperExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         $container->setParameter('emsch.locales', $config['locales']);
-        $container->setParameter('emsch.template_language', $config['template_language']);
         $container->setParameter('emsch.request_environments', $config['request_environments']);
+
+        $templates = $config['templates'];
+        $container->getDefinition('emsch.router')->replaceArgument(1, $templates);
+        $container->getDefinition('emsch.helper_exception')->replaceArgument(2, $templates['error']);
 
         $this->processElasticms($container, $loader, $config['elasticms']);
         $this->processApi($container, $config['api']);
@@ -137,9 +141,9 @@ class EMSClientHelperExtension extends Extension
      */
     private function defineRouter(ContainerBuilder $container, string $name, array $options)
     {
-        $definition = new Definition(Router::class);
-        $definition->setArguments([$options['routes'], ['nl', 'fr']]);
-        $definition->addTag('emsch.router');
+        $definition = new Definition(EMSRouter::class);
+        $definition->setArguments([$options['routes'], $container->getParameter('emsch.locales')]);
+        $definition->addTag('emsch.router', ['priority' => -10]); //after emsch.router
 
         $container->setDefinition(sprintf('emsch.router.%s', $name), $definition);
     }

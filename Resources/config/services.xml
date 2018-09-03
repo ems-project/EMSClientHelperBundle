@@ -21,10 +21,21 @@
             <argument type="service" id="router"/>
             <argument type="string">%emsch.locales%</argument>
         </service>
+        <service id="emsch.helper_exception" class="EMS\ClientHelperBundle\Helper\Request\ExceptionHelper">
+            <argument type="service" id="twig" />
+            <argument>%kernel.debug%</argument>
+            <argument></argument>
+        </service>
         <service id="emsch.helper_translation" class="EMS\ClientHelperBundle\Helper\Translation\TranslationHelper">
             <argument type="service" id="emsch.manager.client_request" />
             <argument type="service" id="translator.default" />
             <argument type="service" id="cache.app" />
+        </service>
+
+        <service id="emsch.router" class="EMS\ClientHelperBundle\Helper\Routing\Router">
+            <argument type="string">%emsch.locales%</argument>
+            <argument></argument>
+            <tag name="emsch.router" />
         </service>
 
         <!-- event listeners -->
@@ -32,7 +43,7 @@
             <argument type="service" id="emsch.helper_request"/>
             <argument type="service" id="emsch.helper_translation" />
             <argument type="service" id="emsch.helper_locale" />
-
+            <argument type="service" id="emsch.helper_exception" />
             <tag name="kernel.event_subscriber" />
         </service>
 
@@ -50,7 +61,7 @@
         <service id="emsch.controller.language_select" class="EMS\ClientHelperBundle\Controller\LanguageSelectController" public="true">
             <argument type="service" id="emsch.manager.client_request" />
             <argument type="string">%emsch.locales%</argument>
-            <argument type="string">%emsch.template_language%</argument>
+            <argument></argument>
         </service>
         <service id="emsch.controller.search" class="EMS\ClientHelperBundle\Controller\SearchController" public="true">
             <argument type="service" id="emsch.search.manager" />
