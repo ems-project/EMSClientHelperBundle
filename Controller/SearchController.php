@@ -15,11 +15,18 @@ class SearchController extends AbstractController
     private $manager;
 
     /**
-     * @param Manager $manager
+     * @var array
      */
-    public function __construct(Manager $manager)
+    private $locales;
+
+    /**
+     * @param Manager $manager
+     * @param array   $locales
+     */
+    public function __construct(Manager $manager, array $locales)
     {
         $this->manager = $manager;
+        $this->locales = $locales;
     }
 
     /**
@@ -45,6 +52,21 @@ class SearchController extends AbstractController
             'sort' => $sortBy,
             'facets' => $facets,
             'page' => $page,
+            'language_routes' => $this->getLanguageRoutes(),
         ]);
+    }
+
+    /**
+     * @return array
+     */
+    private function getLanguageRoutes()
+    {
+        $routes = [];
+
+        foreach ($this->locales as $locale) {
+            $routes[$locale] = $this->generateUrl('emsch_search', ['_locale' => $locale]);
+        }
+
+        return $routes;
     }
 }
