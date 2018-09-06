@@ -83,7 +83,7 @@ class Transformer
      */
     public function transform($content, $locale = null, $baseUrl = null)
     {
-        return preg_replace_callback(EMSLink::REGEX, function ($match) use ($locale, $baseUrl) {
+        return preg_replace_callback(EMSLink::PATTERN, function ($match) use ($locale, $baseUrl) {
             //array filter to remove empty capture groups
             $generation = $this->generate(array_filter($match), $locale);
             $route = $generation ? $generation : $match[0];

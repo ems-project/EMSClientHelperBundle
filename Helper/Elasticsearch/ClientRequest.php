@@ -388,6 +388,22 @@ class ClientRequest
     }
 
     /**
+     * @param array $arguments
+     *
+     * @return array
+     *
+     * @throws EnvironmentNotFoundException
+     */
+    public function searchArgs(array $arguments)
+    {
+        if (!isset($arguments['index'])) {
+            $arguments['index'] = $this->getIndex();
+        }
+
+        return $this->client->search($arguments);
+    }
+
+    /**
      * http://stackoverflow.com/questions/10836142/elasticsearch-duplicate-results-with-paging
      *
      * @param string|array $type
