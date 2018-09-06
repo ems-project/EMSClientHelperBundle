@@ -2,7 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Helper\Asset;
 
-use EMS\ClientHelperBundle\Helper\Request\RequestHelper;
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\CommonBundle\Storage\NotFoundException;
 use EMS\CommonBundle\Storage\StorageManager;
 use Symfony\Component\Filesystem\Filesystem;
@@ -17,9 +17,9 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
     private $storageManager;
 
     /**
-     * @var RequestHelper
+     * @var ClientRequestManager
      */
-    private $requestHelper;
+    private $manager;
 
     /**
      * @var string
@@ -34,14 +34,14 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
     const SIGN_FILE = 'ems_sign';
 
     /**
-     * @param StorageManager $storageManager
-     * @param RequestHelper  $requestHelper
-     * @param string         $projectDir
+     * @param StorageManager       $storageManager
+     * @param ClientRequestManager $manager
+     * @param string               $projectDir
      */
-    public function __construct(StorageManager $storageManager, RequestHelper $requestHelper, string $projectDir)
+    public function __construct(StorageManager $storageManager, ClientRequestManager $manager, string $projectDir)
     {
         $this->storageManager = $storageManager;
-        $this->requestHelper = $requestHelper;
+        $this->manager = $manager;
         $this->projectDir = $projectDir;
 
         $this->filesystem = new Filesystem();
@@ -59,8 +59,8 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
             $this->checkout($hash, $directory);
         }
 
-        $env = $this->requestHelper->getEnvironment();
-        $symlink = sprintf('%s/%s', $basePath, $env);
+        $cacheKey = $this->manager->getDefault()->getCacheKey();
+        $symlink = sprintf('%s/%s', $basePath, $cacheKey);
 
         if (!$this->checkSign($symlink, $directory, $hash)) {
             $this->filesystem->remove($symlink);
