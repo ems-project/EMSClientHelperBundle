@@ -52,19 +52,21 @@ class SearchController extends AbstractController
             'sort' => $sortBy,
             'facets' => $facets,
             'page' => $page,
-            'language_routes' => $this->getLanguageRoutes(),
+            'language_routes' => $this->getLanguageRoutes($request),
         ]);
     }
 
     /**
+     * @param Request $request
+     *
      * @return array
      */
-    private function getLanguageRoutes()
+    private function getLanguageRoutes(Request $request)
     {
         $routes = [];
 
         foreach ($this->locales as $locale) {
-            $routes[$locale] = $this->generateUrl('emsch_search', ['_locale' => $locale]);
+            $routes[$locale] = $this->generateUrl('emsch_search', array_merge(['_locale' => $locale], $request->query->all()));
         }
 
         return $routes;

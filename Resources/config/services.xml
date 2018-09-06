@@ -51,15 +51,18 @@
         <service id="emsch.twig.extension.helper" class="EMS\ClientHelperBundle\Twig\HelperExtension">
             <tag name="twig.extension" />
         </service>
-        <service id="emsch.twig.runtime.request_helper" class="EMS\ClientHelperBundle\Twig\RequestHelperRuntime">
+        <service id="emsch.twig.runtime.request_helper" class="EMS\ClientHelperBundle\Twig\AdminMenuRuntime">
             <argument type="service" id="emsch.helper_request"/>
-            <argument type="service" id="emsch.manager.client_request" />
             <tag name="twig.runtime" />
         </service>
         <service id="emsch.twig.runtime.asset" class="EMS\ClientHelperBundle\Helper\Asset\AssetHelperRuntime">
             <argument type="service" id="ems_common.storage.manager" />
             <argument type="service" id="emsch.manager.client_request" />
             <argument type="string">%kernel.project_dir%</argument>
+            <tag name="twig.runtime" />
+        </service>
+        <service id="emsch.twig.runtime.client_request" class="EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestRuntime">
+            <argument type="service" id="emsch.manager.client_request" />
             <tag name="twig.runtime" />
         </service>
 
