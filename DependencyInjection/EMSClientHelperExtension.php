@@ -40,7 +40,7 @@ class EMSClientHelperExtension extends Extension
 
         $templates = $config['templates'];
         $container->getDefinition('emsch.router')->replaceArgument(1, $templates);
-        $container->getDefinition('emsch.helper_exception')->replaceArgument(2, $templates['error']);
+        $container->getDefinition('emsch.helper_exception')->replaceArgument(3, $templates['error']);
 
         $this->processElasticms($container, $loader, $config['elasticms']);
         $this->processApi($container, $config['api']);
