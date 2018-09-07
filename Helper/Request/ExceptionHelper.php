@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Helper\Request;
 
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\ClientHelperBundle\Helper\Twig\TwigException;
 use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,6 +15,11 @@ class ExceptionHelper
     private $twig;
 
     /**
+     * @var ClientRequestManager
+     */
+    private $manager;
+
+    /**
      * @var string
      */
     private $template;
@@ -24,13 +30,15 @@ class ExceptionHelper
     private $debug;
 
     /**
-     * @param \Twig\Environment $twig
-     * @param bool              $debug
-     * @param string            $template
+     * @param \Twig\Environment    $twig
+     * @param ClientRequestManager $manager
+     * @param bool                 $debug
+     * @param string               $template
      */
-    public function __construct(\Twig\Environment $twig, bool $debug, string $template = null)
+    public function __construct(\Twig\Environment $twig, ClientRequestManager $manager, bool $debug, string $template = null)
     {
         $this->twig = $twig;
+        $this->manager = $manager;
         $this->debug = $debug;
         $this->template = $template;
     }
@@ -50,8 +58,7 @@ class ExceptionHelper
         $template = $this->getTemplate($code);
 
         return new Response($this->twig->render($template, [
-            'trans_default_domain' => 'catalog_template',
-            'emsLink' => 'test',
+            'trans_default_domain' => $this->manager->getDefault()->getCacheKey(),
             'status_code' => $code,
             'status_text' => isset(Response::$statusTexts[$code]) ? Response::$statusTexts[$code] : '',
             'exception' => $exception,
