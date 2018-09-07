@@ -31,18 +31,25 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
      */
     private $filesystem;
 
+    /**
+     * @var bool
+     */
+    private $enabled;
+
     const SIGN_FILE = 'ems_sign';
 
     /**
      * @param StorageManager       $storageManager
      * @param ClientRequestManager $manager
      * @param string               $projectDir
+     * @param bool                 $enabled
      */
-    public function __construct(StorageManager $storageManager, ClientRequestManager $manager, string $projectDir)
+    public function __construct(StorageManager $storageManager, ClientRequestManager $manager, string $projectDir, bool $enabled)
     {
         $this->storageManager = $storageManager;
         $this->manager = $manager;
         $this->projectDir = $projectDir;
+        $this->enabled = $enabled;
 
         $this->filesystem = new Filesystem();
     }
@@ -52,6 +59,10 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
      */
     public function init(string $hash)
     {
+        if (!$this->enabled) {
+            return;
+        }
+
         $basePath = $this->projectDir . '/public/bundles';
         $directory = $basePath . '/' . $hash;
 
