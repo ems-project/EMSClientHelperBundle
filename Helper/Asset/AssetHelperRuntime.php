@@ -63,19 +63,24 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
             return;
         }
 
-        $basePath = $this->projectDir . '/public/bundles';
-        $directory = $basePath . '/' . $hash;
+        try  {
+            $basePath = $this->projectDir . '/public/bundles';
+            $directory = $basePath . '/' . $hash;
 
-        if (!$this->filesystem->exists($directory)) {
-            $this->checkout($hash, $directory);
+            if (!$this->filesystem->exists($directory)) {
+                $this->checkout($hash, $directory);
+            }
+
+            $cacheKey = $this->manager->getDefault()->getCacheKey();
+            $symlink = sprintf('%s/%s', $basePath, $cacheKey);
+
+            if (!$this->checkSign($symlink, $directory, $hash)) {
+                $this->filesystem->remove($symlink);
+                $this->filesystem->symlink($directory, $symlink, true);
+            }
         }
-
-        $cacheKey = $this->manager->getDefault()->getCacheKey();
-        $symlink = sprintf('%s/%s', $basePath, $cacheKey);
-
-        if (!$this->checkSign($symlink, $directory, $hash)) {
-            $this->filesystem->remove($symlink);
-            $this->filesystem->symlink($directory, $symlink, true);
+        catch (\Exception $e) {
+            //TODO: add a flashbag message
         }
     }
 
