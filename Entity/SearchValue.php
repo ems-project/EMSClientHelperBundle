@@ -88,19 +88,33 @@ class SearchValue
         
         $matches = [];
         preg_match_all('/^\"(.*)\"$/', $this->term, $matches);
-        
+
         if(isset($matches[1][0])) {
             return [
                 'match_phrase' => [
                     ($field?$field:'_all') => [
                         'analyzer' => $analyzer,
-                        'query' => $this->getTerm(),  
+                        'query' => $matches[1][0],
                         'boost' => $boost
                     ]
-                    
+
                 ]
             ];
         }
+
+        if(strpos($this->term, '*') !== false) {
+            return [
+                'query_string' => [
+                    'default_field' => $field?:'_all',
+                    'query' => $this->term,
+                    'analyzer' => $analyzer,
+                    'analyze_wildcard' => true,
+                    'boost' => $boost
+                ]
+            ];
+        }
+
+
         return [
             'match' => [
                 ($field?$field:'_all') => [
