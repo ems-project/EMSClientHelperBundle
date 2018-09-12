@@ -44,7 +44,7 @@ class Manager
     /**
      * @return ClientRequest
      */
-    public function getClientRequest(): ClientRequest
+    public function getClientRequest()
     {
         return $this->clientRequestManager->getDefault();
     }
@@ -88,6 +88,14 @@ class Manager
         $body = [
             'query' => $query,
             'aggs' => $aggs,
+            'suggest' => [
+                'suggestion' => [
+                    'text' => $queryString,
+                    'term' => [
+                        'field' => 'all_'.$locale,
+                    ]
+                ]
+            ]
         ];
 
         if($sortBy) {
