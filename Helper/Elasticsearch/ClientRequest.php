@@ -28,6 +28,11 @@ class ClientRequest
     private $indexPrefix;
 
     /**
+     * @var array
+     */
+    private $externalIndexes = [];
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -63,7 +68,8 @@ class ClientRequest
         $this->requestHelper = $requestHelper;
         $this->logger = $logger;
         $this->options = $options;
-        $this->indexPrefix = isset($options[self::OPTION_INDEX_PREFIX]) ? $options[self::OPTION_INDEX_PREFIX] : null;
+        $this->indexPrefix = $options['index_prefix'] ?? null;
+        $this->externalIndexes = $options['external_indexes'] ?? null;
         $this->name = $name;
     }
 
@@ -234,7 +240,7 @@ class ClientRequest
     {
         $this->logger->debug('ClientRequest : getFieldAnalyzer {field}', ['field' => $field]);
         $info = $this->client->indices()->getFieldMapping([
-            'index' => $this->getFirstIndex(),
+            'index' => array_shift($this->getIndex()),
             'field' => $field,
         ]);
 
@@ -606,13 +612,13 @@ class ClientRequest
      */
     public function getCacheKey(string $prefix = ''): string
     {
-        $index = $this->getIndex();
+        $environment = $this->requestHelper->getEnvironment();
 
-        return $prefix . (is_array($index) ? implode('_', $index) : $index);
+        return $prefix . str_replace('|', '', $this->indexPrefix) . $environment;
     }
 
     /**
-     * @return string|array
+     * @return array
      *
      * @throws EnvironmentNotFoundException
      */
@@ -629,21 +635,7 @@ class ClientRequest
         foreach ($prefixes as $prefix) {
             $out[] = $prefix . $environment;
         }
-        if (!empty($out)) {
-            return $out;
-        }
-        return $this->indexPrefix . $environment;
-    }
 
-    /**
-     * @return string
-     */
-    private function getFirstIndex()
-    {
-        $indexes = $this->getIndex();
-        if (is_array($indexes) && count($indexes) > 0) {
-            return $indexes[0];
-        }
-        return $indexes;
+        return array_merge($out, $this->externalIndexes);
     }
 }
