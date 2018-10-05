@@ -87,6 +87,7 @@ class Configuration implements ConfigurationInterface
                                 ->info("example: 'test_'")
                                 ->defaultValue(null)
                             ->end()
+                            ->variableNode('external_indexes')->end()
                             ->booleanNode('default')->end()
                             ->scalarNode('translation_type')
                                 ->info("example: 'test_i18n'")
