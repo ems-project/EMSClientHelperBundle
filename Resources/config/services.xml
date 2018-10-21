@@ -31,6 +31,7 @@
             <argument type="service" id="emsch.manager.client_request" />
             <argument type="service" id="translator.default" />
             <argument type="service" id="cache.app" />
+            <argument type="string">%emsch.locales%</argument>
         </service>
 
         <service id="emsch.router" class="EMS\ClientHelperBundle\Helper\Routing\Router">
