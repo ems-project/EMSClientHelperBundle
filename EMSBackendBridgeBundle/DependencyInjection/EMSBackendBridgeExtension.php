@@ -4,6 +4,7 @@ namespace EMS\ClientHelperBundle\EMSBackendBridgeBundle\DependencyInjection;
 
 use Composer\CaBundle\CaBundle;
 use Elasticsearch\Client;
+use Elasticsearch\ConnectionPool\SniffingConnectionPool;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Api\ApiClient;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\EMSBackendBridgeBundle\Translation\TranslationLoader;
@@ -124,6 +125,7 @@ class EMSBackendBridgeExtension extends Extension
     {
         $definition = new Definition(Client::class);
         $config = ['hosts' => $options['hosts']];
+        $config['connectionPool'] = SniffingConnectionPool::class;
 
 //        foreach ($options['hosts'] as $host){
 //            if((substr($host, 0, 8) === 'https://')){
