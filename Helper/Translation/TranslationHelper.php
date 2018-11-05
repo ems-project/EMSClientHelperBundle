@@ -51,42 +51,40 @@ class TranslationHelper
      */
     public function addCatalogues(Request $request)
     {
-        //$locale = $request->getLocale();
-        //Load all defined locales as the locale can be forced later in the translator functions. I.e.: {{ 'í18n.key'|trans({}, trans_default_domain, 'fr') }}
-        foreach ($this->locales as $locale) {
-            $catalogue = $this->translator->getCatalogue($locale);
+        foreach ($this->clientManager->all() as $clientRequest) {
+            if (!$clientRequest->hasOption('translation_type')) {
+                continue;
+            }
 
-            foreach ($this->clientManager->all() as $clientRequest) {
-                if (!$clientRequest->hasOption('translation_type')) {
-                    continue;
-                }
+            $messages = $this->getMessages($clientRequest);
 
-                $catalogue->addCatalogue($this->createCatalogue($clientRequest, $locale));
+            foreach ($this->locales as $locale) {
+                $clientCatalog = new MessageCatalogue($locale);
+                $clientCatalog->add($messages[$locale], $clientRequest->getCacheKey());
+
+                $catalogue = $this->translator->getCatalogue($locale);
+                $catalogue->addCatalogue($clientCatalog);
             }
         }
     }
 
     /**
      * @param ClientRequest $client
-     * @param string        $locale
      *
-     * @return MessageCatalogue
+     * @return array
      */
-    private function createCatalogue(ClientRequest $client, string $locale): MessageCatalogue
+    private function getMessages(ClientRequest $client): array
     {
         $lastChanged = $this->getLastChangeDate($client);
-        $cacheItem = $this->cache->getItem($client->getCacheKey('translations_'.$locale));
+        $cacheItem = $this->cache->getItem($client->getCacheKey('translations'));
 
         if (!$cacheItem->isHit() || !$this->cacheIsValid($lastChanged, $cacheItem)) {
-            $messages = $this->createMessages($client, $cacheItem, $locale, $lastChanged);
+            $messages = $this->createMessages($client, $cacheItem, $lastChanged);
         } else {
             $messages = $cacheItem->get();
         }
 
-        $catalogue = new MessageCatalogue($locale);
-        $catalogue->add($messages, $client->getCacheKey());
-
-        return $catalogue;
+        return $messages;
     }
 
     /**
@@ -106,12 +104,11 @@ class TranslationHelper
     /**
      * @param ClientRequest $client
      * @param CacheItem     $cacheItem
-     * @param string        $locale
      * @param \DateTime     $lastChanged
      *
      * @return array
      */
-    private function createMessages(ClientRequest $client, CacheItem $cacheItem, string $locale, \DateTime $lastChanged): array
+    private function createMessages(ClientRequest $client, CacheItem $cacheItem, \DateTime $lastChanged): array
     {
         $scroll = $client->scrollAll([
             'size' => 100,
@@ -119,12 +116,13 @@ class TranslationHelper
             'sort' => ['_doc']
         ], '5s');
 
-
         $messages = ['ems_last_change' => $lastChanged->format(DATE_ATOM)];
 
         foreach ($scroll as $hit) {
-            if(isset($hit['_source']['label_'.$locale])){
-                $messages[$hit['_source']['key']] = $hit['_source']['label_'.$locale];
+            foreach ($this->locales as $locale) {
+                if(isset($hit['_source']['label_'.$locale])){
+                    $messages[$locale][$hit['_source']['key']] = $hit['_source']['label_'.$locale];
+                }
             }
         }
 
