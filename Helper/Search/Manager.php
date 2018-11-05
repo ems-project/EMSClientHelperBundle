@@ -6,6 +6,7 @@ use EMS\ClientHelperBundle\Entity\AnalyserSet;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\ClientHelperBundle\Service\QueryBuilderService;
+use Symfony\Component\HttpFoundation\Request;
 
 class Manager
 {
@@ -14,31 +15,9 @@ class Manager
      */
     private $clientRequestManager;
 
-    /**
-     * @var array
-     */
-    private $synonyms;
-
-    /**
-     * @var array
-     */
-    private $facets;
-
-
-    /**
-     * @var int
-     */
-    private $itemPerPage;
-
-    /**
-     * @param ClientRequestManager $clientRequestManager
-     */
     public function __construct(ClientRequestManager $clientRequestManager)
     {
         $this->clientRequestManager = $clientRequestManager;
-        $this->synonyms = ['typology', 'organization'];
-        $this->facets = ['typology' => 15, 'ownership' => 15];
-        $this->itemPerPage = 1000;
     }
 
     /**
@@ -49,15 +28,29 @@ class Manager
         return $this->clientRequestManager->getDefault();
     }
 
-    public function search($queryString, array $facets, $locale, $sortBy, $page, $sortOrder='asc')
+    public function search(Request $request)
     {
         $clientRequest = $this->getClientRequest();
 
+        $options = $clientRequest->getOption('[search]');
+        $types = $options['types'] ?? [];
+        $facets = $options['facets'] ?? [];
+        $synonyms = $options['synonyms'] ?? [];
+        $fields = $options['fields'] ?? [];
+        $defaultLimit = $options['default_limit'] ?? 1000;
+
+        $queryString = $request->get('q', false);
+        $filterFacets = $request->get('f', []);
+        $locale = $request->getLocale();
+        $sortBy = $request->get('s', false);
+        $sortOrder = $request->get('o','asc');
+        $page = (int) $request->get('p', 0);
+        $limit = (int) $request->get('l', $defaultLimit);
+
         $filter = '';
-        if(!empty($facets))
-        {
+        if(!empty($filterFacets)) {
             $filter = [];
-            foreach($facets as $field => $terms) {
+            foreach($filterFacets as $field => $terms) {
                 if(!empty($terms)) {
                     $filter['bool']['must'][] = [
                         'terms' => [
@@ -68,15 +61,19 @@ class Manager
             }
         }
 
+        $analyzers = [];
 
-        $analyzers = [new AnalyserSet($clientRequest, 'all_'.$locale, $filter, $this->synonyms, empty($this->synonyms)?false:('all_'.$locale), '_all')];
+        foreach ($fields as $field) {
+            $field = str_replace('%locale%', $locale, $field);
+            $analyzers[] = new AnalyserSet($clientRequest, $field, $filter, $synonyms, empty($synonyms)?false:($field));
+        }
 
         $qbService = new QueryBuilderService();
         $query = $qbService->getQuery($queryString, $analyzers);
 
         $aggs = [];
-        if(!empty($this->facets)) {
-            foreach ($this->facets as $facet => $size) {
+        if(!empty($facets)) {
+            foreach ($facets as $facet => $size) {
                 $aggs[$facet] = [
                     'terms' => [
                         'field' => $facet,
@@ -99,15 +96,36 @@ class Manager
         ];
 
         if($sortBy) {
-            $body['sort'] = [
-                $sortBy => [
-                    'order' => $sortOrder,
-                    'missing' => '_last',
-                    'unmapped_type' => 'long',
-                ]
-            ];
+            $body['sort'] = [$sortBy => ['order' => $sortOrder, 'missing' => '_last', 'unmapped_type' => 'long']];
         }
 
-        return $this->getClientRequest()->search('service', $body, $page*$this->itemPerPage, $this->itemPerPage);
+        $results = $this->getClientRequest()->search($types, $body, $page*$limit, $limit);
+
+        return [
+            'results' => $results,
+            'query' => $queryString,
+            'sort' => $sortBy,
+            'facets' => $filterFacets,
+            'page' => $page,
+            'size' => $limit,
+            'counters' => $this->getCountInfo($results),
+        ];
     }
+
+    private function getCountInfo(array $results): array
+    {
+        $counters = [];
+        $aggregations = $results['aggregations'] ?? [];
+
+        foreach ($aggregations as $type => $data) {
+            $counters[$type] = [];
+
+            foreach ($data['buckets'] as $bucket) {
+                $counters[$type][$bucket['key']] = $bucket['doc_count'];
+            }
+        }
+
+        return $counters;
+    }
+
 }

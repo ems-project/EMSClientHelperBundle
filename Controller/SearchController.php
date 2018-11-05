@@ -39,21 +39,12 @@ class SearchController extends AbstractController
      */
     public function results(Request $request, string $template)
     {
-        $clientRequest = $this->manager->getClientRequest();
-        $queryString = $request->get('q', false);
-        $facets = $request->get('f', []);
-        $sortBy = $request->get('s', false);
-        $page = $request->get('p', 0);
+        $search = $this->manager->search($request);
 
-        return $this->render($template, [
-            'trans_default_domain' => $clientRequest->getCacheKey(),
-            'results' => $this->manager->search($queryString, $facets, $request->getLocale(), $sortBy, $page),
-            'query' => $queryString,
-            'sort' => $sortBy,
-            'facets' => $facets,
-            'page' => $page,
+        return $this->render($template, array_merge([
+            'trans_default_domain' => $this->manager->getClientRequest()->getCacheKey(),
             'language_routes' => $this->getLanguageRoutes($request),
-        ]);
+        ], $search));
     }
 
     /**
