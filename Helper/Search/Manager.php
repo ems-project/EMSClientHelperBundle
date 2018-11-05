@@ -62,9 +62,11 @@ class Manager
         }
 
         $analyzers = [];
+        $suggest = ['text' => $queryString];
 
         foreach ($fields as $field) {
             $field = str_replace('%locale%', $locale, $field);
+            $suggest['suggest-'.$field] = ['term'=> ['field' => $field]];
             $analyzers[] = new AnalyserSet($clientRequest, $field, $filter, $synonyms, empty($synonyms)?false:($field));
         }
 
@@ -85,14 +87,7 @@ class Manager
         $body = [
             'query' => $query,
             'aggs' => $aggs,
-            'suggest' => [
-                'suggestion' => [
-                    'text' => $queryString,
-                    'term' => [
-                        'field' => 'all_'.$locale,
-                    ]
-                ]
-            ]
+            'suggest' => $suggest
         ];
 
         if($sortBy) {
