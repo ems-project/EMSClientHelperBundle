@@ -29,15 +29,21 @@ class TranslationHelper
     private $cache;
 
     /**
+     * @var array
+     */
+    private $locales;
+
+    /**
      * @param ClientRequestManager $clientManager
      * @param Translator           $translator
      * @param AdapterInterface     $cache
      */
-    public function __construct(ClientRequestManager $clientManager, Translator $translator, AdapterInterface $cache)
+    public function __construct(ClientRequestManager $clientManager, Translator $translator, AdapterInterface $cache, array $locales)
     {
         $this->clientManager = $clientManager;
         $this->translator = $translator;
         $this->cache = $cache;
+        $this->locales = $locales;
     }
 
     /**
@@ -45,15 +51,18 @@ class TranslationHelper
      */
     public function addCatalogues(Request $request)
     {
-        $locale = $request->getLocale();
-        $catalogue = $this->translator->getCatalogue($locale);
+        //$locale = $request->getLocale();
+        //Load all defined locales as the locale can be forced later in the translator functions. I.e.: {{ 'í18n.key'|trans({}, trans_default_domain, 'fr') }}
+        foreach ($this->locales as $locale) {
+            $catalogue = $this->translator->getCatalogue($locale);
 
-        foreach ($this->clientManager->all() as $clientRequest) {
-            if (!$clientRequest->hasOption('translation_type')) {
-                continue;
+            foreach ($this->clientManager->all() as $clientRequest) {
+                if (!$clientRequest->hasOption('translation_type')) {
+                    continue;
+                }
+
+                $catalogue->addCatalogue($this->createCatalogue($clientRequest, $locale));
             }
-
-            $catalogue->addCatalogue($this->createCatalogue($clientRequest, $locale));
         }
     }
 
