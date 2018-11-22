@@ -50,17 +50,10 @@ class RequestHelper
         }
 
         foreach ($this->environments as $env) {
-            if (!$env->match($request)) {
-                continue;
+            if ($env->matchRequest($request)) {
+                $env->modifyRequest($request);
+                break;
             }
-
-            $request->attributes->set('_environment', $env->getIndex());
-
-            if(!empty($env->getBackend())) {
-                $request->attributes->set('_backend', $env->getBackend());
-            }
-
-            return; //stop on match
         }
     }
 
@@ -91,7 +84,7 @@ class RequestHelper
 
         return $env;
     }
-    
+
     /**
      * @return string
      */
