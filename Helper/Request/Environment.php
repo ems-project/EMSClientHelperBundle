@@ -27,16 +27,18 @@ class Environment
     private $backend;
 
     /**
-     * @param string $name
-     * @param array  $config
+     * @var array
      */
+    private $request = [];
+
     public function __construct($name, array $config)
     {
         $this->name = $name;
 
-        $this->index = $config['index'];
         $this->regex = $config['regex'] ?? '*';
-        $this->backend = $config['backend'] ?? '*';
+        $this->backend = $config['backend'] ?? false;
+        $this->index = $config['index'] ?? null;
+        $this->request = $config['request'] ?? [];
     }
     
     /**
@@ -44,34 +46,34 @@ class Environment
      */
     public function getIndex()
     {
-        return ($this->index ? $this->index : $this->name);
+        if ($this->index) {
+            return $this->index;
+        }
+
+        return $this->request['_environment'] ? $this->request['_environment'] : $this->name;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getBackend()
-    {
-        return $this->backend;
-    }
-
-    /**
-     * @param Request $request
-     *
-     * @return boolean
-     */
-    public function match(Request $request)
+    public function matchRequest(Request $request)
     {
         if (null === $this->regex) {
             return true;
         }
         
-        $url = vsprintf('%s://%s%s', [
-            $request->getScheme(),
-            $request->getHttpHost(),
-            $request->getBasePath(),
-        ]);
+        $url = vsprintf('%s://%s%s', [$request->getScheme(), $request->getHttpHost(), $request->getBasePath() ]);
         
         return 1 === preg_match($this->regex, $url) ? true : false;
+    }
+
+    public function modifyRequest(Request $request)
+    {
+        // backward compatibility
+        $request->attributes->set('_environment', $this->getIndex());
+        $request->attributes->set('_backend', $this->backend);
+
+        if (!empty($this->request)) {
+            foreach ($this->request as $key => $value) {
+                $request->attributes->set($key, $value);
+            }
+        }
     }
 }
