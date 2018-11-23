@@ -36,7 +36,7 @@ class Environment
         $this->name = $name;
 
         $this->regex = $config['regex'] ?? '*';
-        $this->backend = $config['backend'] ?? null;
+        $this->backend = $config['backend'] ?? false;
         $this->index = $config['index'] ?? null;
         $this->request = $config['request'] ?? [];
     }
@@ -50,7 +50,7 @@ class Environment
             return $this->index;
         }
 
-        return $this->request['_environment'] ? $this->name : null;
+        return $this->request['_environment'] ? $this->request['_environment'] : $this->name;
     }
 
     public function matchRequest(Request $request)
@@ -66,13 +66,14 @@ class Environment
 
     public function modifyRequest(Request $request)
     {
+        // backward compatibility
+        $request->attributes->set('_environment', $this->getIndex());
+        $request->attributes->set('_backend', $this->backend);
+
         if (!empty($this->request)) {
             foreach ($this->request as $key => $value) {
                 $request->attributes->set($key, $value);
             }
-        } else {
-            $request->attributes->set('_environment', $this->getIndex());
-            $request->attributes->set('_backend', $this->backend);
         }
     }
 }
