@@ -44,7 +44,11 @@ class EMSRouter extends BaseRouter
 
         foreach ($configs as $config) {
             /* @var $config RouteConfig */
-            $collection->add($config->getName(), $config->getRoute());
+            $routes = $config->getRoutes();
+
+            foreach ($routes as $name => $route) {
+                $collection->add($name, $route);
+            }
         }
 
         return $collection;

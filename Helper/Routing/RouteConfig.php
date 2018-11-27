@@ -30,7 +30,7 @@ class RouteConfig
      * @param array  $options
      * @param bool   $emsRoute
      */
-    public function __construct(string $name, array $options, bool $emsRoute = false)
+    public function __construct($name, array $options, $emsRoute)
     {
         $this->name = $name;
         $this->options = $this->resolveOptions($options, $emsRoute);
@@ -48,12 +48,32 @@ class RouteConfig
     }
 
     /**
-     * @return Route
+     * @return array
      */
-    public function getRoute()
+    public function getRoutes()
+    {
+        $path = $this->options['path'];
+
+        if (is_string($path)) {
+            return [$this->getName() => $this->createRoute($path)];
+        }
+
+        $routes = [];
+
+        if (is_array($path)) {
+            foreach ($path as $key => $p) {
+                $name = $this->getName() . '.' . $key;
+                $routes[$name] = $this->createRoute($p);
+            }
+        }
+
+        return $routes;
+    }
+
+    private function createRoute($path)
     {
         return new Route(
-            $this->options['path'],
+            $path,
             $this->options['defaults'],
             $this->options['requirements'],
             $this->options['options'],
