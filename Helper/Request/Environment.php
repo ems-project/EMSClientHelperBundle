@@ -73,6 +73,10 @@ class Environment
         if (!empty($this->request)) {
             foreach ($this->request as $key => $value) {
                 $request->attributes->set($key, $value);
+
+                if ('_locale' === $key) {
+                    $request->setLocale($value);
+                }
             }
         }
     }
