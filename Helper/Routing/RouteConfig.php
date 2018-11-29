@@ -30,7 +30,7 @@ class RouteConfig
      * @param array  $options
      * @param bool   $emsRoute
      */
-    public function __construct($name, array $options, $emsRoute)
+    public function __construct($name, array $options, $emsRoute = false)
     {
         $this->name = $name;
         $this->options = $this->resolveOptions($options, $emsRoute);
