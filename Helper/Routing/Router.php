@@ -51,7 +51,10 @@ class Router extends BaseRouter
                 'controller' => 'emsch.controller.language_select::view',
                 'defaults' => ['template' => $this->templates['language']]
             ]);
-            $collection->add($langSelectConfig->getName(), $langSelectConfig->getRoute());
+
+            foreach ($langSelectConfig->getRoutes() as $name => $route) {
+                $collection->add($name, $route);
+            }
         }
 
         if (isset($this->templates['search'])) {
@@ -60,7 +63,10 @@ class Router extends BaseRouter
                 'controller' => 'emsch.controller.search::results',
                 'defaults' => ['template' => $this->templates['search']]
             ]);
-            $collection->add($searchConfig->getName(), $searchConfig->getRoute());
+
+            foreach ($searchConfig->getRoutes() as $name => $route) {
+                $collection->add($name, $route);
+            }
         }
 
         return $collection;
