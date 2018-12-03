@@ -36,7 +36,7 @@ class AdminMenuRuntime implements RuntimeExtensionInterface
         }
 
         if (!$emsLink instanceof EMSLink) {
-            $emsLink = EMSLink::fromString($emsLink);
+            $emsLink = EMSLink::fromText($emsLink);
         }
 
         return vsprintf('data-ems-type="%s" data-ems-key="%s" data-ems-url="%s"', [
