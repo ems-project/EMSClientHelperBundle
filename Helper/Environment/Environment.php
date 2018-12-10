@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\Helper\Request;
+namespace EMS\ClientHelperBundle\Helper\Environment;
 
 use Symfony\Component\HttpFoundation\Request;
 

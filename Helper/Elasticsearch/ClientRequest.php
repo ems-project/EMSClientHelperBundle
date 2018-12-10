@@ -6,7 +6,7 @@ use Elasticsearch\Client;
 use EMS\ClientHelperBundle\Entity\HierarchicalStructure;
 use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
-use EMS\ClientHelperBundle\Helper\Request\RequestHelper;
+use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -18,9 +18,9 @@ class ClientRequest
     private $client;
 
     /**
-     * @var RequestHelper
+     * @var EnvironmentHelper
      */
-    private $requestHelper;
+    private $environmentHelper;
 
     /**
      * @var string
@@ -45,22 +45,22 @@ class ClientRequest
     const OPTION_INDEX_PREFIX = 'index_prefix';
 
     /**
-     * @param Client          $client
-     * @param RequestHelper   $requestHelper
-     * @param LoggerInterface $logger
-     * @param array           $options
-     * @param string          $name
+     * @param Client            $client
+     * @param EnvironmentHelper $environmentHelper
+     * @param LoggerInterface   $logger
+     * @param string            $name
+     * @param array             $options
      */
     public function __construct(
         Client $client,
-        RequestHelper $requestHelper,
+        EnvironmentHelper $environmentHelper,
         LoggerInterface $logger,
-        array $options = [],
-        $name
+        $name,
+        array $options = []
     )
     {
         $this->client = $client;
-        $this->requestHelper = $requestHelper;
+        $this->environmentHelper = $environmentHelper;
         $this->logger = $logger;
         $this->options = $options;
         $this->indexPrefix = isset($options[self::OPTION_INDEX_PREFIX]) ? $options[self::OPTION_INDEX_PREFIX] : null;
@@ -284,12 +284,26 @@ class ClientRequest
         return $out;
     }
 
+    public function getLastChangeDate(string $type): \DateTime
+    {
+        $result = $this->search($type, [
+            'sort' => ['_published_datetime' => ['order' => 'desc', 'missing' => '_last']],
+            '_source' => '_published_datetime'
+        ], 0, 1);
+
+        if ($result['hits']['total'] > 0 && isset($result['hits']['hits']['0']['_source']['_published_datetime'])) {
+            return new \DateTime($result['hits']['hits']['0']['_source']['_published_datetime']);
+        }
+
+        return new \DateTime('Wed, 09 Feb 1977 16:00:00 GMT');
+    }
+
     /**
      * @return string
      */
     public function getLocale()
     {
-        return $this->requestHelper->getLocale();
+        return $this->environmentHelper->getLocale();
     }
 
     /**
@@ -565,7 +579,7 @@ class ClientRequest
      *
      * @throws EnvironmentNotFoundException
      */
-    public function scrollAll(array $params, string $timeout = '30s'): iterable
+    public function scrollAll(array $params, $timeout = '30s'): iterable
     {
         $params['scroll'] = $timeout;
 
@@ -618,7 +632,7 @@ class ClientRequest
      */
     private function getIndex()
     {
-        $environment = $this->requestHelper->getEnvironment();
+        $environment = $this->environmentHelper->getEnvironment();
 
         if($environment === null) {
             throw new EnvironmentNotFoundException();

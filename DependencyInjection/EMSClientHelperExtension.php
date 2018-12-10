@@ -6,9 +6,6 @@ use Composer\CaBundle\CaBundle;
 use Elasticsearch\Client;
 use EMS\ClientHelperBundle\Helper\Api\Client as ApiClient;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
-use EMS\ClientHelperBundle\Helper\Routing\EMSRouter;
-use EMS\ClientHelperBundle\Helper\Routing\Router;
-use EMS\ClientHelperBundle\Helper\Translation\TranslationLoader;
 use EMS\ClientHelperBundle\Helper\Twig\TwigLoader;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -16,8 +13,6 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
-use EMS\ClientHelperBundle\Service\ClearCacheService;
-use EMS\ClientHelperBundle\EventListener\ClearCacheRequestListener;
 
 class EMSClientHelperExtension extends Extension
 {
@@ -39,12 +34,13 @@ class EMSClientHelperExtension extends Extension
         $container->setParameter('emsch.request_environments', $config['request_environments']);
 
         $templates = $config['templates'];
-        $container->getDefinition('emsch.router')->replaceArgument(1, $templates);
+        $container->setParameter('emsch.templates', $config['templates']);
         $container->getDefinition('emsch.helper_exception')->replaceArgument(3, $templates['error']);
+        $container->getDefinition('emsch.routing.url.transformer')->replaceArgument(4, $templates['ems_link']);
 
         $this->processElasticms($container, $loader, $config['elasticms']);
         $this->processApi($container, $config['api']);
-        $this->processRoutingSelection($container, $loader, $config['routing']);
+        $this->processRoutingSelection($container, $config['routing']);
 
         if (isset($config['twig_list'])) {
             $definition = $container->getDefinition('emsch.controller.twig_list');
@@ -62,13 +58,10 @@ class EMSClientHelperExtension extends Extension
         foreach ($config as $name => $options) {
             $this->defineElasticsearchClient($container, $name, $options);
             $this->defineClientRequest($container, $loader, $name, $options);
-            $this->defineRouter($container, $name, $options);
 
             if (isset($options['templates'])) {
                 $this->defineTwigLoader($container, $name, $options['templates']);
             }
-
-            $container->setParameter('emsch_routes', $options['routes']);
         }
     }
 
@@ -120,10 +113,10 @@ class EMSClientHelperExtension extends Extension
         $definition = new Definition(ClientRequest::class);
         $definition->setArguments([
             new Reference(sprintf('ems_common.elasticsearch.%s', $name)),
-            new Reference('emsch.helper_request'),
+            new Reference('emsch.helper_environment'),
             new Reference('logger'),
-            $options,
-            $name
+            $name,
+            $options
         ]);
         $definition->addTag('emsch.client_request');
 
@@ -133,20 +126,6 @@ class EMSClientHelperExtension extends Extension
         }
 
         $container->setDefinition(sprintf('emsch.client_request.%s', $name), $definition);
-    }
-
-    /**
-     * @param ContainerBuilder $container
-     * @param string           $name
-     * @param array            $options
-     */
-    private function defineRouter(ContainerBuilder $container, string $name, array $options)
-    {
-        $definition = new Definition(EMSRouter::class);
-        $definition->setArguments([$options['routes'], $container->getParameter('emsch.locales')]);
-        $definition->addTag('emsch.router', ['priority' => -10]); //after emsch.router
-
-        $container->setDefinition(sprintf('emsch.router.%s', $name), $definition);
     }
 
     /**
@@ -183,16 +162,16 @@ class EMSClientHelperExtension extends Extension
 
     /**
      * @param ContainerBuilder $container
-     * @param XmlFileLoader    $loader
      * @param array            $config
      */
-    private function processRoutingSelection(ContainerBuilder $container, XmlFileLoader $loader, array $config)
+    private function processRoutingSelection(ContainerBuilder $container, array $config)
     {
         if (!$config['enabled']) {
             return;
         }
 
         $container->setParameter('emsch.routing.client_request', $config['client_request']);
+        $container->setParameter('emsch.routing.routes', $config['routes']);
         $container->setParameter('emsch.routing.redirect_type', $config['redirect_type']);
         $container->setParameter('emsch.routing.relative_paths', $config['relative_paths']);
     }

@@ -5,6 +5,7 @@ namespace EMS\ClientHelperBundle\Helper\Routing\Url;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Twig\TwigException;
 use EMS\CommonBundle\Common\EMSLink;
+use Psr\Log\LoggerInterface;
 
 class Transformer
 {
@@ -24,15 +25,29 @@ class Transformer
     private $twig;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * @var string
+     */
+    private $template;
+
+    /**
      * @param ClientRequest     $clientRequest injected by compiler pass
      * @param Generator         $generator
      * @param \Twig_Environment $twig
+     * @param LoggerInterface   $logger
+     * @param string            $template
      */
-    public function __construct(ClientRequest $clientRequest, Generator $generator, \Twig_Environment $twig)
+    public function __construct(ClientRequest $clientRequest, Generator $generator, \Twig_Environment $twig, LoggerInterface $logger, string $template)
     {
         $this->clientRequest = $clientRequest;
         $this->generator = $generator;
-        $this->twig = $twig;    
+        $this->twig = $twig;
+        $this->logger = $logger;
+        $this->template = $template;
     }
     
     /**
@@ -51,8 +66,9 @@ class Transformer
      */
     public function generate(array $match, $locale=null)
     {
+        $emsLink = EMSLink::fromMatch($match);
+
         try {
-            $emsLink = EMSLink::fromMatch($match);
 
             if ('asset' === $emsLink->getLinkType()) {
                 return '/file/view/' . $emsLink->getOuuid() . '?' . http_build_query($emsLink->getQuery());
@@ -67,11 +83,10 @@ class Transformer
             $url = $this->generator->prependBaseUrl($emsLink, $template);
 
             return $url;
-        } catch (TwigException $ex) {
-            throw $ex;
         } catch (\Exception $ex) {
-            return $ex->getMessage();
-        }  
+            $this->logger->error($ex->getMessage());
+            return (string) $emsLink;
+        }
     }
 
     /**
@@ -101,16 +116,14 @@ class Transformer
      */
     private function renderTemplate(EMSLink $emsLink, array $document, $locale=null)
     {
-        try {
-            return $this->twig->render('@EMSCH/routing/'.$document['_type'], [
-                'id'     => $document['_id'],
-                'source' => $document['_source'],
-                'locale' => ($locale?$locale:$this->clientRequest->getLocale()),
-                'url'    => $emsLink,
-            ]);
-        } catch (\Twig_Error $ex) {
-            return 'Template errror: ' . $ex->getMessage();
-        }
+        $template = str_replace('{type}', $document['_type'], $this->template);
+
+        return $this->twig->render($template, [
+            'id'     => $document['_id'],
+            'source' => $document['_source'],
+            'locale' => ($locale?$locale:$this->clientRequest->getLocale()),
+            'url'    => $emsLink,
+        ]);
     }
     
     /**

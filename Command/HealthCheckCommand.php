@@ -8,7 +8,7 @@ use EMS\ClientHelperBundle\Exception\ClusterHealthNotGreenException;
 use EMS\ClientHelperBundle\Exception\ClusterHealthRedException;
 use EMS\ClientHelperBundle\Exception\IndexNotFoundException;
 use EMS\ClientHelperBundle\Exception\NoClientsFoundException;
-use EMS\ClientHelperBundle\Helper\Request\RequestHelper;
+use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\CommonBundle\Storage\StorageManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -29,9 +29,9 @@ class HealthCheckCommand extends Command
     private $clientRequests;
 
     /**
-     * @var RequestHelper
+     * @var EnvironmentHelper
      */
-    private $requestHelper;
+    private $environmentHelper;
 
     /**
      * @var StorageManager
@@ -39,15 +39,15 @@ class HealthCheckCommand extends Command
     private $storageManager;
 
     /**
-     * @param RequestHelper $requestHelper
-     * @param iterable      $clients
-     * @param iterable      $clientRequests
+     * @param EnvironmentHelper $environmentHelper
+     * @param iterable          $clients
+     * @param iterable          $clientRequests
      */
-    public function __construct(RequestHelper $requestHelper, iterable $clients = [], iterable $clientRequests = [], StorageManager $storageManager = null)
+    public function __construct(EnvironmentHelper $environmentHelper, iterable $clients = null, iterable $clientRequests = null, StorageManager $storageManager = null)
     {
-        $this->requestHelper = $requestHelper;
-        $this->clients = $clients;
-        $this->clientRequests = $clientRequests;
+        $this->environmentHelper = $environmentHelper;
+        $this->clients = $clients ?? [];
+        $this->clientRequests = $clientRequests ?? [];
         $this->storageManager = $storageManager;
          
         parent::__construct();
@@ -122,7 +122,7 @@ class HealthCheckCommand extends Command
            $prefixes = array_merge($prefixes, $clientRequest->getPrefixes());
         }
         $postfixes = [];
-        foreach ($this->requestHelper->getEnvironments() as $environment) {
+        foreach ($this->environmentHelper->getEnvironments() as $environment) {
             $postfixes[] = $environment->getIndex();
         }
         $indexes = [];

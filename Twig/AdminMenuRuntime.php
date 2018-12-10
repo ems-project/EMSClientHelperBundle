@@ -2,24 +2,23 @@
 
 namespace EMS\ClientHelperBundle\Twig;
 
-use EMS\ClientHelperBundle\Helper\Request\RequestHelper;
+use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\CommonBundle\Common\EMSLink;
 use Twig\Extension\RuntimeExtensionInterface;
 
 class AdminMenuRuntime implements RuntimeExtensionInterface
 {
     /**
-     * @var RequestHelper
+     * @var EnvironmentHelper
      */
-    private $requestHelper;
+    private $environmentHelper;
 
     /**
-     * RequestHelperRuntime constructor.
-     * @param RequestHelper $requestHelper
+     * @param EnvironmentHelper $environmentHelper
      */
-    public function __construct(RequestHelper $requestHelper)
+    public function __construct(EnvironmentHelper $environmentHelper)
     {
-        $this->requestHelper = $requestHelper;
+        $this->environmentHelper = $environmentHelper;
     }
 
     /**
@@ -29,7 +28,7 @@ class AdminMenuRuntime implements RuntimeExtensionInterface
      */
     public function showAdminMenu($emsLink): string
     {
-        $backend = $this->requestHelper->getBackend();
+        $backend = $this->environmentHelper->getBackend();
 
         if (!$backend) {
             return '';
