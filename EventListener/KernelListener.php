@@ -2,9 +2,10 @@
 
 namespace EMS\ClientHelperBundle\EventListener;
 
+use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Request\ExceptionHelper;
 use EMS\ClientHelperBundle\Helper\Request\LocaleHelper;
-use EMS\ClientHelperBundle\Helper\Request\RequestHelper;
+use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\ClientHelperBundle\Helper\Translation\TranslationHelper;
 use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -16,9 +17,9 @@ use Symfony\Component\HttpKernel\KernelEvents;
 class KernelListener implements EventSubscriberInterface
 {
     /**
-     * @var RequestHelper
+     * @var EnvironmentHelper
      */
-    private $requestHelper;
+    private $environmentHelper;
 
     /**
      * @var TranslationHelper
@@ -36,19 +37,19 @@ class KernelListener implements EventSubscriberInterface
     private $exceptionHelper;
 
     /**
-     * @param RequestHelper     $requestHelper
+     * @param EnvironmentHelper $environmentHelper
      * @param TranslationHelper $translationHelper
      * @param LocaleHelper      $localeHelper
      * @param ExceptionHelper   $exceptionHelper
      */
     public function __construct(
-        RequestHelper $requestHelper,
+        EnvironmentHelper $environmentHelper,
         TranslationHelper $translationHelper,
         LocaleHelper $localeHelper,
         ExceptionHelper $exceptionHelper
     )
     {
-        $this->requestHelper = $requestHelper;
+        $this->environmentHelper = $environmentHelper;
         $this->translationHelper = $translationHelper;
         $this->localeHelper = $localeHelper;
         $this->exceptionHelper = $exceptionHelper;
@@ -79,7 +80,15 @@ class KernelListener implements EventSubscriberInterface
      */
     public function bindEnvironment(GetResponseEvent $event)
     {
-        $this->requestHelper->bindEnvironment($event->getRequest());
+        $request = $event->getRequest();
+
+        foreach ($this->environmentHelper->getEnvironments() as $env) {
+            /** @var $env Environment */
+            if ($env->matchRequest($request)) {
+                $env->modifyRequest($request);
+                break;
+            }
+        }
     }
 
     /**
@@ -88,7 +97,7 @@ class KernelListener implements EventSubscriberInterface
     public function loadTranslations(GetResponseEvent $event)
     {
         if ($event->isMasterRequest()) {
-            $this->translationHelper->addCatalogues($event->getRequest());
+            $this->translationHelper->addCatalogues();
         }
     }
 

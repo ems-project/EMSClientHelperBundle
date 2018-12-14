@@ -2,6 +2,8 @@
 
 namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
+use Psr\Log\LoggerInterface;
+
 class ClientRequestManager
 {
     /**
@@ -14,11 +16,17 @@ class ClientRequestManager
      */
     private $default;
 
+    /** @var LoggerInterface */
+    private $logger;
+
     /**
      * @param iterable|ClientRequest[] $clientRequests
+     * @param LoggerInterface          $logger
      */
-    public function __construct(iterable $clientRequests)
+    public function __construct(iterable $clientRequests, LoggerInterface $logger)
     {
+        $this->logger = $logger;
+
         foreach ($clientRequests as $clientRequest) {
             $this->clientRequests[$clientRequest->getName()] = $clientRequest;
 
@@ -26,6 +34,14 @@ class ClientRequestManager
                 $this->default = $clientRequest;
             }
         }
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    public function getLogger(): LoggerInterface
+    {
+        return $this->logger;
     }
 
     /**
