@@ -3,10 +3,11 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://symfony.com/schema/dic/services
         http://symfony.com/schema/dic/services/services-1.0.xsd">
-
+    <parameters>
+        <parameter key="env(EMSCH_ASSET_CONFIG_TYPE)"/>
+    </parameters>
     <services>
         <defaults public="false" />
-
         <service id="emch.routing.chain_router" class="Symfony\Cmf\Component\Routing\ChainRouter">
             <argument type="service" id="logger" on-invalid="ignore" />
             <call method="add">
@@ -24,6 +25,9 @@
             <argument type="string">%emsch.templates%</argument>
             <argument type="string">%emsch.routing.routes%</argument>
             <tag name="emsch.router" priority="100" /> <!-- before symfony router -->
+            <call method="setAssetConfigType">
+                <argument type="string">%env(EMSCH_ASSET_CONFIG_TYPE)%</argument>
+            </call>
         </service>
         <service id="emsch.controller.router" class="EMS\ClientHelperBundle\Controller\RouterController">
             <argument type="service" id="emsch.manager.client_request" />
