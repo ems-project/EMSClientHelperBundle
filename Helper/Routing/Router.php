@@ -23,9 +23,6 @@ class Router extends BaseRouter
     /** @var array */
     private $routes;
 
-    /** @var string */
-    private $assetConfigType;
-
     public function __construct(ClientRequestManager $manager, CacheHelper $cacheHelper, array $locales, array $templates, array $routes)
     {
         $this->manager = $manager;
@@ -53,21 +50,7 @@ class Router extends BaseRouter
         $this->addLanguageSelectionRoute($collection);
         $this->addSearchResultRoute($collection);
 
-       // if ($this->assetConfigType) {
-          /*  $route = new Route('emsch_processor_asset', [
-                'path' => '/asset/{processor}/{hash}',
-                'controller' => 'emsch.controller.asset::process',
-                'defaults' => ['config_type' => $this->assetConfigType],
-            ]);
-            $route->addToCollection($collection);*/
-        //}
-
         $this->collection = $collection;
-    }
-
-    public function setAssetConfigType(?string $configType): void
-    {
-        $this->assetConfigType = $configType;
     }
 
     private function addEnvRoutes(RouteCollection $collection): void
@@ -105,22 +88,15 @@ class Router extends BaseRouter
     private function addEMSRoutes(RouteCollection $collection): void
     {
         foreach ($this->manager->all() as $clientRequest) {
-            if ($clientRequest->hasOption('route_type')) {
-                $routes = $this->getRoutes($clientRequest);
-
-                foreach ($routes as $route) {
-                    /** @var $route Route */
-                    $route->addToCollection($collection, $this->locales);
-                }
+            if (!$clientRequest->hasOption('route_type')) {
+                continue;
             }
 
-            if ($clientRequest->hasOption('asset_config_type') && null === $collection->get('emsch_processor_asset')) {
-                $route = new Route('emsch_processor_asset', [
-                    'path' => '/asset/{processor}/{hash}',
-                    'controller' => 'emsch.controller.asset::process',
-                    'defaults' => ['config_type' => $this->assetConfigType],
-                ]);
-                $route->addToCollection($collection);
+            $routes = $this->getRoutes($clientRequest);
+
+            foreach ($routes as $route) {
+                /** @var $route Route */
+                $route->addToCollection($collection, $this->locales);
             }
         }
     }

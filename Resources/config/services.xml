@@ -68,6 +68,12 @@
             <argument type="string">%emsch.assets.enabled%</argument>
             <tag name="twig.runtime" />
         </service>
+        <service id="emsch.twig.runtime.process" class="EMS\ClientHelperBundle\Helper\Asset\ProcessHelper">
+            <argument type="service" id="ems_common.storage.processor"/>
+            <argument type="service" id="emsch.manager.client_request" />
+            <argument type="service" id="Symfony\Component\Routing\Generator\UrlGeneratorInterface" />
+            <tag name="twig.runtime" />
+        </service>
         <service id="emsch.twig.runtime.client_request" class="EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestRuntime">
             <argument type="service" id="emsch.manager.client_request" />
             <tag name="twig.runtime" />
@@ -75,8 +81,7 @@
 
         <!-- controllers -->
         <service id="emsch.controller.asset" class="EMS\ClientHelperBundle\Controller\AssetController" public="true">
-            <argument type="service" id="ems_common.storage.processor"/>
-            <argument type="service" id="emsch.manager.client_request"/>
+            <argument type="service" id="emsch.twig.runtime.process"/>
         </service>
         <service id="emsch.controller.language_select" class="EMS\ClientHelperBundle\Controller\LanguageSelectController" public="true">
             <argument type="service" id="emsch.manager.client_request" />

@@ -3,6 +3,7 @@
 namespace EMS\ClientHelperBundle\Twig;
 
 use EMS\ClientHelperBundle\Helper\Asset\AssetHelperRuntime;
+use EMS\ClientHelperBundle\Helper\Asset\ProcessHelper;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestRuntime;
 use Twig\Extension\AbstractExtension;
 
@@ -29,6 +30,7 @@ class HelperExtension extends AbstractExtension
             new \Twig_SimpleFunction('emsch_route', [RoutingRuntime::class, 'createUrl']),
             new \Twig_SimpleFunction('emsch_search', [ClientRequestRuntime::class, 'search']),
             new \Twig_SimpleFunction('emsch_assets', [AssetHelperRuntime::class, 'init']),
+            new \Twig_SimpleFunction('emsch_process_asset', [ProcessHelper::class, 'generate']),
         ];
     }
 }

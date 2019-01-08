@@ -2,52 +2,22 @@
 
 namespace EMS\ClientHelperBundle\Controller;
 
-use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
-use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
-use EMS\CommonBundle\Storage\Processor\Config;
-use EMS\CommonBundle\Storage\Processor\Processor;
+use EMS\ClientHelperBundle\Helper\Asset\ProcessHelper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class AssetController
 {
-    /** @var Processor */
-    private $processor;
-    /** @var ClientRequest */
-    private $clientRequest;
+    /** @var ProcessHelper */
+    private $processHelper;
 
-    public function __construct(Processor $processor, ClientRequestManager $clientRequestManager)
+    public function __construct(ProcessHelper $processHelper)
     {
-        $this->processor = $processor;
-        $this->clientRequest = $clientRequestManager->getDefault();
+        $this->processHelper = $processHelper;
     }
 
-    public function process(Request $request, string $processor, string $hash): Response
+    public function process(Request $request, string $processor, string $hash, string $configHash = null): Response
     {
-        $doc = $this->getDocument($processor, $request->get('config_type', null));
-        $config = new Config($processor, $doc);
-
-        return $this->processor->createResponse($request, $config, $hash);
-    }
-
-    private function getDocument(string $processor, ?string $configType): array
-    {
-        if (null == $configType) {
-            return [];
-        }
-
-        try {
-            $document = $this->clientRequest->searchOne($configType, [
-                'query' => [
-                    'term' => [
-                        'identifier' => ['value' => $processor]
-                    ]
-                ]
-            ]);
-
-            return $document['_source'];
-        } catch (\Exception $e) {
-            return [];
-        }
+        return $this->processHelper->process($request, $processor, $hash, $configHash);
     }
 }
