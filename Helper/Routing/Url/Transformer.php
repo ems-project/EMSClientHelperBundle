@@ -66,16 +66,15 @@ class Transformer
      */
     public function generate(array $match, $locale=null)
     {
-        $emsLink = EMSLink::fromMatch($match);
-
         try {
+            $emsLink = EMSLink::fromMatch($match);
 
             if ('asset' === $emsLink->getLinkType()) {
                 return '/file/view/' . $emsLink->getOuuid() . '?' . http_build_query($emsLink->getQuery());
             }
 
             if (!$emsLink->hasContentType()) {
-                return false;
+                throw new \Exception('missing content type');
             }
 
             $document = $this->getDocument($emsLink);
@@ -84,8 +83,8 @@ class Transformer
 
             return $url;
         } catch (\Exception $ex) {
-            $this->logger->error($ex->getMessage());
-            return (string) $emsLink;
+            $this->logger->error(sprintf('%s match (%s)', $ex->getMessage(), json_encode($match)));
+            return false;
         }
     }
 
