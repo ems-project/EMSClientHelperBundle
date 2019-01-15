@@ -41,7 +41,7 @@ class Transformer
      * @param LoggerInterface   $logger
      * @param string            $template
      */
-    public function __construct(ClientRequest $clientRequest, Generator $generator, \Twig_Environment $twig, LoggerInterface $logger, string $template)
+    public function __construct(ClientRequest $clientRequest, Generator $generator, \Twig_Environment $twig, LoggerInterface $logger, ?string $template)
     {
         $this->clientRequest = $clientRequest;
         $this->generator = $generator;
@@ -115,14 +115,41 @@ class Transformer
      */
     private function renderTemplate(EMSLink $emsLink, array $document, $locale=null)
     {
-        $template = str_replace('{type}', $document['_type'], $this->template);
-
-        return $this->twig->render($template, [
+        $context = [
             'id'     => $document['_id'],
             'source' => $document['_source'],
             'locale' => ($locale?$locale:$this->clientRequest->getLocale()),
             'url'    => $emsLink,
-        ]);
+        ];
+
+        if ($this->template) {
+            $template = str_replace('{type}', $document['_type'], $this->template);
+
+            if ($result = $this->twigRender($template, $context)) {
+                return $result;
+            }
+        }
+
+        return $this->twigRender('@EMSCH/routing/'.$document['_type'], $context);
+    }
+
+    /**
+     * @param string $template
+     * @param array  $context
+     *
+     * @return string|null
+     */
+    private function twigRender(string $template, array $context): ?string
+    {
+        try {
+            return $this->twig->render($template, $context);
+        } catch (TwigException $ex) {
+            $this->logger->warning($ex->getMessage());
+        } catch (\Twig_Error $ex) {
+            $this->logger->error($ex->getMessage());
+        }
+
+        return null;
     }
     
     /**
