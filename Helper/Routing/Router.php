@@ -45,10 +45,10 @@ class Router extends BaseRouter
     public function buildRouteCollection(): void
     {
         $collection = new RouteCollection();
+        $this->addSearchResultRoute($collection);
+        $this->addLanguageSelectionRoute($collection);
         $this->addEMSRoutes($collection);
         $this->addEnvRoutes($collection);
-        $this->addLanguageSelectionRoute($collection);
-        $this->addSearchResultRoute($collection);
 
         $this->collection = $collection;
     }
