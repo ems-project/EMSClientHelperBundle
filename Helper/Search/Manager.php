@@ -2,107 +2,57 @@
 
 namespace EMS\ClientHelperBundle\Helper\Search;
 
-use EMS\ClientHelperBundle\Entity\AnalyserSet;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
-use EMS\ClientHelperBundle\Service\QueryBuilderService;
 use Symfony\Component\HttpFoundation\Request;
 
 class Manager
 {
-    /**
-     * @var ClientRequestManager
-     */
-    private $clientRequestManager;
+    /** @var ClientRequest */
+    private $clientRequest;
 
     public function __construct(ClientRequestManager $clientRequestManager)
     {
-        $this->clientRequestManager = $clientRequestManager;
+        $this->clientRequest = $clientRequestManager->getDefault();
     }
 
-    /**
-     * @return ClientRequest
-     */
-    public function getClientRequest()
+    public function getClientRequest(): ClientRequest
     {
-        return $this->clientRequestManager->getDefault();
+        return $this->clientRequest;
     }
 
     public function search(Request $request)
     {
-        $clientRequest = $this->getClientRequest();
+        $config = Config::fromClientRequest($this->clientRequest);
+        $config->bindRequest($request);
 
-        $options = $clientRequest->getOption('[search]');
-        $types = $options['types'] ?? [];
-        $facets = $options['facets'] ?? [];
-        $synonyms = $options['synonyms'] ?? [];
-        $fields = $options['fields'] ?? [];
-        $defaultLimit = $options['default_limit'] ?? 1000;
-
-        $queryString = $request->get('q', false);
-        $filterFacets = $request->get('f', []);
-        $locale = $request->getLocale();
-        $sortBy = $request->get('s', false);
-        $sortOrder = $request->get('o','asc');
-        $page = (int) $request->get('p', 0);
-        $limit = (int) $request->get('l', $defaultLimit);
-
-        $filter = '';
-        if(!empty($filterFacets)) {
-            $filter = [];
-            foreach($filterFacets as $field => $terms) {
-                if(!empty($terms)) {
-                    $filter['bool']['must'][] = [
-                        'terms' => [
-                            $field => $terms,
-                        ]
-                    ];
-                }
-            }
-        }
+        $synonyms = $config->getSynonyms();
+        $filter = $config->createFilter();
 
         $analyzers = [];
-        $suggest = ['text' => $queryString];
-
-        foreach ($fields as $field) {
-            $field = str_replace('%locale%', $locale, $field);
-            $suggest['suggest-'.$field] = ['term'=> ['field' => $field]];
-            $analyzers[] = new AnalyserSet($clientRequest, $field, $filter, $synonyms, empty($synonyms)?false:($field));
+        foreach ($config->getFields() as $field) {
+            $analyzers[] = new AnalyserSet($field, $filter, $synonyms, empty($synonyms) ? false : ($field));
         }
 
-        $qbService = new QueryBuilderService();
-        $query = $qbService->getQuery($queryString, $analyzers);
+        $qbService = new QueryBuilder($this->clientRequest);
+        $query = $qbService->getQuery($config->getQueryString(), $analyzers);
 
-        $aggs = [];
-        if(!empty($facets)) {
-            foreach ($facets as $facet => $size) {
-                $aggs[$facet] = [
-                    'terms' => [
-                        'field' => $facet,
-                        'size' => $size,
-                ]];
-            }
-        }
-
-        $body = [
+        $body = array_filter([
             'query' => $query,
-            'aggs' => $aggs,
-            'suggest' => $suggest
-        ];
+            'aggs' => $config->getFacetsAggs(),
+            'suggest' => $config->getSuggestions(),
+            'sort' => $config->getSort(),
+        ]);
 
-        if($sortBy) {
-            $body['sort'] = [$sortBy => ['order' => $sortOrder, 'missing' => '_last', 'unmapped_type' => 'long']];
-        }
-
-        $results = $this->getClientRequest()->search($types, $body, $page*$limit, $limit);
+        $results = $this->clientRequest->search($config->getTypes(), $body, $config->getFrom(), $config->getLimit());
 
         return [
             'results' => $results,
-            'query' => $queryString,
-            'sort' => $sortBy,
-            'facets' => $filterFacets,
-            'page' => $page,
-            'size' => $limit,
+            'query' => $config->getQueryString(),
+            'sort' => $config->getSortBy(),
+            'facets' => $config->getFilterFacets(),
+            'page' => $config->getPage(),
+            'size' => $config->getLimit(),
             'counters' => $this->getCountInfo($results),
         ];
     }
@@ -122,5 +72,4 @@ class Manager
 
         return $counters;
     }
-
 }

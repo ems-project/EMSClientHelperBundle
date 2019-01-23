@@ -90,6 +90,8 @@
         </service>
         <service id="emsch.controller.search" class="EMS\ClientHelperBundle\Controller\SearchController" public="true">
             <argument type="service" id="emsch.search.manager" />
+            <argument type="service" id="emsch.routing.handler" />
+            <argument type="service" id="twig" />
             <argument type="string">%emsch.locales%</argument>
         </service>
         <service id="emsch.controller.twig_list" class="EMS\ClientHelperBundle\Controller\TwigListController" public="true">
