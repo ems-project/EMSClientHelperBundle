@@ -7,6 +7,7 @@ use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Twig\TwigLoader;
 use EMS\CommonBundle\Common\EMSLink;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -50,6 +51,28 @@ class RouterController
      */
     public function handle(Request $request)
     {
+        return new Response($this->getContent($request), 200);
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return RedirectResponse
+     */
+    public function redirect(Request $request)
+    {
+        $data = json_decode($this->getContent($request), true);
+
+        return new RedirectResponse($data['url'], ($data['status'] ?? 302));
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return string
+     */
+    private function getContent(Request $request)
+    {
         try {
             $route = $this->getRoute($request);
 
@@ -65,9 +88,7 @@ class RouterController
                 $context['emsLink'] = EMSLink::fromDocument($document);
             }
 
-            $content = $this->templating->render($template, $context);
-
-            return new Response($content, 200);
+            return $this->templating->render($template, $context);
         } catch (SingleResultException $e) {
             throw new NotFoundHttpException();
         }
