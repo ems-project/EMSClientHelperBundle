@@ -2,7 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Controller;
 
-use EMS\ClientHelperBundle\Helper\Routing\Handler;
+use EMS\ClientHelperBundle\Helper\Request\Handler;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

@@ -2,7 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Controller;
 
-use EMS\ClientHelperBundle\Helper\Routing\Handler;
+use EMS\ClientHelperBundle\Helper\Request\Handler;
 use EMS\ClientHelperBundle\Helper\Search\Manager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
