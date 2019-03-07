@@ -65,7 +65,6 @@
             <argument type="service" id="ems_common.storage.manager" />
             <argument type="service" id="emsch.manager.client_request" />
             <argument type="string">%kernel.project_dir%</argument>
-            <argument type="string">%emsch.assets.enabled%</argument>
             <tag name="twig.runtime" />
         </service>
         <service id="emsch.twig.runtime.process" class="EMS\ClientHelperBundle\Helper\Asset\ProcessHelper">
@@ -90,15 +89,19 @@
         </service>
         <service id="emsch.controller.search" class="EMS\ClientHelperBundle\Controller\SearchController" public="true">
             <argument type="service" id="emsch.search.manager" />
+            <argument type="service" id="emsch.routing.handler" />
+            <argument type="service" id="twig" />
             <argument type="string">%emsch.locales%</argument>
         </service>
         <service id="emsch.controller.twig_list" class="EMS\ClientHelperBundle\Controller\TwigListController" public="true">
             <argument type="service" id="kernel" />
             <argument/>
         </service>
-        <service id="EMS\ClientHelperBundle\Controller\EmbedController" public="true">
+        <service id="emsch.controller.embed" class="EMS\ClientHelperBundle\Controller\EmbedController" public="true">
             <argument type="service" id="emsch.manager.client_request" />
+            <tag name="controller.service_arguments"/>
         </service>
+        <service id="EMS\ClientHelperBundle\Controller\EmbedController" alias="emsch.controller.embed" public="true" />
 
         <!-- commands -->
         <service id="emsch.command.health_check" class="EMS\ClientHelperBundle\Command\HealthCheckCommand">

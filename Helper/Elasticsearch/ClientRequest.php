@@ -3,7 +3,6 @@
 namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
 use Elasticsearch\Client;
-use EMS\ClientHelperBundle\Entity\HierarchicalStructure;
 use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
@@ -249,15 +248,7 @@ class ClientRequest
         return $analyzer;
     }
 
-    /**
-     * @param string  $emsKey
-     * @param string  $childrenField
-     * @param integer $depth
-     * @param array   $sourceFields
-     *
-     * @return HierarchicalStructure|null
-     */
-    public function getHierarchy($emsKey, $childrenField, $depth = null, $sourceFields = [])
+    public function getHierarchy(string $emsKey, string $childrenField, int $depth = null, array $sourceFields = []): ?HierarchicalStructure
     {
         $this->logger->debug('ClientRequest : getHierarchy for {emsKey}', ['emsKey' => $emsKey]);
         $item = $this->getByEmsKey($emsKey, $sourceFields);
@@ -617,6 +608,8 @@ class ClientRequest
      * @return string
      *
      * @throws EnvironmentNotFoundException
+     *
+     * @todo rename to getEnvironmentAlias?
      */
     public function getCacheKey(string $prefix = ''): string
     {

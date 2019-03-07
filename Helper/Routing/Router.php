@@ -76,6 +76,8 @@ class Router extends BaseRouter
     private function addSearchResultRoute(RouteCollection $collection): void
     {
         if (isset($this->templates['search'])) {
+            @trigger_error('Deprecated search template use routing content type!', E_USER_DEPRECATED);
+
             $searchRoute = new Route('emsch_search', [
                 'path' => '/{_locale}/search',
                 'controller' => 'emsch.controller.search::results',
@@ -128,8 +130,11 @@ class Router extends BaseRouter
         ], '5s');
 
         foreach ($scroll as $hit) {
+            $source = $hit['_source'];
+            $name = $source['name'];
+
             try {
-                $source = $hit['_source'];
+
                 $options = json_decode($source['config'], true);
 
                 if (json_last_error() !== JSON_ERROR_NONE) {
@@ -141,9 +146,9 @@ class Router extends BaseRouter
                 $staticTemplate = isset($source['template_static']) ? '@EMSCH/'.$source['template_static'] : null;
                 $options['template'] = $source['template_source'] ?? $staticTemplate;
 
-                $routes[] = new Route($source['name'], $options);
+                $routes[] = new Route($name, $options);
             } catch (\Exception $e) {
-                $this->logger->error(sprintf('Router failed to create ems route (%s)', $e->getMessage()));
+                $this->logger->error('Router failed to create ems route {name} : {error}', ['name' => $name, 'error' => $e->getMessage()]);
             }
         }
 

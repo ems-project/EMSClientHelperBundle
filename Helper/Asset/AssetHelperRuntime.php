@@ -3,111 +3,67 @@
 namespace EMS\ClientHelperBundle\Helper\Asset;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
-use EMS\CommonBundle\Storage\NotFoundException;
 use EMS\CommonBundle\Storage\StorageManager;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 use Twig\Extension\RuntimeExtensionInterface;
 use ZipArchive;
 
 class AssetHelperRuntime implements RuntimeExtensionInterface
 {
-    /**
-     * @var StorageManager
-     */
+    /** @var StorageManager */
     private $storageManager;
-
-    /**
-     * @var ClientRequestManager
-     */
+    /** @var ClientRequestManager */
     private $manager;
-
-    /**
-     * @var string
-     */
-    private $projectDir;
-
-    /**
-     * @var Filesystem
-     */
+    /** @var string */
+    private $publicDir;
+    /** @var Filesystem */
     private $filesystem;
 
-    /**
-     * @var bool
-     */
-    private $enabled;
-
-    const SIGN_FILE = 'ems_sign';
-
-    /**
-     * @param StorageManager       $storageManager
-     * @param ClientRequestManager $manager
-     * @param string               $projectDir
-     * @param bool                 $enabled
-     */
-    public function __construct(StorageManager $storageManager, ClientRequestManager $manager, string $projectDir, bool $enabled)
+    public function __construct(StorageManager $storageManager, ClientRequestManager $manager, string $projectDir)
     {
         $this->storageManager = $storageManager;
         $this->manager = $manager;
-        $this->projectDir = $projectDir;
-        $this->enabled = $enabled;
+        $this->publicDir = $projectDir . '/public';
 
         $this->filesystem = new Filesystem();
     }
 
-    /**
-     * @param string $hash
-     */
-    public function init(string $hash)
+    public function assets(string $hash, string $saveDir = 'bundles'): void
     {
-        if (!$this->enabled) {
-            return;
-        }
+        $directory = $this->publicDir . '/' . $saveDir . '/' . $hash;
 
         try  {
-            $basePath = $this->projectDir . '/public/bundles';
-            $directory = $basePath . '/' . $hash;
-
             if (!$this->filesystem->exists($directory)) {
-                $this->checkout($hash, $directory);
+                $this->extract($this->storageManager->getFile($hash), $directory);
             }
 
             $cacheKey = $this->manager->getDefault()->getCacheKey();
-            $symlink = sprintf('%s/%s', $basePath, $cacheKey);
+            $symlink = $this->publicDir .  '/bundles/' . $cacheKey;
 
             if (!$this->checkSign($symlink, $directory, $hash)) {
                 $this->filesystem->remove($symlink);
                 $this->filesystem->symlink($directory, $symlink, true);
             }
-        }
-        catch (\Exception $e) {
-            //TODO: add a flashbag message
+        } catch (\Exception $e) {
+            $this->manager->getLogger()->error('emsch_assets failed : {error}', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
         }
     }
 
-    /**
-     * @param string $hash
-     * @param string $directory
-     */
-    private function checkout(string $hash, string $directory)
+    public function unzip(string $hash, string $saveDir): array
     {
-        try {
-            $file = $this->storageManager->getFile($hash);
-        } catch (NotFoundException $ex) {
-            throw new AssetException(sprintf('Asset zip file not found with hash: ', $hash));
+        try  {
+            $this->extract($this->storageManager->getFile($hash), $saveDir);
+
+            return iterator_to_array(Finder::create()->in($saveDir)->files()->getIterator());
+        } catch (\Exception $e) {
+            $this->manager->getLogger()->error('emsch_assets failed : {error}', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
         }
 
-        $this->extract($file, $directory);
-
-        $this->filesystem->touch($directory . '/' . $hash);
+        return [];
     }
 
-    /**
-     * @param string $path
-     * @param string $destination
-     *
-     * @return bool
-     */
-    private function extract(string $path, string $destination)
+    private function extract(string $path, string $destination): bool
     {
         $zip = new ZipArchive;
 
@@ -124,14 +80,7 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
         return true;
     }
 
-    /**
-     * @param $symlink
-     * @param $directory
-     *
-     * @param $hash
-     * @return bool
-     */
-    private function checkSign($symlink, $directory, $hash)
+    private function checkSign(string $symlink, string $directory, string $hash): bool
     {
         if (!$this->filesystem->exists($symlink)) {
             return false;

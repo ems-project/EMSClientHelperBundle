@@ -79,7 +79,13 @@ class Route
             })
             ->setNormalizer('options', function(Options $options, $value) {
                 if (null !== $options['query']) {
-                    $value['query'] = json_encode(json_decode($options['query']));
+                    $query = json_decode($options['query']);
+
+                    if (json_last_error() !== JSON_ERROR_NONE) {
+                        throw new \LogicException('invalid json for query!');
+                    }
+
+                    $value['query'] = json_encode($query);
                 }
 
                 $value['type'] = $options['type'];
