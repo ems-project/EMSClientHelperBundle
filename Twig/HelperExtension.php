@@ -29,7 +29,7 @@ class HelperExtension extends AbstractExtension
             new \Twig_SimpleFunction('emsch_admin_menu', [AdminMenuRuntime::class, 'showAdminMenu'], ['is_safe' => ['html']]),
             new \Twig_SimpleFunction('emsch_route', [RoutingRuntime::class, 'createUrl']),
             new \Twig_SimpleFunction('emsch_search', [ClientRequestRuntime::class, 'search']),
-            new \Twig_SimpleFunction('emsch_assets', [AssetHelperRuntime::class, 'init']),
+            new \Twig_SimpleFunction('emsch_assets', [AssetHelperRuntime::class, 'dumpAssets']),
             new \Twig_SimpleFunction('emsch_process_asset', [ProcessHelper::class, 'generate']),
         ];
     }

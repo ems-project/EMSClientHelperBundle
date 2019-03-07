@@ -11,39 +11,17 @@ use ZipArchive;
 
 class AssetHelperRuntime implements RuntimeExtensionInterface
 {
-    /**
-     * @var StorageManager
-     */
+    /** @var StorageManager */
     private $storageManager;
-
-    /**
-     * @var ClientRequestManager
-     */
+    /** @var ClientRequestManager */
     private $manager;
-
-    /**
-     * @var string
-     */
+    /** @var string */
     private $projectDir;
-
-    /**
-     * @var Filesystem
-     */
+    /** @var Filesystem */
     private $filesystem;
-
-    /**
-     * @var bool
-     */
+    /** @var bool */
     private $enabled;
 
-    const SIGN_FILE = 'ems_sign';
-
-    /**
-     * @param StorageManager       $storageManager
-     * @param ClientRequestManager $manager
-     * @param string               $projectDir
-     * @param bool                 $enabled
-     */
     public function __construct(StorageManager $storageManager, ClientRequestManager $manager, string $projectDir, bool $enabled)
     {
         $this->storageManager = $storageManager;
@@ -55,18 +33,20 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
     }
 
     /**
+     * {{- emsch_assets('406210472030380156997695b489c479b926f695') -}}
+     *
      * @param string $hash
      */
-    public function init(string $hash)
+    public function dumpAssets(string $hash): void
     {
         if (!$this->enabled) {
             return;
         }
 
-        try  {
-            $basePath = $this->projectDir . '/public/bundles';
-            $directory = $basePath . '/' . $hash;
+        $basePath = $this->projectDir . '/public/bundles';
+        $directory = $basePath . '/' . $hash;
 
+        try  {
             if (!$this->filesystem->exists($directory)) {
                 $this->checkout($hash, $directory);
             }
@@ -78,17 +58,17 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
                 $this->filesystem->remove($symlink);
                 $this->filesystem->symlink($directory, $symlink, true);
             }
-        }
-        catch (\Exception $e) {
-            //TODO: add a flashbag message
+        } catch (\Exception $e) {
+            $this->manager->getLogger()->error('emsch_assets failed : {error}', [
+                'error_class' => get_class($e),
+                'error_message' => $e->getMessage(),
+                'hash' => $hash,
+                'directory' => $directory
+            ]);
         }
     }
 
-    /**
-     * @param string $hash
-     * @param string $directory
-     */
-    private function checkout(string $hash, string $directory)
+    private function checkout(string $hash, string $directory): void
     {
         try {
             $file = $this->storageManager->getFile($hash);
@@ -101,13 +81,7 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
         $this->filesystem->touch($directory . '/' . $hash);
     }
 
-    /**
-     * @param string $path
-     * @param string $destination
-     *
-     * @return bool
-     */
-    private function extract(string $path, string $destination)
+    private function extract(string $path, string $destination): bool
     {
         $zip = new ZipArchive;
 
@@ -124,14 +98,7 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
         return true;
     }
 
-    /**
-     * @param $symlink
-     * @param $directory
-     *
-     * @param $hash
-     * @return bool
-     */
-    private function checkSign($symlink, $directory, $hash)
+    private function checkSign(string $symlink, string $directory, string $hash): bool
     {
         if (!$this->filesystem->exists($symlink)) {
             return false;
