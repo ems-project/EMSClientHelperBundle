@@ -1,4 +1,4 @@
 ClientHelperBundle
 =============
 
-[Twig documentation](../blob/master/Resources/doc/twig.md)
+[Twig documentation](../master/Resources/doc/twig.md)
