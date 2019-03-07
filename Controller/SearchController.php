@@ -39,7 +39,7 @@ class SearchController extends AbstractController
 
     public function results(Request $request, string $template): Response
     {
-        @trigger_error('Deprecated please do not use this route!', E_USER_DEPRECATED);
+        @trigger_error('Deprecated use routing content type and use controller emsch.controller.search::handle', E_USER_DEPRECATED);
 
         $search = $this->manager->search($request);
 
