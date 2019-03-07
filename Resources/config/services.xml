@@ -98,9 +98,11 @@
             <argument type="service" id="kernel" />
             <argument/>
         </service>
-        <service id="EMS\ClientHelperBundle\Controller\EmbedController" public="true">
+        <service id="emsch.controller.embed" class="EMS\ClientHelperBundle\Controller\EmbedController" public="true">
             <argument type="service" id="emsch.manager.client_request" />
+            <tag name="controller.service_arguments"/>
         </service>
+        <service id="EMS\ClientHelperBundle\Controller\EmbedController" alias="emsch.controller.embed" public="true" />
 
         <!-- commands -->
         <service id="emsch.command.health_check" class="EMS\ClientHelperBundle\Command\HealthCheckCommand">
