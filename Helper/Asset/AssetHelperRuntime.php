@@ -19,15 +19,12 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
     private $projectDir;
     /** @var Filesystem */
     private $filesystem;
-    /** @var bool */
-    private $enabled;
 
-    public function __construct(StorageManager $storageManager, ClientRequestManager $manager, string $projectDir, bool $enabled)
+    public function __construct(StorageManager $storageManager, ClientRequestManager $manager, string $projectDir)
     {
         $this->storageManager = $storageManager;
         $this->manager = $manager;
         $this->projectDir = $projectDir;
-        $this->enabled = $enabled;
 
         $this->filesystem = new Filesystem();
     }
@@ -39,10 +36,6 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
      */
     public function dumpAssets(string $hash): void
     {
-        if (!$this->enabled) {
-            return;
-        }
-
         $basePath = $this->projectDir . '/public/bundles';
         $directory = $basePath . '/' . $hash;
 
@@ -67,6 +60,9 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
             ]);
         }
     }
+
+
+
 
     private function checkout(string $hash, string $directory): void
     {
