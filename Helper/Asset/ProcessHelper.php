@@ -4,6 +4,7 @@ namespace EMS\ClientHelperBundle\Helper\Asset;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
+use EMS\CommonBundle\Storage\NotFoundException;
 use EMS\CommonBundle\Storage\Processor\Config;
 use EMS\CommonBundle\Storage\Processor\Processor;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,15 +39,26 @@ class ProcessHelper implements RuntimeExtensionInterface
 
     public function generate(string $processor, string $assetHash, array $options = [])
     {
-        $options = array_merge($this->getOptions($processor), $options);
-        $config = $this->processor->process($processor, $assetHash, $options);
+        try {
+            $options = array_merge($this->getOptions($processor), $options);
+            $config = $this->processor->process($processor, $assetHash, $options);
 
-        return $this->urlGenerator->generate('emsch_processor_asset', [
-            'processor' => $config->getProcessor(),
-            'hash' => $config->getAssetHash(),
-            'configHash' => $config->getConfigHash(),
-            'type' => $config->getMimeType(),
-        ]);
+            return $this->urlGenerator->generate('emsch_processor_asset', [
+                'processor' => $config->getProcessor(),
+                'hash' => $config->getAssetHash(),
+                'configHash' => $config->getConfigHash(),
+                'type' => $config->getMimeType(),
+            ]);
+        }
+        catch (NotFoundException $e) {
+            //TODO: this method should only generate the asset confgi and save it in the storage service
+            return $this->urlGenerator->generate('emsch_processor_asset', [
+                'processor' => $processor,
+                'hash' => $assetHash,
+                'configHash' => 'not_found',
+                'type' => 'image/png',
+            ]);
+        }
     }
 
     private function getOptions(string $processor): array
