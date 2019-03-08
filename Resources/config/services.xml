@@ -44,6 +44,8 @@
             <argument type="string">%emsch.locales%</argument>
         </service>
 
+        <service id="emsch.text.encoder" class="EMS\ClientHelperBundle\Helper\Text\Encoder"/>
+
         <!-- event listeners -->
         <service id="emsch.kernel_listener" class="EMS\ClientHelperBundle\EventListener\KernelListener">
             <argument type="service" id="emsch.helper_environment"/>
@@ -75,6 +77,10 @@
         </service>
         <service id="emsch.twig.runtime.client_request" class="EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestRuntime">
             <argument type="service" id="emsch.manager.client_request" />
+            <tag name="twig.runtime" />
+        </service>
+        <service id="emsch.twig.runtime.text" class="EMS\ClientHelperBundle\Twig\TextRuntime">
+            <argument type="service" id="emsch.text.encoder" />
             <tag name="twig.runtime" />
         </service>
 
