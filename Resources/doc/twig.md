@@ -20,6 +20,8 @@ The following data can be obfuscated (even inside a wysiwyg field):
 {{- '<span class="pii">02/787.50.00</span>'|emsch_html_encode -}}
 ````
 
+See unit test for more examples.
+
 Note: Phone numbers are only obfuscated if they are found inside "tel:" notation. When a phone is used
 outside an anchor, the custom selection of pii method should be used.
 
@@ -35,6 +37,8 @@ You can transform any text to its equivalent in html character encoding.
 ````twig
 {{- 'text and téxt'|emsch_html_encode -}}
 ````
+
+See unit test for more examples.
 
 # Twig functions
 
