@@ -21,7 +21,7 @@ class Encoder
      */
     private function encode_phone(string $text): string
     {
-        $telRegex = '/"tel:(?P<tel>.*)"/iU';
+        $telRegex = '/(?P<tel>"tel:.*")/i';
 
         return preg_replace_callback($telRegex, function ($match) {
             return $this->html_encode($match['tel']);
