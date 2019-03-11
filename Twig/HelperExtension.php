@@ -19,8 +19,6 @@ class HelperExtension extends AbstractExtension
         return [
             new TwigFilter('emsch_routing', [RoutingRuntime::class, 'transform'], ['is_safe' => ['html']]),
             new TwigFilter('emsch_data', [ClientRequestRuntime::class, 'data'], ['is_safe' => ['html']]),
-            new TwigFilter('emsch_html_encode', [TextRuntime::class, 'html_encode'], ['is_safe' => ['html']]),
-            new TwigFilter('emsch_anti_spam', [TextRuntime::class, 'html_encode_pii'], ['is_safe' => ['html']]),
         ];
     }
 
