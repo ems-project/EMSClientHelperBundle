@@ -18,24 +18,10 @@ class EncoderTest extends TestCase
     }
 
     /**
-     * @dataProvider htmlProvider
+     * format: [text, &#ascii;]
      */
-    public function testHtml_encode(string $text, string $expected)
+    public function htmlProvider(): array
     {
-        self::assertEquals($expected, $this->encoder->html_encode($text));
-    }
-
-    /**
-     * @dataProvider piiProvider
-     */
-    public function testHtml_encode_pii(string $text, string $expected)
-    {
-        self::assertEquals($expected, $this->encoder->html_encode_pii($text));
-    }
-
-    public function htmlProvider()
-    {
-        // [text, &#ascii;]
         return [
             ['example', '&#101;&#120;&#97;&#109;&#112;&#108;&#101;'],
             ['@', '&#64;'],
@@ -46,12 +32,22 @@ class EncoderTest extends TestCase
         ];
     }
 
-    public function piiProvider()
+    /**
+     * @dataProvider htmlProvider
+     */
+    public function testHtml_encode(string $text, string $expected)
+    {
+        self::assertSame($expected, $this->encoder->html_encode($text));
+    }
+
+    /**
+     * format: [text, &#ascii;]
+     */
+    public function piiProvider(): array
     {
         $email = '&#101;&#120;&#97;&#109;&#112;&#108;&#101;&#64;&#101;&#120;&#97;&#109;&#112;&#108;&#101;&#46;&#99;&#111;&#109;';
         $example = '&#101;&#120;&#97;&#109;&#112;&#108;&#101;'; //example, no <span> tag included!
 
-        // [text, &#ascii;]
         return [
             ['example', 'example'],
             ['@', '@'],
@@ -63,5 +59,13 @@ class EncoderTest extends TestCase
             ['"tel:02/345.67.89"', '&#34;&#116;&#101;&#108;&#58;&#48;&#50;&#47;&#51;&#52;&#53;&#46;&#54;&#55;&#46;&#56;&#57;&#34;'],
             ['<span class="pii">example</span>', $example],
         ];
+    }
+
+    /**
+     * @dataProvider piiProvider
+     */
+    public function testHtml_encode_pii(string $text, string $expected)
+    {
+        self::assertSame($expected, $this->encoder->html_encode_pii($text));
     }
 }
