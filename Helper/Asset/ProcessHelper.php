@@ -28,8 +28,18 @@ class ProcessHelper implements RuntimeExtensionInterface
         $this->urlGenerator = $urlGenerator;
     }
 
+    /**
+     * @deprecated 
+     * @param Request $request
+     * @param string $processor
+     * @param string $assetHash
+     * @param string|null $configHash
+     * @return Response
+     */
     public function process(Request $request, string $processor, string $assetHash, string $configHash = null): Response
     {
+        @trigger_error("ProcessHelper::process is deprecated use the ems_asset twig filter to generate the route", E_USER_DEPRECATED);
+
         if ($configHash) {
             return $this->processor->fromCache($request, $processor, $assetHash, $configHash);
         }
@@ -37,8 +47,16 @@ class ProcessHelper implements RuntimeExtensionInterface
         return  $this->processor->createResponse($request, $processor, $assetHash, $this->getOptions($processor));
     }
 
+    /**
+     * @deprecated
+     * @param string $processor
+     * @param string $assetHash
+     * @param array $options
+     * @return string
+     */
     public function generate(string $processor, string $assetHash, array $options = [])
     {
+        @trigger_error("ProcessHelper::generate is deprecated use the ems_asset twig filter to generate the route", E_USER_DEPRECATED);
         try {
             $options = array_merge($this->getOptions($processor), $options);
             $config = $this->processor->process($processor, $assetHash, $options);
@@ -61,8 +79,14 @@ class ProcessHelper implements RuntimeExtensionInterface
         }
     }
 
+    /**
+     * @deprecated
+     * @param string $processor
+     * @return array
+     */
     private function getOptions(string $processor): array
     {
+        @trigger_error("ProcessHelper::getOptions is deprecated use the ems_asset twig filter to generate the route", E_USER_DEPRECATED);
         if (null == $this->clientRequest->hasOption('asset_config_type')) {
             return [];
         }
