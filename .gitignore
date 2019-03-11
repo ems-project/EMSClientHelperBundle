@@ -7,3 +7,4 @@
 /nbproject/
 /vendor
 composer.lock
+phpunit.xml
