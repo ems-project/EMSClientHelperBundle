@@ -1,0 +1,18 @@
+.admin-menu-wrapper {
+	content: '';
+	display:inline-block;
+	a {
+		padding-right:22px !important;
+		&.emsch {
+			background-image: icon(emsch, '#FFFFFF', '16', '16');
+			background-repeat: no-repeat;
+			background-position: 99% 50%;
+		}
+		&:after{
+			content:none !important;
+			margin-left:0 !important;
+		}
+	}
+
+	&.hide {display: none;}
+}

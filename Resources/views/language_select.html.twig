@@ -1,0 +1,29 @@
+{% trans_default_domain trans_default_domain  %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>{{ 'language.selection'|trans }}</title>
+        <link rel="icon" type="image/x-icon" href="favicon.ico" />
+        {% block stylesheets %}{% endblock %}
+    </head>
+    <body class="languages-page">
+        <div id="wrapper">
+            <div class="container-fluid">
+                <ul>
+                    {% for locale in locales %}
+                        <li lang="{{ locale }}">
+                            <a href="{{ locale }}{{ destination }}">
+                                <div class="logo">
+                                    <span>{{ 'header.logo.title'|trans }}</span>
+                                </div>
+                                <button class="btn btn-default">{{ 'language.select.continue'|trans }}</button>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% block javascripts %}{% endblock %}
+    </body>
+</html>
