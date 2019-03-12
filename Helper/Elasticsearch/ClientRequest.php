@@ -248,7 +248,7 @@ class ClientRequest
         return $analyzer;
     }
 
-    public function getHierarchy(string $emsKey, string $childrenField, int $depth = null, array $sourceFields = [],string $activeChild): ?HierarchicalStructure
+    public function getHierarchy(string $emsKey, string $childrenField, int $depth = null, array $sourceFields = [], string $activeChild): ?HierarchicalStructure
     {
         $this->logger->debug('ClientRequest : getHierarchy for {emsKey}', ['emsKey' => $emsKey]);
         $item = $this->getByEmsKey($emsKey, $sourceFields);
