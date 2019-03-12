@@ -17,12 +17,13 @@ class HierarchicalStructure
     /** @var bool  */
     private $active = false;
 
-    public function __construct(string $type, string $id, array $source)
+    public function __construct(string $type, string $id, array $source, bool $active)
     {
         $this->type = $type;
         $this->id = $id;
         $this->source = $source;
         $this->children = [];
+        $this->active = $active;
     }
 
     public function getId(): string
@@ -73,27 +74,6 @@ class HierarchicalStructure
 
         return $this;
     }
-    /**
-     * Search all active items for a given Id
-     * @return HierarchicalStructure
-     */
-    public function setAllActives(string $currentId): HierarchicalStructure
-    {   
-        if($currentId === $this->getId()) {
-            $active = true;
-        } else { 
-            $active = false;
-            foreach ($this->getChildren() as $child) {
-                /** @var HierarchicalStructure $child */
-                $child->setAllActives($currentId);
-                if($child->getActive()) {
-                    $active = true;
-                }
-            }
-        }
-        $this->setActive($active);
-        return $this;
-    }
 
     public function getKey(): string
     {
@@ -103,5 +83,8 @@ class HierarchicalStructure
     public function addChild(HierarchicalStructure $child)
     {
         $this->children[] = $child;
+        if ($child->getActive()){
+            $this->setActive(true);
+        }
     }
 }
