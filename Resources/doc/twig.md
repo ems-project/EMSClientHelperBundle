@@ -48,6 +48,7 @@ and a Symfony\Component\Finder\SplFileInfo object as value.
     'depth': 5,
     'sourceFields': [],
     'args': {'extra': 'test'}
+    'currentPage' : emsLink 
 } )) }}
 ```
 Example menu.html.twig

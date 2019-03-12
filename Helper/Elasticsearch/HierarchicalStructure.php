@@ -14,6 +14,8 @@ class HierarchicalStructure
     private $source;
     /** @var mixed  */
     private $data;
+    /** @var bool  */
+    private $active = false;
 
     public function __construct(string $type, string $id, array $source)
     {
@@ -57,6 +59,37 @@ class HierarchicalStructure
     {
         $this->data = $data;
 
+        return $this;
+    }
+    
+    public function getActive(): bool
+    {
+        return $this->active;
+    }
+    
+    public function setActive(bool $active): HierarchicalStructure
+    {
+        $this->active = $active;
+
+        return $this;
+    }
+    /**
+     * Search all active items
+     * @return HierarchicalStructure
+     */
+    public function setAllActives(): HierarchicalStructure
+    {   
+        $active = false;
+        foreach ($this->getChildren() as $child) {
+            /** @var HierarchicalStructure $child */
+            $child->setAllActives(); 
+            if($child->getActive()) {
+                $active = true;
+            }
+        }
+        if($active) {
+            $this->setActive($active);    
+        }
         return $this;
     }
 
