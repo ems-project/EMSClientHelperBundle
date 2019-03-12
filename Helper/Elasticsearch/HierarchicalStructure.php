@@ -74,22 +74,24 @@ class HierarchicalStructure
         return $this;
     }
     /**
-     * Search all active items
+     * Search all active items for a given Id
      * @return HierarchicalStructure
      */
-    public function setAllActives(): HierarchicalStructure
+    public function setAllActives(string $currentId): HierarchicalStructure
     {   
-        $active = false;
-        foreach ($this->getChildren() as $child) {
-            /** @var HierarchicalStructure $child */
-            $child->setAllActives(); 
-            if($child->getActive()) {
-                $active = true;
+        if($currentId === $this->getId()) {
+            $active = true;
+        } else { 
+            $active = false;
+            foreach ($this->getChildren() as $child) {
+                /** @var HierarchicalStructure $child */
+                $child->setAllActives($currentId);
+                if($child->getActive()) {
+                    $active = true;
+                }
             }
         }
-        if($active) {
-            $this->setActive($active);    
-        }
+        $this->setActive($active);
         return $this;
     }
 
