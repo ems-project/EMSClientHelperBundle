@@ -13,6 +13,11 @@ If your code is not compliant, you could try fixing it automatically:
 composer phpcbf
 ````
 
+PHPStan is run at level 0, you can check for errors locally using:
+`````bash
+composer phpstan
+`````
+
 Documentation
 -------------
 

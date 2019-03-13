@@ -115,7 +115,7 @@ class TwigLoader implements \Twig_LoaderInterface
             return [$matchName['content_type'], $matchName['search_val'], null];
         }
 
-        throw new TwigException(sprintf('Invalid template name: ', $name));
+        throw new TwigException(sprintf('Invalid template name: %s', $name));
     }
 
     /**

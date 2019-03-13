@@ -17,6 +17,7 @@ class MissingTranslationException extends \Exception
         $this->linkLabels = $linkLabels;
         $this->ouuid = $ouuid;
         $this->linkType = $linkType;
+        parent::__construct();
     }
     
     public function getLinkLabels()
