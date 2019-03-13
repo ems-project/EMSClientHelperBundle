@@ -53,6 +53,7 @@
 		}
 	},
 	"scripts": {
-		"phpcs": "phpcs --standard=phpcs.xml.dist --extensions=php,lib,inc"
+		"phpcs": "phpcs --standard=phpcs.xml.dist --extensions=php,lib,inc",
+		"phpcbf": "phpcbf --standard=phpcs.xml.dist --extensions=php,lib,inc"
 	}
 }
