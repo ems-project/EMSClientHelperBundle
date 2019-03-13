@@ -1,4 +1,5 @@
 parameters:
     excludes_analyse:
         - %currentWorkingDirectory%/vendor/*
-    level: 0
+        - %currentWorkingDirectory%/DependencyInjection/Configuration.php
+    level: 2
