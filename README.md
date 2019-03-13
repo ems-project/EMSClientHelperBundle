@@ -13,7 +13,7 @@ If your code is not compliant, you could try fixing it automatically:
 composer phpcbf
 ````
 
-PHPStan is run at level 2, you can check for errors locally using:
+PHPStan is run at level 3, you can check for errors locally using:
 `````bash
 composer phpstan
 `````
