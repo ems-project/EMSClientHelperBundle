@@ -190,7 +190,9 @@ class Configuration implements ConfigurationInterface
                     ->scalarNode('client_request')
                         ->isRequired()
                         ->beforeNormalization()
-                            ->always(function ($v) { return 'emsch.client_request.'.$v; })
+                            ->always(function ($v) {
+                                return 'emsch.client_request.'.$v;
+                            })
                         ->end()
                     ->end()
                     ->scalarNode('redirect_type')

@@ -48,7 +48,8 @@ class Config
     public function bindRequest(Request $request): void
     {
         $this->queryString = $request->get('q', $this->queryString);
-        $this->filterFacets = $request->get('f', $this->filterFacets);;
+        $this->filterFacets = $request->get('f', $this->filterFacets);
+        ;
 
         $this->page = (int) $request->get('p', $this->page);
         $this->limit = (int) $request->get('l', $this->limit);

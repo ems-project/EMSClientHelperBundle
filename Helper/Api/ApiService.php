@@ -23,7 +23,7 @@ class ApiService
      * @param UrlGeneratorInterface $urlGenerator
      * @param iterable              $clientRequests
      */
-    public function __construct(UrlGeneratorInterface $urlGenerator, iterable $clientRequests =  [])
+    public function __construct(UrlGeneratorInterface $urlGenerator, iterable $clientRequests = [])
     {
         $this->urlGenerator = $urlGenerator;
         $this->clientRequests = $clientRequests;

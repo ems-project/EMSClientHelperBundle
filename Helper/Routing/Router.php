@@ -134,7 +134,6 @@ class Router extends BaseRouter
             $name = $source['name'];
 
             try {
-
                 $options = json_decode($source['config'], true);
 
                 if (json_last_error() !== JSON_ERROR_NONE) {
