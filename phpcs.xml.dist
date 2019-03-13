@@ -2,7 +2,7 @@
 <ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="EMSClientHelper" xsi:noNamespaceSchemaLocation="phpcs.xsd">
     <description>The coding standard for EMS Client Helper Bundle.</description>
 
-    <file>.\.php</file>
+    <file>.</file>
 
     <exclude-pattern>*undle/vendor/*</exclude-pattern>
     <exclude-pattern>*/composer.*</exclude-pattern>
