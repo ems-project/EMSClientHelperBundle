@@ -33,7 +33,7 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
     {
         $directory = $this->publicDir . '/' . $saveDir . '/' . $hash;
 
-        try  {
+        try {
             if (!$this->filesystem->exists($directory)) {
                 $this->extract($this->storageManager->getFile($hash), $directory);
             }
@@ -52,7 +52,7 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
 
     public function unzip(string $hash, string $saveDir): array
     {
-        try  {
+        try {
             $this->extract($this->storageManager->getFile($hash), $saveDir);
 
             return iterator_to_array(Finder::create()->in($saveDir)->files()->getIterator());

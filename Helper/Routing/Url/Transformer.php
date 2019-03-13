@@ -64,7 +64,7 @@ class Transformer
      *
      * @return false|string
      */
-    public function generate(array $match, $locale=null)
+    public function generate(array $match, $locale = null)
     {
         try {
             $emsLink = EMSLink::fromMatch($match);
@@ -110,10 +110,10 @@ class Transformer
      * @param EMSLink $emsLink
      * @param array   $document
      * @param string  $locale
-     * 
+     *
      * @return string
      */
-    private function renderTemplate(EMSLink $emsLink, array $document, $locale=null)
+    private function renderTemplate(EMSLink $emsLink, array $document, $locale = null)
     {
         $context = [
             'id'     => $document['_id'],
@@ -156,7 +156,7 @@ class Transformer
      * @param EMSLink $emsLink
      *
      * @return array|false
-     * 
+     *
      * @throw \Exception
      */
     private function getDocument(EMSLink $emsLink)

@@ -90,18 +90,18 @@ class HealthCheckCommand extends Command
     private function checkElasticSearch(SymfonyStyle $io, $green)
     {
         $io->section('Elasticsearch');
-        if (empty($this->clients)){
+        if (empty($this->clients)) {
             $io->error('No clients found');
             throw new NoClientsFoundException();
         }
         
         foreach ($this->clients as $client) {
-            if ('red' === $client->cluster()->health()){
+            if ('red' === $client->cluster()->health()) {
                 $io->error('Cluster health is RED');
                 throw new ClusterHealthRedException();
             }
             
-            if ($green && 'green' !== $client->cluster()->health()){
+            if ($green && 'green' !== $client->cluster()->health()) {
                 $io->error('Cluster health is NOT GREEN');
                 throw new ClusterHealthNotGreenException();
             }
@@ -115,19 +115,19 @@ class HealthCheckCommand extends Command
      */
     private function checkIndexes(SymfonyStyle $io)
     {
-       $io->section('Indexes');
+        $io->section('Indexes');
         
         $prefixes = [];
         foreach ($this->clientRequests as $clientRequest) {
-           $prefixes = array_merge($prefixes, $clientRequest->getPrefixes());
+            $prefixes = array_merge($prefixes, $clientRequest->getPrefixes());
         }
         $postfixes = [];
         foreach ($this->environmentHelper->getEnvironments() as $environment) {
             $postfixes[] = $environment->getIndex();
         }
         $indexes = [];
-        foreach($prefixes as $preValue){
-            foreach($postfixes as $postValue){
+        foreach ($prefixes as $preValue) {
+            foreach ($postfixes as $postValue) {
                 $indexes[] = $preValue.$postValue;
             }
         }
@@ -135,7 +135,7 @@ class HealthCheckCommand extends Command
         $index = join(',', $indexes);
         
         foreach ($this->clients as $client) {
-            if (!$client->indices()->exists(['index' => $index])){
+            if (!$client->indices()->exists(['index' => $index])) {
                 $io->error('Index '.$index.' not found');
                 throw new IndexNotFoundException();
             }
@@ -154,13 +154,12 @@ class HealthCheckCommand extends Command
     {
         $io->section('Storage');
         
-        if ($skip)
-        {
+        if ($skip) {
             $io->note('Skipping Storage Health Check.');
             return;
         }
         
-        if(null === $this->storageManager){
+        if (null === $this->storageManager) {
             $io->warning('Skipping assets because health check has no access to a storageManager, enable storage ?');
             return;
         }
