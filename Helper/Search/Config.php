@@ -36,13 +36,19 @@ class Config
 
     public static function fromClientRequest(ClientRequest $clientRequest): Config
     {
-        if (!$clientRequest->hasOption('search')) {
+        if ($clientRequest->hasOption('search')) {
+            @trigger_error('Deprecated search option please use search_config!', E_USER_DEPRECATED);
+
+            return self::create($clientRequest->getOption('[search]'), $clientRequest->getLocale());
+        }
+
+        if (!$clientRequest->hasOption('search_config')) {
             throw new \LogicException('no search defined!');
         }
 
         $locale = $clientRequest->getLocale();
 
-        return self::create($clientRequest->getOption('[search]'), $locale);
+        return self::create($clientRequest->getOption('[search_config]'), $locale);
     }
 
     public function bindRequest(Request $request): void
