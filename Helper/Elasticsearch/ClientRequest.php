@@ -8,6 +8,7 @@ use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use EMS\CommonBundle\Common\EMSLink;
 
 class ClientRequest
 {
@@ -245,7 +246,7 @@ class ClientRequest
         return $analyzer;
     }
 
-    public function getHierarchy(string $emsKey, string $childrenField, int $depth = null, array $sourceFields = [], array $activeChild = []): ?HierarchicalStructure
+    public function getHierarchy(string $emsKey, string $childrenField, int $depth = null, array $sourceFields = [], EMSLink $activeChild = null): ?HierarchicalStructure
     {
         $this->logger->debug('ClientRequest : getHierarchy for {emsKey}', ['emsKey' => $emsKey]);
         $item = $this->getByEmsKey($emsKey, $sourceFields);

@@ -4,7 +4,6 @@ namespace EMS\ClientHelperBundle\Controller;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
-use EMS\CommonBundle\Common\EMSLink;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -20,11 +19,7 @@ class EmbedController extends AbstractController
 
     public function renderHierarchyAction(string $template, string $parent, string $field, int $depth = null, array $sourceFields = [], array $args = []): Response
     {
-        $activeChild = [];
-        if (isset($args['activeChild']) && $args['activeChild'] instanceof EMSLink) {
-            $activeChild = ["id" => $args['activeChild']->getOuuid(), "type" => $args['activeChild']->getContentType()];
-        }
-        $hierarchy = $this->clientRequest->getHierarchy($parent, $field, $depth, $sourceFields, $activeChild);
+        $hierarchy = $this->clientRequest->getHierarchy($parent, $field, $depth, $sourceFields, $args['activeChild'] ?? null);
 
         return $this->render($template, [
             'translation_domain' => $this->clientRequest->getCacheKey(),
