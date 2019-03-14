@@ -375,20 +375,19 @@ class ClientRequest
      */
     public function search($type, array $body, $from = 0, $size = 10, array $sourceExclude = [])
     {
-        $this->logger->debug('ClientRequest : search for {type}', ['type' => $type, 'body' => $body, 'index' => $this->getIndex()]);
-
         $arguments = [
             'index' => $this->getIndex(),
             'type' => $type,
             'body' => $body,
-            'size' => $size,
-            'from' => $from
+            'size' => $body['size'] ?? $size,
+            'from' => $body['from'] ?? $from,
         ];
 
         if (!empty($sourceExclude)) {
             $arguments['_source_exclude'] = $sourceExclude;
         }
 
+        $this->logger->debug('ClientRequest : search for {type}', $arguments);
         return $this->client->search($arguments);
     }
 
