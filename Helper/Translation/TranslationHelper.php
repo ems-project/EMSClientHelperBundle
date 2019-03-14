@@ -75,7 +75,7 @@ class TranslationHelper
 
         foreach ($scroll as $hit) {
             foreach ($this->locales as $locale) {
-                if(isset($hit['_source']['label_'.$locale])){
+                if (isset($hit['_source']['label_'.$locale])) {
                     $messages[$locale][$hit['_source']['key']] = $hit['_source']['label_'.$locale];
                 }
             }

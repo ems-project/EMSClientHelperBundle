@@ -12,21 +12,25 @@ class MissingTranslationException extends \Exception
     private $ouuid;
     private $linkType;
     
-    public function __construct($ouuid, array $linkLabels, $linkType='object'){
+    public function __construct($ouuid, array $linkLabels, $linkType = 'object')
+    {
         $this->linkLabels = $linkLabels;
         $this->ouuid = $ouuid;
         $this->linkType = $linkType;
     }
     
-    public function getLinkLabels()  {
+    public function getLinkLabels()
+    {
         return $this->linkLabels;
     }
     
-    public function getOuuid()  {
+    public function getOuuid()
+    {
         return $this->ouuid;
     }
     
-    public function getLinkType()  {
+    public function getLinkType()
+    {
         return $this->linkType;
     }
 }

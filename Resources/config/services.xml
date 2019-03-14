@@ -71,6 +71,7 @@
             <argument type="service" id="ems_common.storage.processor"/>
             <argument type="service" id="emsch.manager.client_request" />
             <argument type="service" id="Symfony\Component\Routing\Generator\UrlGeneratorInterface" />
+            <argument type="service" id="EMS\CommonBundle\Twig\RequestRuntime" />
             <tag name="twig.runtime" />
         </service>
         <service id="emsch.twig.runtime.client_request" class="EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestRuntime">

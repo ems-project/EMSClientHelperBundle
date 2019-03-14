@@ -76,7 +76,7 @@ class RedirectListener implements EventSubscriberInterface
     
     /**
      * @param GetResponseForExceptionEvent $event
-     * 
+     *
      * @return void
      */
     private function handleNotFoundException(GetResponseForExceptionEvent $event)
@@ -105,7 +105,7 @@ class RedirectListener implements EventSubscriberInterface
             $attributes = [];
 
             $server = array_merge($request->server->all(), ['REQUEST_URI' => $uri]);
-            $subRequest = $request->duplicate(null, null, $attributes, null,  null, $server);
+            $subRequest = $request->duplicate(null, null, $attributes, null, null, $server);
             
             $subResponse = $this->kernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
             
@@ -114,8 +114,7 @@ class RedirectListener implements EventSubscriberInterface
             $subResponse->headers->set('Link', $canonical);
     
             $event->setResponse($subResponse);
-        }
-        catch(\Exception $e) {
+        } catch (\Exception $e) {
             $event->setResponse(new RedirectResponse($uri));
         }
         $event->allowCustomResponseCode();
@@ -124,7 +123,7 @@ class RedirectListener implements EventSubscriberInterface
     /**
      * @param Request $request
      * @param string  $uri
-     * 
+     *
      * @return string
      */
     private function getHeaderLink(Request $request, $uri)

@@ -4,8 +4,11 @@ namespace EMS\ClientHelperBundle\Helper\Asset;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
+use EMS\CommonBundle\Helper\EmsFields;
+use EMS\CommonBundle\Storage\NotFoundException;
 use EMS\CommonBundle\Storage\Processor\Config;
 use EMS\CommonBundle\Storage\Processor\Processor;
+use EMS\CommonBundle\Twig\RequestRuntime;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -19,16 +22,29 @@ class ProcessHelper implements RuntimeExtensionInterface
     private $clientRequest;
     /** @var UrlGeneratorInterface */
     private $urlGenerator;
+    /** @var RequestRuntime  */
+    private $requestRuntime;
 
-    public function __construct(Processor $processor, ClientRequestManager $clientRequestManager, UrlGeneratorInterface $urlGenerator)
+    public function __construct(Processor $processor, ClientRequestManager $clientRequestManager, UrlGeneratorInterface $urlGenerator, RequestRuntime $requestRuntime)
     {
         $this->processor = $processor;
         $this->clientRequest = $clientRequestManager->getDefault();
         $this->urlGenerator = $urlGenerator;
+        $this->requestRuntime = $requestRuntime;
     }
 
+    /**
+     * @deprecated
+     * @param Request $request
+     * @param string $processor
+     * @param string $assetHash
+     * @param string|null $configHash
+     * @return Response
+     */
     public function process(Request $request, string $processor, string $assetHash, string $configHash = null): Response
     {
+        @trigger_error("ProcessHelper::process is deprecated use the ems_asset twig filter to generate the route", E_USER_DEPRECATED);
+
         if ($configHash) {
             return $this->processor->fromCache($request, $processor, $assetHash, $configHash);
         }
@@ -36,21 +52,34 @@ class ProcessHelper implements RuntimeExtensionInterface
         return  $this->processor->createResponse($request, $processor, $assetHash, $this->getOptions($processor));
     }
 
+    /**
+     * @deprecated
+     * @param string $processor
+     * @param string $assetHash
+     * @param array $options
+     * @return string
+     */
     public function generate(string $processor, string $assetHash, array $options = [])
     {
-        $options = array_merge($this->getOptions($processor), $options);
-        $config = $this->processor->process($processor, $assetHash, $options);
+        @trigger_error("ProcessHelper::generate is deprecated use the ems_asset twig filter to generate the route", E_USER_DEPRECATED);
 
-        return $this->urlGenerator->generate('emsch_processor_asset', [
-            'processor' => $config->getProcessor(),
-            'hash' => $config->getAssetHash(),
-            'configHash' => $config->getConfigHash(),
-            'type' => $config->getMimeType(),
-        ]);
+        $options = array_merge($this->getOptions($processor), $options);
+
+        return $this->requestRuntime->assetPath([
+            EmsFields::CONTENT_FILE_HASH_FIELD => $assetHash,
+            EmsFields::CONTENT_FILE_NAME_FIELD=> 'filename',
+            EmsFields::CONTENT_MIME_TYPE_FIELD => 'image/png',
+        ], $options);
     }
 
+    /**
+     * @deprecated
+     * @param string $processor
+     * @return array
+     */
     private function getOptions(string $processor): array
     {
+        @trigger_error("ProcessHelper::getOptions is deprecated use the ems_asset twig filter to generate the route", E_USER_DEPRECATED);
         if (null == $this->clientRequest->hasOption('asset_config_type')) {
             return [];
         }

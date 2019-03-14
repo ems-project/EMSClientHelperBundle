@@ -41,7 +41,7 @@ class TwigListController extends AbstractController
         foreach ($this->locations as $location) {
             $path = $location['path'];
 
-           if ('@' === $path[0]) {
+            if ('@' === $path[0]) {
                 $in = $this->kernel->locateResource($path);
             } else {
                 $in = $this->kernel->getRootDir() . '/../' . $path;

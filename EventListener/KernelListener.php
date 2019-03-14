@@ -47,8 +47,7 @@ class KernelListener implements EventSubscriberInterface
         TranslationHelper $translationHelper,
         LocaleHelper $localeHelper,
         ExceptionHelper $exceptionHelper
-    )
-    {
+    ) {
         $this->environmentHelper = $environmentHelper;
         $this->translationHelper = $translationHelper;
         $this->localeHelper = $localeHelper;
