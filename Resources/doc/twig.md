@@ -47,7 +47,7 @@ and a Symfony\Component\Finder\SplFileInfo object as value.
     'field': 'children',
     'depth': 5,
     'sourceFields': [],
-    'args': {'activeChild': emslink, 'extra': 'test'}
+    'args': {'activeChild': emsLink, 'extra': 'test'}
 } )) }}
 ```
 Example menu.html.twig

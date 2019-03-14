@@ -20,9 +20,9 @@ class EmbedController extends AbstractController
 
     public function renderHierarchyAction(string $template, string $parent, string $field, int $depth = null, array $sourceFields = [], array $args = []): Response
     {
-        $activeChild = '';
+        $activeChild = [];
         if(isset($args['activeChild']) && $args['activeChild'] instanceof EMSLink) {
-            $activeChild = $args['activeChild']->getOuuid();
+            $activeChild = ["id" => $args['activeChild']->getOuuid(), "type" => $args['activeChild']->getContentType()];
         }
         $hierarchy = $this->clientRequest->getHierarchy($parent, $field, $depth, $sourceFields, $activeChild);
 

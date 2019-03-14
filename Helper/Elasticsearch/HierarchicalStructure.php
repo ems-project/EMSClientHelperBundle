@@ -17,13 +17,15 @@ class HierarchicalStructure
     /** @var bool  */
     private $active = false;
 
-    public function __construct(string $type, string $id, array $source, bool $active)
+    public function __construct(string $type, string $id, array $source, array $activeChild)
     {
         $this->type = $type;
         $this->id = $id;
         $this->source = $source;
         $this->children = [];
-        $this->active = $active;
+        if (!empty($activeChild)) {
+            $this->active = ($id === $activeChild['id'] && $type === $activeChild['type']) ? true : false;
+        }
     }
 
     public function getId(): string

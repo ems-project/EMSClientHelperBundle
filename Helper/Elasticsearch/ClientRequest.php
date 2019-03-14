@@ -248,7 +248,7 @@ class ClientRequest
         return $analyzer;
     }
 
-    public function getHierarchy(string $emsKey, string $childrenField, int $depth = null, array $sourceFields = [], string $activeChild): ?HierarchicalStructure
+    public function getHierarchy(string $emsKey, string $childrenField, int $depth = null, array $sourceFields = [], array $activeChild): ?HierarchicalStructure
     {
         $this->logger->debug('ClientRequest : getHierarchy for {emsKey}', ['emsKey' => $emsKey]);
         $item = $this->getByEmsKey($emsKey, $sourceFields);
@@ -257,7 +257,7 @@ class ClientRequest
             return null;
         }
 
-        $out = new HierarchicalStructure($item['_type'], $item['_id'], $item['_source'], ($item['_id'] === $activeChild ? true : false));
+        $out = new HierarchicalStructure($item['_type'], $item['_id'], $item['_source'], $activeChild);
 
         if ($depth === null || $depth) {
             if (isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
