@@ -19,7 +19,7 @@ class EmbedController extends AbstractController
 
     public function renderHierarchyAction(string $template, string $parent, string $field, int $depth = null, array $sourceFields = [], array $args = []): Response
     {
-        $hierarchy = $this->clientRequest->getHierarchy($parent, $field, $depth, $sourceFields);
+        $hierarchy = $this->clientRequest->getHierarchy($parent, $field, $depth, $sourceFields, $args['activeChild'] ?? null);
 
         return $this->render($template, [
             'translation_domain' => $this->clientRequest->getCacheKey(),

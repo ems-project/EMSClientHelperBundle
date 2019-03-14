@@ -8,6 +8,7 @@ use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use EMS\CommonBundle\Common\EMSLink;
 
 class ClientRequest
 {
@@ -245,7 +246,7 @@ class ClientRequest
         return $analyzer;
     }
 
-    public function getHierarchy(string $emsKey, string $childrenField, int $depth = null, array $sourceFields = []): ?HierarchicalStructure
+    public function getHierarchy(string $emsKey, string $childrenField, int $depth = null, array $sourceFields = [], EMSLink $activeChild = null): ?HierarchicalStructure
     {
         $this->logger->debug('ClientRequest : getHierarchy for {emsKey}', ['emsKey' => $emsKey]);
         $item = $this->getByEmsKey($emsKey, $sourceFields);
@@ -254,13 +255,13 @@ class ClientRequest
             return null;
         }
 
-        $out = new HierarchicalStructure($item['_type'], $item['_id'], $item['_source']);
+        $out = new HierarchicalStructure($item['_type'], $item['_id'], $item['_source'], $activeChild);
 
         if ($depth === null || $depth) {
             if (isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
                 foreach ($item['_source'][$childrenField] as $key) {
                     if ($key) {
-                        $child = $this->getHierarchy($key, $childrenField, ($depth === null ? null : $depth - 1), $sourceFields);
+                        $child = $this->getHierarchy($key, $childrenField, ($depth === null ? null : $depth - 1), $sourceFields, $activeChild);
                         if ($child) {
                             $out->addChild($child);
                         }

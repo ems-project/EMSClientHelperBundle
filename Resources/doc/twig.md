@@ -47,19 +47,19 @@ and a Symfony\Component\Finder\SplFileInfo object as value.
     'field': 'children',
     'depth': 5,
     'sourceFields': [],
-    'args': {'extra': 'test'}
+    'args': {'activeChild': emsLink, 'extra': 'test'}
 } )) }}
 ```
 Example menu.html.twig
 ```twig
 <ul>   
     {% for a, childA in hierarchy.children %}
-        <li>  
+        <li {% if childA.active %}class="active"{% endif %}>  
             {{ childA.source._contenttype ~ ':' ~ childA.id }}
             {% if childA.children|length > 0 %}      
                 <ul>
                     {% for b, childB in childA.children %}
-                        <li>{{ childB.source._contenttype ~ ':' ~ childB.id }}</li>
+                        <li {% if childB.active %}class="active"{% endif %}>{{ childB.source._contenttype ~ ':' ~ childB.id }}</li>
                     {% endfor %}
                 </ul>
             {% endif %}

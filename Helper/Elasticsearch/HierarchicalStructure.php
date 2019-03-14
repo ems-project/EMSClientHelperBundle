@@ -2,6 +2,8 @@
 
 namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
+use EMS\CommonBundle\Common\EMSLink;
+
 class HierarchicalStructure
 {
     /**@var \array* */
@@ -14,13 +16,18 @@ class HierarchicalStructure
     private $source;
     /** @var mixed  */
     private $data;
+    /** @var bool  */
+    private $active = false;
 
-    public function __construct(string $type, string $id, array $source)
+    public function __construct(string $type, string $id, array $source, EMSLink $activeChild = null)
     {
         $this->type = $type;
         $this->id = $id;
         $this->source = $source;
         $this->children = [];
+        if (!empty($activeChild)) {
+            $this->active = ($id === $activeChild->getOuuid() && $type === $activeChild->getContentType()) ? true : false;
+        }
     }
 
     public function getId(): string
@@ -59,6 +66,18 @@ class HierarchicalStructure
 
         return $this;
     }
+    
+    public function getActive(): bool
+    {
+        return $this->active;
+    }
+    
+    public function setActive(bool $active): HierarchicalStructure
+    {
+        $this->active = $active;
+
+        return $this;
+    }
 
     public function getKey(): string
     {
@@ -68,5 +87,8 @@ class HierarchicalStructure
     public function addChild(HierarchicalStructure $child)
     {
         $this->children[] = $child;
+        if ($child->getActive()) {
+            $this->setActive(true);
+        }
     }
 }
