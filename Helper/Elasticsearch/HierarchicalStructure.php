@@ -85,7 +85,7 @@ class HierarchicalStructure
     public function addChild(HierarchicalStructure $child)
     {
         $this->children[] = $child;
-        if ($child->getActive()){
+        if ($child->getActive()) {
             $this->setActive(true);
         }
     }
