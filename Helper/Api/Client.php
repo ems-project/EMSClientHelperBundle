@@ -36,7 +36,7 @@ class Client
     {
         $response = $this->client->post(
             sprintf('api/data/%s/draft', $type),
-            ['body' => \json_encode($body)] 
+            ['body' => \json_encode($body)]
         );
 
         return \json_decode($response->getBody()->getContents(), true);
@@ -44,7 +44,7 @@ class Client
     
     /**
      * Call createDraft for a new revisionId
-     * 
+     *
      * @param string $type
      * @param string $revisionId
      *

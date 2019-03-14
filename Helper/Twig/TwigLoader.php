@@ -140,9 +140,9 @@ class TwigLoader implements \Twig_LoaderInterface
 
             $source = $document['_source'];
 
-            if(isset($source['_published_datetime'])) {
+            if (isset($source['_published_datetime'])) {
                 $date = new \DateTime($source['_published_datetime']);
-            } else if(isset($source['_finalization_datetime'])) {
+            } else if (isset($source['_finalization_datetime'])) {
                 $date = new \DateTime($source['_finalization_datetime']);
             } else {
                 $date = new \DateTime();

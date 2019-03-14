@@ -56,8 +56,7 @@ class ClientRequest
         LoggerInterface $logger,
         $name,
         array $options = []
-    )
-    {
+    ) {
         $this->client = $client;
         $this->environmentHelper = $environmentHelper;
         $this->logger = $logger;
@@ -129,11 +128,9 @@ class ClientRequest
         $item = $this->getByEmsKey($emsKey);
 
         if (isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
-
             foreach ($item['_source'][$childrenField] as $key) {
                 $out = array_merge($out, $this->getAllChildren($key, $childrenField));
             }
-
         }
 
         return $out;
@@ -627,7 +624,7 @@ class ClientRequest
     {
         $environment = $this->environmentHelper->getEnvironment();
 
-        if($environment === null) {
+        if ($environment === null) {
             throw new EnvironmentNotFoundException();
         }
 

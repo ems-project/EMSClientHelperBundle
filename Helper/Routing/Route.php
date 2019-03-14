@@ -70,14 +70,14 @@ class Route
                 'query' => null,
                 'template' => null,
             ])
-            ->setNormalizer('defaults', function(Options $options, $value) {
+            ->setNormalizer('defaults', function (Options $options, $value) {
                 if (!isset($value['_controller'])) {
                     $value['_controller'] = $options['controller'];
                 }
 
                 return $value;
             })
-            ->setNormalizer('options', function(Options $options, $value) {
+            ->setNormalizer('options', function (Options $options, $value) {
                 if (null !== $options['query']) {
                     $query = json_decode($options['query']);
 

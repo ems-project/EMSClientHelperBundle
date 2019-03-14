@@ -110,7 +110,9 @@ class Configuration implements ConfigurationInterface
                                 ->info('api for content exposing')
                                 ->example('{"enable": true, "name": "api"}')
                             ->end()
+                            ->variableNode('search_config')->end()
                             ->arrayNode('search')
+                                ->setDeprecated('The ems_client_helper "%node%" option is deprecated. Please use search_config!')
                                 ->children()
                                     ->variableNode('types')->end()
                                     ->variableNode('facets')->end()
@@ -190,7 +192,9 @@ class Configuration implements ConfigurationInterface
                     ->scalarNode('client_request')
                         ->isRequired()
                         ->beforeNormalization()
-                            ->always(function ($v) { return 'emsch.client_request.'.$v; })
+                            ->always(function ($v) {
+                                return 'emsch.client_request.'.$v;
+                            })
                         ->end()
                     ->end()
                     ->scalarNode('redirect_type')
