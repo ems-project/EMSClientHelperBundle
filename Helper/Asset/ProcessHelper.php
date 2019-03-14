@@ -34,7 +34,7 @@ class ProcessHelper implements RuntimeExtensionInterface
     }
 
     /**
-     * @deprecated 
+     * @deprecated
      * @param Request $request
      * @param string $processor
      * @param string $assetHash
