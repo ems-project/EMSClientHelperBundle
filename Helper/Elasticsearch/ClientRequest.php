@@ -116,13 +116,7 @@ class ClientRequest
         ]);
     }
 
-    /**
-     * @param string $emsKey
-     * @param string $childrenField
-     *
-     * @return string|null
-     */
-    public function getAllChildren($emsKey, $childrenField)
+    public function getAllChildren(string $emsKey, string $childrenField): array
     {
         $this->logger->debug('ClientRequest : getAllChildren for {emsKey}', ['emsKey' => $emsKey]);
         $out = [$emsKey];
@@ -506,13 +500,7 @@ class ClientRequest
         return $hits['hits'][0];
     }
 
-    /**
-     * @param string $type
-     * @param array  $parameters
-     *
-     * @return string|null
-     */
-    public function searchOneBy($type, array $parameters)
+    public function searchOneBy(string $type, array $parameters): ?array
     {
         $this->logger->debug('ClientRequest : searchOneBy for type {type}', ['type' => $type]);
 
@@ -522,7 +510,7 @@ class ClientRequest
             return $result['hits']['hits'][0];
         }
 
-        return false;
+        return null;
     }
 
     /**
