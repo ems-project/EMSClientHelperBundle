@@ -3,6 +3,8 @@
 namespace EMS\ClientHelperBundle\Helper\Asset;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
+use EMS\CommonBundle\Storage\Service\FileSystemStorage;
+use EMS\CommonBundle\Storage\Service\HttpStorage;
 use EMS\CommonBundle\Storage\StorageManager;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -20,13 +22,19 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
     /** @var Filesystem */
     private $filesystem;
 
-    public function __construct(StorageManager $storageManager, ClientRequestManager $manager, string $projectDir)
+    public function __construct(StorageManager $storageManager, ClientRequestManager $manager, string $projectDir, string $storagePath, ?string $backendUrl)
     {
         $this->storageManager = $storageManager;
         $this->manager = $manager;
         $this->publicDir = $projectDir . '/public';
 
         $this->filesystem = new Filesystem();
+
+
+        $this->storageManager->addAdapter(new FileSystemStorage($storagePath));
+        if($backendUrl) {
+            $this->storageManager->addAdapter(new HttpStorage($backendUrl, '/public/file/'));
+        }
     }
 
     public function assets(string $hash, string $saveDir = 'bundles'): void

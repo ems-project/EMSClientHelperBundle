@@ -20,6 +20,8 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->variableNode('request_environments')->isRequired()->end()
+                ->variableNode('storage_path')->isRequired()->end()
+                ->variableNode('backend_url')->end()
                 ->variableNode('locales')->isRequired()->end()
                 ->booleanNode('dump_assets')
                     ->setDeprecated('The ems_client_helper "%node%" option is deprecated. Will be removed!')
