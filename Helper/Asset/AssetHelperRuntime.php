@@ -32,7 +32,7 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
 
 
         $this->storageManager->addAdapter(new FileSystemStorage($storagePath));
-        if($backendUrl) {
+        if ($backendUrl) {
             $this->storageManager->addAdapter(new HttpStorage($backendUrl, '/public/file/'));
         }
     }
@@ -43,7 +43,7 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
 
         try {
             $cacheKey = $this->manager->getDefault()->getCacheKey();
-            $symlink = $this->publicDir .  '/bundles/' . $cacheKey;
+            $symlink = $this->publicDir . '/bundles/' . $cacheKey;
 
             if ($this->filesystem->exists($symlink . '/' . $hash)) {
                 return; //valid
