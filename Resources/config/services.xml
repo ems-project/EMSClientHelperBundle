@@ -65,8 +65,6 @@
             <argument type="service" id="ems_common.storage.manager" />
             <argument type="service" id="emsch.manager.client_request" />
             <argument type="string">%kernel.project_dir%</argument>
-            <argument type="string">%emsch.storage_path%</argument>
-            <argument type="string">%emsch.backend_url%</argument>
             <tag name="twig.runtime" />
         </service>
         <service id="emsch.twig.runtime.process" class="EMS\ClientHelperBundle\Helper\Asset\ProcessHelper">
