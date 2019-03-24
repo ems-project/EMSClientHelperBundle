@@ -32,8 +32,6 @@ class EMSClientHelperExtension extends Extension
         $container->setParameter('emsch.locales', $config['locales']);
         $container->setParameter('emsch.assets.enabled', $config['dump_assets']);
         $container->setParameter('emsch.request_environments', $config['request_environments']);
-        $container->setParameter('emsch.storage_path', $config['storage_path']);
-        $container->setParameter('emsch.backend_url', $config['backend_url']);
 
         $templates = $config['templates'];
         $container->setParameter('emsch.templates', $config['templates']);
