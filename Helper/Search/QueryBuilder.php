@@ -19,13 +19,13 @@ class QueryBuilder
         $searchValues = [];
 
         foreach ($tokens as $token) {
-            $searchValues[$token] = new SearchValue($token);
+            $searchValues[$token] = new TextValue($token);
         }
 
         return $searchValues;
     }
 
-    private function addSynonyms(SearchValue &$searchValue, AnalyserSet $analyzer, $analyzerField)
+    private function addSynonyms(TextValue &$searchValue, AnalyserSet $analyzer, $analyzerField)
     {
         $query = [
             'bool' => [
@@ -63,7 +63,7 @@ class QueryBuilder
             ];
         }
 
-        /**@var SearchValue $searchValue */
+        /**@var TextValue $searchValue */
         foreach ($searchValues as $searchValue) {
             $filter['bool']['must'][] = $searchValue->makeShould($analyzer->getField(), $analyzer->getSearchSynonymsInField(), $analyzerField, $analyzer->getBoost());
         }

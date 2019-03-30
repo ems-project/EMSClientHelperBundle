@@ -5,7 +5,7 @@ namespace EMS\ClientHelperBundle\Helper\Search;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use Symfony\Component\HttpFoundation\Request;
 
-class Config
+class Search
 {
     /** @var array */
     private $types;
@@ -34,7 +34,7 @@ class Config
     {
     }
 
-    public static function fromClientRequest(ClientRequest $clientRequest): Config
+    public static function fromClientRequest(ClientRequest $clientRequest): Search
     {
         if ($clientRequest->hasOption('search')) {
             @trigger_error('Deprecated search option please use search_config!', E_USER_DEPRECATED);
@@ -63,7 +63,7 @@ class Config
         $this->sortOrder = $request->get('o', $this->sortOrder);
     }
 
-    private static function create(array $options, string $locale): Config
+    private static function create(array $options, string $locale): Search
     {
         $config = new self;
         $config->types = $options['types']; //required

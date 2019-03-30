@@ -23,7 +23,7 @@ class Manager
 
     public function search(Request $request)
     {
-        $config = Config::fromClientRequest($this->clientRequest);
+        $config = Search::fromClientRequest($this->clientRequest);
         $config->bindRequest($request);
 
         $synonyms = $config->getSynonyms();

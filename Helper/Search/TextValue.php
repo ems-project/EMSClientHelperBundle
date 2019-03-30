@@ -6,7 +6,7 @@ namespace EMS\ClientHelperBundle\Helper\Search;
  * If we search for 'foo bar'
  * the SearchManager will create two SearchValue instances
  */
-class SearchValue
+class TextValue
 {
     /** @var string */
     private $term;
