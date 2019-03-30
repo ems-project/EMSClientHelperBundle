@@ -19,9 +19,16 @@ class TextValue
         $this->synonyms = [];
     }
 
-    public function addSynonym(array $document): void
+    public function addSynonym(string $field, array $doc): void
     {
-        $this->synonyms[] = sprintf('%s:%s', $document['_type'], $document['_id']);
+        $this->synonyms[] = [
+            'match' => [
+                $field => [
+                    'query' => sprintf('%s:%s', $doc['_source']['_contenttype'], $doc['_id']),
+                    'operator' => 'AND',
+                ]
+            ]
+        ];
     }
 
     public function getTerm(): string
@@ -29,32 +36,18 @@ class TextValue
         return $this->term;
     }
 
-    public function makeShould($searchFields, string $synonymsSearchField, string $analyzerField, float $boost = 1.0): array
+    public function makeShould($searchFields, string $analyzerField, float $boost = 1.0): array
     {
         $should = [];
         $should[] = $this->getQuery($searchFields, $analyzerField, $boost);
 
-        foreach ($this->synonyms as $emsLink) {
-            if (!empty($emsLink)) {
-                $should[] = $this->makeEmsLinkQuery($synonymsSearchField, $emsLink);
-            }
+        foreach ($this->synonyms as $synonym) {
+            $should[] = $synonym;
         }
 
-        return ['bool' => [
-            'should' => $should,
-        ]];
-    }
-
-    private function makeEmsLinkQuery(string $field, string $query): array
-    {
-        $searchField = ($field ? $field : '_all');
-
         return [
-            'match' => [
-                $searchField => [
-                    'query' => $query,
-                    'operator' => 'AND',
-                ]
+            'bool' => [
+                'should' => $should,
             ]
         ];
     }

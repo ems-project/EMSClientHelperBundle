@@ -11,7 +11,7 @@ class Search
     private $types;
     /** @var array [facet_name => size], used for aggregation */
     private $facets;
-    /** @var array */
+    /** @var Synonym[] */
     private $synonyms;
     /** @var array */
     private $fields;
@@ -34,17 +34,15 @@ class Search
     {
         $options = $this->getOptions($clientRequest);
 
-        dump($options, $clientRequest->getLocale());
-
         if (isset($options['facets'])) {
             @trigger_error('Deprecated facets, please use filters setting', E_USER_DEPRECATED);
         }
 
         $this->types = $options['types']; //required
         $this->facets = $options['facets'] ?? [];
-        $this->synonyms = $options['synonyms'] ?? [];
         $this->limit = $options['default_limit'] ?? $this->limit;
         $this->setFields(($options['fields'] ?? []), $clientRequest->getLocale());
+        $this->setSynonyms(($options['synonyms'] ?? []), $clientRequest->getLocale());
     }
 
     public function bindRequest(Request $request): void
@@ -74,9 +72,28 @@ class Search
         return $aggs;
     }
 
+    public function hasSynonyms(): bool
+    {
+        return null != $this->synonyms;
+    }
+
+    /**
+     * @return Synonym[]
+     */
     public function getSynonyms(): array
     {
         return $this->synonyms;
+    }
+
+    public function setSynonyms(array $synonyms, string $locale): void
+    {
+        foreach ($synonyms as $options) {
+            if (\is_string($options)) {
+                $options = ['types' => [$options]];
+            }
+
+            $this->synonyms[] = new Synonym($options, $locale);
+        }
     }
 
     public function getFields(): array

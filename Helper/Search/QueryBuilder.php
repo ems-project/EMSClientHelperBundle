@@ -16,19 +16,18 @@ class QueryBuilder
 
     public function buildQuery(Search $search): array
     {
-        $synonyms = $search->getSynonyms();
         $filter = $search->createFilter();
 
         $analyzerSets = [];
         foreach ($search->getFields() as $field) {
-            $analyzerSets[] = new AnalyserSet($field, $filter, $synonyms, empty($synonyms) ? false : ($field));
+            $analyzerSets[] = new AnalyserSet($field, $filter);
         }
 
         $should = [];
 
         if ($search->hasQueryString()) {
             foreach ($analyzerSets as $analyzer) {
-                $should[] = $this->buildPerAnalyzer($search->getQueryString(), $analyzer);
+                $should[] = $this->buildPerAnalyzer($search, $analyzer);
             }
         } else {
             $should = $search->createFilter();
@@ -48,26 +47,20 @@ class QueryBuilder
         return $searchValues;
     }
 
-    private function addSynonyms(TextValue &$searchValue, AnalyserSet $analyzer, $analyzerField)
+    private function addSynonyms(Search $search, TextValue $searchValue, string $analyzer)
     {
-        $query = [
-            'bool' => [
-                'must' => $searchValue->getQuery($analyzer->getSynonymsSearchField(), $analyzerField)
-            ]
-        ];
+        foreach ($search->getSynonyms() as $synonym) {
+            $queryText = $searchValue->getQuery($synonym->getSearchField(), $analyzer);
+            $querySynonym = $synonym->getQuery($queryText);
 
-        if ($analyzer->getSynonymsFilter()) {
-            $query['bool']['must'] = [$query['bool']['must'], ['bool' => $analyzer->getSynonymsFilter()]];
-        }
+            $documents = $this->clientRequest->search([], ['_source' => ['_contenttype'], 'query' => $querySynonym], 0, 20);
 
-        $documents = $this->clientRequest->search($analyzer->getSynonymTypes(), [
-            '_source' => false,
-            'query' => $query,
-        ], 0, 20);
+            if ($documents['hits']['total'] > 20) {
+                continue;
+            }
 
-        if ($documents['hits']['total'] <= 20) {
-            foreach ($documents['hits']['hits'] as $document) {
-                $searchValue->addSynonym($document);
+            foreach ($documents['hits']['hits'] as $doc) {
+                $searchValue->addSynonym($synonym->getField(), $doc);
             }
         }
     }
@@ -88,24 +81,22 @@ class QueryBuilder
 
         /**@var TextValue $searchValue */
         foreach ($searchValues as $searchValue) {
-            $filter['bool']['must'][] = $searchValue->makeShould($analyzer->getField(), $analyzer->getSearchSynonymsInField(), $analyzerField, $analyzer->getBoost());
+            $filter['bool']['must'][] = $searchValue->makeShould($analyzer->getField(), $analyzerField, $analyzer->getBoost());
         }
 
         return $filter;
     }
 
-    private function buildPerAnalyzer($queryString, AnalyserSet $analyzerSet)
+    private function buildPerAnalyzer(Search $search, AnalyserSet $analyzerSet)
     {
         $analyzer = $this->clientRequest->getFieldAnalyzer($analyzerSet->getField());
-        $tokens = $this->clientRequest->analyze($queryString, $analyzerSet->getField());
+        $tokens = $this->clientRequest->analyze($search->getQueryString(), $analyzerSet->getField());
 
         $searchValues = $this->createSearchValues($tokens);
 
-        dump($searchValues);
-
-        if (!empty($analyzerSet->getSynonymTypes())) {
+        if ($search->hasSynonyms()) {
             foreach ($searchValues as $searchValue) {
-                $this->addSynonyms($searchValue, $analyzerSet, $analyzer);
+                $this->addSynonyms($search, $searchValue, $analyzer);
             }
         }
 
