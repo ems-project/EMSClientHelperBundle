@@ -16,18 +16,11 @@ class QueryBuilder
 
     public function buildQuery(Search $search): array
     {
-        $filter = $search->createFilter();
-
-        $analyzerSets = [];
-        foreach ($search->getFields() as $field) {
-            $analyzerSets[] = new AnalyserSet($field, $filter);
-        }
-
         $should = [];
 
         if ($search->hasQueryString()) {
-            foreach ($analyzerSets as $analyzer) {
-                $should[] = $this->buildPerAnalyzer($search, $analyzer);
+            foreach ($search->getFields() as $field) {
+                $should[] = $this->buildPerAnalyzer($search, $field);
             }
         } else {
             $should = $search->createFilter();
@@ -65,9 +58,9 @@ class QueryBuilder
         }
     }
 
-    private function createBodyPerAnalyzer(array $searchValues, AnalyserSet $analyzer, $analyzerField)
+    private function createBodyPerAnalyzer(Search $search, array $searchValues, string $field, $analyzer)
     {
-        $filter = $analyzer->getFilter();
+        $filter = $search->createFilter();
 
         if (empty($filter) || !isset($filter['bool'])) {
             $filter['bool'] = [
@@ -81,16 +74,16 @@ class QueryBuilder
 
         /**@var TextValue $searchValue */
         foreach ($searchValues as $searchValue) {
-            $filter['bool']['must'][] = $searchValue->makeShould($analyzer->getField(), $analyzerField, $analyzer->getBoost());
+            $filter['bool']['must'][] = $searchValue->makeShould($field, $analyzer);
         }
 
         return $filter;
     }
 
-    private function buildPerAnalyzer(Search $search, AnalyserSet $analyzerSet)
+    private function buildPerAnalyzer(Search $search, string $field)
     {
-        $analyzer = $this->clientRequest->getFieldAnalyzer($analyzerSet->getField());
-        $tokens = $this->clientRequest->analyze($search->getQueryString(), $analyzerSet->getField());
+        $analyzer = $this->clientRequest->getFieldAnalyzer($field);
+        $tokens = $this->clientRequest->analyze($search->getQueryString(), $field);
 
         $searchValues = $this->createSearchValues($tokens);
 
@@ -100,6 +93,6 @@ class QueryBuilder
             }
         }
 
-        return $this->createBodyPerAnalyzer($searchValues, $analyzerSet, $analyzer);
+        return $this->createBodyPerAnalyzer($search, $searchValues, $field, $analyzer);
     }
 }

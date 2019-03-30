@@ -36,10 +36,10 @@ class TextValue
         return $this->term;
     }
 
-    public function makeShould($searchFields, string $analyzerField, float $boost = 1.0): array
+    public function makeShould($searchFields, string $analyzer, float $boost = 1.0): array
     {
         $should = [];
-        $should[] = $this->getQuery($searchFields, $analyzerField, $boost);
+        $should[] = $this->getQuery($searchFields, $analyzer, $boost);
 
         foreach ($this->synonyms as $synonym) {
             $should[] = $synonym;
