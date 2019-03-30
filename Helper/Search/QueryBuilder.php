@@ -20,7 +20,9 @@ class QueryBuilder
 
         if ($search->hasQueryString()) {
             foreach ($search->getFields() as $field) {
-                $should[] = $this->buildPerAnalyzer($search, $field);
+                $textValues = $this->createTextValues($search, $field);
+                
+                $should[] = $this->createBodyPerAnalyzer($search, $textValues);
             }
         } else {
             $should = $search->createFilter();
@@ -29,16 +31,6 @@ class QueryBuilder
         return ['bool' => ['should' => $should]];
     }
 
-    private function createSearchValues(array $tokens): array
-    {
-        $searchValues = [];
-
-        foreach ($tokens as $token) {
-            $searchValues[$token] = new TextValue($token);
-        }
-
-        return $searchValues;
-    }
 
     private function addSynonyms(Search $search, TextValue $searchValue, string $analyzer)
     {
@@ -58,7 +50,7 @@ class QueryBuilder
         }
     }
 
-    private function createBodyPerAnalyzer(Search $search, array $searchValues, string $field, $analyzer)
+    private function createBodyPerAnalyzer(Search $search, array $textValues)
     {
         $filter = $search->createFilter();
 
@@ -73,26 +65,30 @@ class QueryBuilder
         }
 
         /**@var TextValue $searchValue */
-        foreach ($searchValues as $searchValue) {
-            $filter['bool']['must'][] = $searchValue->makeShould($field, $analyzer);
+        foreach ($textValues as $searchValue) {
+            $filter['bool']['must'][] = $searchValue->makeShould();
         }
 
         return $filter;
     }
 
-    private function buildPerAnalyzer(Search $search, string $field)
+    private function createTextValues(Search $search, string $field): array
     {
         $analyzer = $this->clientRequest->getFieldAnalyzer($field);
         $tokens = $this->clientRequest->analyze($search->getQueryString(), $field);
 
-        $searchValues = $this->createSearchValues($tokens);
+        $textValues = [];
 
-        if ($search->hasSynonyms()) {
-            foreach ($searchValues as $searchValue) {
-                $this->addSynonyms($search, $searchValue, $analyzer);
+        foreach ($tokens as $token) {
+            $textValue = new TextValue($token, $field, $analyzer);
+
+            if ($search->hasSynonyms()) {
+                $this->addSynonyms($search, $textValue, $analyzer);
             }
+
+            $textValues[$token] = $textValue;
         }
 
-        return $this->createBodyPerAnalyzer($search, $searchValues, $field, $analyzer);
+        return $textValues;
     }
 }
