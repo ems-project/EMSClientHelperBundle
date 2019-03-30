@@ -14,10 +14,23 @@ class QueryBuilder
         $this->clientRequest = $clientRequest;
     }
 
-    public function getQuery($queryString, $analyzerSets)
+    public function buildQuery(Search $search): array
     {
+        $synonyms = $search->getSynonyms();
+        $filter = $search->createFilter();
+
+        $analyzerSets = [];
+        foreach ($search->getFields() as $field) {
+            $analyzerSets[] = new AnalyserSet($field, $filter, $synonyms, empty($synonyms) ? false : ($field));
+        }
+
         $should = [];
-        if (!$queryString) {
+
+        if ($search->hasQueryString()) {
+            foreach ($analyzerSets as $analyzer) {
+                $should[] = $this->buildPerAnalyzer($search->getQueryString(), $analyzer);
+            }
+        } else {
             /**@var AnalyserSet $analyzer */
             foreach ($analyzerSets as $analyzer) {
                 $filter = $analyzer->getFilter();
@@ -25,22 +38,9 @@ class QueryBuilder
                     $should[] = $filter;
                 }
             }
-        } else {
-            foreach ($analyzerSets as $analyzer) {
-                $should[] = $this->buildPerAnalyzer($queryString, $analyzer);
-            }
         }
 
-        $out = [
-            'bool' => [
-                'should' => $should
-            ]
-        ];
-
-        //add aggs per facet index
-        //add a must terms if there is at least one facets
-
-        return $out;
+        return ['bool' => ['should' => $should]];
     }
 
     private function createSearchValues(array $tokens): array
@@ -106,6 +106,8 @@ class QueryBuilder
         $tokens = $this->clientRequest->analyze($queryString, $analyzerSet->getField());
 
         $searchValues = $this->createSearchValues($tokens);
+
+        dump($searchValues);
 
         if (!empty($analyzerSet->getSynonymTypes())) {
             foreach ($searchValues as $searchValue) {

@@ -26,16 +26,8 @@ class Manager
         $search = new Search($this->clientRequest);
         $search->bindRequest($request);
 
-        $synonyms = $search->getSynonyms();
-        $filter = $search->createFilter();
-
-        $analyzers = [];
-        foreach ($search->getFields() as $field) {
-            $analyzers[] = new AnalyserSet($field, $filter, $synonyms, empty($synonyms) ? false : ($field));
-        }
-
         $qbService = new QueryBuilder($this->clientRequest);
-        $query = $qbService->getQuery($search->getQueryString(), $analyzers);
+        $query = $qbService->buildQuery($search);
 
         $body = array_filter([
             'query' => $query,

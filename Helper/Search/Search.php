@@ -34,6 +34,8 @@ class Search
     {
         $options = $this->getOptions($clientRequest);
 
+        dump($options, $clientRequest->getLocale());
+
         if (isset($options['facets'])) {
             @trigger_error('Deprecated facets, please use filters setting', E_USER_DEPRECATED);
         }
@@ -98,6 +100,11 @@ class Search
         }
 
         return $suggestions;
+    }
+
+    public function hasQueryString(): bool
+    {
+        return null !== $this->queryString;
     }
 
     public function getQueryString(): ?string
