@@ -26,8 +26,8 @@ class Manager
         $search = new Search($this->clientRequest);
         $search->bindRequest($request);
 
-        $qbService = new QueryBuilder($this->clientRequest);
-        $query = $qbService->buildQuery($search);
+        $qbService = new QueryBuilder($this->clientRequest, $search);
+        $query = $qbService->buildQuery();
 
         $body = array_filter([
             'query' => $query,

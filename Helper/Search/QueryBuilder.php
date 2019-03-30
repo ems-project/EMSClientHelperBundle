@@ -8,33 +8,36 @@ class QueryBuilder
 {
     /** @var ClientRequest */
     private $clientRequest;
+    /** @var search */
+    private $search;
 
-    public function __construct(ClientRequest $clientRequest)
+    public function __construct(ClientRequest $clientRequest, Search $search)
     {
         $this->clientRequest = $clientRequest;
+        $this->search = $search;
     }
 
-    public function buildQuery(Search $search): array
+    public function buildQuery(): array
     {
         $should = [];
 
-        if ($search->hasQueryString()) {
-            foreach ($search->getFields() as $field) {
-                $textValues = $this->createTextValues($search, $field);
-                
-                $should[] = $this->createBodyPerAnalyzer($search, $textValues);
+        if ($this->search->hasQueryString()) {
+            foreach ($this->search->getFields() as $field) {
+                $textValues = $this->createTextValues($field);
+
+                $should[] = $this->createBodyPerAnalyzer($textValues);
             }
         } else {
-            $should = $search->createFilter();
+            $should = $this->search->createFilter();
         }
 
         return ['bool' => ['should' => $should]];
     }
 
 
-    private function addSynonyms(Search $search, TextValue $searchValue, string $analyzer)
+    private function addSynonyms(TextValue $searchValue, string $analyzer)
     {
-        foreach ($search->getSynonyms() as $synonym) {
+        foreach ($this->search->getSynonyms() as $synonym) {
             $queryText = $searchValue->getQuery($synonym->getSearchField(), $analyzer);
             $querySynonym = $synonym->getQuery($queryText);
 
@@ -50,9 +53,9 @@ class QueryBuilder
         }
     }
 
-    private function createBodyPerAnalyzer(Search $search, array $textValues)
+    private function createBodyPerAnalyzer(array $textValues)
     {
-        $filter = $search->createFilter();
+        $filter = $this->search->createFilter();
 
         if (empty($filter) || !isset($filter['bool'])) {
             $filter['bool'] = [
@@ -72,18 +75,18 @@ class QueryBuilder
         return $filter;
     }
 
-    private function createTextValues(Search $search, string $field): array
+    private function createTextValues( string $field): array
     {
         $analyzer = $this->clientRequest->getFieldAnalyzer($field);
-        $tokens = $this->clientRequest->analyze($search->getQueryString(), $field);
+        $tokens = $this->clientRequest->analyze($this->search->getQueryString(), $field);
 
         $textValues = [];
 
         foreach ($tokens as $token) {
             $textValue = new TextValue($token, $field, $analyzer);
 
-            if ($search->hasSynonyms()) {
-                $this->addSynonyms($search, $textValue, $analyzer);
+            if ($this->search->hasSynonyms()) {
+                $this->addSynonyms($textValue, $analyzer);
             }
 
             $textValues[$token] = $textValue;
