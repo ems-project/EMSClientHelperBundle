@@ -19,7 +19,7 @@ class Search
     /** @var string|null free text search */
     private $queryString;
     /** @var array */
-    private $filterFacets = [];
+    private $queryFacets = [];
 
     /** @var int */
     private $page = 0;
@@ -35,17 +35,20 @@ class Search
         $options = $this->getOptions($clientRequest);
 
         $this->types = $options['types']; //required
-        $this->facets = $options['facets'] ?? [];
         $this->synonyms = $options['synonyms'] ?? [];
         $this->limit = $options['default_limit'] ?? $this->limit;
         $this->setFields(($options['fields'] ?? []), $clientRequest->getLocale());
+
+        if (isset($options['facets'])) {
+            @trigger_error('Deprecated facets, please use filters setting', E_USER_DEPRECATED);
+            $this->facets = $options['facets'];
+        }
     }
 
     public function bindRequest(Request $request): void
     {
         $this->queryString = $request->get('q', $this->queryString);
-        $this->filterFacets = $request->get('f', $this->filterFacets);
-        ;
+        $this->queryFacets = $request->get('f', $this->queryFacets);
 
         $this->page = (int) $request->get('p', $this->page);
         $this->limit = (int) $request->get('l', $this->limit);
@@ -102,16 +105,16 @@ class Search
         return $this->queryString;
     }
 
-    public function getFilterFacets(): array
+    public function getQueryFacets(): array
     {
-        return $this->filterFacets;
+        return $this->queryFacets;
     }
 
     public function createFilter(): array
     {
         $filter = [];
 
-        foreach ($this->filterFacets as $field => $terms) {
+        foreach ($this->queryFacets as $field => $terms) {
             if (empty($terms) || !array_key_exists($field, $this->facets)) {
                 continue;
             }

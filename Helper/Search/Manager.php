@@ -50,7 +50,7 @@ class Manager
             'results' => $results,
             'query' => $config->getQueryString(),
             'sort' => $config->getSortBy(),
-            'facets' => $config->getFilterFacets(),
+            'facets' => $config->getQueryFacets(),
             'page' => $config->getPage(),
             'size' => $config->getLimit(),
             'counters' => $this->getCountInfo($results),
