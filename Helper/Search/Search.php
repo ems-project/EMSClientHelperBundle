@@ -69,7 +69,7 @@ class Search
             $aggs[$facet] = ['terms' => ['field' => $facet, 'size' => $size]];
         }
 
-        return [];
+        return $aggs;
     }
 
     public function getSynonyms(): array
