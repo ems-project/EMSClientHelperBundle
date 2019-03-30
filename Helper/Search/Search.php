@@ -104,7 +104,7 @@ class Search
 
     public function hasQueryString(): bool
     {
-        return null !== $this->queryString;
+        return null != $this->queryString;
     }
 
     public function getQueryString(): ?string

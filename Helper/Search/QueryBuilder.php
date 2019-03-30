@@ -31,13 +31,7 @@ class QueryBuilder
                 $should[] = $this->buildPerAnalyzer($search->getQueryString(), $analyzer);
             }
         } else {
-            /**@var AnalyserSet $analyzer */
-            foreach ($analyzerSets as $analyzer) {
-                $filter = $analyzer->getFilter();
-                if ($filter) {
-                    $should[] = $filter;
-                }
-            }
+            $should = $search->createFilter();
         }
 
         return ['bool' => ['should' => $should]];
