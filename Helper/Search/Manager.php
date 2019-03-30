@@ -23,36 +23,36 @@ class Manager
 
     public function search(Request $request)
     {
-        $config = new Search($this->clientRequest);
-        $config->bindRequest($request);
+        $search = new Search($this->clientRequest);
+        $search->bindRequest($request);
 
-        $synonyms = $config->getSynonyms();
-        $filter = $config->createFilter();
+        $synonyms = $search->getSynonyms();
+        $filter = $search->createFilter();
 
         $analyzers = [];
-        foreach ($config->getFields() as $field) {
+        foreach ($search->getFields() as $field) {
             $analyzers[] = new AnalyserSet($field, $filter, $synonyms, empty($synonyms) ? false : ($field));
         }
 
         $qbService = new QueryBuilder($this->clientRequest);
-        $query = $qbService->getQuery($config->getQueryString(), $analyzers);
+        $query = $qbService->getQuery($search->getQueryString(), $analyzers);
 
         $body = array_filter([
             'query' => $query,
-            'aggs' => $config->getFacetsAggs(),
-            'suggest' => $config->getSuggestions(),
-            'sort' => $config->getSort(),
+            'aggs' => $search->getFacetsAggs(),
+            'suggest' => $search->getSuggestions(),
+            'sort' => $search->getSort(),
         ]);
 
-        $results = $this->clientRequest->search($config->getTypes(), $body, $config->getFrom(), $config->getLimit());
+        $results = $this->clientRequest->search($search->getTypes(), $body, $search->getFrom(), $search->getLimit());
 
         return [
             'results' => $results,
-            'query' => $config->getQueryString(),
-            'sort' => $config->getSortBy(),
-            'facets' => $config->getQueryFacets(),
-            'page' => $config->getPage(),
-            'size' => $config->getLimit(),
+            'query' => $search->getQueryString(),
+            'sort' => $search->getSortBy(),
+            'facets' => $search->getQueryFacets(),
+            'page' => $search->getPage(),
+            'size' => $search->getLimit(),
             'counters' => $this->getCountInfo($results),
         ];
     }
