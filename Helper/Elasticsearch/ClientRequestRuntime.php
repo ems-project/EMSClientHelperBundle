@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
+use EMS\ClientHelperBundle\Helper\Search\Search;
 use EMS\CommonBundle\Common\EMSLink;
 use Twig\Extension\RuntimeExtensionInterface;
 
@@ -36,6 +37,13 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
         return $client->search($type, $body, $from, $size, $sourceExclude);
     }
 
+    /**
+     * @return Search
+     */
+    public function searchConfig(): Search
+    {
+        return new Search($this->manager->getDefault());
+    }
 
     /**
      * @param string $input

@@ -36,6 +36,14 @@ and a Symfony\Component\Finder\SplFileInfo object as value.
 {% endfor %}
 ```
 
+## ems_search_config
+
+For accessing the search configuration (filters) before doing the actual search.
+
+````twig
+{% set search = emsch_search_config() %}
+````
+
 # Twig embed
 
 ## render hierarchy
