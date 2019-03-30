@@ -14,6 +14,35 @@ class QueryBuilder
         $this->clientRequest = $clientRequest;
     }
 
+    public function getQuery($queryString, $analyzerSets)
+    {
+        $should = [];
+        if (!$queryString) {
+            /**@var AnalyserSet $analyzer */
+            foreach ($analyzerSets as $analyzer) {
+                $filter = $analyzer->getFilter();
+                if ($filter) {
+                    $should[] = $filter;
+                }
+            }
+        } else {
+            foreach ($analyzerSets as $analyzer) {
+                $should[] = $this->buildPerAnalyzer($queryString, $analyzer);
+            }
+        }
+
+        $out = [
+            'bool' => [
+                'should' => $should
+            ]
+        ];
+
+        //add aggs per facet index
+        //add a must terms if there is at least one facets
+
+        return $out;
+    }
+
     private function createSearchValues(array $tokens): array
     {
         $searchValues = [];
@@ -85,34 +114,5 @@ class QueryBuilder
         }
 
         return $this->createBodyPerAnalyzer($searchValues, $analyzerSet, $analyzer);
-    }
-
-    public function getQuery($queryString, $analyzerSets)
-    {
-        $should = [];
-        if (!$queryString) {
-            /**@var AnalyserSet $analyzer */
-            foreach ($analyzerSets as $analyzer) {
-                $filter = $analyzer->getFilter();
-                if ($filter) {
-                    $should[] = $filter;
-                }
-            }
-        } else {
-            foreach ($analyzerSets as $analyzer) {
-                $should[] = $this->buildPerAnalyzer($queryString, $analyzer);
-            }
-        }
-
-        $out = [
-            'bool' => [
-                'should' => $should
-            ]
-        ];
-
-        //add aggs per facet index
-        //add a must terms if there is at least one facets
-
-        return $out;
     }
 }
