@@ -34,15 +34,15 @@ class Search
     {
         $options = $this->getOptions($clientRequest);
 
+        if (isset($options['facets'])) {
+            @trigger_error('Deprecated facets, please use filters setting', E_USER_DEPRECATED);
+        }
+
         $this->types = $options['types']; //required
+        $this->facets = $options['facets'] ?? [];
         $this->synonyms = $options['synonyms'] ?? [];
         $this->limit = $options['default_limit'] ?? $this->limit;
         $this->setFields(($options['fields'] ?? []), $clientRequest->getLocale());
-
-        if (isset($options['facets'])) {
-            @trigger_error('Deprecated facets, please use filters setting', E_USER_DEPRECATED);
-            $this->facets = $options['facets'];
-        }
     }
 
     public function bindRequest(Request $request): void
