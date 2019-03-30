@@ -30,25 +30,15 @@ class Search
     /** @var string */
     private $sortOrder = 'asc';
 
-    private function __construct()
+    public function __construct(ClientRequest $clientRequest)
     {
-    }
+        $options = $this->getOptions($clientRequest);
 
-    public static function fromClientRequest(ClientRequest $clientRequest): Search
-    {
-        if ($clientRequest->hasOption('search')) {
-            @trigger_error('Deprecated search option please use search_config!', E_USER_DEPRECATED);
-
-            return self::create($clientRequest->getOption('[search]'), $clientRequest->getLocale());
-        }
-
-        if (!$clientRequest->hasOption('search_config')) {
-            throw new \LogicException('no search defined!');
-        }
-
-        $locale = $clientRequest->getLocale();
-
-        return self::create($clientRequest->getOption('[search_config]'), $locale);
+        $this->types = $options['types']; //required
+        $this->facets = $options['facets'] ?? [];
+        $this->synonyms = $options['synonyms'] ?? [];
+        $this->limit = $options['default_limit'] ?? $this->limit;
+        $this->setFields(($options['fields'] ?? []), $clientRequest->getLocale());
     }
 
     public function bindRequest(Request $request): void
@@ -61,19 +51,6 @@ class Search
         $this->limit = (int) $request->get('l', $this->limit);
         $this->sortBy = $request->get('s', $this->sortBy);
         $this->sortOrder = $request->get('o', $this->sortOrder);
-    }
-
-    private static function create(array $options, string $locale): Search
-    {
-        $config = new self;
-        $config->types = $options['types']; //required
-        $config->facets = $options['facets'] ?? [];
-        $config->synonyms = $options['synonyms'] ?? [];
-        $config->limit = $options['default_limit'] ?? $config->limit;
-
-        $config->setFields(($options['fields'] ?? []), $locale);
-
-        return $config;
     }
 
     public function getTypes(): array
@@ -172,5 +149,20 @@ class Search
     public function getSortBy(): ?string
     {
         return $this->sortBy;
+    }
+
+    private function getOptions(ClientRequest $clientRequest): array
+    {
+        if ($clientRequest->hasOption('search_config')) {
+            return $clientRequest->getOption('[search_config]');
+        }
+
+        if ($clientRequest->hasOption('search')) {
+            @trigger_error('Deprecated search option please use search_config!', E_USER_DEPRECATED);
+
+            return $clientRequest->getOption('[search]');
+        }
+
+        throw new \LogicException('no search defined!');
     }
 }
