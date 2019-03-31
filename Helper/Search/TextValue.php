@@ -26,6 +26,11 @@ class TextValue
         $this->synonyms = [];
     }
 
+    public function getAnalyzer(): string
+    {
+        return $this->analyzer;
+    }
+
     public function addSynonym(string $synonymField, array $doc): void
     {
         $this->synonyms[] = [

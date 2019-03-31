@@ -34,11 +34,10 @@ class QueryBuilder
         return ['bool' => ['should' => $should]];
     }
 
-
-    private function addSynonyms(TextValue $searchValue, string $analyzer)
+    private function addSynonyms(TextValue $textValue)
     {
         foreach ($this->search->getSynonyms() as $synonym) {
-            $queryText = $searchValue->getQuery($synonym->getSearchField(), $analyzer);
+            $queryText = $textValue->getQuery($synonym->getSearchField(), $textValue->getAnalyzer());
             $querySynonym = $synonym->getQuery($queryText);
 
             $documents = $this->clientRequest->search([], ['_source' => ['_contenttype'], 'query' => $querySynonym], 0, 20);
@@ -48,7 +47,7 @@ class QueryBuilder
             }
 
             foreach ($documents['hits']['hits'] as $doc) {
-                $searchValue->addSynonym($synonym->getField(), $doc);
+                $textValue->addSynonym($synonym->getField(), $doc);
             }
         }
     }
@@ -75,7 +74,7 @@ class QueryBuilder
         return $filter;
     }
 
-    private function createTextValues( string $field): array
+    private function createTextValues(string $field): array
     {
         $analyzer = $this->clientRequest->getFieldAnalyzer($field);
         $tokens = $this->clientRequest->analyze($this->search->getQueryString(), $field);
@@ -86,7 +85,7 @@ class QueryBuilder
             $textValue = new TextValue($token, $field, $analyzer);
 
             if ($this->search->hasSynonyms()) {
-                $this->addSynonyms($textValue, $analyzer);
+                $this->addSynonyms($textValue);
             }
 
             $textValues[$token] = $textValue;
