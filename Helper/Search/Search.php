@@ -48,7 +48,7 @@ class Search
 
         $filters = $options['filters'] ?? [];
         foreach ($filters as $name => $options) {
-            $this->filters[$name] = new Filter($name, $options);
+            $this->filters[$name] = new Filter($clientRequest, $name, $options);
         }
     }
 

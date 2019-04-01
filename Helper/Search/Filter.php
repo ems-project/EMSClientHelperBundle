@@ -2,10 +2,13 @@
 
 namespace EMS\ClientHelperBundle\Helper\Search;
 
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use Symfony\Component\HttpFoundation\Request;
 
 class Filter
 {
+    /** @var ClientRequest */
+    private $clientRequest;
     /** @var string */
     private $name;
     /** @var string */
@@ -21,6 +24,11 @@ class Filter
     /** @var array */
     private $query = [];
 
+
+
+    /** @var array */
+    private $terms = [];
+
     const TYPE_TERMS      = 'terms';
     const TYPE_DATE_RANGE = 'date_range';
 
@@ -29,8 +37,10 @@ class Filter
         self::TYPE_DATE_RANGE => 'DateRange',
     ];
 
-    public function __construct(string $name, array $options)
+    public function __construct(ClientRequest $clientRequest, string $name, array $options)
     {
+        $this->clientRequest = $clientRequest;
+
         if (!\array_key_exists($options['type'], self::TYPES)) {
             throw new \Exception(sprintf('invalid filter type %s', $options['type']));
         }
@@ -94,15 +104,41 @@ class Filter
             return;
         }
 
-        $this->requestValue = $value;
+        $this->requestValue = (\is_array($value) ? $value : [$value]);
         $this->setQuery($value);
+    }
+
+    public function getChoices(): array
+    {
+        if ($this->type !== self::TYPE_TERMS) {
+            return [];
+        }
+
+        $search = $this->clientRequest->searchArgs([
+            'body' => [
+                'size' => 0,
+                'aggs' => [$this->name => ['terms' => ['field' => $this->field, 'size' => $this->aggSize] ]]
+            ]
+        ]);
+        $buckets = $search['aggregations'][$this->name]['buckets'];
+        $choices = [];
+
+        foreach ($buckets as $bucket) {
+            $choices[$bucket['key']] = [
+                'count' => $bucket['doc_count'],
+                'active' => \in_array($bucket['key'], $this->queryValue ?? [])
+            ];
+        }
+
+        return $choices;
     }
 
     private function setQuery($value): void
     {
         switch ($this->type) {
             case self::TYPE_TERMS:
-                $this->query = $this->getQueryTerms($value);
+                $this->terms = (\is_array($value) ? $value : [$value]);
+                $this->query = $this->getQueryTerms();
                 break;
             case self::TYPE_DATE_RANGE:
                 $this->query = $this->getQueryDateRange($value);
@@ -110,13 +146,9 @@ class Filter
         }
     }
 
-    private function getQueryTerms($value): array
+    private function getQueryTerms(): array
     {
-        return [
-            'terms' => [
-                $this->field => (\is_array($value) ? $value : [$value])
-            ]
-        ];
+        return ['terms' => [$this->field => $this->terms]];
     }
 
     private function getQueryDateRange($value): ?array
