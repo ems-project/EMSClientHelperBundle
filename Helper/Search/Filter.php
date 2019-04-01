@@ -16,7 +16,8 @@ class Filter
     private $aggSize;
     /** @var mixed */
     private $requestValue;
-
+    /** @var bool only public filters will handle a request. */
+    private $public;
     /** @var array */
     private $query = [];
 
@@ -37,7 +38,12 @@ class Filter
         $this->name = $name;
         $this->type = $options['type'];
         $this->field = $options['field'];
+        $this->public = isset($options['public']) ? (bool) $options['public'] : true;
         $this->aggSize = isset($options['aggs_size']) ? (int) $options['aggs_size'] : null;
+
+        if (isset($options['value'])) {
+            $this->setQuery($options['value']);
+        }
     }
 
     public function getName(): string
@@ -82,45 +88,51 @@ class Filter
 
     public function handleRequest(Request $request): void
     {
-        if (null == $value = $request->get($this->name)) {
+        $value = $request->get($this->name);
+
+        if (!$this->public || null == $value) {
             return;
         }
 
         $this->requestValue = $value;
+        $this->setQuery($value);
+    }
 
+    private function setQuery($value): void
+    {
         switch ($this->type) {
             case self::TYPE_TERMS:
-                $this->setQueryTerms($value);
+                $this->query = $this->getQueryTerms($value);
                 break;
             case self::TYPE_DATE_RANGE:
-                $this->setQueryDateRange($value);
+                $this->query = $this->getQueryDateRange($value);
                 break;
         }
     }
 
-    private function setQueryTerms($value): void
+    private function getQueryTerms($value): array
     {
-        $this->query = [
+        return [
             'terms' => [
                 $this->field => (\is_array($value) ? $value : [$value])
             ]
         ];
     }
 
-    private function setQueryDateRange($value): void
+    private function getQueryDateRange($value): ?array
     {
         if (!\is_array($value)) {
-            return;
+            return null;
         }
 
         $start = isset($value['start']) ? \DateTime::createFromFormat('d-m-Y H:i:s', $value['start'].' 00:00:00') : false;
         $end = isset($value['end']) ? \DateTime::createFromFormat('d-m-Y H:i:s', $value['end'].' 23:59:59') : false;
 
         if (!$start && !$end) {
-            return;
+            return null;
         }
 
-        $this->query = ['range' => [
+        return ['range' => [
             $this->field => array_filter([
                 'gte' => $start ? $start->format('Y-m-d') : null,
                 'lte' => $end ? $end->format('Y-m-d') : null,

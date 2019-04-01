@@ -27,6 +27,18 @@
 }
 ````
 
+### Private filter
+
+By setting the option **public** to false the filter will not get his value from the request query.
+You pass the private value with the **value** option.
+
+````json
+{
+   "filterName": {"type":  "terms", "field":  "_contenttype", "public":  false, "value":  ["page"]}
+}
+````
+
+
 ### DateRange 
 
 Example uri for filtering all documents in november 2018.
