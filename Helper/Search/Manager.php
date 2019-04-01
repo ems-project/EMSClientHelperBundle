@@ -31,6 +31,10 @@ class Manager
 
         $results = $this->clientRequest->search($search->getTypes(), $body, $search->getFrom(), $search->getLimit());
 
+        if (isset($results['aggregations'])) {
+            $search->bindAggregations($results['aggregations']);
+        }
+
         return [
             'results' => $results,
             'query' => $search->getQueryString(),

@@ -21,35 +21,45 @@ class QueryBuilder
     {
         return array_filter([
             'query' => $this->getQuery(),
-            'aggs' => $this->search->getFacetsAggs(),
+            'post_filter' => $this->getPostFilters(),
+            'aggs' => $this->getAggs(),
             'suggest' => $this->getSuggest(),
             'sort' => $this->getSort(),
         ]);
     }
 
-    private function getQuery(): array
+    private function getQuery(): ?array
     {
-        $query = [];
         $filterMust = $this->getQueryFilters();
 
         if ($this->search->hasQueryString()) {
-            $analyzer = new Analyzer($this->clientRequest);
-
-            foreach ($this->search->getFields() as $field) {
-                $textValues = $analyzer->getTextValues($field, $this->search->getQueryString(), $this->search->getSynonyms());
-
-                $textMust = [];
-                foreach ($textValues as $textValue) {
-                    $textMust['bool']['must'][] = $textValue->makeShould();
-                }
-
-                $query[] = \array_merge_recursive($filterMust, $textMust);
-            }
-        } else {
-            $query = $filterMust;
+            return $this->getQueryWithString($this->search->getQueryString());
+        } elseif ($filterMust) {
+            return $filterMust;
         }
 
-        return ['bool' => ['should' => $query]];
+        return null;
+    }
+
+    private function getQueryWithString(string $queryString): array
+    {
+        $query = ['bool' => ['should' => []]];
+        $filterMust = $this->getQueryFilters();
+
+        $analyzer = new Analyzer($this->clientRequest);
+
+        foreach ($this->search->getFields() as $field) {
+            $textValues = $analyzer->getTextValues($field, $queryString, $this->search->getSynonyms());
+
+            $textMust = [];
+            foreach ($textValues as $textValue) {
+                $textMust['bool']['must'][] = $textValue->makeShould();
+            }
+
+            $query['bool']['should'][] = \array_merge_recursive($filterMust, $textMust);
+        }
+
+        return $query;
     }
 
     private function getQueryFilters(): array
@@ -61,12 +71,42 @@ class QueryBuilder
         }
 
         foreach ($this->search->getFilters() as $filter) {
-            if ($filter->hasQuery()) {
+            if ($filter->isActive() && !$filter->isPostFilter()) {
                 $query['bool']['must'][] = $filter->getQuery();
             }
         }
 
         return $query;
+    }
+
+    private function getPostFilters(): array
+    {
+        $postFilters = [];
+
+        foreach ($this->search->getFilters() as $filter) {
+            if ($filter->isActive() && $filter->isPostFilter()) {
+                $postFilters[] = $filter->getQuery();
+            }
+        }
+
+        return $postFilters ? ['bool' => ['must' => $postFilters]] : [];
+    }
+
+    private function getAggs(): ?array
+    {
+        $aggs = [];
+
+        foreach ($this->search->getQueryFacets() as $facet => $size) {
+            $aggs[$facet] = ['terms' => ['field' => $facet, 'size' => $size]];
+        }
+
+        foreach ($this->search->getFilters() as $filter) {
+            if ($filter->hasAggSize()) {
+                $aggs[$filter->getName()] = ['terms' => ['field' => $filter->getField(), 'size' => $filter->getAggSize()]];
+            }
+        }
+
+        return $aggs;
     }
 
     private function getSuggest(): ?array

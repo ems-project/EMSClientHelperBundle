@@ -67,26 +67,18 @@ class Search
         }
     }
 
+    public function bindAggregations(array $aggregations): void
+    {
+        foreach ($aggregations as $name => $aggregation) {
+            if ($this->hasFilter($name)) {
+                $this->getFilter($name)->handleAggregation($aggregation);
+            }
+        }
+    }
+
     public function getTypes(): array
     {
         return $this->types;
-    }
-
-    public function getFacetsAggs(): array
-    {
-        $aggs = [];
-
-        foreach ($this->facets as $facet => $size) {
-            $aggs[$facet] = ['terms' => ['field' => $facet, 'size' => $size]];
-        }
-
-        foreach ($this->filters as $filter) {
-            if ($filter->hasAggSize()) {
-                $aggs[$filter->getName()] = ['terms' => ['field' => $filter->getField(), 'size' => $filter->getAggSize()]];
-            }
-        }
-
-        return $aggs;
     }
 
     /**
@@ -123,6 +115,11 @@ class Search
         }
 
         return $queryFacets;
+    }
+
+    public function hasFilter(string $name): bool
+    {
+        return isset($this->filters[$name]);
     }
 
     public function getFilter(string $name): Filter

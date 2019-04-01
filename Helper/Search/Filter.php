@@ -17,17 +17,18 @@ class Filter
     private $field;
     /** @var null|int */
     private $aggSize;
-    /** @var mixed */
-    private $requestValue;
+    /** @var bool default true for terms, when value passed default false */
+    private $postFilter;
     /** @var bool only public filters will handle a request. */
     private $public;
-    /** @var array */
-    private $query = [];
-    /** @var mixed */
-    private $queryValue;
 
     /** @var array */
-    private $terms = [];
+    private $query = [];
+
+    /** @var array|null */
+    private $value;
+    /** @var array */
+    private $choices = [];
 
     const TYPE_TERMS      = 'terms';
     const TYPE_DATE_RANGE = 'date_range';
@@ -50,6 +51,7 @@ class Filter
         $this->field = $options['field'];
         $this->public = isset($options['public']) ? (bool) $options['public'] : true;
         $this->aggSize = isset($options['aggs_size']) ? (int) $options['aggs_size'] : null;
+        $this->setPostFilter($options);
 
         if (isset($options['value'])) {
             $this->setQuery($options['value']);
@@ -71,9 +73,9 @@ class Filter
         return $this->field;
     }
 
-    public function getRequestValue()
+    public function getValue()
     {
-        return $this->requestValue;
+        return $this->value;
     }
 
     public function hasAggSize(): bool
@@ -86,7 +88,7 @@ class Filter
         return $this->aggSize;
     }
 
-    public function hasQuery(): bool
+    public function isActive(): bool
     {
         return !empty($this->query);
     }
@@ -94,6 +96,11 @@ class Filter
     public function getQuery(): ?array
     {
         return $this->query;
+    }
+
+    public function isPostFilter(): bool
+    {
+        return $this->postFilter;
     }
 
     public function handleRequest(Request $request): void
@@ -104,14 +111,82 @@ class Filter
             return;
         }
 
-        $this->requestValue = (\is_array($value) ? $value : [$value]);
         $this->setQuery($value);
+    }
+
+    public function handleAggregation(array $aggregation)
+    {
+        $this->setChoices();
+
+        foreach ($aggregation['buckets'] as $bucket) {
+            if (isset($this->choices[$bucket['key']])) {
+                $this->choices[$bucket['key']]['filter'] = $bucket['doc_count'];
+            }
+        }
+    }
+
+    public function isChosen(string $choice): bool
+    {
+        if (!isset($this->choices[$choice])) {
+            return false;
+        }
+
+        return $this->choices[$choice]['active'];
     }
 
     public function getChoices(): array
     {
-        if ($this->type !== self::TYPE_TERMS) {
-            return [];
+        $this->setChoices();
+
+        return $this->choices;
+    }
+
+    private function setQuery($value): void
+    {
+        $this->value = (\is_array($value) ? $value : [$value]);
+
+        switch ($this->type) {
+            case self::TYPE_TERMS:
+                $this->query = $this->getQueryTerms($this->value);
+                break;
+            case self::TYPE_DATE_RANGE:
+                $this->query = $this->getQueryDateRange($this->value);
+                break;
+        }
+    }
+
+    private function getQueryTerms(array $value): array
+    {
+        return ['terms' => [$this->field => $value]];
+    }
+
+    private function getQueryDateRange(array $value): ?array
+    {
+        if (!isset($value['start']) && !isset($value['end'])) {
+            return null;
+        }
+
+        $format = 'd-m-Y H:i:s';
+
+        if (isset($value['start'])) {
+            $start = \DateTime::createFromFormat($format, $value['start'].' 00:00:00');
+        }
+        if (isset($value['end'])) {
+            $end = \DateTime::createFromFormat($format, $value['end'].' 23:59:59');
+        }
+
+        return ['range' => [
+            $this->field => array_filter([
+                'gte' => isset($start) ? $start->format('Y-m-d') : null,
+                'lte' => isset($end) ? $end->format('Y-m-d') : null,
+            ])
+        ]];
+    }
+
+    private function setChoices(): void
+    {
+        if (null != $this->choices ||$this->type !== self::TYPE_TERMS) {
+            return;
         }
 
         $search = $this->clientRequest->searchArgs([
@@ -125,50 +200,23 @@ class Filter
 
         foreach ($buckets as $bucket) {
             $choices[$bucket['key']] = [
-                'count' => $bucket['doc_count'],
-                'active' => \in_array($bucket['key'], $this->queryValue ?? [])
+                'total' => $bucket['doc_count'],
+                'filter' => 0,
+                'active' => \in_array($bucket['key'], $this->value ?? [])
             ];
         }
 
-        return $choices;
+        $this->choices = $choices;
     }
 
-    private function setQuery($value): void
+    private function setPostFilter(array $options)
     {
-        switch ($this->type) {
-            case self::TYPE_TERMS:
-                $this->terms = (\is_array($value) ? $value : [$value]);
-                $this->query = $this->getQueryTerms();
-                break;
-            case self::TYPE_DATE_RANGE:
-                $this->query = $this->getQueryDateRange($value);
-                break;
+        if (isset($options['post_filter'])) {
+            $this->postFilter = (bool) $options['post_filter'];
+        } else if ($this->type === self::TYPE_TERMS && $this->public) {
+            $this->postFilter = true; //default post filtering for public terms filters
+        } else {
+            $this->postFilter = false;
         }
-    }
-
-    private function getQueryTerms(): array
-    {
-        return ['terms' => [$this->field => $this->terms]];
-    }
-
-    private function getQueryDateRange($value): ?array
-    {
-        if (!\is_array($value)) {
-            return null;
-        }
-
-        $start = isset($value['start']) ? \DateTime::createFromFormat('d-m-Y H:i:s', $value['start'].' 00:00:00') : false;
-        $end = isset($value['end']) ? \DateTime::createFromFormat('d-m-Y H:i:s', $value['end'].' 23:59:59') : false;
-
-        if (!$start && !$end) {
-            return null;
-        }
-
-        return ['range' => [
-            $this->field => array_filter([
-                'gte' => $start ? $start->format('Y-m-d') : null,
-                'lte' => $end ? $end->format('Y-m-d') : null,
-            ])
-        ]];
     }
 }
