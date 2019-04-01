@@ -42,6 +42,7 @@ For accessing the search configuration (filters) before doing the actual search.
 
 ````twig
 {% set search = emsch_search_config() %}
+{% set choices = search.getFilter('name').getChoices() %}
 ````
 
 # Twig embed

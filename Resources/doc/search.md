@@ -38,6 +38,12 @@ You pass the private value with the **value** option.
 }
 ````
 
+### Post Filtering
+
+By default post filtering is enable for public **terms** filters. This way the aggregations are computed before filtering,
+we still known the counts of other choices.
+
+[elasticsearch doc](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-post-filter.html)
 
 ### DateRange 
 
