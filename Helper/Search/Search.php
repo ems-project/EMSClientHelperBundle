@@ -125,17 +125,6 @@ class Search
         }, $fields);
     }
 
-    public function getSuggestions(): array
-    {
-        $suggestions = ['text' => ($this->queryString ?: false)];
-
-        foreach ($this->fields as $field) {
-            $suggestions['suggest-' . $field] = ['term' => ['field' => $field]];
-        }
-
-        return $suggestions;
-    }
-
     public function hasQueryString(): bool
     {
         return null != $this->queryString;
@@ -197,18 +186,14 @@ class Search
         return $this->limit;
     }
 
-    public function getSort(): ?array
-    {
-        if ($this->sortBy) {
-            return [$this->sortBy => ['order' => $this->sortOrder, 'missing' => '_last', 'unmapped_type' => 'long']];
-        }
-
-        return null;
-    }
-
     public function getSortBy(): ?string
     {
         return $this->sortBy;
+    }
+
+    public function getSortOrder(): string
+    {
+        return $this->sortOrder;
     }
 
     private function getOptions(ClientRequest $clientRequest): array

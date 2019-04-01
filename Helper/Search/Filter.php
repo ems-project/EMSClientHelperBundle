@@ -23,8 +23,8 @@ class Filter
     private $public;
     /** @var array */
     private $query = [];
-
-
+    /** @var mixed */
+    private $queryValue;
 
     /** @var array */
     private $terms = [];

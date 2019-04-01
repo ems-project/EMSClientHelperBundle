@@ -27,14 +27,7 @@ class Manager
         $search->bindRequest($request);
 
         $qbService = new QueryBuilder($this->clientRequest, $search);
-        $query = $qbService->buildQuery();
-
-        $body = array_filter([
-            'query' => $query,
-            'aggs' => $search->getFacetsAggs(),
-            'suggest' => $search->getSuggestions(),
-            'sort' => $search->getSort(),
-        ]);
+        $body = $qbService->buildBody();
 
         $results = $this->clientRequest->search($search->getTypes(), $body, $search->getFrom(), $search->getLimit());
 

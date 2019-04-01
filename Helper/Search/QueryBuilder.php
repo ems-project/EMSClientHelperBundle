@@ -17,7 +17,17 @@ class QueryBuilder
         $this->search = $search;
     }
 
-    public function buildQuery(): array
+    public function buildBody(): array
+    {
+        return array_filter([
+            'query' => $this->getQuery(),
+            'aggs' => $this->search->getFacetsAggs(),
+            'suggest' => $this->getSuggest(),
+            'sort' => $this->getSort(),
+        ]);
+    }
+
+    private function getQuery(): array
     {
         $should = [];
 
@@ -92,5 +102,35 @@ class QueryBuilder
         }
 
         return $textValues;
+    }
+
+    private function getSuggest(): ?array
+    {
+        if (!$this->search->hasQueryString()) {
+            return null;
+        }
+
+        $suggest = [];
+
+        foreach ($this->search->getFields() as $field) {
+            $suggest['suggest-' . $field] = ['term' => ['field' => $field]];
+        }
+
+        return $suggest;
+    }
+
+    private function getSort(): ?array
+    {
+        if (!$this->search->getSortBy()) {
+            return null;
+        }
+
+        return [
+            $this->search->getSortBy() => [
+                'order' => $this->search->getSortOrder(),
+                'missing' => '_last',
+                'unmapped_type' => 'long'
+            ]
+        ];
     }
 }
