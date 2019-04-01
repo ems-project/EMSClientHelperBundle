@@ -89,11 +89,6 @@ class Search
         return $aggs;
     }
 
-    public function hasSynonyms(): bool
-    {
-        return null != $this->synonyms;
-    }
-
     /**
      * @return Synonym[]
      */
@@ -102,27 +97,9 @@ class Search
         return $this->synonyms;
     }
 
-    public function setSynonyms(array $synonyms, string $locale): void
-    {
-        foreach ($synonyms as $options) {
-            if (\is_string($options)) {
-                $options = ['types' => [$options]];
-            }
-
-            $this->synonyms[] = new Synonym($options, $locale);
-        }
-    }
-
     public function getFields(): array
     {
         return $this->fields;
-    }
-
-    private function setFields(array $fields, string $locale): void
-    {
-        $this->fields = array_map(function (string $field) use ($locale) {
-            return str_replace('%locale%', $locale, $field);
-        }, $fields);
     }
 
     public function hasQueryString(): bool
@@ -137,7 +114,15 @@ class Search
 
     public function getQueryFacets(): array
     {
-        return $this->queryFacets;
+        $queryFacets = [];
+
+        foreach ($this->queryFacets as $field => $terms) {
+            if (array_key_exists($field, $this->facets) && !empty($terms)) {
+                $queryFacets[$field] = $terms;
+            }
+        }
+
+        return $queryFacets;
     }
 
     public function getFilter(string $name): Filter
@@ -145,30 +130,12 @@ class Search
         return $this->filters[$name];
     }
 
+    /**
+     * @return Filter[]
+     */
     public function getFilters(): array
     {
         return $this->filters;
-    }
-
-    public function createFilter(): array
-    {
-        $result = [];
-
-        foreach ($this->queryFacets as $field => $terms) {
-            if (empty($terms) || !array_key_exists($field, $this->facets)) {
-                continue;
-            }
-
-            $result['bool']['must'][] = ['terms' => [$field => $terms]];
-        }
-
-        foreach ($this->filters as $filter) {
-            if ($filter->hasQuery()) {
-                $result['bool']['must'][] = $filter->getQuery();
-            }
-        }
-
-        return $result;
     }
 
     public function getPage(): int
@@ -209,5 +176,23 @@ class Search
         }
 
         throw new \LogicException('no search defined!');
+    }
+
+    private function setFields(array $fields, string $locale): void
+    {
+        $this->fields = array_map(function (string $field) use ($locale) {
+            return str_replace('%locale%', $locale, $field);
+        }, $fields);
+    }
+
+    private function setSynonyms(array $synonyms, string $locale): void
+    {
+        foreach ($synonyms as $options) {
+            if (\is_string($options)) {
+                $options = ['types' => [$options]];
+            }
+
+            $this->synonyms[] = new Synonym($options, $locale);
+        }
     }
 }

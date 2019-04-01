@@ -29,79 +29,44 @@ class QueryBuilder
 
     private function getQuery(): array
     {
-        $should = [];
+        $query = [];
+        $filterMust = $this->getQueryFilters();
 
         if ($this->search->hasQueryString()) {
-            foreach ($this->search->getFields() as $field) {
-                $textValues = $this->createTextValues($field);
+            $analyzer = new Analyzer($this->clientRequest);
 
-                $should[] = $this->createBodyPerAnalyzer($textValues);
+            foreach ($this->search->getFields() as $field) {
+                $textValues = $analyzer->getTextValues($field, $this->search->getQueryString(), $this->search->getSynonyms());
+
+                $textMust = [];
+                foreach ($textValues as $textValue) {
+                    $textMust['bool']['must'][] = $textValue->makeShould();
+                }
+
+                $query[] = \array_merge_recursive($filterMust, $textMust);
             }
         } else {
-            $should = $this->search->createFilter();
+            $query = $filterMust;
         }
 
-        return ['bool' => ['should' => $should]];
+        return ['bool' => ['should' => $query]];
     }
 
-    private function addSynonyms(TextValue $textValue)
+    private function getQueryFilters(): array
     {
-        foreach ($this->search->getSynonyms() as $synonym) {
-            $queryText = $textValue->getQuery($synonym->getSearchField(), $textValue->getAnalyzer());
-            $querySynonym = $synonym->getQuery($queryText);
+        $query = [];
 
-            $documents = $this->clientRequest->search([], ['_source' => ['_contenttype'], 'query' => $querySynonym], 0, 20);
+        foreach ($this->search->getQueryFacets() as $field => $terms) {
+            $query['bool']['must'][] = ['terms' => [$field => $terms]];
+        }
 
-            if ($documents['hits']['total'] > 20) {
-                continue;
-            }
-
-            foreach ($documents['hits']['hits'] as $doc) {
-                $textValue->addSynonym($synonym->getField(), $doc);
+        foreach ($this->search->getFilters() as $filter) {
+            if ($filter->hasQuery()) {
+                $query['bool']['must'][] = $filter->getQuery();
             }
         }
-    }
 
-    private function createBodyPerAnalyzer(array $textValues)
-    {
-        $filter = $this->search->createFilter();
-
-        if (empty($filter) || !isset($filter['bool'])) {
-            $filter['bool'] = [
-            ];
-        }
-
-        if (!isset($filter['bool']['must'])) {
-            $filter['bool']['must'] = [
-            ];
-        }
-
-        /**@var TextValue $searchValue */
-        foreach ($textValues as $searchValue) {
-            $filter['bool']['must'][] = $searchValue->makeShould();
-        }
-
-        return $filter;
-    }
-
-    private function createTextValues(string $field): array
-    {
-        $analyzer = $this->clientRequest->getFieldAnalyzer($field);
-        $tokens = $this->clientRequest->analyze($this->search->getQueryString(), $field);
-
-        $textValues = [];
-
-        foreach ($tokens as $token) {
-            $textValue = new TextValue($token, $field, $analyzer);
-
-            if ($this->search->hasSynonyms()) {
-                $this->addSynonyms($textValue);
-            }
-
-            $textValues[$token] = $textValue;
-        }
-
-        return $textValues;
+        return $query;
     }
 
     private function getSuggest(): ?array
@@ -110,7 +75,7 @@ class QueryBuilder
             return null;
         }
 
-        $suggest = [];
+        $suggest = ['text' => $this->search->getQueryString()];
 
         foreach ($this->search->getFields() as $field) {
             $suggest['suggest-' . $field] = ['term' => ['field' => $field]];
