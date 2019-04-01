@@ -1,14 +1,37 @@
 # Search
 
-## config
+## Config
 
 ````json
 {
   "types": ["page", "block"],
   "fields": ["all_url_%locale%", "url"],
-  "synonyms": ["keyword"]
+  "synonyms": ["keyword"],
+  "filters": {
+     "ctype": {"type": "terms", "field": "search_type", "aggs_size": 10},
+     "fdate": {"type": "date_range", "field": "search_dates"}
+   }
 }  
 ````
+
+## Filters
+
+- filterName: the named of the request query parameter.
+- type: terms of date_range
+- field: the search field in the elasticsearch document
+- agg_size: for adding the field in aggregations
+
+````json
+{
+   "filterName": {"type":  "type", "field":  "field", "aggs_size": 10}
+}
+````
+
+### DateRange 
+
+Example uri for filtering all documents in november 2018.
+
+/search?**fdate[start_date]**=1-11-2018&**fdate[end_date]**=30-11-2018
 
 ## Synonyms
 

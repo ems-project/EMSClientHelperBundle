@@ -15,6 +15,8 @@ class Search
     private $synonyms;
     /** @var array */
     private $fields;
+    /** @var Filter[] */
+    private $filters = [];
 
     /** @var string|null free text search */
     private $queryString;
@@ -43,6 +45,11 @@ class Search
         $this->limit = $options['default_limit'] ?? $this->limit;
         $this->setFields(($options['fields'] ?? []), $clientRequest->getLocale());
         $this->setSynonyms(($options['synonyms'] ?? []), $clientRequest->getLocale());
+
+        $filters = $options['filters'] ?? [];
+        foreach ($filters as $name => $options) {
+            $this->filters[$name] = new Filter($name, $options);
+        }
     }
 
     public function bindRequest(Request $request): void
@@ -54,6 +61,10 @@ class Search
         $this->limit = (int) $request->get('l', $this->limit);
         $this->sortBy = $request->get('s', $this->sortBy);
         $this->sortOrder = $request->get('o', $this->sortOrder);
+
+        foreach ($this->filters as $filter) {
+            $filter->handleRequest($request);
+        }
     }
 
     public function getTypes(): array
@@ -67,6 +78,12 @@ class Search
 
         foreach ($this->facets as $facet => $size) {
             $aggs[$facet] = ['terms' => ['field' => $facet, 'size' => $size]];
+        }
+
+        foreach ($this->filters as $filter) {
+            if ($filter->hasAggSize()) {
+                $aggs[$filter->getName()] = ['terms' => ['field' => $filter->getField(), 'size' => $filter->getAggSize()]];
+            }
         }
 
         return $aggs;
@@ -134,19 +151,35 @@ class Search
         return $this->queryFacets;
     }
 
+    public function getFilter(string $name): Filter
+    {
+        return $this->filters[$name];
+    }
+
+    public function getFilters(): array
+    {
+        return $this->filters;
+    }
+
     public function createFilter(): array
     {
-        $filter = [];
+        $result = [];
 
         foreach ($this->queryFacets as $field => $terms) {
             if (empty($terms) || !array_key_exists($field, $this->facets)) {
                 continue;
             }
 
-            $filter['bool']['must'][] = ['terms' => [$field => $terms]];
+            $result['bool']['must'][] = ['terms' => [$field => $terms]];
         }
 
-        return $filter;
+        foreach ($this->filters as $filter) {
+            if ($filter->hasQuery()) {
+                $result['bool']['must'][] = $filter->getQuery();
+            }
+        }
+
+        return $result;
     }
 
     public function getPage(): int

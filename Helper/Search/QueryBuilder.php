@@ -8,7 +8,7 @@ class QueryBuilder
 {
     /** @var ClientRequest */
     private $clientRequest;
-    /** @var search */
+    /** @var Search */
     private $search;
 
     public function __construct(ClientRequest $clientRequest, Search $search)
