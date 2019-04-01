@@ -21,6 +21,8 @@ class Filter
     private $postFilter;
     /** @var bool only public filters will handle a request. */
     private $public;
+    /** @var bool if not all doc contain the filter */
+    private $optional;
 
     /** @var array */
     private $query = [];
@@ -50,6 +52,7 @@ class Filter
         $this->type = $options['type'];
         $this->field = $options['field'];
         $this->public = isset($options['public']) ? (bool) $options['public'] : true;
+        $this->optional = isset($options['optional']) ? (bool) $options['optional'] : true;
         $this->aggSize = isset($options['aggs_size']) ? (int) $options['aggs_size'] : null;
         $this->setPostFilter($options);
 
@@ -93,8 +96,17 @@ class Filter
         return !empty($this->query);
     }
 
+    public function isOptional(): bool
+    {
+        return $this->optional;
+    }
+
     public function getQuery(): ?array
     {
+        if ($this->optional) {
+            return $this->getQueryOptional();
+        }
+
         return $this->query;
     }
 
@@ -181,6 +193,20 @@ class Filter
                 'lte' => isset($end) ? $end->format('Y-m-d') : null,
             ])
         ]];
+    }
+
+    private function getQueryOptional(): array
+    {
+        return [
+            'bool' => [
+                'should' => [
+                    [$this->query],
+                    ['bool' => [
+                        'must_not' => ['exists' => ['field' => $this->field]]
+                    ]]
+                ]
+            ]
+        ];
     }
 
     private function setChoices(): void
