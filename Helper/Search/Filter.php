@@ -54,7 +54,7 @@ class Filter
         $this->type = $options['type'];
         $this->field = $options['field'];
         $this->public = isset($options['public']) ? (bool) $options['public'] : true;
-        $this->optional = isset($options['optional']) ? (bool) $options['optional'] : true;
+        $this->optional = isset($options['optional']) ? (bool) $options['optional'] : false;
         $this->aggSize = isset($options['aggs_size']) ? (int) $options['aggs_size'] : null;
         $this->setPostFilter($options);
 
@@ -166,16 +166,17 @@ class Filter
             return;
         }
 
-        $this->value = (\is_array($value) ? $value : [$value]);
-
         switch ($this->type) {
             case self::TYPE_TERM:
-                $this->query = $this->getQueryTerms($this->value);
+                $this->value = $value;
+                $this->query = $this->getQueryTerms([$this->value]);
                 break;
             case self::TYPE_TERMS:
+                $this->value = \is_array($value) ? $value : [$value];
                 $this->query = $this->getQueryTerms($this->value);
                 break;
             case self::TYPE_DATE_RANGE:
+                $this->value = \is_array($value) ? $value : [$value];
                 $this->query = $this->getQueryDateRange($this->value);
                 break;
         }

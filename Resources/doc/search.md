@@ -32,7 +32,7 @@
 - field: the search field in the elasticsearch document
 - agg_size: for adding the field in aggregations
 - post_filter: filter after making aggregations (see Post Filtering)
-- optional: if not all docs contain this filter
+- optional: if not all docs contain this filter, default false
 ````json
 {
    "filterName": {"type":  "type", "field":  "field", "aggs_size": 10, "post_filter":  true, "optional":  true}
