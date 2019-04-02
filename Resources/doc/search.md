@@ -28,7 +28,7 @@
 ## Filters
 
 - filterName: the named of the request query parameter.
-- type: terms of date_range
+- type: term, terms, date_range
 - field: the search field in the elasticsearch document
 - agg_size: for adding the field in aggregations
 - post_filter: filter after making aggregations (see Post Filtering)

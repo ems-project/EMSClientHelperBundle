@@ -32,19 +32,21 @@ class Filter
     /** @var array */
     private $choices = [];
 
+    const TYPE_TERM       = 'term';
     const TYPE_TERMS      = 'terms';
     const TYPE_DATE_RANGE = 'date_range';
 
     const TYPES = [
-        self::TYPE_TERMS      => 'Terms',
-        self::TYPE_DATE_RANGE => 'DateRange',
+        self::TYPE_TERM,
+        self::TYPE_TERMS,
+        self::TYPE_DATE_RANGE,
     ];
 
     public function __construct(ClientRequest $clientRequest, string $name, array $options)
     {
         $this->clientRequest = $clientRequest;
 
-        if (!\array_key_exists($options['type'], self::TYPES)) {
+        if (!\in_array($options['type'], self::TYPES)) {
             throw new \Exception(sprintf('invalid filter type %s', $options['type']));
         }
 
@@ -160,9 +162,16 @@ class Filter
 
     private function setQuery($value): void
     {
+        if (self::TYPE_TERM == $this->type && !\is_string($value)) {
+            return;
+        }
+
         $this->value = (\is_array($value) ? $value : [$value]);
 
         switch ($this->type) {
+            case self::TYPE_TERM:
+                $this->query = $this->getQueryTerms($this->value);
+                break;
             case self::TYPE_TERMS:
                 $this->query = $this->getQueryTerms($this->value);
                 break;
