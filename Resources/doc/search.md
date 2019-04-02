@@ -2,11 +2,17 @@
 
 ## Config
 
+- types: _contenttype field in the result
+- fields: free text search in these fields
+- synonyms: can be used for translating emsLinks
+- sizes: define possible search sizes, default is the first one.
+
 ````json
 {
   "types": ["page", "block"],
   "fields": ["all_url_%locale%", "url"],
   "synonyms": ["keyword"],
+  "sizes": [10,25,50],
   "filters": {
      "ctype": {"type": "terms", "field": "search_type", "aggs_size": 10},
      "fdate": {"type": "date_range", "field": "search_dates"}
@@ -22,7 +28,6 @@
 - agg_size: for adding the field in aggregations
 - post_filter: filter after making aggregations (see Post Filtering)
 - optional: if not all docs contain this filter
-
 ````json
 {
    "filterName": {"type":  "type", "field":  "field", "aggs_size": 10, "post_filter":  true, "optional":  true}
@@ -33,7 +38,6 @@
 
 By setting the option **public** to false the filter will not get his value from the request query.
 You pass the private value with the **value** option.
-
 ````json
 {
    "filterName": {"type":  "terms", "field":  "_contenttype", "public":  false, "value":  ["page"]}

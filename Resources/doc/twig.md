@@ -6,14 +6,12 @@ For managing environment based assets.
 
 This function will unzip the file (hash) in /public/{saveDir}/**hash** (if not exists). 
 The default value of the saveDir is **bundles**.
-
 ```twig
 {{- emsch_assets('hash', 'saveDir') -}}
 ```
 
 After it will create a symlink /public/{saveDir}/**environment_alias** to the hash directory.
 Now you have the possibility to add the following rule in your apache vhost.
-
 ```
  Alias /bundles/emsch_assets /opt/src/public/bundles/**$ENVIRONMENT_ALIAS**
 ```
@@ -28,7 +26,6 @@ Example base template.
 Like emsch_assets this will unzip a file into the required saveDir.
 The function will also return an array, on success this array will contain the file path as key 
 and a Symfony\Component\Finder\SplFileInfo object as value. 
-
 ```twig
 {% set images = emsch_unzip('cf3adfdc15eae63f2040cf2c737ccb37a06ee1f5', 'example-images') %}
 {% for path, info in images %}
@@ -39,9 +36,14 @@ and a Symfony\Component\Finder\SplFileInfo object as value.
 ## ems_search_config
 
 For accessing the search configuration (filters) before doing the actual search.
-
 ````twig
 {% set search = emsch_search_config() %}
+{% set choices = search.getFilter('name').getChoices() %}
+````
+
+In a search result page the search is passed to the template.
+````twig
+{% set activeFilters = search.getActiveFilters() %}
 {% set choices = search.getFilter('name').getChoices() %}
 ````
 

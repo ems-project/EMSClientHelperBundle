@@ -17,6 +17,8 @@ class Search
     private $fields;
     /** @var Filter[] */
     private $filters = [];
+    /** @var array */
+    private $sizes = [];
 
     /** @var string|null free text search */
     private $queryString;
@@ -26,7 +28,7 @@ class Search
     /** @var int */
     private $page = 0;
     /** @var int */
-    private $limit = 1000;
+    private $limit = 100;
     /** @var string|null */
     private $sortBy;
     /** @var string */
@@ -43,6 +45,7 @@ class Search
         $this->types = $options['types']; //required
         $this->facets = $options['facets'] ?? [];
         $this->limit = $options['default_limit'] ?? $this->limit;
+        $this->sizes = $options['sizes'] ?? [];
         $this->setFields(($options['fields'] ?? []), $clientRequest->getLocale());
         $this->setSynonyms(($options['synonyms'] ?? []), $clientRequest->getLocale());
 
@@ -58,7 +61,8 @@ class Search
         $this->queryFacets = $request->get('f', $this->queryFacets);
 
         $this->page = (int) $request->get('p', $this->page);
-        $this->limit = (int) $request->get('l', $this->limit);
+        $this->limit = $this->bindLimit((int) $request->get('l'));
+
         $this->sortBy = $request->get('s', $this->sortBy);
         $this->sortOrder = $request->get('o', $this->sortOrder);
 
@@ -183,6 +187,20 @@ class Search
         }
 
         throw new \LogicException('no search defined!');
+    }
+
+    private function bindLimit(int $l): int
+    {
+        if (null == $this->sizes) {
+            @trigger_error('Define allow sizes with the search option "sizes"', \E_USER_DEPRECATED);
+            return $l > 0 ? $l : $this->limit;
+        }
+
+        if (\in_array($l, $this->sizes)) {
+            return $l;
+        } else {
+            return array_shift($this->sizes);
+        }
     }
 
     private function setFields(array $fields, string $locale): void
