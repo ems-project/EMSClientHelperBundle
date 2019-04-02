@@ -8,17 +8,19 @@ use Symfony\Component\HttpFoundation\Request;
 class Search
 {
     /** @var array */
-    private $types;
+    private $types = [];
     /** @var array [facet_name => size], used for aggregation */
-    private $facets;
+    private $facets = [];
     /** @var Synonym[] */
-    private $synonyms;
+    private $synonyms = [];
     /** @var array */
-    private $fields;
+    private $fields = [];
     /** @var Filter[] */
     private $filters = [];
     /** @var array */
     private $sizes = [];
+    /** @var array */
+    private $sorts = [];
 
     /** @var string|null free text search */
     private $queryString;
@@ -28,7 +30,7 @@ class Search
     /** @var int */
     private $page = 0;
     /** @var int */
-    private $limit = 100;
+    private $size = 100;
     /** @var string|null */
     private $sortBy;
     /** @var string */
@@ -44,8 +46,8 @@ class Search
 
         $this->types = $options['types']; //required
         $this->facets = $options['facets'] ?? [];
-        $this->limit = $options['default_limit'] ?? $this->limit;
         $this->sizes = $options['sizes'] ?? [];
+        $this->setSorts(($options['sorts'] ?? []), $clientRequest->getLocale());
         $this->setFields(($options['fields'] ?? []), $clientRequest->getLocale());
         $this->setSynonyms(($options['synonyms'] ?? []), $clientRequest->getLocale());
 
@@ -61,10 +63,10 @@ class Search
         $this->queryFacets = $request->get('f', $this->queryFacets);
 
         $this->page = (int) $request->get('p', $this->page);
-        $this->limit = $this->bindLimit((int) $request->get('l'));
 
-        $this->sortBy = $request->get('s', $this->sortBy);
-        $this->sortOrder = $request->get('o', $this->sortOrder);
+        $this->setSize($request->get('l', $this->size));
+        $this->setSortBy($request->get('s'));
+        $this->setSortOrder($request->get('o', $this->sortOrder));
 
         foreach ($this->filters as $filter) {
             $filter->handleRequest($request);
@@ -156,12 +158,17 @@ class Search
 
     public function getFrom(): int
     {
-        return $this->page * $this->limit;
+        return $this->page * $this->size;
     }
 
-    public function getLimit(): int
+    public function getSize(): int
     {
-        return $this->limit;
+        return $this->size;
+    }
+
+    public function getSizes(): array
+    {
+        return $this->sizes;
     }
 
     public function getSortBy(): ?string
@@ -172,6 +179,11 @@ class Search
     public function getSortOrder(): string
     {
         return $this->sortOrder;
+    }
+
+    public function getSorts(): array
+    {
+        return $this->sorts;
     }
 
     private function getOptions(ClientRequest $clientRequest): array
@@ -189,25 +201,55 @@ class Search
         throw new \LogicException('no search defined!');
     }
 
-    private function bindLimit(int $l): int
-    {
-        if (null == $this->sizes) {
-            @trigger_error('Define allow sizes with the search option "sizes"', \E_USER_DEPRECATED);
-            return $l > 0 ? $l : $this->limit;
-        }
-
-        if (\in_array($l, $this->sizes)) {
-            return $l;
-        } else {
-            return array_shift($this->sizes);
-        }
-    }
-
     private function setFields(array $fields, string $locale): void
     {
         $this->fields = array_map(function (string $field) use ($locale) {
             return str_replace('%locale%', $locale, $field);
         }, $fields);
+    }
+
+    public function setSorts(array $data, string $locale): void
+    {
+        foreach ($data as $name => $options) {
+            if (\is_array($options)) {
+                $options['field'] = str_replace('%locale%', $locale, $options['field']);
+                $this->sorts[$name] = $options;
+            } elseif (\is_string($options)) {
+                $this->sorts[$name] = ['field' => str_replace('%locale%', $locale, $options)];
+            }
+        }
+    }
+
+    private function setSortBy(?string $name)
+    {
+        if (null === $name) {
+            return;
+        }
+
+        if (null == $this->sorts) {
+            @trigger_error('Define possible sort fields with the search option "sorts"', \E_USER_DEPRECATED);
+            $this->sortBy = $name;
+        } elseif (\array_key_exists($name, $this->sorts)) {
+            $this->sortBy = $this->sorts[$name]['field'];
+            $this->sortOrder = $this->sorts[$name]['order'] ?? $this->sortOrder;
+        }
+    }
+
+    private function setSortOrder(string $o): void
+    {
+        $this->sortOrder = ($o === 'asc' || $o === 'desc') ? $o : 'asc';
+    }
+
+    private function setSize(string $l): void
+    {
+        if (null == $this->sizes) {
+            @trigger_error('Define allow sizes with the search option "sizes"', \E_USER_DEPRECATED);
+             $this->size = (int) $l > 0 ? $l : $this->size;
+        } elseif (\in_array($l, $this->sizes)) {
+            $this->size = (int) $l;
+        } else {
+            $this->size = (int) array_shift($this->sizes);
+        }
     }
 
     private function setSynonyms(array $synonyms, string $locale): void

@@ -5,7 +5,8 @@
 - types: _contenttype field in the result
 - fields: free text search in these fields
 - synonyms: can be used for translating emsLinks
-- sizes: define possible search sizes, default is the first one.
+- sizes: define possible search sizes, default is the first one, use request param **'l'**.
+- sorts: key is the value of the request param **'s'**
 
 ````json
 {
@@ -13,6 +14,10 @@
   "fields": ["all_url_%locale%", "url"],
   "synonyms": ["keyword"],
   "sizes": [10,25,50],
+  "sorts": {
+      "recent": {"field": "search_date", "order": "desc"},
+      "title": "title_%locale%.keyword"
+  },
   "filters": {
      "ctype": {"type": "terms", "field": "search_type", "aggs_size": 10},
      "fdate": {"type": "date_range", "field": "search_dates"}

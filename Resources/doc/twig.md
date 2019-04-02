@@ -47,6 +47,22 @@ In a search result page the search is passed to the template.
 {% set choices = search.getFilter('name').getChoices() %}
 ````
 
+Sorting example
+````twig
+{% if search.sorts|length > 0 %}
+    <div class="custom-control custom-radio">
+      <input type="radio" id="sortby_relevance" name="s" value="" class="custom-control-input" {{ null == search.sortBy ? 'checked="checked"' }}>
+      <label class="custom-control-label" for="sortby_relevance">{{ 'sortby_relevance'|trans }}</label>
+    </div>
+    {% for s, sort in search.sorts %}
+        <div class="custom-control custom-radio">
+          <input type="radio" id="sortby_{{ s }}" name="s" value="{{ s }}" class="custom-control-input" {{ sort.field == search.sortBy ? 'checked="checked"' }} >
+          <label class="custom-control-label" for="sortby_{{ s }}">{{ ('sortby_'~s)|trans }}</label>
+        </div>
+    {% endfor %}
+{% endif %}
+````
+
 # Twig embed
 
 ## render hierarchy

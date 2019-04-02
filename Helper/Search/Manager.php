@@ -29,7 +29,7 @@ class Manager
         $qbService = new QueryBuilder($this->clientRequest, $search);
         $body = $qbService->buildBody();
 
-        $results = $this->clientRequest->search($search->getTypes(), $body, $search->getFrom(), $search->getLimit());
+        $results = $this->clientRequest->search($search->getTypes(), $body, $search->getFrom(), $search->getSize());
 
         if (isset($results['aggregations'])) {
             $search->bindAggregations($results['aggregations']);
@@ -42,7 +42,7 @@ class Manager
             'sort' => $search->getSortBy(),
             'facets' => $search->getQueryFacets(),
             'page' => $search->getPage(),
-            'size' => $search->getLimit(),
+            'size' => $search->getSize(),
             'counters' => $this->getCountInfo($results),
         ];
     }
