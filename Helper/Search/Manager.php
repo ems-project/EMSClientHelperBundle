@@ -37,10 +37,10 @@ class Manager
 
         return [
             'results' => $results,
+            'search' => $search,
             'query' => $search->getQueryString(),
             'sort' => $search->getSortBy(),
             'facets' => $search->getQueryFacets(),
-            'filters' => $search->getFilters(),
             'page' => $search->getPage(),
             'size' => $search->getLimit(),
             'counters' => $this->getCountInfo($results),

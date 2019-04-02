@@ -135,6 +135,16 @@ class Search
         return $this->filters;
     }
 
+    /**
+     * @return Filter[]
+     */
+    public function getActiveFilters()
+    {
+        return \array_filter($this->filters, function (Filter $filter) {
+            return $filter->isActive() && $filter->isPublic();
+        });
+    }
+
     public function getPage(): int
     {
         return $this->page;

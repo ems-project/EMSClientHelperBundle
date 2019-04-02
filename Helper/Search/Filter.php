@@ -101,6 +101,11 @@ class Filter
         return $this->optional;
     }
 
+    public function isPublic(): bool
+    {
+        return $this->public;
+    }
+
     public function getQuery(): ?array
     {
         if ($this->optional) {
