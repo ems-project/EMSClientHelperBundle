@@ -6,55 +6,55 @@ namespace EMS\ClientHelperBundle\Helper\Search;
  * If we search for 'foo bar'
  * the SearchManager will create two SearchValue instances
  */
-class SearchValue
+class TextValue
 {
     /** @var string */
-    private $term;
+    private $text;
+    /** @var string */
+    private $field;
+    /** @var string */
+    private $analyzer;
+
     /** @var array */
     private $synonyms;
 
-    public function __construct(string $term)
+    public function __construct(string $text, string $field, string $analyzer)
     {
-        $this->term = $term;
+        $this->text = $text;
+        $this->field = $field;
+        $this->analyzer = $analyzer;
         $this->synonyms = [];
     }
 
-    public function addSynonym(array $document): void
+    public function getAnalyzer(): string
     {
-        $this->synonyms[] = sprintf('%s:%s', $document['_type'], $document['_id']);
+        return $this->analyzer;
     }
 
-    public function getTerm(): string
+    public function addSynonym(string $synonymField, array $doc): void
     {
-        return $this->term;
-    }
-
-    public function makeShould($searchFields, string $synonymsSearchField, string $analyzerField, float $boost = 1.0): array
-    {
-        $should = [];
-        $should[] = $this->getQuery($searchFields, $analyzerField, $boost);
-
-        foreach ($this->synonyms as $emsLink) {
-            if (!empty($emsLink)) {
-                $should[] = $this->makeEmsLinkQuery($synonymsSearchField, $emsLink);
-            }
-        }
-
-        return ['bool' => [
-            'should' => $should,
-        ]];
-    }
-
-    private function makeEmsLinkQuery(string $field, string $query): array
-    {
-        $searchField = ($field ? $field : '_all');
-
-        return [
+        $this->synonyms[] = [
             'match' => [
-                $searchField => [
-                    'query' => $query,
+                $synonymField => [
+                    'query' => sprintf('%s:%s', $doc['_source']['_contenttype'], $doc['_id']),
                     'operator' => 'AND',
                 ]
+            ]
+        ];
+    }
+
+    public function makeShould(float $boost = 1.0): array
+    {
+        $should = [];
+        $should[] = $this->getQuery($this->field, $this->analyzer, $boost);
+
+        foreach ($this->synonyms as $synonym) {
+            $should[] = $synonym;
+        }
+
+        return [
+            'bool' => [
+                'should' => $should,
             ]
         ];
     }
@@ -62,7 +62,7 @@ class SearchValue
     public function getQuery(string $field, string $analyzer, float $boost = 1.0): array
     {
         $matches = [];
-        preg_match_all('/^\"(.*)\"$/', $this->term, $matches);
+        preg_match_all('/^\"(.*)\"$/', $this->text, $matches);
 
         if (isset($matches[1][0])) {
             return [
@@ -77,11 +77,11 @@ class SearchValue
             ];
         }
 
-        if (strpos($this->term, '*') !== false) {
+        if (strpos($this->text, '*') !== false) {
             return [
                 'query_string' => [
                     'default_field' => $field ?: '_all',
-                    'query' => $this->term,
+                    'query' => $this->text,
                     'analyzer' => $analyzer,
                     'analyze_wildcard' => true,
                     'boost' => $boost
@@ -93,7 +93,7 @@ class SearchValue
         return [
             'match' => [
                 ($field ? $field : '_all') => [
-                    'query' => $this->getTerm(),
+                    'query' => $this->text,
                     'boost' => $boost,
                 ],
             ]

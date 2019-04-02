@@ -23,36 +23,26 @@ class Manager
 
     public function search(Request $request)
     {
-        $config = Config::fromClientRequest($this->clientRequest);
-        $config->bindRequest($request);
+        $search = new Search($this->clientRequest);
+        $search->bindRequest($request);
 
-        $synonyms = $config->getSynonyms();
-        $filter = $config->createFilter();
+        $qbService = new QueryBuilder($this->clientRequest, $search);
+        $body = $qbService->buildBody();
 
-        $analyzers = [];
-        foreach ($config->getFields() as $field) {
-            $analyzers[] = new AnalyserSet($field, $filter, $synonyms, empty($synonyms) ? false : ($field));
+        $results = $this->clientRequest->search($search->getTypes(), $body, $search->getFrom(), $search->getSize());
+
+        if (isset($results['aggregations'])) {
+            $search->bindAggregations($results['aggregations']);
         }
-
-        $qbService = new QueryBuilder($this->clientRequest);
-        $query = $qbService->getQuery($config->getQueryString(), $analyzers);
-
-        $body = array_filter([
-            'query' => $query,
-            'aggs' => $config->getFacetsAggs(),
-            'suggest' => $config->getSuggestions(),
-            'sort' => $config->getSort(),
-        ]);
-
-        $results = $this->clientRequest->search($config->getTypes(), $body, $config->getFrom(), $config->getLimit());
 
         return [
             'results' => $results,
-            'query' => $config->getQueryString(),
-            'sort' => $config->getSortBy(),
-            'facets' => $config->getFilterFacets(),
-            'page' => $config->getPage(),
-            'size' => $config->getLimit(),
+            'search' => $search,
+            'query' => $search->getQueryString(),
+            'sort' => $search->getSortBy(),
+            'facets' => $search->getQueryFacets(),
+            'page' => $search->getPage(),
+            'size' => $search->getSize(),
             'counters' => $this->getCountInfo($results),
         ];
     }

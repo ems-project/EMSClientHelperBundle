@@ -37,6 +37,9 @@ class SearchController extends AbstractController
         return new Response($this->templating->render($result['template'], $context), 200);
     }
 
+    /**
+     * @deprecated
+     */
     public function results(Request $request, string $template): Response
     {
         @trigger_error('Deprecated use routing content type and use controller emsch.controller.search::handle', E_USER_DEPRECATED);
