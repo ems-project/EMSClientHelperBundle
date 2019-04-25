@@ -49,8 +49,8 @@ class Route
             $defaults,
             $this->options['requirements'],
             $this->options['options'],
-            null,
-            null,
+            $this->options['host'],
+            $this->options['schemes'],
             [$this->options['method']]
         );
     }
@@ -66,6 +66,8 @@ class Route
                 'defaults' => [],
                 'requirements' => [],
                 'options' => [],
+                'host' => null,
+                'schemes' => null,
                 'type' => null,
                 'query' => null,
                 'template' => null,
