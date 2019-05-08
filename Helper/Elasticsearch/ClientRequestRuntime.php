@@ -52,6 +52,8 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
      */
     public function data(string $input)
     {
+        @trigger_error(sprintf('The filter emsch_data is deprecated and should not be used anymore. use the filter emsch_get instead"'), E_USER_DEPRECATED);
+
         $emsLink = EMSLink::fromText($input);
         $body = [
             'query' => [
@@ -76,5 +78,38 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
         }
 
         return ($total > 1) ? false : null;
+    }
+
+    /**
+     * @param string $input
+     *
+     * @return array|false|null false when multiple results
+     */
+    public function get(string $input)
+    {
+        $emsLink = EMSLink::fromText($input);
+        $body = [
+            'query' => [
+                'bool' => [
+                    'must' => [['term' => ['_id' => $emsLink->getOuuid()]]],
+                ]
+            ]
+        ];
+
+        if ($emsLink->hasContentType()) {
+            $body['query']['bool']['should'] = [
+                ['term' => ['_type' => $emsLink->getContentType()]],
+                ['term' => ['contenttype' => $emsLink->getContentType()]],
+            ];
+        }
+
+        $result = $this->manager->getDefault()->searchArgs(['body' => $body]);
+
+
+        if (1 === $result['hits']['total']) {
+            return $result['hits']['hits'][0]['_source'];
+        }
+
+        return null;
     }
 }
