@@ -2,8 +2,10 @@
 
 namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
+use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Helper\Search\Search;
 use EMS\CommonBundle\Common\EMSLink;
+use EMS\CommonBundle\Entity\Document;
 use Twig\Extension\RuntimeExtensionInterface;
 
 class ClientRequestRuntime implements RuntimeExtensionInterface
@@ -23,10 +25,10 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
 
     /**
      * @param string $type
-     * @param array  $body
-     * @param int    $from
-     * @param int    $size
-     * @param array  $sourceExclude
+     * @param array $body
+     * @param int $from
+     * @param int $size
+     * @param array $sourceExclude
      *
      * @return array
      */
@@ -83,10 +85,10 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
 
     /**
      * @param string $input
-     *
-     * @return array|false|null false when multiple results
+     * @return Document|null
+     * @throws EnvironmentNotFoundException
      */
-    public function get(string $input)
+    public function get(string $input): ?Document
     {
         $emsLink = EMSLink::fromText($input);
         $body = [
@@ -103,12 +105,10 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
                 ['term' => ['_contenttype' => $emsLink->getContentType()]],
             ];
         }
-
         $result = $this->manager->getDefault()->searchArgs(['body' => $body]);
 
-
         if (1 === $result['hits']['total']) {
-            return $result['hits']['hits'][0]['_source'];
+            return new Document($emsLink->getContentType(), $emsLink->getOuuid(), $result['hits']['hits'][0]['_source']);
         }
 
         return null;
