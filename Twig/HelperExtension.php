@@ -18,7 +18,8 @@ class HelperExtension extends AbstractExtension
     {
         return [
             new TwigFilter('emsch_routing', [RoutingRuntime::class, 'transform'], ['is_safe' => ['html']]),
-            new TwigFilter('emsch_data', [ClientRequestRuntime::class, 'data'], ['is_safe' => ['html']]),
+            new TwigFilter('emsch_data', [ClientRequestRuntime::class, 'data']),
+            new TwigFilter('emsch_get', [ClientRequestRuntime::class, 'get']),
         ];
     }
 
