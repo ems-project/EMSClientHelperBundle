@@ -4,8 +4,10 @@ namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
 use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Helper\Search\Search;
+use EMS\CommonBundle\Common\Document;
 use EMS\CommonBundle\Common\EMSLink;
 use EMS\CommonBundle\Entity\Common;
+use Psr\Log\LoggerInterface;
 use Twig\Extension\RuntimeExtensionInterface;
 
 class ClientRequestRuntime implements RuntimeExtensionInterface
@@ -16,11 +18,17 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
     private $manager;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @param ClientRequestManager $manager
      */
-    public function __construct(ClientRequestManager $manager)
+    public function __construct(ClientRequestManager $manager, LoggerInterface $logger)
     {
         $this->manager = $manager;
+        $this->logger = $logger;
     }
 
     /**
@@ -112,7 +120,7 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
         }
 
         if (1 !== $result['hits']['total']) {
-            @trigger_error(sprintf('emsch_get filter found %d results for the ems key %s', $result['hits']['total'], $input), E_USER_ERROR);
+            $this->logger->error(sprintf('emsch_get filter found %d results for the ems key %s', $result['hits']['total'], $input));
         }
         return new Document($emsLink->getContentType(), $emsLink->getOuuid(), $result['hits']['hits'][0]['_source']);
     }

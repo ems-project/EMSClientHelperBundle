@@ -76,6 +76,8 @@
         </service>
         <service id="emsch.twig.runtime.client_request" class="EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestRuntime">
             <argument type="service" id="emsch.manager.client_request" />
+            <argument type="service" id="logger" />
+            <tag name="monolog.logger" channel="emsch_request"/>
             <tag name="twig.runtime" />
         </service>
 
