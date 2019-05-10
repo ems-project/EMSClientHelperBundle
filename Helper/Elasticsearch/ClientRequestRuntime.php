@@ -6,7 +6,6 @@ use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Helper\Search\Search;
 use EMS\CommonBundle\Common\Document;
 use EMS\CommonBundle\Common\EMSLink;
-use EMS\CommonBundle\Entity\Common;
 use Psr\Log\LoggerInterface;
 use Twig\Extension\RuntimeExtensionInterface;
 
@@ -24,6 +23,7 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
 
     /**
      * @param ClientRequestManager $manager
+     * @param LoggerInterface $logger
      */
     public function __construct(ClientRequestManager $manager, LoggerInterface $logger)
     {
@@ -59,6 +59,8 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
      * @param string $input
      *
      * @return array|false|null false when multiple results
+     *
+     * @throws EnvironmentNotFoundException
      */
     public function data(string $input)
     {
