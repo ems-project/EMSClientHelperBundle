@@ -5,7 +5,7 @@ namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Helper\Search\Search;
 use EMS\CommonBundle\Common\EMSLink;
-use EMS\CommonBundle\Entity\Document;
+use EMS\CommonBundle\Entity\Common;
 use Twig\Extension\RuntimeExtensionInterface;
 
 class ClientRequestRuntime implements RuntimeExtensionInterface
