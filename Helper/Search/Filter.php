@@ -127,7 +127,7 @@ class Filter
         $this->field = str_replace('%locale%', $request->getLocale(), $this->field);
         $requestValue = $request->get($this->name);
 
-        if ($this->value !== null ) {
+        if ($this->value !== null) {
             $this->setQuery($this->value);
         } elseif ($this->public && $requestValue) {
             $this->setQuery($requestValue);
