@@ -134,7 +134,6 @@ class QueryBuilder
             $this->search->getSortBy() => [
                 'order' => $this->search->getSortOrder(),
                 'missing' => '_last',
-                'unmapped_type' => 'long'
             ]
         ];
     }

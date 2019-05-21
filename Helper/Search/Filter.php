@@ -124,13 +124,14 @@ class Filter
 
     public function handleRequest(Request $request): void
     {
-        $value = $request->get($this->name);
+        $this->field = str_replace('%locale%', $request->getLocale(), $this->field);
+        $requestValue = $request->get($this->name);
 
-        if (!$this->public || null == $value) {
-            return;
+        if ($this->value !== null) {
+            $this->setQuery($this->value);
+        } elseif ($this->public && $requestValue) {
+            $this->setQuery($requestValue);
         }
-
-        $this->setQuery($value);
     }
 
     public function handleAggregation(array $aggregation)
@@ -162,29 +163,20 @@ class Filter
 
     private function setQuery($value): void
     {
-        if (self::TYPE_TERM == $this->type && !\is_string($value)) {
-            return;
-        }
-
         switch ($this->type) {
             case self::TYPE_TERM:
                 $this->value = $value;
-                $this->query = $this->getQueryTerms([$this->value]);
+                $this->query = ['term' => [$this->field => ['value' => $value]]];
                 break;
             case self::TYPE_TERMS:
                 $this->value = \is_array($value) ? $value : [$value];
-                $this->query = $this->getQueryTerms($this->value);
+                $this->query = ['terms' => [$this->field => $value]];
                 break;
             case self::TYPE_DATE_RANGE:
                 $this->value = \is_array($value) ? $value : [$value];
                 $this->query = $this->getQueryDateRange($this->value);
                 break;
         }
-    }
-
-    private function getQueryTerms(array $value): array
-    {
-        return ['terms' => [$this->field => $value]];
     }
 
     private function getQueryDateRange(array $value): ?array
