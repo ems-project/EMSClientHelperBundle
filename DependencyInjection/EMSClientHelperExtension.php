@@ -115,6 +115,7 @@ class EMSClientHelperExtension extends Extension
             new Reference(sprintf('ems_common.elasticsearch.%s', $name)),
             new Reference('emsch.helper_environment'),
             new Reference('logger'),
+            new Reference('cache.app'),
             $name,
             $options
         ]);

@@ -3,12 +3,17 @@
 namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
 use Elasticsearch\Client;
+use Elasticsearch\Common\Exceptions\Missing404Exception;
 use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
+use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\PropertyAccess\PropertyAccess;
 use EMS\CommonBundle\Common\EMSLink;
+use EMS\CommonBundle\Helper\EmsFields;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class ClientRequest
 {
@@ -33,6 +38,11 @@ class ClientRequest
     private $logger;
 
     /**
+     * @var AdapterInterface
+     */
+    private $cache;
+
+    /**
      * @var array
      */
     private $options;
@@ -48,6 +58,7 @@ class ClientRequest
      * @param Client            $client
      * @param EnvironmentHelper $environmentHelper
      * @param LoggerInterface   $logger
+     * @param AdapterInterface   $cache
      * @param string            $name
      * @param array             $options
      */
@@ -55,12 +66,14 @@ class ClientRequest
         Client $client,
         EnvironmentHelper $environmentHelper,
         LoggerInterface $logger,
+        AdapterInterface $cache,
         $name,
         array $options = []
     ) {
         $this->client = $client;
         $this->environmentHelper = $environmentHelper;
         $this->logger = $logger;
+        $this->cache = $cache;
         $this->options = $options;
         $this->indexPrefix = isset($options[self::OPTION_INDEX_PREFIX]) ? $options[self::OPTION_INDEX_PREFIX] : null;
         $this->name = $name;
@@ -267,8 +280,82 @@ class ClientRequest
         return $out;
     }
 
+    public function getEnvironments() : array
+    {
+        $environments = [];
+        /** @var Environment $environment */
+        foreach ($this->environmentHelper->getEnvironments() as $environment) {
+            $environments[] = $environment->getIndex();
+        }
+        return $environments;
+    }
+
     public function getLastChangeDate(string $type): \DateTime
     {
+        $body = [
+            '_source' => EmsFields::LOG_DATETIME_FIELD,
+            'size' => 1,
+            'sort' => [
+                EmsFields::LOG_DATETIME_FIELD => [
+                    'order' => 'desc'
+                ]
+            ],
+            'query' => [
+                'bool' => [
+                    'must' => [
+                        [
+                            'terms' => [
+                                EmsFields::LOG_OPERATION_FIELD => [
+                                    EmsFields::LOG_OPERATION_UPDATE,
+                                    EmsFields::LOG_OPERATION_DELETE,
+                                    EmsFields::LOG_OPERATION_CREATE,
+                                ]
+                            ]
+                        ],
+                        [
+                            'terms' => [
+                                EmsFields::LOG_ENVIRONMENT_FIELD => $this->getEnvironments()
+                            ]
+                        ],
+                        [
+                            'terms' => [
+                                EmsFields::LOG_INSTANCE_ID_FIELD => $this->getPrefixes()
+                            ]
+                        ],
+                        [
+                            'terms' => [
+                                EmsFields::LOG_CONTENTTYPE_FIELD => explode(',', $type)
+                            ]
+                        ],
+                    ]
+                ]
+            ]
+        ];
+
+        try {
+            $result =  $this->client->search([
+                'index' => EmsFields::LOG_ALIAS,
+                'type' => EmsFields::LOG_TYPE,
+                'body' => $body,
+            ]);
+
+            if ($result['hits']['total'] > 0 && isset($result['hits']['hits']['0']['_source'][EmsFields::LOG_DATETIME_FIELD])) {
+                return new \DateTime($result['hits']['hits']['0']['_source'][EmsFields::LOG_DATETIME_FIELD]);
+            }
+            $this->logger->warning('log.ems_log_not_found', [
+                'alias' => EmsFields::LOG_ALIAS,
+                'type' => EmsFields::LOG_TYPE,
+                'types' => $type,
+                'environments' => $this->getEnvironments(),
+                'instance_ids' => $this->getPrefixes(),
+            ]);
+        } catch (Missing404Exception $e) {
+            $this->logger->warning('log.ems_log_alias_not_found', [
+                'alias' => EmsFields::LOG_ALIAS,
+            ]);
+        }
+
+
         $result = $this->search($type, [
             'sort' => ['_published_datetime' => ['order' => 'desc', 'missing' => '_last']],
             '_source' => '_published_datetime'
@@ -637,5 +724,34 @@ class ClientRequest
             return $indexes[0];
         }
         return $indexes;
+    }
+
+    public function getCacheResponse(string $cacheKey, ?string $type, callable $function)
+    {
+        if ($type === null) {
+            return $function();
+        }
+
+        $latestHierarchy = $this->cache->getItem($cacheKey);
+        $lastUpdate = $this->getLastChangeDate($type);
+
+        /** @var Response $response */
+        $response = $latestHierarchy->get();
+        if (!$latestHierarchy->isHit() || $response->getLastModified() != $lastUpdate) {
+            $response = $function();
+            $response->setLastModified($lastUpdate);
+            $this->cache->save($latestHierarchy->set($response));
+            $this->logger->notice('log.cache_missed', [
+                'cache_key' => $cacheKey,
+                'type' => $type,
+            ]);
+        } else {
+            $this->logger->notice('log.cache_hit', [
+                'cache_key' => $cacheKey,
+                'type' => $type,
+            ]);
+            $response = $latestHierarchy->get();
+        }
+        return $response;
     }
 }
