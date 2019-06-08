@@ -7,6 +7,7 @@ use Elasticsearch\Client;
 use EMS\ClientHelperBundle\Helper\Api\Client as ApiClient;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Twig\TwigLoader;
+use EMS\CommonBundle\Logger\ElasticsearchLogger;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -37,6 +38,8 @@ class EMSClientHelperExtension extends Extension
         $container->setParameter('emsch.templates', $config['templates']);
         $container->getDefinition('emsch.helper_exception')->replaceArgument(3, $templates['error']);
         $container->getDefinition('emsch.routing.url.transformer')->replaceArgument(4, $templates['ems_link']);
+
+        $this->defineElasticsearchLogger($container, $config['log']);
 
         $this->processElasticms($container, $loader, $config['elasticms']);
         $this->processApi($container, $config['api']);
@@ -100,6 +103,38 @@ class EMSClientHelperExtension extends Extension
         $definition->addTag('emsch.elasticsearch.client');
         
         $container->setDefinition(sprintf('ems_common.elasticsearch.%s', $name), $definition);
+    }
+
+    private function defineElasticsearchLogger(ContainerBuilder $container, array $options)
+    {
+        $definition = new Definition(Client::class);
+        $config = [
+            'hosts' => $options['hosts'],
+            'sSLVerification' => CaBundle::getBundledCaBundlePath(),
+        ];
+
+        $definition
+            ->setFactory([new Reference('ems_common.elasticsearch.factory'), 'fromConfig'])
+            ->setArgument(0, $config)
+            ->setPublic(true);
+
+        $container->setDefinition('ems_common.elasticsearch.log.client', $definition);
+
+        $definition = new Definition(ElasticsearchLogger::class);
+        $definition->setArguments([
+            'info',
+            $options['instance_id'],
+            '',
+            'ems_client',
+            new Reference('ems_common.elasticsearch.log.client'),
+            new Reference('security.helper'),
+        ]);
+        $definition->addTag('kernel.cache_warmer');
+        $definition->addTag('kernel.event_listener', [
+            'event' => 'kernel.terminate',
+        ]);
+
+        $container->setDefinition('ems_common.elasticsearch.logger', $definition);
     }
 
     /**
