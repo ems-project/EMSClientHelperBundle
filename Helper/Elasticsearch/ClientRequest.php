@@ -732,15 +732,15 @@ class ClientRequest
             return $function();
         }
 
-        $latestHierarchy = $this->cache->getItem($cacheKey);
+        $cachedHierarchy = $this->cache->getItem($cacheKey);
         $lastUpdate = $this->getLastChangeDate($type);
 
         /** @var Response $response */
-        $response = $latestHierarchy->get();
-        if (!$latestHierarchy->isHit() || $response->getLastModified() != $lastUpdate) {
+        $response = $cachedHierarchy->get();
+        if (!$cachedHierarchy->isHit() || $response->getLastModified() != $lastUpdate) {
             $response = $function();
             $response->setLastModified($lastUpdate);
-            $this->cache->save($latestHierarchy->set($response));
+            $this->cache->save($cachedHierarchy->set($response));
             $this->logger->notice('log.cache_missed', [
                 'cache_key' => $cacheKey,
                 'type' => $type,
@@ -750,7 +750,7 @@ class ClientRequest
                 'cache_key' => $cacheKey,
                 'type' => $type,
             ]);
-            $response = $latestHierarchy->get();
+            $response = $cachedHierarchy->get();
         }
         return $response;
     }
