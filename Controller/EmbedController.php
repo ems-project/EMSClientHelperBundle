@@ -19,7 +19,7 @@ class EmbedController extends AbstractController
 
     public function renderHierarchyAction(string $template, string $parent, string $field, int $depth = null, array $sourceFields = [], array $args = [], ?string $cacheType = null): Response
     {
-        $cacheKey= \sha1(\json_encode([
+        $cacheKey= [
             'EMSCH_Hierarchy',
             $template,
             $parent,
@@ -28,7 +28,7 @@ class EmbedController extends AbstractController
             $sourceFields,
             $args,
             $cacheType,
-        ]));
+        ];
 
         return $this->clientRequest->getCacheResponse($cacheKey, $cacheType, function () use ($template, $parent, $field, $depth, $sourceFields, $args) {
             $hierarchy = $this->clientRequest->getHierarchy($parent, $field, $depth, $sourceFields, $args['activeChild'] ?? null);
@@ -42,7 +42,7 @@ class EmbedController extends AbstractController
 
     public function renderBlockAction(string $searchType, array $body, string $template, array $args = [], int $from = 0, int $size = 10, ?string $cacheType = null, array $sourceExclude = []) : Response
     {
-        $cacheKey= \sha1(\json_encode([
+        $cacheKey= [
             'EMSCH_Block',
             $searchType,
             $body,
@@ -52,7 +52,7 @@ class EmbedController extends AbstractController
             $size,
             $cacheType,
             $sourceExclude,
-        ]));
+        ];
 
         return $this->clientRequest->getCacheResponse($cacheKey, $cacheType, function () use ($searchType, $body, $template, $args, $from, $size, $sourceExclude) {
             $result = $this->clientRequest->search($searchType, $body, $from, $size, $sourceExclude);

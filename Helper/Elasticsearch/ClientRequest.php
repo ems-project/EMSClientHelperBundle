@@ -726,13 +726,14 @@ class ClientRequest
         return $indexes;
     }
 
-    public function getCacheResponse(string $cacheKey, ?string $type, callable $function)
+    public function getCacheResponse(array $cacheKey, ?string $type, callable $function)
     {
         if ($type === null) {
             return $function();
         }
+        $cacheHash = \sha1(\json_encode($cacheKey));
 
-        $cachedHierarchy = $this->cache->getItem($cacheKey);
+        $cachedHierarchy = $this->cache->getItem($cacheHash);
         $lastUpdate = $this->getLastChangeDate($type);
 
         /** @var Response $response */
@@ -742,12 +743,12 @@ class ClientRequest
             $response->setLastModified($lastUpdate);
             $this->cache->save($cachedHierarchy->set($response));
             $this->logger->notice('log.cache_missed', [
-                'cache_key' => $cacheKey,
+                'cache_key' => $cacheHash,
                 'type' => $type,
             ]);
         } else {
             $this->logger->notice('log.cache_hit', [
-                'cache_key' => $cacheKey,
+                'cache_key' => $cacheHash,
                 'type' => $type,
             ]);
             $response = $cachedHierarchy->get();
