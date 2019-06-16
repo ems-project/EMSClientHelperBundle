@@ -96,18 +96,20 @@ class ClientRequest
         preg_match_all('/"(?:\\\\.|[^\\\\"])*"|\S+/', $text, $out);
         $words = $out[0];
 
-        $tokens = $this->client->indices()->analyze([
+
+        $params = [
             'index' => $this->getFirstIndex(),
             'body' => [
                 'analyzer' => $analyzer,
-                'text' => $words,
-            ],
-        ])['tokens'];
+            ]
+        ];
 
         $withoutStopWords = [];
-        foreach ($tokens as $token) {
-            if (isset($token['token'])) {
-                $withoutStopWords[] = $token['token'];
+        foreach ($words as $word) {
+            $params['body']['text'] = $word;
+            $analyzed = $this->client->indices()->analyze($params);
+            if (isset($analyzed['tokens'][0]['token'])) {
+                $withoutStopWords[] = $word;
             }
         }
         return $withoutStopWords;
