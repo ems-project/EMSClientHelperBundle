@@ -127,6 +127,8 @@ class Configuration implements ConfigurationInterface
                                     ->variableNode('facets')->end()
                                     ->variableNode('synonyms')->end()
                                     ->variableNode('fields')->end()
+                                    ->variableNode('analyzer')->end()
+                                    ->variableNode('suggestFields')->end()
                                 ->end()
                             ->end()
                         ->end()

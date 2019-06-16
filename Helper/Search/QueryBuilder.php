@@ -49,7 +49,7 @@ class QueryBuilder
         $analyzer = new Analyzer($this->clientRequest);
 
         foreach ($this->search->getFields() as $field) {
-            $textValues = $analyzer->getTextValues($field, $queryString, $this->search->getSynonyms());
+            $textValues = $analyzer->getTextValues($field, $this->search->getAnalyzer(), $queryString, $this->search->getSynonyms());
 
             $textMust = [];
             foreach ($textValues as $textValue) {
@@ -117,7 +117,7 @@ class QueryBuilder
 
         $suggest = ['text' => $this->search->getQueryString()];
 
-        foreach ($this->search->getFields() as $field) {
+        foreach ($this->search->getSuggestFields() as $field) {
             $suggest['suggest-' . $field] = ['term' => ['field' => $field]];
         }
 

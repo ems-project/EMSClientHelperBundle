@@ -81,28 +81,33 @@ class ClientRequest
 
     /**
      * @param string $text
-     * @param string $searchField
+     * @param string $analyzer
      *
      * @return array
      */
-    public function analyze($text, $searchField)
+    public function analyze(string $text, $analyzer)
     {
-        $this->logger->debug('ClientRequest : analyze {text} with {field}', ['text' => $text, 'field' => $searchField]);
+        if (empty($text)) {
+            return [];
+        }
+
+        $this->logger->debug('ClientRequest : analyze {text} with {analyzer}', ['text' => $text, 'analyzer' => $analyzer]);
         $out = [];
         preg_match_all('/"(?:\\\\.|[^\\\\"])*"|\S+/', $text, $out);
         $words = $out[0];
 
-        $withoutStopWords = [];
-        $params = [
+        $tokens = $this->client->indices()->analyze([
             'index' => $this->getFirstIndex(),
-            'field' => $searchField,
-            'text' => ''
-        ];
-        foreach ($words as $word) {
-            $params['text'] = $word;
-            $analyzed = $this->client->indices()->analyze($params);
-            if (isset($analyzed['tokens'][0]['token'])) {
-                $withoutStopWords[] = $word;
+            'body' => [
+                'analyzer' => $analyzer,
+                'text' => $words,
+            ],
+        ])['tokens'];
+
+        $withoutStopWords = [];
+        foreach ($tokens as $token) {
+            if (isset($token['token'])) {
+                $withoutStopWords[] = $token['token'];
             }
         }
         return $withoutStopWords;
@@ -719,11 +724,14 @@ class ClientRequest
      */
     private function getFirstIndex()
     {
-        $indexes = $this->getIndex();
-        if (is_array($indexes) && count($indexes) > 0) {
-            return $indexes[0];
+        $aliases = $this->getIndex();
+        if (is_array($aliases) && count($aliases) > 0) {
+            $aliases = $aliases[0];
         }
-        return $indexes;
+
+        return array_keys($this->client->indices()->getAlias([
+            'index' => $aliases,
+        ]))[0];
     }
 
     public function getCacheResponse(array $cacheKey, ?string $type, callable $function)
