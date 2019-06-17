@@ -48,6 +48,11 @@ class ClientRequest
     private $options;
 
     /**
+     * @var array
+     */
+    private $lastUpdateByType = [];
+
+    /**
      * @var string
      */
     private $name;
@@ -75,31 +80,39 @@ class ClientRequest
         $this->logger = $logger;
         $this->cache = $cache;
         $this->options = $options;
+        $this->lastUpdateByType = [];
         $this->indexPrefix = isset($options[self::OPTION_INDEX_PREFIX]) ? $options[self::OPTION_INDEX_PREFIX] : null;
         $this->name = $name;
     }
 
     /**
      * @param string $text
-     * @param string $searchField
+     * @param string $analyzer
      *
      * @return array
      */
-    public function analyze($text, $searchField)
+    public function analyze(string $text, $analyzer)
     {
-        $this->logger->debug('ClientRequest : analyze {text} with {field}', ['text' => $text, 'field' => $searchField]);
+        if (empty($text)) {
+            return [];
+        }
+
+        $this->logger->debug('ClientRequest : analyze {text} with {analyzer}', ['text' => $text, 'analyzer' => $analyzer]);
         $out = [];
         preg_match_all('/"(?:\\\\.|[^\\\\"])*"|\S+/', $text, $out);
         $words = $out[0];
 
-        $withoutStopWords = [];
+
         $params = [
             'index' => $this->getFirstIndex(),
-            'field' => $searchField,
-            'text' => ''
+            'body' => [
+                'analyzer' => $analyzer,
+            ]
         ];
+
+        $withoutStopWords = [];
         foreach ($words as $word) {
-            $params['text'] = $word;
+            $params['body']['text'] = $word;
             $analyzed = $this->client->indices()->analyze($params);
             if (isset($analyzed['tokens'][0]['token'])) {
                 $withoutStopWords[] = $word;
@@ -292,69 +305,90 @@ class ClientRequest
 
     public function getLastChangeDate(string $type): \DateTime
     {
-        $body = [
-            '_source' => EmsFields::LOG_DATETIME_FIELD,
-            'size' => 1,
-            'sort' => [
-                EmsFields::LOG_DATETIME_FIELD => [
-                    'order' => 'desc'
-                ]
-            ],
-            'query' => [
-                'bool' => [
-                    'must' => [
-                        [
-                            'terms' => [
-                                EmsFields::LOG_OPERATION_FIELD => [
-                                    EmsFields::LOG_OPERATION_UPDATE,
-                                    EmsFields::LOG_OPERATION_DELETE,
-                                    EmsFields::LOG_OPERATION_CREATE,
+        if (empty($this->lastUpdateByType)) {
+            $body = [
+                'size' => 0,
+                'query' => [
+                    'bool' => [
+                        'must' => [
+                            [
+                                'terms' => [
+                                    EmsFields::LOG_OPERATION_FIELD => [
+                                        EmsFields::LOG_OPERATION_UPDATE,
+                                        EmsFields::LOG_OPERATION_DELETE,
+                                        EmsFields::LOG_OPERATION_CREATE,
+                                    ]
                                 ]
-                            ]
-                        ],
-                        [
-                            'terms' => [
-                                EmsFields::LOG_ENVIRONMENT_FIELD => $this->getEnvironments()
-                            ]
-                        ],
-                        [
-                            'terms' => [
-                                EmsFields::LOG_INSTANCE_ID_FIELD => $this->getPrefixes()
-                            ]
-                        ],
-                        [
-                            'terms' => [
-                                EmsFields::LOG_CONTENTTYPE_FIELD => explode(',', $type)
-                            ]
-                        ],
+                            ],
+                            [
+                                'terms' => [
+                                    EmsFields::LOG_ENVIRONMENT_FIELD => $this->getEnvironments()
+                                ]
+                            ],
+                            [
+                                'terms' => [
+                                    EmsFields::LOG_INSTANCE_ID_FIELD => $this->getPrefixes()
+                                ]
+                            ],
+                        ]
                     ]
-                ]
-            ]
-        ];
+                ],
+                'aggs' => [
+                    'lastUpdate' => [
+                        'terms' => [
+                            'field' => EmsFields::LOG_CONTENTTYPE_FIELD,
+                            'size' => 100,
+                        ],
+                        'aggs' => [
+                            'maxUpdate' => [
+                                'max' => [
+                                    'field' => EmsFields::LOG_DATETIME_FIELD
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+            try {
+                $result =  $this->client->search([
+                    'index' => EmsFields::LOG_ALIAS,
+                    'type' => EmsFields::LOG_TYPE,
+                    'body' => $body,
+                ]);
 
-        try {
-            $result =  $this->client->search([
-                'index' => EmsFields::LOG_ALIAS,
-                'type' => EmsFields::LOG_TYPE,
-                'body' => $body,
-            ]);
-
-            if ($result['hits']['total'] > 0 && isset($result['hits']['hits']['0']['_source'][EmsFields::LOG_DATETIME_FIELD])) {
-                return new \DateTime($result['hits']['hits']['0']['_source'][EmsFields::LOG_DATETIME_FIELD]);
+                foreach ($result['aggregations']['lastUpdate']['buckets'] as $maxDate) {
+                    $this->lastUpdateByType[$maxDate['key']] = new \DateTime($maxDate['maxUpdate']['value_as_string']);
+                }
+            } catch (Missing404Exception $e) {
+                $this->logger->warning('log.ems_log_alias_not_found', [
+                    'alias' => EmsFields::LOG_ALIAS,
+                ]);
             }
-            $this->logger->warning('log.ems_log_not_found', [
-                'alias' => EmsFields::LOG_ALIAS,
-                'type' => EmsFields::LOG_TYPE,
-                'types' => $type,
-                'environments' => $this->getEnvironments(),
-                'instance_ids' => $this->getPrefixes(),
-            ]);
-        } catch (Missing404Exception $e) {
-            $this->logger->warning('log.ems_log_alias_not_found', [
-                'alias' => EmsFields::LOG_ALIAS,
-            ]);
         }
 
+
+        if (! empty($this->lastUpdateByType)) {
+            $mostRecentUpdate = new \DateTime('2019-06-01T12:00:00Z');
+            $types = explode(',', $type);
+            foreach ($types as $currentType) {
+                if (isset($this->lastUpdateByType[$currentType]) && $mostRecentUpdate < $this->lastUpdateByType[$currentType]) {
+                    $mostRecentUpdate = $this->lastUpdateByType[$currentType];
+                }
+            }
+            $this->logger->info('log.last_update_date', [
+                'contenttypes' => $type,
+                'lastupdate' => $mostRecentUpdate->format('c')
+            ]);
+            return $mostRecentUpdate;
+        }
+
+        $this->logger->warning('log.ems_log_not_found', [
+            'alias' => EmsFields::LOG_ALIAS,
+            'type' => EmsFields::LOG_TYPE,
+            'types' => $type,
+            'environments' => $this->getEnvironments(),
+            'instance_ids' => $this->getPrefixes(),
+        ]);
 
         $result = $this->search($type, [
             'sort' => ['_published_datetime' => ['order' => 'desc', 'missing' => '_last']],
@@ -719,11 +753,14 @@ class ClientRequest
      */
     private function getFirstIndex()
     {
-        $indexes = $this->getIndex();
-        if (is_array($indexes) && count($indexes) > 0) {
-            return $indexes[0];
+        $aliases = $this->getIndex();
+        if (is_array($aliases) && count($aliases) > 0) {
+            $aliases = $aliases[0];
         }
-        return $indexes;
+
+        return array_keys($this->client->indices()->getAlias([
+            'index' => $aliases,
+        ]))[0];
     }
 
     public function getCacheResponse(array $cacheKey, ?string $type, callable $function)

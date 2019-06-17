@@ -16,16 +16,14 @@ class Analyzer
 
     /**
      * @param string $field
-     * @param string $queryString
+     * @param array $tokens
+     * @param string $analyzer
      * @param array  $synonyms
      *
      * @return TextValue[]
      */
-    public function getTextValues(string $field, string $queryString, array $synonyms = []): array
+    public function getTextValues(string $field, string $analyzer, array $tokens, array $synonyms = []): array
     {
-        $analyzer = $this->clientRequest->getFieldAnalyzer($field);
-        $tokens = $this->clientRequest->analyze($queryString, $field);
-
         $textValues = [];
 
         foreach ($tokens as $token) {

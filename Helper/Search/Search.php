@@ -15,6 +15,8 @@ class Search
     private $synonyms = [];
     /** @var array */
     private $fields = [];
+    /** @var array */
+    private $suggestFields = [];
     /** @var Filter[] */
     private $filters = [];
     /** @var array */
@@ -34,6 +36,8 @@ class Search
     /** @var string|null */
     private $sortBy;
     /** @var string */
+    private $analyzer;
+    /** @var string */
     private $sortOrder = 'asc';
 
     public function __construct(ClientRequest $clientRequest)
@@ -49,6 +53,13 @@ class Search
         $this->sizes = $options['sizes'] ?? [];
         $this->setSorts(($options['sorts'] ?? []), $clientRequest->getLocale());
         $this->setFields(($options['fields'] ?? []), $clientRequest->getLocale());
+        $this->setSuggestFields(($options['suggestFields'] ?? $options['fields'] ?? []), $clientRequest->getLocale());
+        $this->setAnalyzer(($options['analyzers'] ?? [
+            'fr' => 'french',
+            'nl' => 'dutch',
+            'en' => 'english',
+            'de' => 'german'
+        ]), $clientRequest->getLocale());
         $this->setSynonyms(($options['synonyms'] ?? []), $clientRequest->getLocale());
 
         $filters = $options['filters'] ?? [];
@@ -98,6 +109,17 @@ class Search
     public function getFields(): array
     {
         return $this->fields;
+    }
+
+    public function getAnalyzer(): string
+    {
+        return $this->analyzer;
+    }
+
+    public function getSuggestFields(): array
+    {
+
+        return $this->suggestFields;
     }
 
     public function hasQueryString(): bool
@@ -201,11 +223,25 @@ class Search
         throw new \LogicException('no search defined!');
     }
 
+    private function setAnalyzer(array $analyzers, string $locale): void
+    {
+        $this->analyzer = isset($analyzers[$locale]) ? $analyzers[$locale] : 'standard';
+    }
+
     private function setFields(array $fields, string $locale): void
     {
         $this->fields = array_map(function (string $field) use ($locale) {
             return str_replace('%locale%', $locale, $field);
         }, $fields);
+    }
+
+    private function setSuggestFields(array $suggestFields, string $locale): void
+    {
+        if (isset($suggestFields[$locale])) {
+            $this->suggestFields = $suggestFields[$locale];
+        } else {
+            $this->suggestFields = [];
+        }
     }
 
     public function setSorts(array $data, string $locale): void

@@ -34,6 +34,9 @@ class Transformer
      */
     private $template;
 
+    /** @var array  */
+    private $documents = [];
+
     /**
      * @param ClientRequest     $clientRequest injected by compiler pass
      * @param Generator         $generator
@@ -48,6 +51,7 @@ class Transformer
         $this->twig = $twig;
         $this->logger = $logger;
         $this->template = $template;
+        $this->documents = [];
     }
     
     /**
@@ -161,6 +165,10 @@ class Transformer
      */
     private function getDocument(EMSLink $emsLink)
     {
+        if (isset($this->documents[$emsLink->__toString()])) {
+            return $this->documents[$emsLink->__toString()];
+        }
+
         $document = $this->clientRequest->getByOuuid(
             $emsLink->getContentType(),
             $emsLink->getOuuid(),
@@ -171,6 +179,7 @@ class Transformer
         if (!$document) {
             throw new \Exception('Document not found for : ' . $emsLink);
         }
+        $this->documents[$emsLink->__toString()] = $document;
         
         return $document;
     }
