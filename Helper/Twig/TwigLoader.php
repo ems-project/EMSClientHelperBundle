@@ -63,9 +63,9 @@ class TwigLoader implements \Twig_LoaderInterface
      */
     public function isFresh($name, $time)
     {
-        $template = $this->getTemplate($name);
-
-        return $template['fresh_time'] <= $time;
+        $matches = $this->match($name);
+        $contentType = \array_shift($matches);
+        return ($this->client->getLastChangeDate($contentType)->getTimestamp() <= $time);
     }
 
     /**
@@ -140,13 +140,7 @@ class TwigLoader implements \Twig_LoaderInterface
 
             $source = $document['_source'];
 
-            if (isset($source['_published_datetime'])) {
-                $date = new \DateTime($source['_published_datetime']);
-            } else if (isset($source['_finalization_datetime'])) {
-                $date = new \DateTime($source['_finalization_datetime']);
-            } else {
-                $date = new \DateTime();
-            }
+            $date = $this->client->getLastChangeDate($contentType);
 
             return ['fresh_time' => $date->getTimestamp(), 'code' => $source[$code]];
         } catch (\Exception $e) {
