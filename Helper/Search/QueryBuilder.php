@@ -47,9 +47,10 @@ class QueryBuilder
         $filterMust = $this->getQueryFilters();
 
         $analyzer = new Analyzer($this->clientRequest);
+        $tokens = $this->clientRequest->analyze($queryString, $this->search->getAnalyzer());
 
         foreach ($this->search->getFields() as $field) {
-            $textValues = $analyzer->getTextValues($field, $this->search->getAnalyzer(), $queryString, $this->search->getSynonyms());
+            $textValues = $analyzer->getTextValues($field, $this->search->getAnalyzer(), $tokens, $this->search->getSynonyms());
 
             $textMust = [];
             foreach ($textValues as $textValue) {

@@ -22,10 +22,8 @@ class Analyzer
      *
      * @return TextValue[]
      */
-    public function getTextValues(string $field, string $analyzer, string $queryString, array $synonyms = []): array
+    public function getTextValues(string $field, string $analyzer, array $tokens, array $synonyms = []): array
     {
-        $tokens = $this->clientRequest->analyze($queryString, $analyzer);
-
         $textValues = [];
 
         foreach ($tokens as $token) {
