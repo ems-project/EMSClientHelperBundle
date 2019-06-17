@@ -165,8 +165,8 @@ class Transformer
      */
     private function getDocument(EMSLink $emsLink)
     {
-        if (isset($this->documents[$emsLink->getLinkKey()])) {
-            return $this->documents[$emsLink->getLinkKey()];
+        if (isset($this->documents[$emsLink->__toString()])) {
+            return $this->documents[$emsLink->__toString()];
         }
 
         $document = $this->clientRequest->getByOuuid(
@@ -179,7 +179,7 @@ class Transformer
         if (!$document) {
             throw new \Exception('Document not found for : ' . $emsLink);
         }
-        $this->documents[$emsLink->getLinkKey()] = $document;
+        $this->documents[$emsLink->__toString()] = $document;
         
         return $document;
     }

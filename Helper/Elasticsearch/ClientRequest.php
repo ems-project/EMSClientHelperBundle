@@ -359,7 +359,6 @@ class ClientRequest
                 foreach ($result['aggregations']['lastUpdate']['buckets'] as $maxDate) {
                     $this->lastUpdateByType[$maxDate['key']] = new \DateTime($maxDate['maxUpdate']['value_as_string']);
                 }
-
             } catch (Missing404Exception $e) {
                 $this->logger->warning('log.ems_log_alias_not_found', [
                     'alias' => EmsFields::LOG_ALIAS,

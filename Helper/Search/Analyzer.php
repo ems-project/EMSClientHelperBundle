@@ -16,7 +16,7 @@ class Analyzer
 
     /**
      * @param string $field
-     * @param string $queryString
+     * @param array $tokens
      * @param string $analyzer
      * @param array  $synonyms
      *

@@ -106,8 +106,8 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
     {
         $emsLink = EMSLink::fromText($input);
 
-        if ( isset($this->documents[$emsLink->getLinkKey()])) {
-            return $this->documents[$emsLink->getLinkKey()];
+        if (isset($this->documents[$emsLink->__toString()])) {
+            return $this->documents[$emsLink->__toString()];
         }
 
         $body = [
@@ -134,7 +134,7 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
             $this->logger->error(sprintf('emsch_get filter found %d results for the ems key %s', $result['hits']['total'], $input));
         }
         $document = new Document($emsLink->getContentType(), $emsLink->getOuuid(), $result['hits']['hits'][0]['_source']);
-        $this->documents[$emsLink->getLinkKey()] = $document;
+        $this->documents[$emsLink->__toString()] = $document;
         return $document;
     }
 }
