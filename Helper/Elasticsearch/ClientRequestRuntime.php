@@ -21,6 +21,9 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
      */
     private $logger;
 
+    /** @var Document[] */
+    private $documents = [];
+
     /**
      * @param ClientRequestManager $manager
      * @param LoggerInterface $logger
@@ -29,6 +32,7 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
     {
         $this->manager = $manager;
         $this->logger = $logger;
+        $this->documents = [];
     }
 
     /**
@@ -101,6 +105,11 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
     public function get(string $input): ?Document
     {
         $emsLink = EMSLink::fromText($input);
+
+        if ( isset($this->documents[$emsLink->getLinkKey()])) {
+            return $this->documents[$emsLink->getLinkKey()];
+        }
+
         $body = [
             'query' => [
                 'bool' => [
@@ -124,6 +133,8 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
         if (1 !== $result['hits']['total']) {
             $this->logger->error(sprintf('emsch_get filter found %d results for the ems key %s', $result['hits']['total'], $input));
         }
-        return new Document($emsLink->getContentType(), $emsLink->getOuuid(), $result['hits']['hits'][0]['_source']);
+        $document = new Document($emsLink->getContentType(), $emsLink->getOuuid(), $result['hits']['hits'][0]['_source']);
+        $this->documents[$emsLink->getLinkKey()] = $document;
+        return $document;
     }
 }
