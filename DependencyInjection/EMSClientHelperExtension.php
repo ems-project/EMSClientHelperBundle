@@ -128,6 +128,7 @@ class EMSClientHelperExtension extends Extension
             'ems_client',
             new Reference('ems_common.elasticsearch.log.client'),
             new Reference('security.helper'),
+            $options['by_pass'],
         ]);
         $definition->addTag('kernel.cache_warmer');
         $definition->addTag('kernel.event_listener', [
