@@ -119,9 +119,12 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
         ];
 
         if ($emsLink->hasContentType()) {
-            $body['query']['bool']['should'] = [
-                ['term' => ['_type' => $emsLink->getContentType()]],
-                ['term' => ['_contenttype' => $emsLink->getContentType()]],
+            $body['query']['bool'] = [
+                'minimum_should_match' => 1,
+                'should' => [
+                    ['term' => ['_type' => $emsLink->getContentType()]],
+                    ['term' => ['_contenttype' => $emsLink->getContentType()]],
+                ]
             ];
         }
         $result = $this->manager->getDefault()->searchArgs(['body' => $body]);
