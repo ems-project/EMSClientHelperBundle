@@ -110,24 +110,17 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
             return $this->documents[$emsLink->__toString()];
         }
 
-        $body = [
-            'query' => [
-                'bool' => [
-                    'must' => [['term' => ['_id' => $emsLink->getOuuid()]]],
-                ]
-            ]
-        ];
+        $bool = ['must' => [['term' => ['_id' => $emsLink->getOuuid()]]]];
 
         if ($emsLink->hasContentType()) {
-            $body['query']['bool'] = [
-                'minimum_should_match' => 1,
-                'should' => [
-                    ['term' => ['_type' => $emsLink->getContentType()]],
-                    ['term' => ['_contenttype' => $emsLink->getContentType()]],
-                ]
+            $bool['minimum_should_match'] = 1;
+            $bool['should'] =  [
+                ['term' => ['_type' => $emsLink->getContentType()]],
+                ['term' => ['_contenttype' => $emsLink->getContentType()]],
             ];
         }
-        $result = $this->manager->getDefault()->searchArgs(['body' => $body]);
+
+        $result = $this->manager->getDefault()->searchArgs(['body' => ['query' => ['bool' => $bool]]]);
 
         if (0 === $result['hits']['total']) {
             return null;
@@ -136,6 +129,7 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
         if (1 !== $result['hits']['total']) {
             $this->logger->error(sprintf('emsch_get filter found %d results for the ems key %s', $result['hits']['total'], $input));
         }
+        
         $document = new Document($emsLink->getContentType(), $emsLink->getOuuid(), $result['hits']['hits'][0]['_source']);
         $this->documents[$emsLink->__toString()] = $document;
         return $document;
