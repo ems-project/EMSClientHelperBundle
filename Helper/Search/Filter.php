@@ -197,7 +197,7 @@ class Filter
             $end = $endDatetime ? $endDatetime->format('Y-m-d') : $value['end'];
         }
 
-        if (!$start && !$end) {
+        if ($start === null && $end === null) {
             return null;
         }
 
