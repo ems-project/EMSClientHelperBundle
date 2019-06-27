@@ -186,25 +186,22 @@ class Filter
         }
 
         $format = 'd-m-Y H:i:s';
-        $start = $end = false;
+        $start = $end = null;
 
         if (isset($value['start'])) {
-            $start = \DateTime::createFromFormat($format, $value['start'].' 00:00:00');
+            $startDatetime = \DateTime::createFromFormat($format, $value['start'].' 00:00:00');
+            $start = $startDatetime ? $startDatetime->format('Y-m-d') : $value['start'];
         }
         if (isset($value['end'])) {
-            $end = \DateTime::createFromFormat($format, $value['end'].' 23:59:59');
+            $endDatetime = \DateTime::createFromFormat($format, $value['end'].' 23:59:59');
+            $end = $endDatetime ? $endDatetime->format('Y-m-d') : $value['end'];
         }
 
         if (!$start && !$end) {
             return null;
         }
 
-        return ['range' => [
-            $this->field => array_filter([
-                'gte' => $start !== false ? $start->format('Y-m-d') : null,
-                'lte' => $end !== false ? $end->format('Y-m-d') : null,
-            ])
-        ]];
+        return ['range' => [ $this->field => array_filter(['gte' => $start, 'lte' => $end,]) ]];
     }
 
     private function getQueryOptional(): array
