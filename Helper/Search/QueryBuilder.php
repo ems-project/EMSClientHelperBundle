@@ -104,6 +104,11 @@ class QueryBuilder
         foreach ($this->search->getFilters() as $filter) {
             if ($filter->hasAggSize()) {
                 $aggs[$filter->getName()] = ['terms' => ['field' => $filter->getField(), 'size' => $filter->getAggSize()]];
+                if ($filter->getSortField() !== null) {
+                    $aggs[$filter->getName()]['terms']['order'] = [
+                        $filter->getSortField() => $filter->getSortOrder(),
+                    ];
+                }
             }
         }
 
