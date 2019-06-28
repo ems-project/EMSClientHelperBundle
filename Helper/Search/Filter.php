@@ -15,6 +15,12 @@ class Filter
     private $type;
     /** @var string */
     private $field;
+
+    /** @var ?string */
+    private $sortField;
+    /** @var string */
+    private $sortOrder;
+
     /** @var null|int */
     private $aggSize;
     /** @var bool default true for terms, when value passed default false */
@@ -56,6 +62,8 @@ class Filter
         $this->public = isset($options['public']) ? (bool) $options['public'] : true;
         $this->optional = isset($options['optional']) ? (bool) $options['optional'] : false;
         $this->aggSize = isset($options['aggs_size']) ? (int) $options['aggs_size'] : null;
+        $this->sortField = isset($options['sort_field']) ? $options['sort_field'] : null;
+        $this->sortOrder = isset($options['sort_order']) ? $options['sort_order'] : 'asc';
         $this->setPostFilter($options);
 
         if (isset($options['value'])) {
@@ -66,6 +74,16 @@ class Filter
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function getSortField(): ?string
+    {
+        return $this->sortField;
+    }
+
+    public function getSortOrder(): string
+    {
+        return $this->sortOrder;
     }
 
     public function getType(): string
@@ -224,10 +242,15 @@ class Filter
             return;
         }
 
+        $aggs = ['field' => $this->field, 'size' => $this->aggSize];
+        if ($this->getSortField() !== null) {
+            $aggs['order'] = [$this->getSortField() => $this->getSortOrder()];
+        }
+
         $search = $this->clientRequest->searchArgs([
             'body' => [
                 'size' => 0,
-                'aggs' => [$this->name => ['terms' => ['field' => $this->field, 'size' => $this->aggSize] ]]
+                'aggs' => [$this->name => ['terms' =>  $aggs]]
             ]
         ]);
         $buckets = $search['aggregations'][$this->name]['buckets'];
