@@ -206,11 +206,11 @@ class Filter
         $format = 'd-m-Y H:i:s';
         $start = $end = null;
 
-        if (isset($value['start'])) {
+        if (isset($value['start']) && !empty($value['start'])) {
             $startDatetime = \DateTime::createFromFormat($format, $value['start'].' 00:00:00');
             $start = $startDatetime ? $startDatetime->format('Y-m-d') : $value['start'];
         }
-        if (isset($value['end'])) {
+        if (isset($value['end']) && !empty($value['end'])) {
             $endDatetime = \DateTime::createFromFormat($format, $value['end'].' 23:59:59');
             $end = $endDatetime ? $endDatetime->format('Y-m-d') : $value['end'];
         }
