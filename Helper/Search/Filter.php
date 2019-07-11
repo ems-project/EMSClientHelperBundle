@@ -156,10 +156,10 @@ class Filter
     {
         $this->setChoices();
 
-        foreach ($aggregation['buckets'] as $bucket) {
-            if (isset($this->choices[$bucket['key']])) {
-                $this->choices[$bucket['key']]['filter'] = $bucket['doc_count'];
-            }
+        if (isset($aggregation['buckets'])) {
+            $this->handleBuckets($aggregation['buckets']);
+        } elseif (isset($aggregation['filtered_'.$this->name]['buckets'])) {
+            $this->handleBuckets($aggregation['filtered_'.$this->name]['buckets']);
         }
     }
 
@@ -275,6 +275,15 @@ class Filter
             $this->postFilter = true; //default post filtering for public terms filters
         } else {
             $this->postFilter = false;
+        }
+    }
+
+    private function handleBuckets(array $buckets)
+    {
+        foreach ($buckets as $bucket) {
+            if (isset($this->choices[$bucket['key']])) {
+                $this->choices[$bucket['key']]['filter'] = $bucket['doc_count'];
+            }
         }
     }
 }

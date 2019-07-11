@@ -54,8 +54,9 @@ class Manager
 
         foreach ($aggregations as $type => $data) {
             $counters[$type] = [];
+            $buckets = $data['buckets'] ?? [];
 
-            foreach ($data['buckets'] as $bucket) {
+            foreach ($buckets as $bucket) {
                 $counters[$type][$bucket['key']] = $bucket['doc_count'];
             }
         }
