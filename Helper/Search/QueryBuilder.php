@@ -19,10 +19,13 @@ class QueryBuilder
 
     public function buildBody(): array
     {
+        $postFilter = $this->getPostFilters();
+        $hasPostFilter = $postFilter != null;
+
         return array_filter([
             'query' => $this->getQuery(),
-            'post_filter' => $this->getPostFilters(),
-            'aggs' => $this->getAggs(),
+            'post_filter' => $postFilter,
+            'aggs' => $this->getAggs($hasPostFilter),
             'suggest' => $this->getSuggest(),
             'sort' => $this->getSort(),
         ]);
@@ -80,20 +83,20 @@ class QueryBuilder
         return $query;
     }
 
-    private function getPostFilters(): array
+    private function getPostFilters(Filter $exclude = null): ?array
     {
         $postFilters = [];
 
         foreach ($this->search->getFilters() as $filter) {
-            if ($filter->isActive() && $filter->isPostFilter()) {
+            if ($filter->isActive() && $filter->isPostFilter() && $filter !== $exclude) {
                 $postFilters[] = $filter->getQuery();
             }
         }
 
-        return $postFilters ? ['bool' => ['must' => $postFilters]] : [];
+        return $postFilters ? ['bool' => ['must' => $postFilters]] : null;
     }
 
-    private function getAggs(): ?array
+    private function getAggs($hasPostFilter = false): ?array
     {
         $aggs = [];
 
@@ -102,17 +105,43 @@ class QueryBuilder
         }
 
         foreach ($this->search->getFilters() as $filter) {
-            if ($filter->hasAggSize()) {
-                $aggs[$filter->getName()] = ['terms' => ['field' => $filter->getField(), 'size' => $filter->getAggSize()]];
-                if ($filter->getSortField() !== null) {
-                    $aggs[$filter->getName()]['terms']['order'] = [
-                        $filter->getSortField() => $filter->getSortOrder(),
-                    ];
-                }
+            if (!$filter->hasAggSize()) {
+                continue;
             }
+
+            $aggs[$filter->getName()] = $hasPostFilter ? $this->getAggPostFilter($filter) : $this->getAgg($filter);
         }
 
-        return $aggs;
+        return array_filter($aggs);
+    }
+
+    private function getAgg(Filter $filter): ?array
+    {
+        $agg = ['terms' => ['field' => $filter->getField(), 'size' => $filter->getAggSize()]];
+
+        if ($filter->getSortField() !== null) {
+            $agg['terms']['order'] = [$filter->getSortField() => $filter->getSortOrder(),];
+        }
+
+        return $agg;
+    }
+
+    /**
+     * If the search uses post filtering, we need to filter other post filter aggregation
+     */
+    private function getAggPostFilter(Filter $filter)
+    {
+        $agg = $this->getAgg($filter);
+        $aggFilter = $this->getPostFilters($filter);
+
+        if (null === $aggFilter) {
+            return $agg;
+        }
+
+        return [
+            'filter' => $aggFilter,
+            'aggs' => ['filtered_'.$filter->getName() => $agg]
+        ];
     }
 
     private function getSuggest(): ?array
