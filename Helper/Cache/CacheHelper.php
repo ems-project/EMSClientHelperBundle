@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Helper\Cache;
 
+use Psr\Cache\CacheItemInterface;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\CacheItem;
 
@@ -19,7 +20,7 @@ class CacheHelper
         $this->cache = $cache;
     }
 
-    public function get(string $key): ?CacheItem
+    public function get(string $key): ?CacheItemInterface
     {
         return $this->cache->getItem($key);
     }

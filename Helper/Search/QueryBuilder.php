@@ -8,111 +8,168 @@ class QueryBuilder
 {
     /** @var ClientRequest */
     private $clientRequest;
+    /** @var Search */
+    private $search;
 
-    public function __construct(ClientRequest $clientRequest)
+    public function __construct(ClientRequest $clientRequest, Search $search)
     {
         $this->clientRequest = $clientRequest;
+        $this->search = $search;
     }
 
-    private function createSearchValues(array $tokens): array
+    public function buildBody(): array
     {
-        $searchValues = [];
+        $postFilter = $this->getPostFilters();
+        $hasPostFilter = $postFilter != null;
 
-        foreach ($tokens as $token) {
-            $searchValues[$token] = new SearchValue($token);
+        return array_filter([
+            'query' => $this->getQuery(),
+            'post_filter' => $postFilter,
+            'aggs' => $this->getAggs($hasPostFilter),
+            'suggest' => $this->getSuggest(),
+            'sort' => $this->getSort(),
+        ]);
+    }
+
+    private function getQuery(): ?array
+    {
+        $filterMust = $this->getQueryFilters();
+
+        if ($this->search->hasQueryString()) {
+            return $this->getQueryWithString($this->search->getQueryString());
+        } elseif ($filterMust) {
+            return $filterMust;
         }
 
-        return $searchValues;
+        return null;
     }
 
-    private function addSynonyms(SearchValue &$searchValue, AnalyserSet $analyzer, $analyzerField)
+    private function getQueryWithString(string $queryString): array
     {
-        $query = [
-            'bool' => [
-                'must' => $searchValue->getQuery($analyzer->getSynonymsSearchField(), $analyzerField)
+        $query = ['bool' => ['should' => []]];
+        $filterMust = $this->getQueryFilters();
+
+        $analyzer = new Analyzer($this->clientRequest);
+        $tokens = $this->clientRequest->analyze($queryString, $this->search->getAnalyzer());
+
+        foreach ($this->search->getFields() as $field) {
+            $textValues = $analyzer->getTextValues($field, $this->search->getAnalyzer(), $tokens, $this->search->getSynonyms());
+
+            $textMust = [];
+            foreach ($textValues as $textValue) {
+                $textMust['bool']['must'][] = $textValue->makeShould();
+            }
+
+            $query['bool']['should'][] = \array_merge_recursive($filterMust, $textMust);
+        }
+
+        return $query;
+    }
+
+    private function getQueryFilters(): array
+    {
+        $query = [];
+
+        foreach ($this->search->getQueryFacets() as $field => $terms) {
+            $query['bool']['must'][] = ['terms' => [$field => $terms]];
+        }
+
+        foreach ($this->search->getFilters() as $filter) {
+            if ($filter->isActive() && !$filter->isPostFilter()) {
+                $query['bool']['must'][] = $filter->getQuery();
+            }
+        }
+
+        return $query;
+    }
+
+    private function getPostFilters(Filter $exclude = null): ?array
+    {
+        $postFilters = [];
+
+        foreach ($this->search->getFilters() as $filter) {
+            if ($filter->isActive() && $filter->isPostFilter() && $filter !== $exclude) {
+                $postFilters[] = $filter->getQuery();
+            }
+        }
+
+        return $postFilters ? ['bool' => ['must' => $postFilters]] : null;
+    }
+
+    private function getAggs($hasPostFilter = false): ?array
+    {
+        $aggs = [];
+
+        foreach ($this->search->getQueryFacets() as $facet => $size) {
+            $aggs[$facet] = ['terms' => ['field' => $facet, 'size' => $size]];
+        }
+
+        foreach ($this->search->getFilters() as $filter) {
+            if (!$filter->hasAggSize()) {
+                continue;
+            }
+
+            $aggs[$filter->getName()] = $hasPostFilter ? $this->getAggPostFilter($filter) : $this->getAgg($filter);
+        }
+
+        return array_filter($aggs);
+    }
+
+    private function getAgg(Filter $filter): ?array
+    {
+        $agg = ['terms' => ['field' => $filter->getField(), 'size' => $filter->getAggSize()]];
+
+        if ($filter->getSortField() !== null) {
+            $agg['terms']['order'] = [$filter->getSortField() => $filter->getSortOrder(),];
+        }
+
+        return $agg;
+    }
+
+    /**
+     * If the search uses post filtering, we need to filter other post filter aggregation
+     */
+    private function getAggPostFilter(Filter $filter)
+    {
+        $agg = $this->getAgg($filter);
+        $aggFilter = $this->getPostFilters($filter);
+
+        if (null === $aggFilter) {
+            return $agg;
+        }
+
+        return [
+            'filter' => $aggFilter,
+            'aggs' => ['filtered_'.$filter->getName() => $agg]
+        ];
+    }
+
+    private function getSuggest(): ?array
+    {
+        if (!$this->search->hasQueryString()) {
+            return null;
+        }
+
+        $suggest = ['text' => $this->search->getQueryString()];
+
+        foreach ($this->search->getSuggestFields() as $field) {
+            $suggest['suggest-' . $field] = ['term' => ['field' => $field]];
+        }
+
+        return $suggest;
+    }
+
+    private function getSort(): ?array
+    {
+        if (!$this->search->getSortBy()) {
+            return null;
+        }
+
+        return [
+            $this->search->getSortBy() => [
+                'order' => $this->search->getSortOrder(),
+                'missing' => '_last',
             ]
         ];
-
-        if ($analyzer->getSynonymsFilter()) {
-            $query['bool']['must'] = [$query['bool']['must'], ['bool' => $analyzer->getSynonymsFilter()]];
-        }
-
-        $documents = $this->clientRequest->search($analyzer->getSynonymTypes(), [
-            '_source' => false,
-            'query' => $query,
-        ], 0, 20);
-
-        if ($documents['hits']['total'] <= 20) {
-            foreach ($documents['hits']['hits'] as $document) {
-                $searchValue->addSynonym($document);
-            }
-        }
-    }
-
-    private function createBodyPerAnalyzer(array $searchValues, AnalyserSet $analyzer, $analyzerField)
-    {
-        $filter = $analyzer->getFilter();
-
-        if (empty($filter) || !isset($filter['bool'])) {
-            $filter['bool'] = [
-            ];
-        }
-
-        if (!isset($filter['bool']['must'])) {
-            $filter['bool']['must'] = [
-            ];
-        }
-
-        /**@var SearchValue $searchValue */
-        foreach ($searchValues as $searchValue) {
-            $filter['bool']['must'][] = $searchValue->makeShould($analyzer->getField(), $analyzer->getSearchSynonymsInField(), $analyzerField, $analyzer->getBoost());
-        }
-
-        return $filter;
-    }
-
-    private function buildPerAnalyzer($queryString, AnalyserSet $analyzerSet)
-    {
-        $analyzer = $this->clientRequest->getFieldAnalyzer($analyzerSet->getField());
-        $tokens = $this->clientRequest->analyze($queryString, $analyzerSet->getField());
-
-        $searchValues = $this->createSearchValues($tokens);
-
-        if (!empty($analyzerSet->getSynonymTypes())) {
-            foreach ($searchValues as $searchValue) {
-                $this->addSynonyms($searchValue, $analyzerSet, $analyzer);
-            }
-        }
-
-        return $this->createBodyPerAnalyzer($searchValues, $analyzerSet, $analyzer);
-    }
-
-    public function getQuery($queryString, $analyzerSets)
-    {
-        $should = [];
-        if (!$queryString) {
-            /**@var AnalyserSet $analyzer */
-            foreach ($analyzerSets as $analyzer) {
-                $filter = $analyzer->getFilter();
-                if ($filter) {
-                    $should[] = $filter;
-                }
-            }
-        } else {
-            foreach ($analyzerSets as $analyzer) {
-                $should[] = $this->buildPerAnalyzer($queryString, $analyzer);
-            }
-        }
-
-        $out = [
-            'bool' => [
-                'should' => $should
-            ]
-        ];
-
-        //add aggs per facet index
-        //add a must terms if there is at least one facets
-
-        return $out;
     }
 }

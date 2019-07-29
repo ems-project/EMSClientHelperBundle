@@ -34,17 +34,21 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
         $directory = $this->publicDir . '/' . $saveDir . '/' . $hash;
 
         try {
+            $cacheKey = $this->manager->getDefault()->getCacheKey();
+            $symlink = $this->publicDir . '/bundles/' . $cacheKey;
+
+            if ($this->filesystem->exists($symlink . '/' . $hash)) {
+                return; //valid
+            }
+
             if (!$this->filesystem->exists($directory)) {
                 $this->extract($this->storageManager->getFile($hash), $directory);
+                $this->filesystem->touch($directory . '/' . $hash);
             }
 
-            $cacheKey = $this->manager->getDefault()->getCacheKey();
-            $symlink = $this->publicDir .  '/bundles/' . $cacheKey;
-
-            if (!$this->checkSign($symlink, $directory, $hash)) {
-                $this->filesystem->remove($symlink);
-                $this->filesystem->symlink($directory, $symlink, true);
-            }
+            $this->manager->getLogger()->error('switching assets {symlink} to {hash}', ['symlink' => $symlink, 'hash' => $hash]);
+            $this->filesystem->remove($symlink);
+            $this->filesystem->symlink($directory, $symlink, true);
         } catch (\Exception $e) {
             $this->manager->getLogger()->error('emsch_assets failed : {error}', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
         }
@@ -78,18 +82,5 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
         $zip->close();
 
         return true;
-    }
-
-    private function checkSign(string $symlink, string $directory, string $hash): bool
-    {
-        if (!$this->filesystem->exists($symlink)) {
-            return false;
-        }
-
-        try {
-            return sha1_file($symlink . '/' . $hash) === sha1_file($directory . '/' . $hash);
-        } catch (\Exception $e) {
-            return false;
-        }
     }
 }

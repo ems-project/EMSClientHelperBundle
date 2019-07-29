@@ -35,7 +35,7 @@ class Router extends BaseRouter
 
     public function getRouteCollection(): RouteCollection
     {
-        if (!$this->collection) {
+        if ($this->collection === null) {
             $this->buildRouteCollection();
         }
 

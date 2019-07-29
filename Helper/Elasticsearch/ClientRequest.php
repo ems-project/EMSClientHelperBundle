@@ -3,12 +3,17 @@
 namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
 use Elasticsearch\Client;
+use Elasticsearch\Common\Exceptions\Missing404Exception;
 use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
+use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\PropertyAccess\PropertyAccess;
 use EMS\CommonBundle\Common\EMSLink;
+use EMS\CommonBundle\Helper\EmsFields;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class ClientRequest
 {
@@ -33,9 +38,19 @@ class ClientRequest
     private $logger;
 
     /**
+     * @var AdapterInterface
+     */
+    private $cache;
+
+    /**
      * @var array
      */
     private $options;
+
+    /**
+     * @var array
+     */
+    private $lastUpdateByType = [];
 
     /**
      * @var string
@@ -48,6 +63,7 @@ class ClientRequest
      * @param Client            $client
      * @param EnvironmentHelper $environmentHelper
      * @param LoggerInterface   $logger
+     * @param AdapterInterface   $cache
      * @param string            $name
      * @param array             $options
      */
@@ -55,38 +71,48 @@ class ClientRequest
         Client $client,
         EnvironmentHelper $environmentHelper,
         LoggerInterface $logger,
+        AdapterInterface $cache,
         $name,
         array $options = []
     ) {
         $this->client = $client;
         $this->environmentHelper = $environmentHelper;
         $this->logger = $logger;
+        $this->cache = $cache;
         $this->options = $options;
+        $this->lastUpdateByType = [];
         $this->indexPrefix = isset($options[self::OPTION_INDEX_PREFIX]) ? $options[self::OPTION_INDEX_PREFIX] : null;
         $this->name = $name;
     }
 
     /**
      * @param string $text
-     * @param string $searchField
+     * @param string $analyzer
      *
      * @return array
      */
-    public function analyze($text, $searchField)
+    public function analyze(string $text, $analyzer)
     {
-        $this->logger->debug('ClientRequest : analyze {text} with {field}', ['text' => $text, 'field' => $searchField]);
+        if (empty($text)) {
+            return [];
+        }
+
+        $this->logger->debug('ClientRequest : analyze {text} with {analyzer}', ['text' => $text, 'analyzer' => $analyzer]);
         $out = [];
         preg_match_all('/"(?:\\\\.|[^\\\\"])*"|\S+/', $text, $out);
         $words = $out[0];
 
-        $withoutStopWords = [];
+
         $params = [
             'index' => $this->getFirstIndex(),
-            'field' => $searchField,
-            'text' => ''
+            'body' => [
+                'analyzer' => $analyzer,
+            ]
         ];
+
+        $withoutStopWords = [];
         foreach ($words as $word) {
-            $params['text'] = $word;
+            $params['body']['text'] = $word;
             $analyzed = $this->client->indices()->analyze($params);
             if (isset($analyzed['tokens'][0]['token'])) {
                 $withoutStopWords[] = $word;
@@ -116,13 +142,7 @@ class ClientRequest
         ]);
     }
 
-    /**
-     * @param string $emsKey
-     * @param string $childrenField
-     *
-     * @return string|null
-     */
-    public function getAllChildren($emsKey, $childrenField)
+    public function getAllChildren(string $emsKey, string $childrenField): array
     {
         $this->logger->debug('ClientRequest : getAllChildren for {emsKey}', ['emsKey' => $emsKey]);
         $out = [$emsKey];
@@ -273,8 +293,103 @@ class ClientRequest
         return $out;
     }
 
+    public function getEnvironments() : array
+    {
+        $environments = [];
+        /** @var Environment $environment */
+        foreach ($this->environmentHelper->getEnvironments() as $environment) {
+            $environments[] = $environment->getIndex();
+        }
+        return $environments;
+    }
+
     public function getLastChangeDate(string $type): \DateTime
     {
+        if (empty($this->lastUpdateByType)) {
+            $body = [
+                'size' => 0,
+                'query' => [
+                    'bool' => [
+                        'must' => [
+                            [
+                                'terms' => [
+                                    EmsFields::LOG_OPERATION_FIELD => [
+                                        EmsFields::LOG_OPERATION_UPDATE,
+                                        EmsFields::LOG_OPERATION_DELETE,
+                                        EmsFields::LOG_OPERATION_CREATE,
+                                    ]
+                                ]
+                            ],
+                            [
+                                'terms' => [
+                                    EmsFields::LOG_ENVIRONMENT_FIELD => $this->getEnvironments()
+                                ]
+                            ],
+                            [
+                                'terms' => [
+                                    EmsFields::LOG_INSTANCE_ID_FIELD => $this->getPrefixes()
+                                ]
+                            ],
+                        ]
+                    ]
+                ],
+                'aggs' => [
+                    'lastUpdate' => [
+                        'terms' => [
+                            'field' => EmsFields::LOG_CONTENTTYPE_FIELD,
+                            'size' => 100,
+                        ],
+                        'aggs' => [
+                            'maxUpdate' => [
+                                'max' => [
+                                    'field' => EmsFields::LOG_DATETIME_FIELD
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+            try {
+                $result =  $this->client->search([
+                    'index' => EmsFields::LOG_ALIAS,
+                    'type' => EmsFields::LOG_TYPE,
+                    'body' => $body,
+                ]);
+
+                foreach ($result['aggregations']['lastUpdate']['buckets'] as $maxDate) {
+                    $this->lastUpdateByType[$maxDate['key']] = new \DateTime($maxDate['maxUpdate']['value_as_string']);
+                }
+            } catch (Missing404Exception $e) {
+                $this->logger->warning('log.ems_log_alias_not_found', [
+                    'alias' => EmsFields::LOG_ALIAS,
+                ]);
+            }
+        }
+
+
+        if (! empty($this->lastUpdateByType)) {
+            $mostRecentUpdate = new \DateTime('2019-06-01T12:00:00Z');
+            $types = explode(',', $type);
+            foreach ($types as $currentType) {
+                if (isset($this->lastUpdateByType[$currentType]) && $mostRecentUpdate < $this->lastUpdateByType[$currentType]) {
+                    $mostRecentUpdate = $this->lastUpdateByType[$currentType];
+                }
+            }
+            $this->logger->info('log.last_update_date', [
+                'contenttypes' => $type,
+                'lastupdate' => $mostRecentUpdate->format('c')
+            ]);
+            return $mostRecentUpdate;
+        }
+
+        $this->logger->warning('log.ems_log_not_found', [
+            'alias' => EmsFields::LOG_ALIAS,
+            'type' => EmsFields::LOG_TYPE,
+            'types' => $type,
+            'environments' => $this->getEnvironments(),
+            'instance_ids' => $this->getPrefixes(),
+        ]);
+
         $result = $this->search($type, [
             'sort' => ['_published_datetime' => ['order' => 'desc', 'missing' => '_last']],
             '_source' => '_published_datetime'
@@ -506,13 +621,7 @@ class ClientRequest
         return $hits['hits'][0];
     }
 
-    /**
-     * @param string $type
-     * @param array  $parameters
-     *
-     * @return string|null
-     */
-    public function searchOneBy($type, array $parameters)
+    public function searchOneBy(string $type, array $parameters): ?array
     {
         $this->logger->debug('ClientRequest : searchOneBy for type {type}', ['type' => $type]);
 
@@ -522,7 +631,7 @@ class ClientRequest
             return $result['hits']['hits'][0];
         }
 
-        return false;
+        return null;
     }
 
     /**
@@ -644,10 +753,43 @@ class ClientRequest
      */
     private function getFirstIndex()
     {
-        $indexes = $this->getIndex();
-        if (is_array($indexes) && count($indexes) > 0) {
-            return $indexes[0];
+        $aliases = $this->getIndex();
+        if (is_array($aliases) && count($aliases) > 0) {
+            $aliases = $aliases[0];
         }
-        return $indexes;
+
+        return array_keys($this->client->indices()->getAlias([
+            'index' => $aliases,
+        ]))[0];
+    }
+
+    public function getCacheResponse(array $cacheKey, ?string $type, callable $function)
+    {
+        if ($type === null) {
+            return $function();
+        }
+        $cacheHash = \sha1(\json_encode($cacheKey));
+
+        $cachedHierarchy = $this->cache->getItem($cacheHash);
+        $lastUpdate = $this->getLastChangeDate($type);
+
+        /** @var Response $response */
+        $response = $cachedHierarchy->get();
+        if (!$cachedHierarchy->isHit() || $response->getLastModified() != $lastUpdate) {
+            $response = $function();
+            $response->setLastModified($lastUpdate);
+            $this->cache->save($cachedHierarchy->set($response));
+            $this->logger->notice('log.cache_missed', [
+                'cache_key' => $cacheHash,
+                'type' => $type,
+            ]);
+        } else {
+            $this->logger->notice('log.cache_hit', [
+                'cache_key' => $cacheHash,
+                'type' => $type,
+            ]);
+            $response = $cachedHierarchy->get();
+        }
+        return $response;
     }
 }

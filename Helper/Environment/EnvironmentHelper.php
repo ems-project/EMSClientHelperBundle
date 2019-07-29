@@ -38,10 +38,8 @@ class EnvironmentHelper
     /**
      * Important for twig loader on kernel terminate we don't have a current request.
      * So this function remembers it's environment and can still return it.
-     *
-     * @return string
      */
-    public function getEnvironment()
+    public function getEnvironment(): ?string
     {
         static $env = false;
 

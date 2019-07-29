@@ -3,11 +3,12 @@
 namespace EMS\ClientHelperBundle\Helper\Api;
 
 use EMS\CommonBundle\Common\HttpClientFactory;
+use GuzzleHttp\Client as HttpClient;
 
 class Client
 {
     /**
-     * @var Client
+     * @var HttpClient
      */
     private $client;
     

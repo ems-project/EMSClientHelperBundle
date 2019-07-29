@@ -96,12 +96,12 @@ class HealthCheckCommand extends Command
         }
         
         foreach ($this->clients as $client) {
-            if ('red' === $client->cluster()->health()) {
+            if ('red' === $client->cluster()->health()['status']) {
                 $io->error('Cluster health is RED');
                 throw new ClusterHealthRedException();
             }
             
-            if ($green && 'green' !== $client->cluster()->health()) {
+            if ($green && 'green' !== $client->cluster()->health()['status']) {
                 $io->error('Cluster health is NOT GREEN');
                 throw new ClusterHealthNotGreenException();
             }

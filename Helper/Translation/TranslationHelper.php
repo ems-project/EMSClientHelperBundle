@@ -7,13 +7,13 @@ use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use Symfony\Bundle\FrameworkBundle\Translation\Translator;
 use Symfony\Component\Translation\MessageCatalogue;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorBagInterface;
 
 class TranslationHelper
 {
     /** @var ClientRequestManager */
     private $manager;
-    /** @var TranslatorInterface */
+    /** @var TranslatorBagInterface */
     private $translator;
     /** @var CacheHelper */
     private $cache;
