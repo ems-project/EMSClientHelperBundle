@@ -23,6 +23,8 @@ class Search
     private $sizes = [];
     /** @var array */
     private $sorts = [];
+    /** @var array */
+    private $highlight = [];
 
     /** @var string|null free text search */
     private $queryString;
@@ -52,6 +54,7 @@ class Search
         $this->facets = $options['facets'] ?? [];
         $this->sizes = $options['sizes'] ?? [];
         $this->setSorts(($options['sorts'] ?? []), $clientRequest->getLocale());
+        $this->setHighlight(($options['highlight'] ?? []), $clientRequest->getLocale());
         $this->setFields(($options['fields'] ?? []), $clientRequest->getLocale());
         $this->setSuggestFields(($options['suggestFields'] ?? $options['fields'] ?? []), $clientRequest->getLocale());
         $this->setAnalyzer(($options['analyzers'] ?? [
@@ -207,6 +210,16 @@ class Search
     {
         return $this->sorts;
     }
+    
+    public function hasHighlight(): bool
+    {
+        return null != $this->highlight;
+    }
+    
+    public function getHighlight(): array
+    {
+        return $this->highlight;
+    }
 
     private function getOptions(ClientRequest $clientRequest): array
     {
@@ -253,6 +266,19 @@ class Search
             } elseif (\is_string($options)) {
                 $this->sorts[$name] = ['field' => str_replace('%locale%', $locale, $options)];
             }
+        }
+    }
+
+    private function setHighlight(array $data, string $locale): void
+    {
+        if (\is_array($data) && isset($data['fields'])) {
+            foreach ($data['fields'] as $key => $options) {
+                if (strpos($key, '%locale%')) {
+                    $data['fields'][str_replace('%locale%', $locale, $key)] = $options;
+                    unset($data['fields'][$key]);
+                }
+            }
+            $this->highlight = $data;
         }
     }
 

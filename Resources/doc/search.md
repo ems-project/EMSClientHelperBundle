@@ -99,3 +99,25 @@ will search and match with the **_all** field.
     ]
 }
 ````
+
+## Highhight
+
+Get highlighted snippets from one or more fields in your search 
+````json
+{
+  "highlight": {
+    "pre_tags": [
+      "<em>"
+    ],
+    "post_tags": [
+      "</em>"
+    ],
+    "fields": {
+      "all_%locale%": {
+        "fragment_size": 2000,
+        "number_of_fragments": 50
+      }
+    }
+  }
+}
+````

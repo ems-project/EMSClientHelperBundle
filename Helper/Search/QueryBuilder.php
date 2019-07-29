@@ -28,6 +28,7 @@ class QueryBuilder
             'aggs' => $this->getAggs($hasPostFilter),
             'suggest' => $this->getSuggest(),
             'sort' => $this->getSort(),
+            'highlight' => $this->getHighlight()
         ]);
     }
 
@@ -155,7 +156,7 @@ class QueryBuilder
         foreach ($this->search->getSuggestFields() as $field) {
             $suggest['suggest-' . $field] = ['term' => ['field' => $field]];
         }
-
+  
         return $suggest;
     }
 
@@ -171,5 +172,14 @@ class QueryBuilder
                 'missing' => '_last',
             ]
         ];
+    }
+    
+    private function getHighlight(): ?array
+    {
+        if (!$this->search->hasHighlight()) {
+            return null;
+        }
+        
+        return $this->search->getHighlight();
     }
 }
