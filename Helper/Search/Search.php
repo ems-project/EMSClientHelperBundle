@@ -220,7 +220,6 @@ class Search
     {
         return $this->highlight;
     }
-    
 
     private function getOptions(ClientRequest $clientRequest): array
     {
@@ -269,7 +268,7 @@ class Search
             }
         }
     }
-    
+
     private function setHighlight(array $data, string $locale): void
     {
         if (\is_array($data) && isset($data['fields'])) {

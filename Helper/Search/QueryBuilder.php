@@ -156,7 +156,7 @@ class QueryBuilder
         foreach ($this->search->getSuggestFields() as $field) {
             $suggest['suggest-' . $field] = ['term' => ['field' => $field]];
         }
-
+  
         return $suggest;
     }
 
