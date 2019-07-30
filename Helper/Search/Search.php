@@ -210,12 +210,7 @@ class Search
     {
         return $this->sorts;
     }
-    
-    public function hasHighlight(): bool
-    {
-        return null != $this->highlight;
-    }
-    
+
     public function getHighlight(): array
     {
         return $this->highlight;
