@@ -28,6 +28,7 @@ class QueryBuilder
             'aggs' => $this->getAggs($hasPostFilter),
             'suggest' => $this->getSuggest(),
             'sort' => $this->getSort(),
+            'highlight' => $this->search->getHighlight()
         ]);
     }
 
