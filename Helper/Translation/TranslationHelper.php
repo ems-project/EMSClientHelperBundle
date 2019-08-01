@@ -38,6 +38,10 @@ class TranslationHelper
             $messages = $this->getMessages($clientRequest);
 
             foreach ($this->locales as $locale) {
+                if (!isset($messages[$locale])) {
+                    continue;
+                }
+
                 $clientCatalog = new MessageCatalogue($locale);
                 $clientCatalog->add($messages[$locale], $clientRequest->getCacheKey());
 
