@@ -62,10 +62,9 @@ class ApiController
         return $this->service->getDocument($apiName, $contentType, $ouuid)->getResponse();
     }
 
-    public function updateDocumentFromForm(Request $request, string $apiName, string $contentType, ?string $ouuid, string $redirectUrl) : RedirectResponse
+    private function treatFormRequest(Request $request, string $apiName)
     {
         $body = ($request->request->all());
-
         /** @var string $key */
         /** @var UploadedFile $file */
         foreach ($request->files as $key => $file) {
@@ -86,6 +85,23 @@ class ApiController
                 ];
             }
         }
+        return $body;
+    }
+
+    public function createDocumentFromForm(Request $request, string $apiName, string $contentType, ?string $ouuid, string $redirectUrl) : RedirectResponse
+    {
+        $body = $this->treatFormRequest($request, $apiName);
+
+        $ouuid = $this->service->createDocument($apiName, $contentType, $ouuid, $body);
+
+        $url = str_replace('%ouuid%', $ouuid, $redirectUrl);
+        $url = str_replace('%contenttype%', $contentType, $url);
+        return new RedirectResponse($url);
+    }
+
+    public function updateDocumentFromForm(Request $request, string $apiName, string $contentType, string $ouuid, string $redirectUrl) : RedirectResponse
+    {
+        $body = $this->treatFormRequest($request, $apiName);
 
         $ouuid = $this->service->updateDocument($apiName, $contentType, $ouuid, $body);
 

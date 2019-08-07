@@ -40,12 +40,25 @@ class Client
     }
 
     /**
+     * @deprecated
      * @param string $type
      * @param array $body
      * @param ?string $ouuid
      * @return array [acknowledged, revision_id, ouuid, success]
      */
     public function createDraft($type, $body, $ouuid = null)
+    {
+        @trigger_error('Deprecated use the initNewDocument or initNewDraftRevision functions', E_USER_DEPRECATED);
+        return $this->initNewDocument($type, $body, $ouuid);
+    }
+
+    /**
+     * @param string $type
+     * @param array $body
+     * @param ?string $ouuid
+     * @return array [acknowledged, revision_id, ouuid, success]
+     */
+    public function initNewDocument($type, $body, $ouuid = null)
     {
         if ($ouuid === null) {
             $url = sprintf('api/data/%s/draft', $type);
@@ -60,7 +73,23 @@ class Client
 
         return \json_decode($response->getBody()->getContents(), true);
     }
-    
+
+    /**
+     * @param string $type
+     * @param array $body
+     * @param ?string $ouuid
+     * @return array [acknowledged, revision_id, ouuid, success]
+     */
+    public function updateDocument($type, $ouuid, $body)
+    {
+        $response = $this->client->post(
+            sprintf('/api/data/%s/replace/%s', $type, $ouuid),
+            ['body' => \json_encode($body)]
+        );
+
+        return \json_decode($response->getBody()->getContents(), true);
+    }
+
     /**
      * Call createDraft for a new revisionId
      *
