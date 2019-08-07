@@ -66,10 +66,8 @@ class ApiController
     {
         $body = ($request->request->all());
 
-        /**
-         * @var string $key
-         * @var UploadedFile $file
-         */
+        /** @var string $key */
+        /** @var UploadedFile $file */
         foreach ($request->files as $key => $file) {
             if ($file !== null) {
                 $response = $this->service->uploadFile($apiName, $file, $file->getClientOriginalName());
