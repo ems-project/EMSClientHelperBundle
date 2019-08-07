@@ -123,6 +123,12 @@ class ApiService
         if (! $response['success']) {
             throw new \Exception(isset($response['error'][0])?$response['error'][0]:'Update document failed');
         }
+
+        $response = $this->getApiClient($apiName)->finalize($type, $response['revision_id']);
+
+        if (! $response['success']) {
+            throw new \Exception(isset($response['error'][0])?$response['error'][0]:'Finalize draft failed');
+        }
         return $response['ouuid'];
     }
 
