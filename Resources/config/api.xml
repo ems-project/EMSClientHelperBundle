@@ -9,7 +9,8 @@
 
         <service id="emsch.api" class="EMS\ClientHelperBundle\Helper\Api\ApiService">
             <argument type="service" id="Symfony\Component\Routing\Generator\UrlGeneratorInterface" />
-            <argument type="tagged" tag="esmch.client_request.api" on-invalid="null" />
+            <argument type="tagged" tag="emsch.client_request.api" on-invalid="null" />
+            <argument type="tagged" tag="emsch.api_client" on-invalid="null" />
         </service>
         <service id="emsch.controller.api" class="EMS\ClientHelperBundle\Controller\ApiController" public="true">
             <argument type="service" id="emsch.api" />

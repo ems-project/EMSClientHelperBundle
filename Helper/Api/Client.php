@@ -16,27 +16,45 @@ class Client
      * @var string
      */
     private $key;
+
+    /**
+     * @var string
+     */
+    private $name;
     
     /**
+     * @param string $name
      * @param string $baseUrl
      * @param string $key
      */
-    public function __construct($baseUrl, $key)
+    public function __construct($name, $baseUrl, $key)
     {
+        $this->name = $name;
         $this->key = $key;
         $this->client = HttpClientFactory::create($baseUrl, ['X-Auth-Token' => $this->key]);
     }
-    
+
+    public function getName()
+    {
+        return $this->name;
+    }
+
     /**
      * @param string $type
-     * @param array  $body
-     *
+     * @param array $body
+     * @param ?string $ouuid
      * @return array [acknowledged, revision_id, ouuid, success]
      */
-    public function createDraft($type, $body)
+    public function createDraft($type, $body, $ouuid = null)
     {
+        if ($ouuid === null) {
+            $url = sprintf('api/data/%s/draft', $type);
+        } else {
+            $url = sprintf('api/data/%s/draft/%s', $type, $ouuid);
+        }
+
         $response = $this->client->post(
-            sprintf('api/data/%s/draft', $type),
+            $url,
             ['body' => \json_encode($body)]
         );
 
@@ -62,17 +80,17 @@ class Client
 
     /**
      * @param \SplFileInfo $file
-     *
+     * @param string|null $forcedFilename
      * @return array [uploaded, fileName, url]
      */
-    public function postFile(\SplFileInfo $file)
+    public function postFile(\SplFileInfo $file, ?string $forcedFilename = null) : array
     {
         $response = $this->client->post('api/file', [
             'multipart' => [
                 [
                     'name'     => 'upload',
                     'contents' => fopen($file->getPathname(), 'r'),
-                    'filename' => $file->getFilename(),
+                    'filename' => $forcedFilename ?? $file->getFilename(),
                 ],
             ]
         ]);
