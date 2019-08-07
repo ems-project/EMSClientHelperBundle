@@ -3,7 +3,7 @@
 namespace EMS\ClientHelperBundle\Helper\Api;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
-use EMS\CommonBundle\Common\HttpClientFactory;
+use EMS\CommonBundle\Helper\EmsFields;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -15,6 +15,11 @@ class ApiService
     private $clientRequests;
 
     /**
+     * @var Client[]
+     */
+    private $apiClients;
+
+    /**
      * @var UrlGeneratorInterface
      */
     private $urlGenerator;
@@ -23,10 +28,11 @@ class ApiService
      * @param UrlGeneratorInterface $urlGenerator
      * @param iterable              $clientRequests
      */
-    public function __construct(UrlGeneratorInterface $urlGenerator, iterable $clientRequests = [])
+    public function __construct(UrlGeneratorInterface $urlGenerator, iterable $clientRequests = [], iterable $apiClients = [])
     {
         $this->urlGenerator = $urlGenerator;
         $this->clientRequests = $clientRequests;
+        $this->apiClients = $apiClients;
     }
 
     /**
@@ -110,6 +116,37 @@ class ApiService
         return $response;
     }
 
+    public function updateDocument(string $apiName, string $type, ?string $ouuid, array $body) : string
+    {
+        $response = $this->getApiClient($apiName)->createDraft($type, $body, $ouuid);
+
+        if (! $response['success']) {
+            throw new \Exception('Create draft failed');
+        }
+
+        $response = $this->getApiClient($apiName)->finalize($type, $response['revision_id']);
+
+        if (! $response['success']) {
+            throw new \Exception('Finalize draft failed');
+        }
+        return $response['ouuid'];
+    }
+
+    public function uploadFile(string $apiName, \SplFileInfo $file, $filename)
+    {
+        $response = $this->getApiClient($apiName)->postFile($file, $filename);
+        //TODO: remove this hack once the ems back is returniong the file hash as parameter
+        if (! isset($response[EmsFields::CONTENT_FILE_HASH_FIELD_]) && isset($response['url'])) {
+            $output_array = [];
+            preg_match('/\/data\/file\/view\/(?P<hash>.*)\?.*/', $response['url'], $output_array);
+            if (isset($output_array['hash'])) {
+                $response[EmsFields::CONTENT_FILE_HASH_FIELD_] = $output_array['hash'];
+            }
+        }
+
+        return $response;
+    }
+
     /**
      * @param string $apiName
      * @param string $contentType
@@ -145,6 +182,17 @@ class ApiService
         foreach ($this->clientRequests as $clientRequest) {
             if ($apiName === $clientRequest->getOption('[api][name]', false)) {
                 return $clientRequest;
+            }
+        }
+
+        throw new NotFoundHttpException();
+    }
+
+    private function getApiClient(string $clientName) : Client
+    {
+        foreach ($this->apiClients as $apiClient) {
+            if ($clientName === $apiClient->getName()) {
+                return $apiClient;
             }
         }
 
