@@ -116,18 +116,28 @@ class ApiService
         return $response;
     }
 
-    public function updateDocument(string $apiName, string $type, ?string $ouuid, array $body) : string
+    public function updateDocument(string $apiName, string $type, string $ouuid, array $body) : string
     {
-        $response = $this->getApiClient($apiName)->createDraft($type, $body, $ouuid);
+        $response = $this->getApiClient($apiName)->updateDocument($type, $ouuid, $body);
 
         if (! $response['success']) {
-            throw new \Exception('Create draft failed');
+            throw new \Exception(isset($response['error'][0])?$response['error'][0]:'Update document failed');
+        }
+        return $response['ouuid'];
+    }
+
+    public function createDocument(string $apiName, string $type, ?string $ouuid, array $body) : string
+    {
+        $response = $this->getApiClient($apiName)->initNewDocument($type, $body, $ouuid);
+
+        if (! $response['success']) {
+            throw new \Exception(isset($response['error'][0])?$response['error'][0]:'Create draft failed');
         }
 
         $response = $this->getApiClient($apiName)->finalize($type, $response['revision_id']);
 
         if (! $response['success']) {
-            throw new \Exception('Finalize draft failed');
+            throw new \Exception(isset($response['error'][0])?$response['error'][0]:'Finalize draft failed');
         }
         return $response['ouuid'];
     }
