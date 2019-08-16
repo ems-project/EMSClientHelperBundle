@@ -69,7 +69,7 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
 
     private function extract(string $path, string $destination): bool
     {
-        $zip = new ZipArchive;
+        $zip = new ZipArchive();
 
         if (false === $open = $zip->open($path)) {
             throw new AssetException(sprintf('Failed opening zip %s (ZipArchive %s)', $path, $open));

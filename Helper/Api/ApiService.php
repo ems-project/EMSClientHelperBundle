@@ -121,13 +121,13 @@ class ApiService
         $response = $this->getApiClient($apiName)->updateDocument($type, $ouuid, $body);
 
         if (! $response['success']) {
-            throw new \Exception(isset($response['error'][0])?$response['error'][0]:'Update document failed');
+            throw new \Exception(isset($response['error'][0]) ? $response['error'][0] : 'Update document failed');
         }
 
         $response = $this->getApiClient($apiName)->finalize($type, $response['revision_id']);
 
         if (! $response['success']) {
-            throw new \Exception(isset($response['error'][0])?$response['error'][0]:'Finalize draft failed');
+            throw new \Exception(isset($response['error'][0]) ? $response['error'][0] : 'Finalize draft failed');
         }
         return $response['ouuid'];
     }
@@ -137,13 +137,13 @@ class ApiService
         $response = $this->getApiClient($apiName)->initNewDocument($type, $body, $ouuid);
 
         if (! $response['success']) {
-            throw new \Exception(isset($response['error'][0])?$response['error'][0]:'Create draft failed');
+            throw new \Exception(isset($response['error'][0]) ? $response['error'][0] : 'Create draft failed');
         }
 
         $response = $this->getApiClient($apiName)->finalize($type, $response['revision_id']);
 
         if (! $response['success']) {
-            throw new \Exception(isset($response['error'][0])?$response['error'][0]:'Finalize draft failed');
+            throw new \Exception(isset($response['error'][0]) ? $response['error'][0] : 'Finalize draft failed');
         }
         return $response['ouuid'];
     }

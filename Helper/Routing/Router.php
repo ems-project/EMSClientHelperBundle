@@ -56,7 +56,7 @@ class Router extends BaseRouter
     private function addEnvRoutes(RouteCollection $collection): void
     {
         foreach ($this->routes as $name => $options) {
-            $route = new Route('ems_'.$name, $options);
+            $route = new Route('ems_' . $name, $options);
             $route->addToCollection($collection, $this->locales);
         }
     }
@@ -142,7 +142,7 @@ class Router extends BaseRouter
 
                 $options['query'] = $source['query'] ?? null;
 
-                $staticTemplate = isset($source['template_static']) ? '@EMSCH/'.$source['template_static'] : null;
+                $staticTemplate = isset($source['template_static']) ? '@EMSCH/' . $source['template_static'] : null;
                 $options['template'] = $source['template_source'] ?? $staticTemplate;
 
                 $routes[] = new Route($name, $options);

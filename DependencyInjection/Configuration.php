@@ -207,7 +207,7 @@ class Configuration implements ConfigurationInterface
                         ->isRequired()
                         ->beforeNormalization()
                             ->always(function ($v) {
-                                return 'emsch.client_request.'.$v;
+                                return 'emsch.client_request.' . $v;
                             })
                         ->end()
                     ->end()

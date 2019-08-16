@@ -43,9 +43,9 @@ class LocaleHelper
         }
 
         if ($session->has('_locale')) {
-            $url = $request->getUriForPath('/'.$session->get('_locale').$destination);
+            $url = $request->getUriForPath('/' . $session->get('_locale') . $destination);
         } elseif (1 === count($this->locales)) {
-            $url = $request->getUriForPath('/'.$this->locales[0].$destination);
+            $url = $request->getUriForPath('/' . $this->locales[0] . $destination);
         } else {
             $url = $this->router->generate('emsch_language_selection', ['destination' => $destination]);
         }

@@ -19,7 +19,7 @@ class EmbedController extends AbstractController
 
     public function renderHierarchyAction(string $template, string $parent, string $field, int $depth = null, array $sourceFields = [], array $args = [], ?string $cacheType = null): Response
     {
-        $cacheKey= [
+        $cacheKey = [
             'EMSCH_Hierarchy',
             $template,
             $parent,
@@ -42,7 +42,7 @@ class EmbedController extends AbstractController
 
     public function renderBlockAction(string $searchType, array $body, string $template, array $args = [], int $from = 0, int $size = 10, ?string $cacheType = null, array $sourceExclude = []) : Response
     {
-        $cacheKey= [
+        $cacheKey = [
             'EMSCH_Block',
             $searchType,
             $body,
