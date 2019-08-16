@@ -158,8 +158,8 @@ class Filter
 
         if (isset($aggregation['buckets'])) {
             $this->handleBuckets($aggregation['buckets']);
-        } elseif (isset($aggregation['filtered_'.$this->name]['buckets'])) {
-            $this->handleBuckets($aggregation['filtered_'.$this->name]['buckets']);
+        } elseif (isset($aggregation['filtered_' . $this->name]['buckets'])) {
+            $this->handleBuckets($aggregation['filtered_' . $this->name]['buckets']);
         }
     }
 
@@ -207,11 +207,11 @@ class Filter
         $start = $end = null;
 
         if (!empty($value['start'])) {
-            $startDatetime = \DateTime::createFromFormat($format, $value['start'].' 00:00:00');
+            $startDatetime = \DateTime::createFromFormat($format, $value['start'] . ' 00:00:00');
             $start = $startDatetime ? $startDatetime->format('Y-m-d') : $value['start'];
         }
         if (!empty($value['end'])) {
-            $endDatetime = \DateTime::createFromFormat($format, $value['end'].' 23:59:59');
+            $endDatetime = \DateTime::createFromFormat($format, $value['end'] . ' 23:59:59');
             $end = $endDatetime ? $endDatetime->format('Y-m-d') : $value['end'];
         }
 
@@ -238,7 +238,7 @@ class Filter
 
     private function setChoices(): void
     {
-        if (null != $this->choices ||$this->type !== self::TYPE_TERMS) {
+        if (null != $this->choices || $this->type !== self::TYPE_TERMS) {
             return;
         }
 

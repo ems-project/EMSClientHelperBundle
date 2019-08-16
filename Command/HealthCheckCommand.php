@@ -128,7 +128,7 @@ class HealthCheckCommand extends Command
         $indexes = [];
         foreach ($prefixes as $preValue) {
             foreach ($postfixes as $postValue) {
-                $indexes[] = $preValue.$postValue;
+                $indexes[] = $preValue . $postValue;
             }
         }
         
@@ -136,7 +136,7 @@ class HealthCheckCommand extends Command
         
         foreach ($this->clients as $client) {
             if (!$client->indices()->exists(['index' => $index])) {
-                $io->error('Index '.$index.' not found');
+                $io->error('Index ' . $index . ' not found');
                 throw new IndexNotFoundException();
             }
         }

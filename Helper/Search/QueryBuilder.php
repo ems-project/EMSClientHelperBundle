@@ -141,7 +141,7 @@ class QueryBuilder
 
         return [
             'filter' => $aggFilter,
-            'aggs' => ['filtered_'.$filter->getName() => $agg]
+            'aggs' => ['filtered_' . $filter->getName() => $agg]
         ];
     }
 

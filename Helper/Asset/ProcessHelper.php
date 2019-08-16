@@ -67,7 +67,7 @@ class ProcessHelper implements RuntimeExtensionInterface
 
         return $this->requestRuntime->assetPath([
             EmsFields::CONTENT_FILE_HASH_FIELD => $assetHash,
-            EmsFields::CONTENT_FILE_NAME_FIELD=> 'filename',
+            EmsFields::CONTENT_FILE_NAME_FIELD => 'filename',
             EmsFields::CONTENT_MIME_TYPE_FIELD => 'image/png',
         ], $options);
     }
