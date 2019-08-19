@@ -196,6 +196,11 @@ class Search
         return $this->sizes;
     }
 
+    public function getSort(): ?array
+    {
+        return $this->sorts[$this->sortBy] ?? null;
+    }
+
     public function getSortBy(): ?string
     {
         return $this->sortBy;
@@ -257,9 +262,12 @@ class Search
         foreach ($data as $name => $options) {
             if (\is_array($options)) {
                 $options['field'] = str_replace('%locale%', $locale, $options['field']);
-                $this->sorts[$name] = $options;
+                $this->sorts[$name] = array_merge(['missing' => '_last'], $options);
             } elseif (\is_string($options)) {
-                $this->sorts[$name] = ['field' => str_replace('%locale%', $locale, $options)];
+                $this->sorts[$name] = [
+                    'field' => str_replace('%locale%', $locale, $options),
+                    'missing' => '_last'
+                ];
             }
         }
     }
@@ -285,9 +293,8 @@ class Search
 
         if (null == $this->sorts) {
             @trigger_error('Define possible sort fields with the search option "sorts"', \E_USER_DEPRECATED);
-            $this->sortBy = $name;
         } elseif (\array_key_exists($name, $this->sorts)) {
-            $this->sortBy = $this->sorts[$name]['field'];
+            $this->sortBy = $name;
             $this->sortOrder = $this->sorts[$name]['order'] ?? $this->sortOrder;
         }
     }

@@ -15,7 +15,7 @@
   "synonyms": ["keyword"],
   "sizes": [10,25,50],
   "sorts": {
-      "recent": {"field": "search_date", "order": "desc"},
+      "recent": {"field": "search_date", "order": "desc", "unmapped_type": "date", "missing":  "_last"},
       "title": "title_%locale%.keyword"
   },
   "filters": {
