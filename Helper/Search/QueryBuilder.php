@@ -162,15 +162,17 @@ class QueryBuilder
 
     private function getSort(): ?array
     {
-        if (!$this->search->getSortBy()) {
+        if (null === $sort = $this->search->getSort()) {
             return null;
         }
 
-        return [
-            $this->search->getSortBy() => [
-                'order' => $this->search->getSortOrder(),
-                'missing' => '_last',
-            ]
-        ];
+        $field = $sort['field'];
+        unset($sort['field']);
+
+        if (!isset($sort['order'])) {
+            $sort['order'] = $this->search->getSortOrder();
+        }
+
+        return [$field => $sort];
     }
 }
