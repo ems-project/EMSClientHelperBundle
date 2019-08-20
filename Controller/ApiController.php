@@ -8,6 +8,8 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\Security\Csrf\CsrfTokenManager;
 
 class ApiController
 {
@@ -15,13 +17,15 @@ class ApiController
      * @var ApiService
      */
     private $service;
-
     /**
-     * @param ApiService $service
+     * @var CsrfTokenManager
      */
-    public function __construct(ApiService $service)
+    private $csrfTokenManager;
+
+    public function __construct(ApiService $service, CsrfTokenManager $csrfTokenManager)
     {
         $this->service = $service;
+        $this->csrfTokenManager = $csrfTokenManager;
     }
 
     /**
@@ -86,6 +90,35 @@ class ApiController
             }
         }
         return $body;
+    }
+
+
+    private function validateHashcash(Request $request, string $csrfId, int $hashcashLevel, string $hashAlgo)
+    {
+        $hashcash = $request->headers->get('X-Hashcash');
+        if ($hashcash === null) {
+            throw new AccessDeniedHttpException('Unrecognized user');
+        }
+
+        $tokens = explode('|', $hashcash);
+
+        if (intval($tokens[0]) < $hashcashLevel) {
+            throw new AccessDeniedHttpException('Insufficient security level by definition');
+        }
+
+        if (!preg_match(sprintf('/^0{%d}/', $hashcashLevel), hash($hashAlgo, $hashcash))) {
+            throw new AccessDeniedHttpException('Insufficient security level');
+        }
+
+        if ($this->csrfTokenManager->getToken($csrfId)->getValue() !== $tokens[1]) {
+            throw new AccessDeniedHttpException('Unrecognized key');
+        }
+    }
+
+    public function handleJsonPostRequest(Request $request, string $apiName, string $contentType, ?string $ouuid, string $csrfId, string $validationTemplate, int $hashcashLevel, string $hashAlgo)
+    {
+        $this->validateHashcash($request, $csrfId, $hashcashLevel, $hashAlgo);
+        dump($request->getContent());
     }
 
     public function createDocumentFromForm(Request $request, string $apiName, string $contentType, ?string $ouuid, string $redirectUrl) : RedirectResponse
