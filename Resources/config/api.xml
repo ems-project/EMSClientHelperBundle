@@ -15,6 +15,7 @@
         <service id="emsch.controller.api" class="EMS\ClientHelperBundle\Controller\ApiController" public="true">
             <argument type="service" id="emsch.api" />
             <argument type="service" id="security.csrf.token_manager" />
+            <argument type="service" id="twig" />
         </service>
     </services>
 </container>

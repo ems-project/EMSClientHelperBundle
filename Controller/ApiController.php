@@ -21,9 +21,15 @@ class ApiController
      * @var CsrfTokenManager
      */
     private $csrfTokenManager;
+    /**
+     * @var \Twig_Environment
+     */
+    private $twig;
 
-    public function __construct(ApiService $service, CsrfTokenManager $csrfTokenManager)
+
+    public function __construct(ApiService $service, CsrfTokenManager $csrfTokenManager, \Twig_Environment $twig)
     {
+        $this->twig = $twig;
         $this->service = $service;
         $this->csrfTokenManager = $csrfTokenManager;
     }
@@ -118,7 +124,36 @@ class ApiController
     public function handleJsonPostRequest(Request $request, string $apiName, string $contentType, ?string $ouuid, string $csrfId, string $validationTemplate, int $hashcashLevel, string $hashAlgo)
     {
         $this->validateHashcash($request, $csrfId, $hashcashLevel, $hashAlgo);
-        dump($request->getContent());
+        $data = \json_decode($request->getContent(), true);
+
+        if ($data === null) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Empty data',
+            ]);
+        }
+
+        $filteredData = \json_decode($this->twig->render($validationTemplate, [
+            'document' => $data,
+        ]), true);
+
+        if ($filteredData === null) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Invalid data',
+            ]);
+        }
+
+        if ($ouuid === null) {
+            $ouuid = $this->service->createDocument($apiName, $contentType, $ouuid, $filteredData);
+        } else {
+            $ouuid = $this->service->updateDocument($apiName, $contentType, $ouuid, $filteredData);
+        }
+
+        return new JsonResponse([
+            'success' => true,
+            'ouuid' => $ouuid,
+        ]);
     }
 
     public function createDocumentFromForm(Request $request, string $apiName, string $contentType, ?string $ouuid, string $redirectUrl) : RedirectResponse
