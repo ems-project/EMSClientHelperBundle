@@ -92,7 +92,7 @@ class ApiController
     public function createDocumentFromForm(Request $request, string $apiName, string $contentType, ?string $ouuid, string $redirectUrl, string $validationTemplate = null) : RedirectResponse
     {
         $body = $this->service->treatFormRequest($request, $apiName, $validationTemplate);
-        $ouuid = $this->service->createDocument($request, $apiName, $contentType, $ouuid, $body);
+        $ouuid = $this->service->createDocument($apiName, $contentType, $ouuid, $body);
 
         $url = str_replace('%ouuid%', $ouuid, $redirectUrl);
         $url = str_replace('%contenttype%', $contentType, $url);
@@ -102,7 +102,7 @@ class ApiController
     public function updateDocumentFromForm(Request $request, string $apiName, string $contentType, string $ouuid, string $redirectUrl, string $validationTemplate = null) : RedirectResponse
     {
         $body = $this->service->treatFormRequest($request, $apiName, $validationTemplate);
-        $ouuid = $this->service->updateDocument($request, $apiName, $contentType, $ouuid, $body);
+        $ouuid = $this->service->updateDocument($apiName, $contentType, $ouuid, $body);
 
         $url = str_replace('%ouuid%', $ouuid, $redirectUrl);
         $url = str_replace('%contenttype%', $contentType, $url);
