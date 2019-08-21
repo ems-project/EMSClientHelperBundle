@@ -5,44 +5,29 @@ use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 
 /**
  * Defined for each elasticms config with the option 'templates'
- *
  * @see EMSClientHelperExtension::defineTwigLoader()
  */
 class TwigLoader implements \Twig_LoaderInterface
 {
-    /**
-     * @var ClientRequest
-     */
+    /** @var ClientRequest */
     private $client;
-
-    /**
-     * @var array
-     */
+    /** @var array */
     private $config;
 
     const PREFIX = '@EMSCH';
 
-    /**
-     * @param ClientRequest $client
-     * @param array         $config
-     */
     public function __construct(ClientRequest $client, array $config)
     {
         $this->client = $client;
         $this->config = $config;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getSourceContext($name)
     {
         return new \Twig_Source($this->getTemplate($name)['code'], $name);
     }
 
     /**
-     * {@inheritdoc}
-     *
      * @deprecated used for php < 7
      */
     public function getSource($name)
@@ -50,17 +35,11 @@ class TwigLoader implements \Twig_LoaderInterface
         return $this->getTemplate($name)['code'];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getCacheKey($name)
     {
         return $this->client->getCacheKey('twig_') . $name;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isFresh($name, $time)
     {
         $matches = $this->match($name);
@@ -68,20 +47,12 @@ class TwigLoader implements \Twig_LoaderInterface
         return ($this->client->getLastChangeDate($contentType)->getTimestamp() <= $time);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function exists($name): bool
     {
         return substr($name, 0, 6) === self::PREFIX;
     }
 
-    /**
-     * @param string $name
-     *
-     * @return array
-     */
-    private function getTemplate($name)
+    private function getTemplate(string $name): array
     {
         $match = $this->match($name);
         list($contentType, $searchValue, $searchTerm) = $match;
@@ -96,12 +67,7 @@ class TwigLoader implements \Twig_LoaderInterface
         return $this->search($contentType, $searchValue, $searchTerm, $config['code']);
     }
 
-    /**
-     * @param string $name
-     *
-     * @return array
-     */
-    private function match($name)
+    private function match(string $name): array
     {
         preg_match('/^@EMSCH\/(?<content_type>[a-z][a-z0-9\-_]*):(?<search_val>.*)$/', $name, $matchOuuid);
 
@@ -118,15 +84,7 @@ class TwigLoader implements \Twig_LoaderInterface
         throw new TwigException(sprintf('Invalid template name: %s', $name));
     }
 
-    /**
-     * @param string $contentType
-     * @param string $searchVal   ouuid, templateName
-     * @param string $searchTerm  _id, key, name
-     * @param string $code        code field in document
-     *
-     * @return array
-     */
-    private function search($contentType, $searchVal, $searchTerm, $code)
+    private function search(string $contentType, string $searchVal, string $searchTerm, string $code): array
     {
         try {
             $document = $this->client->searchOne($contentType, [
@@ -139,7 +97,6 @@ class TwigLoader implements \Twig_LoaderInterface
             ]);
 
             $source = $document['_source'];
-
             $date = $this->client->getLastChangeDate($contentType);
 
             return ['fresh_time' => $date->getTimestamp(), 'code' => $source[$code]];
