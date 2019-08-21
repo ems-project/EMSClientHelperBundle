@@ -2,58 +2,46 @@
 
 namespace EMS\ClientHelperBundle\Command\Template;
 
-use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
+use EMS\ClientHelperBundle\Helper\Twig\TemplateManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Filesystem\Filesystem;
 
 class DownloadCommand extends Command
 {
-    /** @var ClientRequestManager */
-    private $clientRequestManager;
-    /** @var string */
-    private $templatesDir;
+    /** @var TemplateManager */
+    private $templateManager;
 
     protected static $defaultName = 'emsch:template:download';
 
-    /**
-     * @todo better injection of template dir
-     */
-    public function __construct(ClientRequestManager $clientRequestManager, string $projectDir)
+    public function __construct(TemplateManager $templateManager)
     {
         parent::__construct();
-        $this->clientRequestManager = $clientRequestManager;
-        $this->templatesDir = $projectDir . '/templates';
+        $this->templateManager = $templateManager;
     }
 
     protected function configure()
     {
-        $this
-            ->setDescription('Download templates');
+        $this->setDescription('Download templates');
     }
-
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $style = new SymfonyStyle($input, $output);
         $style->title('Template command');
 
-        $clientRequest = $this->clientRequestManager->getDefault();
+        $logger = new ConsoleLogger($output);
 
-        $dir = $this->templatesDir . '/' . $clientRequest->getCacheKey();
-        $templates = $clientRequest->getOption('[templates]');
+        $progressBar = $style->createProgressBar();
+        $progressBar->start();
 
-        $filesystem = new Filesystem();
-        $filesystem->mkdir($dir);
-
-        foreach ($templates as $contentType => $mapping) {
-            foreach ($clientRequest->scrollAll(['body' => ['query' => ['term' => ['_contenttype' => $contentType ]]] ]) as $hit) {
-                list($fieldName, $fieldTwig) = array_values($mapping);
-                $source = $hit['_source'];
-                $filesystem->dumpFile($dir . '/' . $contentType . '/' . $source[$fieldName], $source[$fieldTwig]);
-            }
+        foreach ($this->templateManager->download() as $template) {
+            $logger->info($template);
+            $progressBar->advance();
         }
+
+        $progressBar->finish();
     }
 }

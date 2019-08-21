@@ -5,6 +5,7 @@
         http://symfony.com/schema/dic/services/services-1.0.xsd">
     <parameters>
         <parameter key="env(EMSCH_ENV)"/>
+        <parameter key="env(EMSCH_TEMPLATES_PATH)">%kernel.project_dir%/templates</parameter>
     </parameters>
 
     <services>
@@ -42,6 +43,11 @@
             <argument type="service" id="translator.default" />
             <argument type="service" id="emsch.helper_cache" />
             <argument type="string">%emsch.locales%</argument>
+        </service>
+
+        <service id="emsch.manager.template" class="EMS\ClientHelperBundle\Helper\Twig\TemplateManager">
+            <argument type="service" id="emsch.manager.client_request" />
+            <argument type="string">%env(EMSCH_TEMPLATES_PATH)%</argument>
         </service>
 
         <!-- event listeners -->
@@ -115,8 +121,7 @@
             <tag name="console.command" />
         </service>
         <service id="emsch.command.template" class="EMS\ClientHelperBundle\Command\Template\DownloadCommand">
-            <argument type="service" id="emsch.manager.client_request" />
-            <argument type="string">%kernel.project_dir%</argument>
+            <argument type="service" id="emsch.manager.template" />
             <tag name="console.command" />
         </service>
     </services>

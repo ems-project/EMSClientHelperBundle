@@ -63,7 +63,7 @@ class EMSClientHelperExtension extends Extension
             $this->defineClientRequest($container, $loader, $name, $options);
 
             if (isset($options['templates'])) {
-                $this->defineTwigLoader($container, $name, $options['templates']);
+                $this->defineTwigLoader($container, $name);
             }
         }
     }
@@ -185,14 +185,13 @@ class EMSClientHelperExtension extends Extension
     /**
      * @param ContainerBuilder $container
      * @param string           $name
-     * @param array            $options
      */
-    private function defineTwigLoader(ContainerBuilder $container, $name, $options)
+    private function defineTwigLoader(ContainerBuilder $container, $name)
     {
         $loader = new Definition(TwigLoader::class);
         $loader->setArguments([
             new Reference(sprintf('emsch.client_request.%s', $name)),
-            $options
+            new Reference('emsch.manager.template')
         ]);
         $loader->addTag('twig.loader', ['alias' => $name, 'priority' => 1]);
 

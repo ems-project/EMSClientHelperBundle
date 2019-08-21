@@ -13,21 +13,20 @@ class TwigLoader implements LoaderInterface
 {
     /** @var ClientRequest */
     private $client;
-    /** @var array */
-    private $config;
+    /** @var TemplateManager */
+    private $templateManager;
 
-    public function __construct(ClientRequest $client, array $config)
+    public function __construct(ClientRequest $client, TemplateManager $templateManager)
     {
         $this->client = $client;
-        $this->config = $config;
+        $this->templateManager = $templateManager;
     }
 
     public function getSourceContext($name)
     {
-        $template = new Template($name, $this->config);
-        $document = $this->getDocument($template);
+        $template = new Template($this->client, $name);
 
-        return new Source($document['_source'][$template->getCodeField()], $name);
+        return new Source($this->templateManager->getCode($template), $name);
     }
 
     public function getCacheKey($name)
@@ -37,7 +36,11 @@ class TwigLoader implements LoaderInterface
 
     public function isFresh($name, $time)
     {
-        $template = new Template($name, $this->config);
+        $template = new Template($this->client, $name);
+
+        if ($this->templateManager->isDownloaded($template)) {
+            return false;
+        }
 
         return ($this->client->getLastChangeDate($template->getContentType())->getTimestamp() <= $time);
     }
@@ -45,18 +48,5 @@ class TwigLoader implements LoaderInterface
     public function exists($name): bool
     {
         return substr($name, 0, 6) === Template::PREFIX;
-    }
-
-    private function getDocument(Template $template): array
-    {
-        try {
-            $document = $this->client->searchOne($template->getContentType(), [
-                'query' => $template->getQuery(),
-            ]);
-
-            return $document;
-        } catch (\Exception $e) {
-            throw new TwigException(sprintf('Template not found %s', $template));
-        }
     }
 }

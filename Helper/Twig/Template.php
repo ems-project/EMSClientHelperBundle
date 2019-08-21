@@ -2,8 +2,12 @@
 
 namespace EMS\ClientHelperBundle\Helper\Twig;
 
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
+
 class Template
 {
+    /** @var ClientRequest */
+    private $clientRequest;
     /** @var string */
     private $template;
     /** @var string */
@@ -17,28 +21,19 @@ class Template
 
     const PREFIX = '@EMSCH';
 
-    public function __construct(string $template, array $config)
+    public function __construct(ClientRequest $clientRequest, string $template)
     {
         if (!$this->matchOuuid($template) && !$this->matchName($template)) {
             throw new TwigException(sprintf('Invalid template name: %s', $template));
         }
 
-        if (!isset($config[$this->contentType])) {
-            throw new TwigException('Missing config EMSCH_TEMPLATES');
+        if (null == $config = $clientRequest->getOption(sprintf('[templates][%s]', $this->contentType))) {
+            throw new TwigException(sprintf('Missing templates config for client %s', $clientRequest->getName()));
         }
 
-        $this->config = $config[$this->contentType];
+        $this->clientRequest = $clientRequest;
+        $this->config = $config;
         $this->template = $template;
-    }
-
-    public function __toString()
-    {
-        return $this->template;
-    }
-
-    public function getCodeField(): string
-    {
-        return $this->config['code'];
     }
 
     public function getContentType(): string
@@ -46,13 +41,39 @@ class Template
         return $this->contentType;
     }
 
-    public function getQuery(): array
+    public function getCacheKey(): string
     {
-        if (null !== $this->name) {
-            return ['term' => [$this->config['name'] => $this->name]];
-        }
+        return $this->clientRequest->getCacheKey();
+    }
 
-        return ['term' => ['_id' => $this->ouuid]];
+    public function getOuuid(): ?string
+    {
+        return $this->ouuid;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function getCode(): string
+    {
+        try {
+            $term = ($this->name ? [$this->config['name'] => $this->name] : ['_id' => $this->ouuid]);
+
+            $document = $this->clientRequest->searchOne($this->contentType, [
+                'query' => ['term' => $term],
+            ]);
+
+            return $document['_source'][$this->config['code']];
+        } catch (\Exception $e) {
+            throw new TwigException(sprintf('Template not found %s', $this->template));
+        }
+    }
+
+    public function hasOuuid(): bool
+    {
+        return $this->ouuid !== null;
     }
 
     private function matchOuuid(string $name): bool
