@@ -114,5 +114,10 @@
             <argument type="service" id="ems_common.storage.manager" on-invalid="null" />
             <tag name="console.command" />
         </service>
+        <service id="emsch.command.template" class="EMS\ClientHelperBundle\Command\Template\DownloadCommand">
+            <argument type="service" id="emsch.manager.client_request" />
+            <argument type="string">%kernel.project_dir%</argument>
+            <tag name="console.command" />
+        </service>
     </services>
 </container>
