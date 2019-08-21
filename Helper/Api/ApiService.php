@@ -5,7 +5,7 @@ namespace EMS\ClientHelperBundle\Helper\Api;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\CommonBundle\Helper\EmsFields;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -27,25 +27,18 @@ class ApiService
     private $urlGenerator;
 
     /**
-     * @var RequestStack
-     */
-    private $requestStack;
-
-    /**
      * @var \Twig_Environment
      */
     private $twig;
 
     /**
-     * @param RequestStack $requestStack
      * @param \Twig_Environment $twig
      * @param UrlGeneratorInterface $urlGenerator
      * @param iterable $clientRequests
      * @param iterable $apiClients
      */
-    public function __construct(RequestStack $requestStack, \Twig_Environment $twig, UrlGeneratorInterface $urlGenerator, iterable $clientRequests = [], iterable $apiClients = [])
+    public function __construct(\Twig_Environment $twig, UrlGeneratorInterface $urlGenerator, iterable $clientRequests = [], iterable $apiClients = [])
     {
-        $this->requestStack = $requestStack;
         $this->twig = $twig;
         $this->urlGenerator = $urlGenerator;
         $this->clientRequests = $clientRequests;
@@ -54,9 +47,8 @@ class ApiService
 
 
 
-    public function treatFormRequest(string $apiName, string $validationTemplate = null)
+    public function treatFormRequest(Request $request, string $apiName, string $validationTemplate = null)
     {
-        $request = $this->requestStack->getCurrentRequest();
         $body = $request->request->all();
         /** @var string $key */
         /** @var UploadedFile $file */
@@ -204,7 +196,7 @@ class ApiService
     public function uploadFile(string $apiName, \SplFileInfo $file, $filename)
     {
         $response = $this->getApiClient($apiName)->postFile($file, $filename);
-        //TODO: remove this hack once the ems back is returniong the file hash as parameter
+        //TODO: remove this hack once the ems back is returning the file hash as parameter
         if (! isset($response[EmsFields::CONTENT_FILE_HASH_FIELD_]) && isset($response['url'])) {
             $output_array = [];
             preg_match('/\/data\/file\/view\/(?P<hash>.*)\?.*/', $response['url'], $output_array);

@@ -3,18 +3,12 @@
 
 namespace EMS\ClientHelperBundle\Helper\Hashcash;
 
-
-use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
 
 class HashcashHelper
 {
-
-    /**
-     * @var RequestStack
-     */
-    private $requestStack;
 
     /**
      * @var CsrfTokenManager
@@ -23,16 +17,14 @@ class HashcashHelper
 
 
 
-    public function __construct(RequestStack $requestStack, CsrfTokenManager $csrfTokenManager)
+    public function __construct(CsrfTokenManager $csrfTokenManager)
     {
-        $this->requestStack = $requestStack;
         $this->csrfTokenManager = $csrfTokenManager;
     }
 
 
-    public function validateHashcash(string $csrfId, int $hashcashLevel = 4, string $hashAlgo = 'sha256')
+    public function validateHashcash(Request $request, string $csrfId, int $hashcashLevel = 4, string $hashAlgo = 'sha256')
     {
-        $request = $this->requestStack->getCurrentRequest();
         $hashcash = $request->headers->get('X-Hashcash');
         if ($hashcash === null) {
             throw new AccessDeniedHttpException('Unrecognized user');

@@ -65,10 +65,10 @@ class ApiController
         return $this->service->getDocument($apiName, $contentType, $ouuid)->getResponse();
     }
 
-    public function handleFormPostRequest(string $apiName, string $contentType, ?string $ouuid, string $csrfId, string $validationTemplate, int $hashcashLevel, string $hashAlgo, bool $forceCreate = false)
+    public function handleFormPostRequest(Request $request, string $apiName, string $contentType, ?string $ouuid, string $csrfId, string $validationTemplate, int $hashcashLevel, string $hashAlgo, bool $forceCreate = false)
     {
-        $this->hashcashHelper->validateHashcash($csrfId, $hashcashLevel, $hashAlgo);
-        $data = $this->service->treatFormRequest($apiName, $validationTemplate);
+        $this->hashcashHelper->validateHashcash($request, $csrfId, $hashcashLevel, $hashAlgo);
+        $data = $this->service->treatFormRequest($request, $apiName, $validationTemplate);
 
         if ($data === null) {
             return new JsonResponse([
@@ -89,20 +89,20 @@ class ApiController
         ]);
     }
 
-    public function createDocumentFromForm(string $apiName, string $contentType, ?string $ouuid, string $redirectUrl, string $validationTemplate = null) : RedirectResponse
+    public function createDocumentFromForm(Request $request, string $apiName, string $contentType, ?string $ouuid, string $redirectUrl, string $validationTemplate = null) : RedirectResponse
     {
-        $body = $this->service->treatFormRequest($apiName, $validationTemplate);
-        $ouuid = $this->service->createDocument($apiName, $contentType, $ouuid, $body);
+        $body = $this->service->treatFormRequest($request, $apiName, $validationTemplate);
+        $ouuid = $this->service->createDocument($request, $apiName, $contentType, $ouuid, $body);
 
         $url = str_replace('%ouuid%', $ouuid, $redirectUrl);
         $url = str_replace('%contenttype%', $contentType, $url);
         return new RedirectResponse($url);
     }
 
-    public function updateDocumentFromForm(string $apiName, string $contentType, string $ouuid, string $redirectUrl, string $validationTemplate = null) : RedirectResponse
+    public function updateDocumentFromForm(Request $request, string $apiName, string $contentType, string $ouuid, string $redirectUrl, string $validationTemplate = null) : RedirectResponse
     {
-        $body = $this->service->treatFormRequest($apiName, $validationTemplate);
-        $ouuid = $this->service->updateDocument($apiName, $contentType, $ouuid, $body);
+        $body = $this->service->treatFormRequest($request, $apiName, $validationTemplate);
+        $ouuid = $this->service->updateDocument($request, $apiName, $contentType, $ouuid, $body);
 
         $url = str_replace('%ouuid%', $ouuid, $redirectUrl);
         $url = str_replace('%contenttype%', $contentType, $url);
