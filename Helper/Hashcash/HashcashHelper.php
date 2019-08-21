@@ -48,12 +48,8 @@ class HashcashHelper
             throw new AccessDeniedHttpException('Insufficient security level');
         }
 
-        dump($token);
-        dump($csrfId);
-        dump($this->csrfTokenManager->getToken($csrfId)->getValue());
         if ($this->csrfTokenManager->getToken($csrfId)->getValue() !== $token->getCsrf()) {
             throw new AccessDeniedHttpException('Unrecognized key');
         }
     }
-
 }

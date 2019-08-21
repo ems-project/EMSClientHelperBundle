@@ -79,7 +79,7 @@ class ApiService
             }
         }
 
-        if ( $validationTemplate !== null ) {
+        if ($validationTemplate !== null) {
             return \json_decode($this->twig->render($validationTemplate, [
                 'document' => $body,
             ]), true);

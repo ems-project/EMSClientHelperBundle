@@ -35,5 +35,4 @@ class Token
     {
         return $this->random;
     }
-
 }
