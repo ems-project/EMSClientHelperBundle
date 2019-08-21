@@ -5,7 +5,7 @@ namespace EMS\ClientHelperBundle\Helper\Request;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
-use EMS\ClientHelperBundle\Helper\Twig\TwigLoader;
+use EMS\ClientHelperBundle\Helper\Twig\Template;
 use EMS\CommonBundle\Common\EMSLink;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -79,12 +79,12 @@ class Handler
     {
         $template = $route->getOption('template');
 
-        if (null === $document || substr($template, 0, 6) === TwigLoader::PREFIX) {
+        if (null === $document || substr($template, 0, 6) === Template::PREFIX) {
             return $template;
         }
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
 
-        return TwigLoader::PREFIX . '/' . $propertyAccessor->getValue($document, '[_source]' . $template);
+        return Template::PREFIX . '/' . $propertyAccessor->getValue($document, '[_source]' . $template);
     }
 }
