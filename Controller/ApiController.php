@@ -121,10 +121,10 @@ class ApiController
         }
     }
 
-    public function handleJsonPostRequest(Request $request, string $apiName, string $contentType, ?string $ouuid, string $csrfId, string $validationTemplate, int $hashcashLevel, string $hashAlgo)
+    public function handleFormPostRequest(Request $request, string $apiName, string $contentType, ?string $ouuid, string $csrfId, string $validationTemplate, int $hashcashLevel, string $hashAlgo)
     {
         $this->validateHashcash($request, $csrfId, $hashcashLevel, $hashAlgo);
-        $data = \json_decode($request->getContent(), true);
+        $data = $this->treatFormRequest($request, $apiName);
 
         if ($data === null) {
             return new JsonResponse([
