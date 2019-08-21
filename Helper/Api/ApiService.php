@@ -4,35 +4,72 @@ namespace EMS\ClientHelperBundle\Helper\Api;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\CommonBundle\Helper\EmsFields;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ApiService
 {
-    /**
-     * @var ClientRequest[]
-     */
+    /** @var ClientRequest[] */
     private $clientRequests;
 
-    /**
-     * @var Client[]
-     */
+    /** @var Client[] */
     private $apiClients;
 
-    /**
-     * @var UrlGeneratorInterface
-     */
+    /** @var UrlGeneratorInterface */
     private $urlGenerator;
 
+    /** @var \Twig_Environment */
+    private $twig;
+
     /**
+     * @param \Twig_Environment $twig
      * @param UrlGeneratorInterface $urlGenerator
-     * @param iterable              $clientRequests
+     * @param iterable $clientRequests
+     * @param iterable $apiClients
      */
-    public function __construct(UrlGeneratorInterface $urlGenerator, iterable $clientRequests = [], iterable $apiClients = [])
+    public function __construct(\Twig_Environment $twig, UrlGeneratorInterface $urlGenerator, iterable $clientRequests = [], iterable $apiClients = [])
     {
+        $this->twig = $twig;
         $this->urlGenerator = $urlGenerator;
         $this->clientRequests = $clientRequests;
         $this->apiClients = $apiClients;
+    }
+
+
+
+    public function treatFormRequest(Request $request, string $apiName, string $validationTemplate = null)
+    {
+        $body = $request->request->all();
+        /** @var string $key */
+        /** @var UploadedFile $file */
+        foreach ($request->files as $key => $file) {
+            if ($file !== null) {
+                $response = $this->uploadFile($apiName, $file, $file->getClientOriginalName());
+                if (!$response['uploaded'] || !isset($response[EmsFields::CONTENT_FILE_HASH_FIELD_])) {
+                    throw new \Exception('File hash not found or file not uploaded');
+                }
+                $body[$key] = [
+                    EmsFields::CONTENT_FILE_HASH_FIELD => $response[EmsFields::CONTENT_FILE_HASH_FIELD_],
+                    EmsFields::CONTENT_FILE_HASH_FIELD_ => $response[EmsFields::CONTENT_FILE_HASH_FIELD_],
+                    EmsFields::CONTENT_FILE_NAME_FIELD => $file->getClientOriginalName(),
+                    EmsFields::CONTENT_FILE_NAME_FIELD_ => $file->getClientOriginalName(),
+                    EmsFields::CONTENT_FILE_SIZE_FIELD => $file->getSize(),
+                    EmsFields::CONTENT_FILE_SIZE_FIELD_ => $file->getSize(),
+                    EmsFields::CONTENT_MIME_TYPE_FIELD => $file->getMimeType(),
+                    EmsFields::CONTENT_MIME_TYPE_FIELD_ => $file->getMimeType(),
+                ];
+            }
+        }
+
+        if ($validationTemplate !== null) {
+            return \json_decode($this->twig->render($validationTemplate, [
+                'document' => $body,
+            ]), true);
+        }
+
+        return $body;
     }
 
     /**
@@ -151,7 +188,7 @@ class ApiService
     public function uploadFile(string $apiName, \SplFileInfo $file, $filename)
     {
         $response = $this->getApiClient($apiName)->postFile($file, $filename);
-        //TODO: remove this hack once the ems back is returniong the file hash as parameter
+        //TODO: remove this hack once the ems back is returning the file hash as parameter
         if (! isset($response[EmsFields::CONTENT_FILE_HASH_FIELD_]) && isset($response['url'])) {
             $output_array = [];
             preg_match('/\/data\/file\/view\/(?P<hash>.*)\?.*/', $response['url'], $output_array);

@@ -3,25 +3,24 @@
 namespace EMS\ClientHelperBundle\Controller;
 
 use EMS\ClientHelperBundle\Helper\Api\ApiService;
-use EMS\CommonBundle\Helper\EmsFields;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use EMS\ClientHelperBundle\Helper\Hashcash\HashcashHelper;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\JsonResponse;
 
 class ApiController
 {
-    /**
-     * @var ApiService
-     */
+    /** @var ApiService */
     private $service;
 
-    /**
-     * @param ApiService $service
-     */
-    public function __construct(ApiService $service)
+    /** @var HashcashHelper */
+    private $hashcashHelper;
+
+
+    public function __construct(ApiService $service, HashcashHelper $hashcashHelper)
     {
         $this->service = $service;
+        $this->hashcashHelper = $hashcashHelper;
     }
 
     /**
@@ -62,36 +61,33 @@ class ApiController
         return $this->service->getDocument($apiName, $contentType, $ouuid)->getResponse();
     }
 
-    private function treatFormRequest(Request $request, string $apiName)
+    public function handleFormPostRequest(Request $request, string $apiName, string $contentType, ?string $ouuid, string $csrfId, string $validationTemplate, int $hashcashLevel, string $hashAlgo, bool $forceCreate = false)
     {
-        $body = ($request->request->all());
-        /** @var string $key */
-        /** @var UploadedFile $file */
-        foreach ($request->files as $key => $file) {
-            if ($file !== null) {
-                $response = $this->service->uploadFile($apiName, $file, $file->getClientOriginalName());
-                if (!$response['uploaded'] || !isset($response[EmsFields::CONTENT_FILE_HASH_FIELD_])) {
-                    throw new \Exception('File hash not found or file not uploaded');
-                }
-                $body[$key] = [
-                    EmsFields::CONTENT_FILE_HASH_FIELD => $response[EmsFields::CONTENT_FILE_HASH_FIELD_],
-                    EmsFields::CONTENT_FILE_HASH_FIELD_ => $response[EmsFields::CONTENT_FILE_HASH_FIELD_],
-                    EmsFields::CONTENT_FILE_NAME_FIELD => $file->getClientOriginalName(),
-                    EmsFields::CONTENT_FILE_NAME_FIELD_ => $file->getClientOriginalName(),
-                    EmsFields::CONTENT_FILE_SIZE_FIELD => $file->getSize(),
-                    EmsFields::CONTENT_FILE_SIZE_FIELD_ => $file->getSize(),
-                    EmsFields::CONTENT_MIME_TYPE_FIELD => $file->getMimeType(),
-                    EmsFields::CONTENT_MIME_TYPE_FIELD_ => $file->getMimeType(),
-                ];
-            }
+        $this->hashcashHelper->validateHashcash($request, $csrfId, $hashcashLevel, $hashAlgo);
+        $data = $this->service->treatFormRequest($request, $apiName, $validationTemplate);
+
+        if ($data === null) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Empty data',
+            ]);
         }
-        return $body;
+
+        if ($ouuid === null || $forceCreate) {
+            $ouuid = $this->service->createDocument($apiName, $contentType, $ouuid, $data);
+        } else {
+            $ouuid = $this->service->updateDocument($apiName, $contentType, $ouuid, $data);
+        }
+
+        return new JsonResponse([
+            'success' => true,
+            'ouuid' => $ouuid,
+        ]);
     }
 
-    public function createDocumentFromForm(Request $request, string $apiName, string $contentType, ?string $ouuid, string $redirectUrl) : RedirectResponse
+    public function createDocumentFromForm(Request $request, string $apiName, string $contentType, ?string $ouuid, string $redirectUrl, string $validationTemplate = null) : RedirectResponse
     {
-        $body = $this->treatFormRequest($request, $apiName);
-
+        $body = $this->service->treatFormRequest($request, $apiName, $validationTemplate);
         $ouuid = $this->service->createDocument($apiName, $contentType, $ouuid, $body);
 
         $url = str_replace('%ouuid%', $ouuid, $redirectUrl);
@@ -99,10 +95,9 @@ class ApiController
         return new RedirectResponse($url);
     }
 
-    public function updateDocumentFromForm(Request $request, string $apiName, string $contentType, string $ouuid, string $redirectUrl) : RedirectResponse
+    public function updateDocumentFromForm(Request $request, string $apiName, string $contentType, string $ouuid, string $redirectUrl, string $validationTemplate = null) : RedirectResponse
     {
-        $body = $this->treatFormRequest($request, $apiName);
-
+        $body = $this->service->treatFormRequest($request, $apiName, $validationTemplate);
         $ouuid = $this->service->updateDocument($apiName, $contentType, $ouuid, $body);
 
         $url = str_replace('%ouuid%', $ouuid, $redirectUrl);
