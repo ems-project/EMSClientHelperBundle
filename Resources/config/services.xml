@@ -44,6 +44,11 @@
             <argument type="string">%emsch.locales%</argument>
         </service>
 
+        <service id="emsch.helper_hashcash" class="EMS\ClientHelperBundle\Helper\Hashcash\HashcashHelper">
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="security.csrf.token_manager" />
+        </service>
+
         <!-- event listeners -->
         <service id="emsch.kernel_listener" class="EMS\ClientHelperBundle\EventListener\KernelListener">
             <argument type="service" id="emsch.helper_environment"/>
