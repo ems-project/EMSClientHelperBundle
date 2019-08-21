@@ -10,14 +10,10 @@ use Symfony\Component\HttpFoundation\Request;
 
 class ApiController
 {
-    /**
-     * @var ApiService
-     */
+    /** @var ApiService */
     private $service;
 
-    /**
-     * @var HashcashHelper
-     */
+    /** @var HashcashHelper */
     private $hashcashHelper;
 
 

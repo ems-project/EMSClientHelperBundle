@@ -21,9 +21,9 @@ class Token
         list($this->level, $this->csrf, $this->random) = explode(Token::DELIMITER, $hashcash);
     }
 
-    public function getLevel(): string
+    public function getLevel(): int
     {
-        return $this->level;
+        return intval($this->level);
     }
 
     public function getCsrf(): string

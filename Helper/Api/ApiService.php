@@ -11,24 +11,16 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ApiService
 {
-    /**
-     * @var ClientRequest[]
-     */
+    /** @var ClientRequest[] */
     private $clientRequests;
 
-    /**
-     * @var Client[]
-     */
+    /** @var Client[] */
     private $apiClients;
 
-    /**
-     * @var UrlGeneratorInterface
-     */
+    /** @var UrlGeneratorInterface */
     private $urlGenerator;
 
-    /**
-     * @var \Twig_Environment
-     */
+    /** @var \Twig_Environment */
     private $twig;
 
     /**

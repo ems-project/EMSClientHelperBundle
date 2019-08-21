@@ -10,9 +10,7 @@ use Symfony\Component\Security\Csrf\CsrfTokenManager;
 class HashcashHelper
 {
 
-    /**
-     * @var CsrfTokenManager
-     */
+    /** @var CsrfTokenManager */
     private $csrfTokenManager;
 
 
@@ -32,7 +30,7 @@ class HashcashHelper
 
         $token = new Token($hashcash);
 
-        if (intval($token->getLevel()) < $hashcashLevel) {
+        if ($token->getLevel() < $hashcashLevel) {
             throw new AccessDeniedHttpException('Insufficient security level by definition');
         }
 
