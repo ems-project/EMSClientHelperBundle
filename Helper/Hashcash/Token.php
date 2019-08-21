@@ -5,8 +5,6 @@ namespace EMS\ClientHelperBundle\Helper\Hashcash;
 
 class Token
 {
-    const DELIMITER = '|';
-
     /** @var string */
     private $level;
 
@@ -15,6 +13,8 @@ class Token
 
     /** @var string */
     private $random;
+
+    const DELIMITER = '|';
 
     public function __construct(string $hashcash)
     {
