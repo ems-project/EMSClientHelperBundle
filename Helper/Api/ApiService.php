@@ -174,13 +174,30 @@ class ApiService
         $response = $this->getApiClient($apiName)->initNewDocument($type, $body, $ouuid);
 
         if (! $response['success']) {
-            throw new \Exception(isset($response['error'][0]) ? $response['error'][0] : 'Create draft failed');
+            foreach (['error', 'warning'] as $level) {
+                if (isset($response[$level][0])) {
+                    throw new \Exception($response[$level][0]);
+                }
+            }
+            throw new \Exception('Create draft failed');
         }
 
-        $response = $this->getApiClient($apiName)->finalize($type, $response['revision_id']);
+        $revisionId = $response['revision_id'];
+        $response = $this->getApiClient($apiName)->finalize($type, $revisionId);
 
         if (! $response['success']) {
-            throw new \Exception(isset($response['error'][0]) ? $response['error'][0] : 'Finalize draft failed');
+            try {
+                $this->getApiClient($apiName)->discardDraft($type, $revisionId);
+            } catch (\Exception $e) {
+                //try to discard the draft
+            }
+
+            foreach (['error', 'warning'] as $level) {
+                if (isset($response[$level][0])) {
+                    throw new \Exception($response[$level][0]);
+                }
+            }
+            throw new \Exception('Finalize draft failed');
         }
         return $response['ouuid'];
     }
