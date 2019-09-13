@@ -73,16 +73,23 @@ class ApiController
             ]);
         }
 
-        if ($ouuid === null || $forceCreate) {
-            $ouuid = $this->service->createDocument($apiName, $contentType, $ouuid, $data);
-        } else {
-            $ouuid = $this->service->updateDocument($apiName, $contentType, $ouuid, $data);
-        }
+        try {
+            if ($ouuid === null || $forceCreate) {
+                $ouuid = $this->service->createDocument($apiName, $contentType, $ouuid, $data);
+            } else {
+                $ouuid = $this->service->updateDocument($apiName, $contentType, $ouuid, $data);
+            }
 
-        return new JsonResponse([
-            'success' => true,
-            'ouuid' => $ouuid,
-        ]);
+            return new JsonResponse([
+                'success' => true,
+                'ouuid' => $ouuid,
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function createDocumentFromForm(Request $request, string $apiName, string $contentType, ?string $ouuid, string $redirectUrl, string $validationTemplate = null) : RedirectResponse
