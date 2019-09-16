@@ -4,6 +4,7 @@ namespace EMS\ClientHelperBundle\Helper\Api;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\CommonBundle\Helper\EmsFields;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -23,14 +24,19 @@ class ApiService
     /** @var \Twig_Environment */
     private $twig;
 
+    /** @var LoggerInterface */
+    private $logger;
+
     /**
+     * @param LoggerInterface $logger
      * @param \Twig_Environment $twig
      * @param UrlGeneratorInterface $urlGenerator
      * @param iterable $clientRequests
      * @param iterable $apiClients
      */
-    public function __construct(\Twig_Environment $twig, UrlGeneratorInterface $urlGenerator, iterable $clientRequests = [], iterable $apiClients = [])
+    public function __construct(LoggerInterface $logger, \Twig_Environment $twig, UrlGeneratorInterface $urlGenerator, iterable $clientRequests = [], iterable $apiClients = [])
     {
+        $this->logger = $logger;
         $this->twig = $twig;
         $this->urlGenerator = $urlGenerator;
         $this->clientRequests = $clientRequests;
@@ -155,41 +161,41 @@ class ApiService
 
     public function updateDocument(string $apiName, string $type, string $ouuid, array $body) : string
     {
-        $response = $this->getApiClient($apiName)->updateDocument($type, $ouuid, $body);
-
-        if (! $response['success']) {
-            throw new \Exception(isset($response['error'][0]) ? $response['error'][0] : 'Update document failed');
-        }
-
-        $response = $this->getApiClient($apiName)->finalize($type, $response['revision_id']);
-
-        if (! $response['success']) {
-            throw new \Exception(isset($response['error'][0]) ? $response['error'][0] : 'Finalize draft failed');
-        }
-        return $response['ouuid'];
+        $apiClient = $this->getApiClient($apiName);
+        $response = $apiClient->updateDocument($type, $ouuid, $body);
+        return $this->finalizeResponse($apiClient, $response, $type, $ouuid);
     }
 
     public function createDocument(string $apiName, string $type, ?string $ouuid, array $body) : string
     {
-        $response = $this->getApiClient($apiName)->initNewDocument($type, $body, $ouuid);
+        $apiClient = $this->getApiClient($apiName);
+        $response = $apiClient->initNewDocument($type, $body, $ouuid);
+        return $this->finalizeResponse($apiClient, $response, $type, $ouuid);
+    }
 
+    private function finalizeResponse(Client $apiClient, array $response, string $type, ?string $ouuid) : string
+    {
         if (! $response['success']) {
             foreach (['error', 'warning'] as $level) {
                 if (isset($response[$level][0])) {
                     throw new \Exception($response[$level][0]);
                 }
             }
-            throw new \Exception('Create draft failed');
+            throw new \Exception('Initialize draft failed');
         }
 
         $revisionId = $response['revision_id'];
-        $response = $this->getApiClient($apiName)->finalize($type, $revisionId);
+        $response = $apiClient->finalize($type, $revisionId);
 
         if (! $response['success']) {
             try {
-                $this->getApiClient($apiName)->discardDraft($type, $revisionId);
+                $apiClient->discardDraft($type, $revisionId);
             } catch (\Exception $e) {
-                //try to discard the draft
+                $this->logger->warning('emsch.api_service.discard_exception', [
+                    'ouuid' => $ouuid,
+                    'type' => $type,
+                    'revision_id' => $revisionId,
+                ]);
             }
 
             foreach (['error', 'warning'] as $level) {
