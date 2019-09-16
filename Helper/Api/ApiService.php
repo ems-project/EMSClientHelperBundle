@@ -12,6 +12,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ApiService
 {
+    const EMS_AJAX_MESSAGE_LEVELS = ['error', 'warning'];
+
     /** @var ClientRequest[] */
     private $clientRequests;
 
@@ -176,7 +178,7 @@ class ApiService
     private function finalizeResponse(Client $apiClient, array $response, string $type, ?string $ouuid) : string
     {
         if (! $response['success']) {
-            foreach (['error', 'warning'] as $level) {
+            foreach (ApiService::EMS_AJAX_MESSAGE_LEVELS as $level) {
                 if (isset($response[$level][0])) {
                     throw new \Exception($response[$level][0]);
                 }
@@ -198,7 +200,7 @@ class ApiService
                 ]);
             }
 
-            foreach (['error', 'warning'] as $level) {
+            foreach (ApiService::EMS_AJAX_MESSAGE_LEVELS as $level) {
                 if (isset($response[$level][0])) {
                     throw new \Exception($response[$level][0]);
                 }
