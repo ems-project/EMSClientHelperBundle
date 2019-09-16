@@ -11,7 +11,7 @@ class Client
      * @var HttpClient
      */
     private $client;
-    
+
     /**
      * @var string
      */
@@ -21,7 +21,7 @@ class Client
      * @var string
      */
     private $name;
-    
+
     /**
      * @param string $name
      * @param string $baseUrl
@@ -103,7 +103,24 @@ class Client
         $response = $this->client->post(
             sprintf('api/data/%s/finalize/%d', $type, $revisionId)
         );
-        
+
+        return \json_decode($response->getBody()->getContents(), true);
+    }
+
+    /**
+     * Call discardDraft for a revisionId
+     *
+     * @param string $type
+     * @param string $revisionId
+     *
+     * @return array [acknowledged, ouuid, success]
+     */
+    public function discardDraft($type, $revisionId)
+    {
+        $response = $this->client->post(
+            sprintf('api/data/%s/discard/%d', $type, $revisionId)
+        );
+
         return \json_decode($response->getBody()->getContents(), true);
     }
 
