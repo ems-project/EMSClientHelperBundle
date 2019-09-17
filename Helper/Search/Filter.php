@@ -15,7 +15,7 @@ class Filter
     private $type;
     /** @var string */
     private $field;
-    /** @var string */
+    /** @var null|string */
     private $nestedPath;
 
     /** @var ?string */
