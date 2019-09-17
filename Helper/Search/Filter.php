@@ -15,6 +15,8 @@ class Filter
     private $type;
     /** @var string */
     private $field;
+    /** @var string */
+    private $nestedPath;
 
     /** @var ?string */
     private $sortField;
@@ -59,6 +61,8 @@ class Filter
         $this->name = $name;
         $this->type = $options['type'];
         $this->field = $options['field'];
+        $this->nestedPath = $options['nested_path'] ?? null;
+
         $this->public = isset($options['public']) ? (bool) $options['public'] : true;
         $this->optional = isset($options['optional']) ? (bool) $options['optional'] : false;
         $this->aggSize = isset($options['aggs_size']) ? (int) $options['aggs_size'] : null;
@@ -93,7 +97,7 @@ class Filter
 
     public function getField(): string
     {
-        return $this->field;
+        return $this->isNested() ? $this->nestedPath . '.' . $this->field : $this->field;
     }
 
     public function getValue()
@@ -156,10 +160,13 @@ class Filter
     {
         $this->setChoices();
 
-        if (isset($aggregation['buckets'])) {
-            $this->handleBuckets($aggregation['buckets']);
-        } elseif (isset($aggregation['filtered_' . $this->name]['buckets'])) {
-            $this->handleBuckets($aggregation['filtered_' . $this->name]['buckets']);
+        $data = $aggregation['nested'] ?? $aggregation;
+        $buckets = $data['filtered_' . $this->name]['buckets'] ?? $data['buckets'];
+
+        foreach ($buckets as $bucket) {
+            if (isset($this->choices[$bucket['key']])) {
+                $this->choices[$bucket['key']]['filter'] = $bucket['doc_count'];
+            }
         }
     }
 
@@ -179,16 +186,26 @@ class Filter
         return $this->choices;
     }
 
+    public function isNested(): bool
+    {
+        return null !== $this->nestedPath;
+    }
+
+    public function getNestedPath(): ?string
+    {
+        return $this->nestedPath;
+    }
+
     private function setQuery($value): void
     {
         switch ($this->type) {
             case self::TYPE_TERM:
                 $this->value = $value;
-                $this->query = ['term' => [$this->field => ['value' => $value]]];
+                $this->query = ['term' => [$this->getField() => ['value' => $value]]];
                 break;
             case self::TYPE_TERMS:
                 $this->value = \is_array($value) ? $value : [$value];
-                $this->query = ['terms' => [$this->field => $value]];
+                $this->query = ['terms' => [$this->getField() => $value]];
                 break;
             case self::TYPE_DATE_RANGE:
                 $this->value = \is_array($value) ? $value : [$value];
@@ -219,17 +236,18 @@ class Filter
             return null;
         }
 
-        return ['range' => [ $this->field => array_filter(['gte' => $start, 'lte' => $end,]) ]];
+        return ['range' => [ $this->getField() => array_filter(['gte' => $start, 'lte' => $end,]) ]];
     }
 
     private function getQueryOptional(): array
     {
         return [
             'bool' => [
+                'minimum_should_match' => 1,
                 'should' => [
                     [$this->query],
                     ['bool' => [
-                        'must_not' => ['exists' => ['field' => $this->field]]
+                        'must_not' => ['exists' => ['field' => $this->getField()]]
                     ]]
                 ]
             ]
@@ -242,18 +260,19 @@ class Filter
             return;
         }
 
-        $aggs = ['field' => $this->field, 'size' => $this->aggSize];
+        $aggs = ['terms' => ['field' => $this->getField(), 'size' => $this->aggSize]];
         if ($this->getSortField() !== null) {
-            $aggs['order'] = [$this->getSortField() => $this->getSortOrder()];
+            $aggs['terms']['order'] = [$this->getSortField() => $this->getSortOrder()];
         }
 
-        $search = $this->clientRequest->searchArgs([
-            'body' => [
-                'size' => 0,
-                'aggs' => [$this->name => ['terms' =>  $aggs]]
-            ]
-        ]);
-        $buckets = $search['aggregations'][$this->name]['buckets'];
+        if ($this->isNested()) {
+            $aggs = ['nested' => ['path' => $this->getNestedPath()], 'aggs' => ['nested' => $aggs]];
+        }
+
+        $search = $this->clientRequest->searchArgs(['body' => ['size' => 0, 'aggs' => [$this->name => $aggs]] ]);
+
+        $result = $search['aggregations'][$this->name];
+        $buckets = $this->isNested() ? $result['nested']['buckets'] : $result['buckets'];
         $choices = [];
 
         foreach ($buckets as $bucket) {
@@ -275,15 +294,6 @@ class Filter
             $this->postFilter = true; //default post filtering for public terms filters
         } else {
             $this->postFilter = false;
-        }
-    }
-
-    private function handleBuckets(array $buckets)
-    {
-        foreach ($buckets as $bucket) {
-            if (isset($this->choices[$bucket['key']])) {
-                $this->choices[$bucket['key']]['filter'] = $bucket['doc_count'];
-            }
         }
     }
 }

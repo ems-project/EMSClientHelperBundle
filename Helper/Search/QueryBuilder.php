@@ -70,28 +70,50 @@ class QueryBuilder
     private function getQueryFilters(): array
     {
         $query = [];
+        $nestedQueries = [];
 
         foreach ($this->search->getQueryFacets() as $field => $terms) {
             $query['bool']['must'][] = ['terms' => [$field => $terms]];
         }
 
         foreach ($this->search->getFilters() as $filter) {
-            if ($filter->isActive() && !$filter->isPostFilter()) {
+            if (!$filter->isActive() || $filter->isPostFilter()) {
+                continue;
+            }
+
+            if ($filter->isNested()) {
+                $nestedQueries[$filter->getNestedPath()]['bool']['must'][] = $filter->getQuery();
+            } else {
                 $query['bool']['must'][] = $filter->getQuery();
             }
+        }
+
+        foreach ($nestedQueries as $path => $queries) {
+            $query['bool']['must'][] = ['nested' => [ 'path' => $path, 'query' => $queries]];
         }
 
         return $query;
     }
 
-    private function getPostFilters(Filter $exclude = null): ?array
+    private function getPostFilters(Filter $exclude = null, $nestedPath = null): ?array
     {
         $postFilters = [];
+        $nestedQueries = [];
 
         foreach ($this->search->getFilters() as $filter) {
-            if ($filter->isActive() && $filter->isPostFilter() && $filter !== $exclude) {
+            if (!$filter->isActive() || !$filter->isPostFilter() || $filter === $exclude) {
+                continue;
+            }
+
+            if ($filter->isNested() && $filter->getNestedPath() !== $nestedPath) {
+                $nestedQueries[$filter->getNestedPath()]['bool']['must'][] = $filter->getQuery();
+            } else {
                 $postFilters[] = $filter->getQuery();
             }
+        }
+
+        foreach ($nestedQueries as $path => $queries) {
+            $postFilters[] = ['nested' => [ 'path' => $path, 'query' => $queries]];
         }
 
         return $postFilters ? ['bool' => ['must' => $postFilters]] : null;
@@ -110,7 +132,16 @@ class QueryBuilder
                 continue;
             }
 
-            $aggs[$filter->getName()] = $hasPostFilter ? $this->getAggPostFilter($filter) : $this->getAgg($filter);
+            $aggregation =  $hasPostFilter ? $this->getAggPostFilter($filter) : $this->getAgg($filter);
+
+            if ($filter->isNested()) {
+                $aggregation = [
+                    'nested' => ['path' => $filter->getNestedPath()],
+                    'aggs' => ['nested' => $aggregation]
+                ];
+            }
+
+            $aggs[$filter->getName()] = $aggregation;
         }
 
         return array_filter($aggs);
@@ -133,7 +164,7 @@ class QueryBuilder
     private function getAggPostFilter(Filter $filter)
     {
         $agg = $this->getAgg($filter);
-        $aggFilter = $this->getPostFilters($filter);
+        $aggFilter = $this->getPostFilters($filter, $filter->getNestedPath());
 
         if (null === $aggFilter) {
             return $agg;
