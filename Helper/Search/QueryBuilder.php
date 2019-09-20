@@ -89,7 +89,11 @@ class QueryBuilder
         }
 
         foreach ($nestedQueries as $path => $queries) {
-            $query['bool']['must'][] = ['nested' => [ 'path' => $path, 'query' => $queries]];
+            $query['bool']['must'][] = ['nested' => [
+                'path' => $path,
+                'ignore_unmapped' => true,
+                'query' => $queries
+            ]];
         }
 
         return $query;
@@ -113,7 +117,11 @@ class QueryBuilder
         }
 
         foreach ($nestedQueries as $path => $queries) {
-            $postFilters[] = ['nested' => [ 'path' => $path, 'query' => $queries]];
+            $postFilters[] = ['nested' => [
+                'path' => $path,
+                'ignore_unmapped' => true,
+                'query' => $queries
+            ]];
         }
 
         return $postFilters ? ['bool' => ['must' => $postFilters]] : null;
