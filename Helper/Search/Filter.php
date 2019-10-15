@@ -266,7 +266,10 @@ class Filter
         }
 
         if ($this->isNested()) {
-            $aggs = ['nested' => ['path' => $this->getNestedPath()], 'aggs' => ['nested' => $aggs]];
+            $aggs = ['nested' => [
+                'path' => $this->getNestedPath()],
+                'aggs' => ['nested' => $aggs]
+            ];
         }
 
         $search = $this->clientRequest->searchArgs(['body' => ['size' => 0, 'aggs' => [$this->name => $aggs]] ]);
