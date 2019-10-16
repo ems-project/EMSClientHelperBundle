@@ -92,7 +92,7 @@ class ApiController
         }
     }
 
-    public function createDocumentFromForm(Request $request, string $apiName, string $contentType, ?string $ouuid, string $redirectUrl, string $validationTemplate = null) : RedirectResponse
+    public function createDocumentFromForm(Request $request, string $apiName, string $contentType, ?string $ouuid, string $redirectUrl, string $validationTemplate = null): RedirectResponse
     {
         $body = $this->service->treatFormRequest($request, $apiName, $validationTemplate);
         $ouuid = $this->service->createDocument($apiName, $contentType, $ouuid, $body);
@@ -102,7 +102,7 @@ class ApiController
         return new RedirectResponse($url);
     }
 
-    public function updateDocumentFromForm(Request $request, string $apiName, string $contentType, string $ouuid, string $redirectUrl, string $validationTemplate = null) : RedirectResponse
+    public function updateDocumentFromForm(Request $request, string $apiName, string $contentType, string $ouuid, string $redirectUrl, string $validationTemplate = null): RedirectResponse
     {
         $body = $this->service->treatFormRequest($request, $apiName, $validationTemplate);
         $ouuid = $this->service->updateDocument($apiName, $contentType, $ouuid, $body);

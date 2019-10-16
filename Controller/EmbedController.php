@@ -40,7 +40,7 @@ class EmbedController extends AbstractController
         });
     }
 
-    public function renderBlockAction(string $searchType, array $body, string $template, array $args = [], int $from = 0, int $size = 10, ?string $cacheType = null, array $sourceExclude = []) : Response
+    public function renderBlockAction(string $searchType, array $body, string $template, array $args = [], int $from = 0, int $size = 10, ?string $cacheType = null, array $sourceExclude = []): Response
     {
         $cacheKey = [
             'EMSCH_Block',

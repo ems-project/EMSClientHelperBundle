@@ -161,21 +161,21 @@ class ApiService
         return $response;
     }
 
-    public function updateDocument(string $apiName, string $type, string $ouuid, array $body) : string
+    public function updateDocument(string $apiName, string $type, string $ouuid, array $body): string
     {
         $apiClient = $this->getApiClient($apiName);
         $response = $apiClient->updateDocument($type, $ouuid, $body);
         return $this->finalizeResponse($apiClient, $response, $type, $ouuid);
     }
 
-    public function createDocument(string $apiName, string $type, ?string $ouuid, array $body) : string
+    public function createDocument(string $apiName, string $type, ?string $ouuid, array $body): string
     {
         $apiClient = $this->getApiClient($apiName);
         $response = $apiClient->initNewDocument($type, $body, $ouuid);
         return $this->finalizeResponse($apiClient, $response, $type, $ouuid);
     }
 
-    private function finalizeResponse(Client $apiClient, array $response, string $type, ?string $ouuid) : string
+    private function finalizeResponse(Client $apiClient, array $response, string $type, ?string $ouuid): string
     {
         if (! $response['success']) {
             foreach (ApiService::EMS_AJAX_MESSAGE_LEVELS as $level) {
@@ -266,7 +266,7 @@ class ApiService
         throw new NotFoundHttpException();
     }
 
-    private function getApiClient(string $clientName) : Client
+    private function getApiClient(string $clientName): Client
     {
         foreach ($this->apiClients as $apiClient) {
             if ($clientName === $apiClient->getName()) {
