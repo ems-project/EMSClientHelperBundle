@@ -1,4 +1,5 @@
 <?php
+
 namespace EMS\ClientHelperBundle\Helper\Twig;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;

@@ -293,7 +293,7 @@ class ClientRequest
         return $out;
     }
 
-    public function getEnvironments() : array
+    public function getEnvironments(): array
     {
         $environments = [];
         /** @var Environment $environment */

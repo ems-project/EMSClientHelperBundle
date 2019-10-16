@@ -129,7 +129,7 @@ class Client
      * @param string|null $forcedFilename
      * @return array [uploaded, fileName, url]
      */
-    public function postFile(\SplFileInfo $file, ?string $forcedFilename = null) : array
+    public function postFile(\SplFileInfo $file, ?string $forcedFilename = null): array
     {
         $response = $this->client->post('api/file', [
             'multipart' => [

@@ -2,7 +2,6 @@
 
 namespace EMS\ClientHelperBundle\Helper\Hashcash;
 
-
 class Token
 {
     /** @var string */

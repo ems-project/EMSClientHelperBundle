@@ -1,6 +1,5 @@
 <?php
 
-
 namespace EMS\ClientHelperBundle\Helper\Hashcash;
 
 use Symfony\Component\HttpFoundation\Request;
