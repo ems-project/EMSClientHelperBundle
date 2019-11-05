@@ -38,7 +38,7 @@ class Handler
         }
 
         return [
-            'template' => $this->getTemplate($route, $document),
+            'template' => $this->getTemplate($request, $route, $document),
             'context' => $context,
         ];
     }
@@ -75,9 +75,14 @@ class Handler
         }
     }
 
-    private function getTemplate(SymfonyRoute $route, array $document = null): string
+    private function getTemplate(Request $request, SymfonyRoute $route, array $document = null): string
     {
         $template = $route->getOption('template');
+
+        $pattern = '/%(?<parameter>(_|)[[:alnum:]]*)%/m';
+        $template = preg_replace_callback($pattern, function ($match) use ($request) {
+            return $request->get($match['parameter'], $match[0]);
+        }, $template);
 
         if (null === $document || substr($template, 0, 6) === TwigLoader::PREFIX) {
             return $template;
