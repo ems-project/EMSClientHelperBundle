@@ -167,12 +167,16 @@ class Filter
         $buckets = $data['filtered_' . $this->name]['buckets'] ?? $data['buckets'];
 
         foreach ($buckets as $bucket) {
-            if (isset($this->choices[$bucket['key']])) {
-                $this->choices[$bucket['key']]['filter'] = $bucket['doc_count'];
+            if (!isset($this->choices[$bucket['key']])) {
+                continue;
             }
-            if (isset($bucket['reversed_nested'])) {
-                $this->choices[$bucket['key']]['reversed_nested'] = $bucket['reversed_nested']['doc_count'];
+            $this->choices[$bucket['key']]['filter'] = $bucket['doc_count'];
+
+            if (!isset($bucket['reversed_nested'])) {
+                continue;
             }
+
+            $this->choices[$bucket['key']]['reversed_nested'] = $bucket['reversed_nested']['doc_count'];
         }
     }
 
