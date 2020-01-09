@@ -3,6 +3,7 @@
 namespace EMS\ClientHelperBundle\Helper\Search;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
+use phpDocumentor\Reflection\Types\Boolean;
 use Symfony\Component\HttpFoundation\Request;
 
 class Filter
@@ -22,6 +23,8 @@ class Filter
     private $sortField;
     /** @var string */
     private $sortOrder;
+    /** @var bool */
+    private $reversedNested;
 
     /** @var null|int */
     private $aggSize;
@@ -68,6 +71,7 @@ class Filter
         $this->aggSize = isset($options['aggs_size']) ? (int) $options['aggs_size'] : null;
         $this->sortField = isset($options['sort_field']) ? $options['sort_field'] : null;
         $this->sortOrder = isset($options['sort_order']) ? $options['sort_order'] : 'asc';
+        $this->reversedNested = isset($options['reversed_nested']) ? $options['reversed_nested'] : false;
         $this->setPostFilter($options);
 
         if (isset($options['value'])) {
@@ -166,6 +170,8 @@ class Filter
         foreach ($buckets as $bucket) {
             if (isset($this->choices[$bucket['key']])) {
                 $this->choices[$bucket['key']]['filter'] = $bucket['doc_count'];
+            }
+            if (isset($bucket['reversed_nested'])) {
                 $this->choices[$bucket['key']]['reversed_nested'] = $bucket['reversed_nested']['doc_count'];
             }
         }
@@ -195,6 +201,11 @@ class Filter
     public function getNestedPath(): ?string
     {
         return $this->nestedPath;
+    }
+
+    public function isReversedNested(): bool
+    {
+        return $this->reversedNested;
     }
 
     private function setQuery($value): void
