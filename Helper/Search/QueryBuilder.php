@@ -3,7 +3,6 @@
 namespace EMS\ClientHelperBundle\Helper\Search;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
-use stdClass;
 
 class QueryBuilder
 {
@@ -161,7 +160,7 @@ class QueryBuilder
         $agg = ['terms' => ['field' => $filter->getField(), 'size' => $filter->getAggSize()]];
 
         if($filter->isReversedNested()){
-            $agg = array_merge($agg, ['aggs' => [ 'reversed_nested' => [ 'reverse_nested' => new stdClass() ]]]);
+            $agg = array_merge($agg, ['aggs' => [ 'reversed_nested' => [ 'reverse_nested' => new \stdClass() ]]]);
         }
 
         if ($filter->getSortField() !== null) {
