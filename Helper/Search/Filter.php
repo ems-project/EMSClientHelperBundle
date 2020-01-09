@@ -3,7 +3,6 @@
 namespace EMS\ClientHelperBundle\Helper\Search;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
-use phpDocumentor\Reflection\Types\Boolean;
 use Symfony\Component\HttpFoundation\Request;
 
 class Filter
