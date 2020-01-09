@@ -159,7 +159,7 @@ class QueryBuilder
     {
         $agg = ['terms' => ['field' => $filter->getField(), 'size' => $filter->getAggSize()]];
 
-        if($filter->isReversedNested()){
+        if ($filter->isReversedNested()) {
             $agg = array_merge($agg, ['aggs' => [ 'reversed_nested' => [ 'reverse_nested' => new \stdClass() ]]]);
         }
 
