@@ -166,6 +166,7 @@ class Filter
         foreach ($buckets as $bucket) {
             if (isset($this->choices[$bucket['key']])) {
                 $this->choices[$bucket['key']]['filter'] = $bucket['doc_count'];
+                $this->choices[$bucket['key']]['reversed_nested'] = $bucket['reversed_nested']['doc_count'];
             }
         }
     }
