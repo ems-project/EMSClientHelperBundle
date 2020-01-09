@@ -159,6 +159,10 @@ class QueryBuilder
     {
         $agg = ['terms' => ['field' => $filter->getField(), 'size' => $filter->getAggSize()]];
 
+        if ($filter->isReversedNested()) {
+            $agg = array_merge($agg, ['aggs' => [ 'reversed_nested' => [ 'reverse_nested' => new \stdClass() ]]]);
+        }
+
         if ($filter->getSortField() !== null) {
             $agg['terms']['order'] = [$filter->getSortField() => $filter->getSortOrder(),];
         }
