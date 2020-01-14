@@ -35,15 +35,14 @@ class LocaleHelper
      */
     public function redirectMissingLocale(Request $request)
     {
-        $session = $request->getSession();
         $destination = $request->getPathInfo();
 
         if ('' === $destination || '/' === $destination) {
             $destination = null;
         }
 
-        if ($session->has('_locale')) {
-            $url = $request->getUriForPath('/' . $session->get('_locale') . $destination);
+        if ($request->hasSession() && $request->getSession()->has('_locale')) {
+            $url = $request->getUriForPath('/' . $request->getSession()->get('_locale') . $destination);
         } elseif (1 === count($this->locales)) {
             $url = $request->getUriForPath('/' . $this->locales[0] . $destination);
         } else {
