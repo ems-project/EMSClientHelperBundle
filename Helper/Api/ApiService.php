@@ -3,30 +3,81 @@
 namespace EMS\ClientHelperBundle\Helper\Api;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
-use EMS\CommonBundle\Common\HttpClientFactory;
+use EMS\CommonBundle\Helper\EmsFields;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ApiService
 {
-    /**
-     * @var ClientRequest[]
-     */
+    const EMS_AJAX_MESSAGE_LEVELS = ['error', 'warning'];
+
+    /** @var ClientRequest[] */
     private $clientRequests;
 
-    /**
-     * @var UrlGeneratorInterface
-     */
+    /** @var Client[] */
+    private $apiClients;
+
+    /** @var UrlGeneratorInterface */
     private $urlGenerator;
 
+    /** @var \Twig_Environment */
+    private $twig;
+
+    /** @var LoggerInterface */
+    private $logger;
+
     /**
+     * @param LoggerInterface $logger
+     * @param \Twig_Environment $twig
      * @param UrlGeneratorInterface $urlGenerator
-     * @param iterable              $clientRequests
+     * @param iterable $clientRequests
+     * @param iterable $apiClients
      */
-    public function __construct(UrlGeneratorInterface $urlGenerator, iterable $clientRequests = [])
+    public function __construct(LoggerInterface $logger, \Twig_Environment $twig, UrlGeneratorInterface $urlGenerator, iterable $clientRequests = [], iterable $apiClients = [])
     {
+        $this->logger = $logger;
+        $this->twig = $twig;
         $this->urlGenerator = $urlGenerator;
         $this->clientRequests = $clientRequests;
+        $this->apiClients = $apiClients;
+    }
+
+
+
+    public function treatFormRequest(Request $request, string $apiName, string $validationTemplate = null)
+    {
+        $body = $request->request->all();
+        /** @var string $key */
+        /** @var UploadedFile $file */
+        foreach ($request->files as $key => $file) {
+            if ($file !== null) {
+                $response = $this->uploadFile($apiName, $file, $file->getClientOriginalName());
+                if (!$response['uploaded'] || !isset($response[EmsFields::CONTENT_FILE_HASH_FIELD_])) {
+                    throw new \Exception('File hash not found or file not uploaded');
+                }
+                $body[$key] = [
+                    EmsFields::CONTENT_FILE_HASH_FIELD => $response[EmsFields::CONTENT_FILE_HASH_FIELD_],
+                    EmsFields::CONTENT_FILE_HASH_FIELD_ => $response[EmsFields::CONTENT_FILE_HASH_FIELD_],
+                    EmsFields::CONTENT_FILE_NAME_FIELD => $file->getClientOriginalName(),
+                    EmsFields::CONTENT_FILE_NAME_FIELD_ => $file->getClientOriginalName(),
+                    EmsFields::CONTENT_FILE_SIZE_FIELD => $file->getSize(),
+                    EmsFields::CONTENT_FILE_SIZE_FIELD_ => $file->getSize(),
+                    EmsFields::CONTENT_MIME_TYPE_FIELD => $file->getMimeType(),
+                    EmsFields::CONTENT_MIME_TYPE_FIELD_ => $file->getMimeType(),
+                ];
+            }
+        }
+
+        if ($validationTemplate !== null) {
+            return \json_decode($this->twig->render($validationTemplate, [
+                'document' => $body,
+            ]), true);
+        }
+
+        return $body;
     }
 
     /**
@@ -110,6 +161,70 @@ class ApiService
         return $response;
     }
 
+    public function updateDocument(string $apiName, string $type, string $ouuid, array $body): string
+    {
+        $apiClient = $this->getApiClient($apiName);
+        $response = $apiClient->updateDocument($type, $ouuid, $body);
+        return $this->finalizeResponse($apiClient, $response, $type, $ouuid);
+    }
+
+    public function createDocument(string $apiName, string $type, ?string $ouuid, array $body): string
+    {
+        $apiClient = $this->getApiClient($apiName);
+        $response = $apiClient->initNewDocument($type, $body, $ouuid);
+        return $this->finalizeResponse($apiClient, $response, $type, $ouuid);
+    }
+
+    private function finalizeResponse(Client $apiClient, array $response, string $type, ?string $ouuid): string
+    {
+        if (! $response['success']) {
+            foreach (ApiService::EMS_AJAX_MESSAGE_LEVELS as $level) {
+                if (isset($response[$level][0])) {
+                    throw new \Exception($response[$level][0]);
+                }
+            }
+            throw new \Exception('Initialize draft failed');
+        }
+
+        $revisionId = $response['revision_id'];
+        $response = $apiClient->finalize($type, $revisionId);
+
+        if (! $response['success']) {
+            try {
+                $apiClient->discardDraft($type, $revisionId);
+            } catch (\Exception $e) {
+                $this->logger->warning('emsch.api_service.discard_exception', [
+                    'ouuid' => $ouuid,
+                    'type' => $type,
+                    'revision_id' => $revisionId,
+                ]);
+            }
+
+            foreach (ApiService::EMS_AJAX_MESSAGE_LEVELS as $level) {
+                if (isset($response[$level][0])) {
+                    throw new \Exception($response[$level][0]);
+                }
+            }
+            throw new \Exception('Finalize draft failed');
+        }
+        return $response['ouuid'];
+    }
+
+    public function uploadFile(string $apiName, \SplFileInfo $file, $filename)
+    {
+        $response = $this->getApiClient($apiName)->postFile($file, $filename);
+        //TODO: remove this hack once the ems back is returning the file hash as parameter
+        if (! isset($response[EmsFields::CONTENT_FILE_HASH_FIELD_]) && isset($response['url'])) {
+            $output_array = [];
+            preg_match('/\/data\/file\/view\/(?P<hash>.*)\?.*/', $response['url'], $output_array);
+            if (isset($output_array['hash'])) {
+                $response[EmsFields::CONTENT_FILE_HASH_FIELD_] = $output_array['hash'];
+            }
+        }
+
+        return $response;
+    }
+
     /**
      * @param string $apiName
      * @param string $contentType
@@ -145,6 +260,17 @@ class ApiService
         foreach ($this->clientRequests as $clientRequest) {
             if ($apiName === $clientRequest->getOption('[api][name]', false)) {
                 return $clientRequest;
+            }
+        }
+
+        throw new NotFoundHttpException();
+    }
+
+    private function getApiClient(string $clientName): Client
+    {
+        foreach ($this->apiClients as $apiClient) {
+            if ($clientName === $apiClient->getName()) {
+                return $apiClient;
             }
         }
 

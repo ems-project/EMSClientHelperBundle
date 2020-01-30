@@ -38,6 +38,10 @@ class TranslationHelper
             $messages = $this->getMessages($clientRequest);
 
             foreach ($this->locales as $locale) {
+                if (!isset($messages[$locale])) {
+                    continue;
+                }
+
                 $clientCatalog = new MessageCatalogue($locale);
                 $clientCatalog->add($messages[$locale], $clientRequest->getCacheKey());
 
@@ -75,8 +79,8 @@ class TranslationHelper
 
         foreach ($scroll as $hit) {
             foreach ($this->locales as $locale) {
-                if (isset($hit['_source']['label_'.$locale])) {
-                    $messages[$locale][$hit['_source']['key']] = $hit['_source']['label_'.$locale];
+                if (isset($hit['_source']['label_' . $locale])) {
+                    $messages[$locale][$hit['_source']['key']] = $hit['_source']['label_' . $locale];
                 }
             }
         }

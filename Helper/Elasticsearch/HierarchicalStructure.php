@@ -6,17 +6,17 @@ use EMS\CommonBundle\Common\EMSLink;
 
 class HierarchicalStructure
 {
-    /**@var \array* */
+    /** @var array */
     private $children;
-    /**@var \string* */
+    /** @var string */
     private $type;
-    /**@var \string* */
+    /** @var string */
     private $id;
-    /**@var \string* */
+    /** @var array */
     private $source;
-    /** @var mixed  */
+    /** @var mixed */
     private $data;
-    /** @var bool  */
+    /** @var bool*/
     private $active = false;
 
     public function __construct(string $type, string $id, array $source, EMSLink $activeChild = null)

@@ -70,28 +70,58 @@ class QueryBuilder
     private function getQueryFilters(): array
     {
         $query = [];
+        $nestedQueries = [];
 
         foreach ($this->search->getQueryFacets() as $field => $terms) {
             $query['bool']['must'][] = ['terms' => [$field => $terms]];
         }
 
         foreach ($this->search->getFilters() as $filter) {
-            if ($filter->isActive() && !$filter->isPostFilter()) {
+            if (!$filter->isActive() || $filter->isPostFilter()) {
+                continue;
+            }
+
+            if ($filter->isNested()) {
+                $nestedQueries[$filter->getNestedPath()]['bool']['must'][] = $filter->getQuery();
+            } else {
                 $query['bool']['must'][] = $filter->getQuery();
             }
+        }
+
+        foreach ($nestedQueries as $path => $queries) {
+            $query['bool']['must'][] = ['nested' => [
+                'path' => $path,
+                'ignore_unmapped' => true,
+                'query' => $queries
+            ]];
         }
 
         return $query;
     }
 
-    private function getPostFilters(Filter $exclude = null): ?array
+    private function getPostFilters(Filter $exclude = null, $nestedPath = null): ?array
     {
         $postFilters = [];
+        $nestedQueries = [];
 
         foreach ($this->search->getFilters() as $filter) {
-            if ($filter->isActive() && $filter->isPostFilter() && $filter !== $exclude) {
+            if (!$filter->isActive() || !$filter->isPostFilter() || $filter === $exclude) {
+                continue;
+            }
+
+            if ($filter->isNested() && $filter->getNestedPath() !== $nestedPath) {
+                $nestedQueries[$filter->getNestedPath()]['bool']['must'][] = $filter->getQuery();
+            } else {
                 $postFilters[] = $filter->getQuery();
             }
+        }
+
+        foreach ($nestedQueries as $path => $queries) {
+            $postFilters[] = ['nested' => [
+                'path' => $path,
+                'ignore_unmapped' => true,
+                'query' => $queries
+            ]];
         }
 
         return $postFilters ? ['bool' => ['must' => $postFilters]] : null;
@@ -110,7 +140,16 @@ class QueryBuilder
                 continue;
             }
 
-            $aggs[$filter->getName()] = $hasPostFilter ? $this->getAggPostFilter($filter) : $this->getAgg($filter);
+            $aggregation =  $hasPostFilter ? $this->getAggPostFilter($filter) : $this->getAgg($filter);
+
+            if ($filter->isNested()) {
+                $aggregation = [
+                    'nested' => ['path' => $filter->getNestedPath()],
+                    'aggs' => ['nested' => $aggregation]
+                ];
+            }
+
+            $aggs[$filter->getName()] = $aggregation;
         }
 
         return array_filter($aggs);
@@ -119,6 +158,10 @@ class QueryBuilder
     private function getAgg(Filter $filter): ?array
     {
         $agg = ['terms' => ['field' => $filter->getField(), 'size' => $filter->getAggSize()]];
+
+        if ($filter->isReversedNested()) {
+            $agg = array_merge($agg, ['aggs' => [ 'reversed_nested' => [ 'reverse_nested' => new \stdClass() ]]]);
+        }
 
         if ($filter->getSortField() !== null) {
             $agg['terms']['order'] = [$filter->getSortField() => $filter->getSortOrder(),];
@@ -133,7 +176,7 @@ class QueryBuilder
     private function getAggPostFilter(Filter $filter)
     {
         $agg = $this->getAgg($filter);
-        $aggFilter = $this->getPostFilters($filter);
+        $aggFilter = $this->getPostFilters($filter, $filter->getNestedPath());
 
         if (null === $aggFilter) {
             return $agg;
@@ -141,7 +184,7 @@ class QueryBuilder
 
         return [
             'filter' => $aggFilter,
-            'aggs' => ['filtered_'.$filter->getName() => $agg]
+            'aggs' => ['filtered_' . $filter->getName() => $agg]
         ];
     }
 
@@ -162,15 +205,17 @@ class QueryBuilder
 
     private function getSort(): ?array
     {
-        if (!$this->search->getSortBy()) {
+        if (null === $sort = $this->search->getSort()) {
             return null;
         }
 
-        return [
-            $this->search->getSortBy() => [
-                'order' => $this->search->getSortOrder(),
-                'missing' => '_last',
-            ]
-        ];
+        $field = $sort['field'];
+        unset($sort['field']);
+
+        if (!isset($sort['order'])) {
+            $sort['order'] = $this->search->getSortOrder();
+        }
+
+        return [$field => $sort];
     }
 }

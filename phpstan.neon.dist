@@ -3,3 +3,4 @@ parameters:
         - %currentWorkingDirectory%/vendor/*
         - %currentWorkingDirectory%/DependencyInjection/Configuration.php
     level: 4
+    inferPrivatePropertyTypeFromConstructor: true

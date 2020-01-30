@@ -76,8 +76,10 @@ class EMSClientHelperExtension extends Extension
     {
         foreach ($config as $name => $options) {
             $definition = new Definition(ApiClient::class);
-            $definition->setArgument(0, $options['url']);
-            $definition->setArgument(1, $options['key']);
+            $definition->setArgument(0, $name);
+            $definition->setArgument(1, $options['url']);
+            $definition->setArgument(2, $options['key']);
+            $definition->addTag('emsch.api_client');
 
             $container->setDefinition(sprintf('emsch.api_client.%s', $name), $definition);
         }
@@ -159,7 +161,7 @@ class EMSClientHelperExtension extends Extension
 
         if (isset($options['api'])) {
             $this->loadClientRequestApi($loader);
-            $definition->addTag('esmch.client_request.api');
+            $definition->addTag('emsch.client_request.api');
         }
 
         $container->setDefinition(sprintf('emsch.client_request.%s', $name), $definition);

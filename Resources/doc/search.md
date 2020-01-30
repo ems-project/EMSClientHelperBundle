@@ -15,7 +15,7 @@
   "synonyms": ["keyword"],
   "sizes": [10,25,50],
   "sorts": {
-      "recent": {"field": "search_date", "order": "desc"},
+      "recent": {"field": "search_date", "order": "desc", "unmapped_type": "date", "missing":  "_last"},
       "title": "title_%locale%.keyword"
   },
   "filters": {
@@ -61,6 +61,54 @@ we still known the counts of other choices.
 Example uri for filtering all documents in november 2018.
 
 /search?**fdate[start_date]**=1-11-2018&**fdate[end_date]**=30-11-2018
+
+## Nested queries
+
+If facets depends on facets, we can create a nested collection for filtering.
+
+### Example document source's
+````json
+[
+    {
+        "name": "person1",
+        "tags": [
+            {"type": "tag1", "values": [1, 2, 3, 4]},
+            {"type": "tag2", "values": [5, 7]},
+            {"type": "tag3", "values": [5, 7]}
+        ]
+    },
+    {
+        "name": "person2",
+        "tags": [
+            {"type": "tag2", "values": [1, 2]},
+            {"type": "tag4", "values": [5, 7]}
+        ]
+    }
+]
+````
+### Configuration 2 nested filters
+````json
+{
+  "filters": {
+    "personTags": {
+      "type": "terms",
+      "nested_path": "tags",
+      "field": "type",
+      "aggs_size": 50,
+      "sort_field": "_term",
+      "sort_order": "desc"
+    },
+    "personValues": {
+      "type": "terms",
+      "nested_path": "tags",
+      "field": "values",
+      "aggs_size": 50,
+      "sort_field": "_term",
+      "sort_order": "desc"
+    }
+  }
+}
+````
 
 ## Synonyms
 

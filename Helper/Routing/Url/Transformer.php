@@ -122,7 +122,7 @@ class Transformer
         $context = [
             'id'     => $document['_id'],
             'source' => $document['_source'],
-            'locale' => ($locale?$locale:$this->clientRequest->getLocale()),
+            'locale' => ($locale ? $locale : $this->clientRequest->getLocale()),
             'url'    => $emsLink,
         ];
 
@@ -134,7 +134,7 @@ class Transformer
             }
         }
 
-        return $this->twigRender('@EMSCH/routing/'.$document['_type'], $context);
+        return $this->twigRender('@EMSCH/routing/' . $document['_type'], $context);
     }
 
     /**
