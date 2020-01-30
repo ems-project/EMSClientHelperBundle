@@ -32,7 +32,7 @@ class Manager
         $results = $this->clientRequest->search($search->getTypes(), $body, $search->getFrom(), $search->getSize());
 
         if (isset($results['aggregations'])) {
-            $search->bindAggregations($results['aggregations']);
+            $search->bindAggregations($results['aggregations'], $qbService->getQueryFilters());
         }
 
         return [
