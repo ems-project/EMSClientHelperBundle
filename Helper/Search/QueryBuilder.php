@@ -67,7 +67,7 @@ class QueryBuilder
         return $query;
     }
 
-    private function getQueryFilters(): array
+    public function getQueryFilters(): array
     {
         $query = [];
         $nestedQueries = [];

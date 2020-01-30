@@ -33,6 +33,10 @@ class Filter
     private $public;
     /** @var bool if not all doc contain the filter */
     private $optional;
+    /** @var array */
+    private $queryFilters = [];
+    /** @var array */
+    private $queryTypes = [];
 
     /** @var array */
     private $query = [];
@@ -159,8 +163,10 @@ class Filter
         }
     }
 
-    public function handleAggregation(array $aggregation)
+    public function handleAggregation(array $aggregation, array $types = [], array $queryFilters = [])
     {
+        $this->queryTypes = $types;
+        $this->queryFilters = $queryFilters;
         $this->setChoices();
 
         $data = $aggregation['nested'] ?? $aggregation;
@@ -287,7 +293,7 @@ class Filter
             ];
         }
 
-        $search = $this->clientRequest->searchArgs(['body' => ['size' => 0, 'aggs' => [$this->name => $aggs]] ]);
+        $search = $this->clientRequest->searchArgs(['type' => $this->queryTypes, 'body' => ['query' => $this->queryFilters, 'size' => 0, 'aggs' => [$this->name => $aggs]]]);
 
         $result = $search['aggregations'][$this->name];
         $buckets = $this->isNested() ? $result['nested']['buckets'] : $result['buckets'];

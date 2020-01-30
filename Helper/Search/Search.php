@@ -69,6 +69,7 @@ class Search
         foreach ($filters as $name => $options) {
             $this->filters[$name] = new Filter($clientRequest, $name, $options);
         }
+
     }
 
     public function bindRequest(Request $request): void
@@ -87,11 +88,11 @@ class Search
         }
     }
 
-    public function bindAggregations(array $aggregations): void
+    public function bindAggregations(array $aggregations, array $queryFilters): void
     {
         foreach ($aggregations as $name => $aggregation) {
             if ($this->hasFilter($name)) {
-                $this->getFilter($name)->handleAggregation($aggregation);
+                $this->getFilter($name)->handleAggregation($aggregation,  $this->getTypes(), $queryFilters);
             }
         }
     }
