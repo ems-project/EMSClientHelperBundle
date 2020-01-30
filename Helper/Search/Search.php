@@ -87,11 +87,11 @@ class Search
         }
     }
 
-    public function bindAggregations(array $aggregations): void
+    public function bindAggregations(array $aggregations, array $queryFilters): void
     {
         foreach ($aggregations as $name => $aggregation) {
             if ($this->hasFilter($name)) {
-                $this->getFilter($name)->handleAggregation($aggregation);
+                $this->getFilter($name)->handleAggregation($aggregation, $this->getTypes(), $queryFilters);
             }
         }
     }
