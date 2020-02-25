@@ -68,8 +68,17 @@ class Handler
             return $request->get($match['parameter'], $match[0]);
         }, $query);
 
+        $indexRegex = $route->getOption('index_regex');
+        if ($indexRegex !== null) {
+            $pattern = '/%(?<parameter>(_|)[[:alnum:]]*)%/m';
+            $indexRegex = preg_replace_callback($pattern, function ($match) use ($request) {
+                return $request->get($match['parameter'], $match[0]);
+            }, $indexRegex);
+        }
+
+
         try {
-            return $this->clientRequest->searchOne($route->getOption('type'), json_decode($json, true));
+            return $this->clientRequest->searchOne($route->getOption('type'), json_decode($json, true), $indexRegex);
         } catch (SingleResultException $e) {
             throw new NotFoundHttpException();
         }

@@ -479,17 +479,47 @@ class ClientRequest
 
     /**
      * @param string|array $type
-     * @param array        $body
      * @param int          $from
      * @param int          $size
-     * @param array        $sourceExclude
      *
      * @return array
      */
-    public function search($type, array $body, $from = 0, $size = 10, array $sourceExclude = [])
+    public function search($type, array $body, $from = 0, $size = 10, array $sourceExclude = [], ?string $regex = null)
     {
+        if ($regex === null) {
+            $index = $this->getIndex();
+        } else {
+            $index = [];
+            foreach ($this->getIndex() as $alias) {
+                if (preg_match(sprintf('/%s/', $regex), $alias)) {
+                    $index[] = $alias;
+                }
+            }
+
+            $aggs = $this->client->search([
+                'index' => $this->getIndex(),
+                'type' => $type,
+                'body' => [
+                    'size' => 0,
+                    'aggs' => [
+                        'indexes' => [
+                            'terms' => [
+                                'field' => '_index'
+                            ]
+                        ]
+                    ]
+                ],
+            ]);
+
+            foreach ($aggs['aggregations']['indexes']['buckets'] as $bucket) {
+                if (preg_match(sprintf('/%s/', $regex), $bucket['key'])) {
+                    $index[] = $bucket['key'];
+                }
+            }
+        }
+
         $arguments = [
-            'index' => $this->getIndex(),
+            'index' => $index,
             'type' => $type,
             'body' => $body,
             'size' => $body['size'] ?? $size,
@@ -600,17 +630,16 @@ class ClientRequest
     }
 
     /**
-     * @param string $type
-     * @param array  $body
+     * @param string|array $type
      *
      * @return array
      *
      * @throws SingleResultException
      */
-    public function searchOne($type, array $body)
+    public function searchOne($type, array $body, ?string $indexRegex = null)
     {
-        $this->logger->debug('ClientRequest : searchOne for {type}', ['type' => $type, 'body' => $body]);
-        $search = $this->search($type, $body);
+        $this->logger->debug('ClientRequest : searchOne for {type}', ['type' => $type, 'body' => $body, 'indexRegex' => $indexRegex]);
+        $search = $this->search($type, $body, 0, 1, [], $indexRegex);
 
         $hits = $search['hits'];
 

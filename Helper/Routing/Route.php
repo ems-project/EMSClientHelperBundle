@@ -71,6 +71,7 @@ class Route
                 'type' => null,
                 'query' => null,
                 'template' => null,
+                'index_regex' => null,
             ])
             ->setNormalizer('defaults', function (Options $options, $value) {
                 if (!isset($value['_controller'])) {
@@ -92,6 +93,7 @@ class Route
 
                 $value['type'] = $options['type'];
                 $value['template'] = $options['template'];
+                $value['index_regex'] = $options['index_regex'];
 
                 return $value;
             })

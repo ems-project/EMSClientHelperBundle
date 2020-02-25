@@ -37,18 +37,16 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
 
     /**
      * @param string $type
-     * @param array $body
      * @param int $from
      * @param int $size
-     * @param array $sourceExclude
      *
      * @return array
      */
-    public function search($type, array $body, $from = 0, $size = 10, array $sourceExclude = [])
+    public function search($type, array $body, $from = 0, $size = 10, array $sourceExclude = [], ?string $regex = null)
     {
         $client = $this->manager->getDefault();
 
-        return $client->search($type, $body, $from, $size, $sourceExclude);
+        return $client->search($type, $body, $from, $size, $sourceExclude, $regex);
     }
 
     /**

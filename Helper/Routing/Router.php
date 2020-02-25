@@ -144,6 +144,7 @@ class Router extends BaseRouter
 
                 $staticTemplate = isset($source['template_static']) ? '@EMSCH/' . $source['template_static'] : null;
                 $options['template'] = $source['template_source'] ?? $staticTemplate;
+                $options['index_regex'] = $source['index_regex'] ?? null;
 
                 $routes[] = new Route($name, $options);
             } catch (\Exception $e) {
