@@ -12,7 +12,7 @@ class RouterController
 {
     /** @var Handler */
     private $handler;
-    /** @var \Twig_Environment */
+    /** @var Environment */
     private $templating;
 
     public function __construct(Handler $handler, Environment $templating)

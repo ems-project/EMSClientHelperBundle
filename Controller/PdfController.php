@@ -14,7 +14,7 @@ class PdfController
 {
     /** @var Handler */
     private $handler;
-    /** @var \Twig_Environment */
+    /** @var Environment */
     private $templating;
     /** @var PdfGenerator */
     private $pdfGenerator;
