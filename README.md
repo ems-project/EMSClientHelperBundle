@@ -21,6 +21,7 @@ composer phpstan
 Documentation
 -------------
 
+- [Routing](../master/Resources/doc/routing.md)
 - [Search](../master/Resources/doc/search.md)
 - [Twig documentation](../master/Resources/doc/twig.md)
 

@@ -36,6 +36,12 @@
             <argument type="service" id="twig"/>
             <tag name="controller.service_arguments"/>
         </service>
+        <service id="emsch.controller.pdf" class="EMS\ClientHelperBundle\Controller\PdfController">
+            <argument type="service" id="emsch.routing.handler" />
+            <argument type="service" id="twig"/>
+            <argument type="service" id="emsch.common.pdf_generator"/>
+            <tag name="controller.service_arguments"/>
+        </service>
 
         <service id="emsch.routing.url.generator" class="EMS\ClientHelperBundle\Helper\Routing\Url\Generator">
             <argument type="service" id="Symfony\Component\Routing\RouterInterface" />

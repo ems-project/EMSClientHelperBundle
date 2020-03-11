@@ -6,15 +6,16 @@ use EMS\ClientHelperBundle\Helper\Request\Handler;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Twig\Environment;
 
 class RouterController
 {
     /** @var Handler */
     private $handler;
-    /** @var \Twig_Environment */
+    /** @var Environment */
     private $templating;
 
-    public function __construct(Handler $handler, \Twig_Environment $templating)
+    public function __construct(Handler $handler, Environment $templating)
     {
         $this->handler = $handler;
         $this->templating = $templating;
