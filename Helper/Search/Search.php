@@ -5,6 +5,7 @@ namespace EMS\ClientHelperBundle\Helper\Search;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Search\Filter\Filter;
 use EMS\ClientHelperBundle\Helper\Search\Filter\FilterFactory;
+use EMS\ClientHelperBundle\Helper\Search\Filter\Options;
 use Symfony\Component\HttpFoundation\Request;
 
 class Search
@@ -68,10 +69,9 @@ class Search
         $this->setSynonyms(($options['synonyms'] ?? []), $clientRequest->getLocale());
 
         $filters = $options['filters'] ?? [];
-        $filterFactory = new FilterFactory($clientRequest);
 
         foreach ($filters as $name => $options) {
-            $this->filters[$name] = $filterFactory->create($name, $options);
+            $this->filters[$name] = new Filter($name, new Options($options));
         }
     }
 
@@ -91,11 +91,11 @@ class Search
         }
     }
 
-    public function bindAggregations(array $aggregations, array $queryFilters): void
+    public function bindAggregations(array $aggregations): void
     {
         foreach ($aggregations as $name => $aggregation) {
             if ($this->hasFilter($name)) {
-                $this->getFilter($name)->handleAggregation($aggregation, $this->getTypes(), $queryFilters);
+                $this->getFilter($name)->handleAggregation($aggregation);
             }
         }
     }

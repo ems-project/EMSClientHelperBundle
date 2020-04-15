@@ -33,12 +33,20 @@ class QueryBuilder
         ]);
     }
 
+    public function buildBodyForFilterChoices(Filter $filter): array
+    {
+        return array_filter([
+            'query' => $this->getQueryFilters(),
+            'aggs' => $filter->getOptions()->hasAggSize() ? [$filter->getName() => $this->getAgg($filter)] : [],
+        ]);
+    }
+
     private function getQuery(): ?array
     {
         $filterMust = $this->getQueryFilters();
 
         if ($this->search->hasQueryString()) {
-            return $this->getQueryWithString($this->search->getQueryString());
+            return $this->getQueryWithString($this->search->getQueryString(), $filterMust);
         } elseif ($filterMust) {
             return $filterMust;
         }
@@ -46,10 +54,9 @@ class QueryBuilder
         return null;
     }
 
-    private function getQueryWithString(string $queryString): array
+    private function getQueryWithString(string $queryString, array $filterMust): array
     {
         $query = ['bool' => ['should' => []]];
-        $filterMust = $this->getQueryFilters();
 
         $analyzer = new Analyzer($this->clientRequest);
         $tokens = $this->clientRequest->analyze($queryString, $this->search->getAnalyzer());
@@ -141,16 +148,7 @@ class QueryBuilder
                 continue;
             }
 
-            $aggregation =  $hasPostFilter ? $this->getAggPostFilter($filter) : $this->getAgg($filter);
-
-            if ($filter->getOptions()->hasNestedPath()) {
-                $aggregation = [
-                    'nested' => ['path' => $filter->getOptions()->getNestedPath()],
-                    'aggs' => ['nested' => $aggregation]
-                ];
-            }
-
-            $aggs[$filter->getName()] = $aggregation;
+            $aggs[$filter->getName()] = $hasPostFilter ? $this->getAggPostFilter($filter) : $this->getAgg($filter);
         }
 
         return array_filter($aggs);
@@ -168,7 +166,7 @@ class QueryBuilder
             $agg['terms']['order'] = [$filter->getOptions()->getSortField() => $filter->getOptions()->getSortOrder()];
         }
 
-        return $agg;
+        return $this->nestedAggregation($filter, $agg);
     }
 
     /**
@@ -183,10 +181,12 @@ class QueryBuilder
             return $agg;
         }
 
-        return [
+        $agg = [
             'filter' => $aggFilter,
             'aggs' => ['filtered_' . $filter->getName() => $agg]
         ];
+
+        return $this->nestedAggregation($filter, $agg);
     }
 
     private function getSuggest(): ?array
@@ -218,5 +218,17 @@ class QueryBuilder
         }
 
         return [$field => $sort];
+    }
+
+    private function nestedAggregation(Filter $filter, array $aggregation): array
+    {
+        if (!$filter->getOptions()->hasNestedPath()) {
+            return $aggregation;
+        }
+
+        return  $aggregation = [
+            'nested' => ['path' => $filter->getOptions()->getNestedPath()],
+            'aggs' => ['nested' => $aggregation]
+        ];
     }
 }

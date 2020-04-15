@@ -2,13 +2,10 @@
 
 namespace EMS\ClientHelperBundle\Helper\Search\Filter;
 
-use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use Symfony\Component\HttpFoundation\Request;
 
 class Filter
 {
-    /** @var ClientRequest */
-    private $clientRequest;
     /** @var string */
     private $name;
     /** @var Options */
@@ -18,33 +15,28 @@ class Filter
     /** @var string */
     private $field;
     /** @var array */
-    private $queryFilters = [];
-    /** @var array */
-    private $queryTypes = [];
-    /** @var array */
     private $query = [];
     /** @var array|null */
     private $value;
     /** @var array */
     private $choices = [];
 
-    const TYPE_TERM       = 'term';
-    const TYPE_TERMS      = 'terms';
-    const TYPE_DATE_RANGE = 'date_range';
+    public const TYPE_TERM       = 'term';
+    public const TYPE_TERMS      = 'terms';
+    public const TYPE_DATE_RANGE = 'date_range';
 
-    const TYPES = [
+    private const TYPES = [
         self::TYPE_TERM,
         self::TYPE_TERMS,
         self::TYPE_DATE_RANGE,
     ];
 
-    public function __construct(ClientRequest $clientRequest, string $name, Options $options)
+    public function __construct(string $name, Options $options)
     {
         if (!\in_array($options->getType(), self::TYPES)) {
             throw new \Exception(sprintf('invalid filter type %s', $options->getType()));
         }
 
-        $this->clientRequest = $clientRequest;
         $this->name = $name;
         $this->type = $options->getType();
         $this->field = $options->getField();
@@ -131,12 +123,8 @@ class Filter
         }
     }
 
-    public function handleAggregation(array $aggregation, array $types = [], array $queryFilters = [])
+    public function handleAggregation(array $aggregation)
     {
-        $this->queryTypes = $types;
-        $this->queryFilters = $queryFilters;
-        $this->setChoices();
-
         $data = $aggregation['nested'] ?? $aggregation;
         $buckets = $data['filtered_' . $this->name]['buckets'] ?? $data['buckets'];
 
@@ -165,9 +153,25 @@ class Filter
 
     public function getChoices(): array
     {
-        $this->setChoices();
-
         return $this->choices;
+    }
+
+    public function setChoices(array $aggregation): void
+    {
+        if (!$this->getOptions()->isType(self::TYPE_TERMS)) {
+            return;
+        }
+
+        $data = $aggregation['nested'] ?? $aggregation;
+        $buckets = $data['filtered_' . $this->name]['buckets'] ?? $data['buckets'];
+
+        foreach ($buckets as $bucket) {
+            $this->choices[$bucket['key']] = [
+                'total' => $bucket['doc_count'],
+                'filter' => 0,
+                'active' => \in_array($bucket['key'], $this->value ?? [])
+            ];
+        }
     }
 
     private function setQuery($value): void
@@ -226,40 +230,5 @@ class Filter
                 ]
             ]
         ];
-    }
-
-    private function setChoices(): void
-    {
-        if (null != $this->choices || $this->type !== self::TYPE_TERMS) {
-            return;
-        }
-
-        $aggs = ['terms' => ['field' => $this->getField(), 'size' => $this->getOptions()->getAggSize()]];
-        if ($this->options->hasSortField()) {
-            $aggs['terms']['order'] = [$this->options->getSortField() => $this->options->getSortOrder()];
-        }
-
-        if ($this->getOptions()->hasNestedPath()) {
-            $aggs = ['nested' => [
-                'path' => $this->getOptions()->getNestedPath()],
-                'aggs' => ['nested' => $aggs]
-            ];
-        }
-
-        $search = $this->clientRequest->searchArgs(['type' => $this->queryTypes, 'body' => ['query' => $this->queryFilters, 'size' => 0, 'aggs' => [$this->name => $aggs]]]);
-
-        $result = $search['aggregations'][$this->name];
-        $buckets = $this->getOptions()->hasNestedPath() ? $result['nested']['buckets'] : $result['buckets'];
-        $choices = [];
-
-        foreach ($buckets as $bucket) {
-            $choices[$bucket['key']] = [
-                'total' => $bucket['doc_count'],
-                'filter' => 0,
-                'active' => \in_array($bucket['key'], $this->value ?? [])
-            ];
-        }
-
-        $this->choices = $choices;
     }
 }
