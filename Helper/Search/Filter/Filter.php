@@ -1,6 +1,6 @@
 <?php
 
-namespace EMS\ClientHelperBundle\Helper\Search;
+namespace EMS\ClientHelperBundle\Helper\Search\Filter;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,36 +11,18 @@ class Filter
     private $clientRequest;
     /** @var string */
     private $name;
+    /** @var Options */
+    private $options;
     /** @var string */
     private $type;
     /** @var string */
     private $field;
-    /** @var null|string */
-    private $nestedPath;
-
-    /** @var ?string */
-    private $sortField;
-    /** @var string */
-    private $sortOrder;
-    /** @var bool */
-    private $reversedNested;
-
-    /** @var null|int */
-    private $aggSize;
-    /** @var bool default true for terms, when value passed default false */
-    private $postFilter;
-    /** @var bool only public filters will handle a request. */
-    private $public;
-    /** @var bool if not all doc contain the filter */
-    private $optional;
     /** @var array */
     private $queryFilters = [];
     /** @var array */
     private $queryTypes = [];
-
     /** @var array */
     private $query = [];
-
     /** @var array|null */
     private $value;
     /** @var array */
@@ -56,29 +38,20 @@ class Filter
         self::TYPE_DATE_RANGE,
     ];
 
-    public function __construct(ClientRequest $clientRequest, string $name, array $options)
+    public function __construct(ClientRequest $clientRequest, string $name, Options $options)
     {
-        $this->clientRequest = $clientRequest;
-
-        if (!\in_array($options['type'], self::TYPES)) {
-            throw new \Exception(sprintf('invalid filter type %s', $options['type']));
+        if (!\in_array($options->getType(), self::TYPES)) {
+            throw new \Exception(sprintf('invalid filter type %s', $options->getType()));
         }
 
+        $this->clientRequest = $clientRequest;
         $this->name = $name;
-        $this->type = $options['type'];
-        $this->field = $options['field'];
-        $this->nestedPath = $options['nested_path'] ?? null;
+        $this->type = $options->getType();
+        $this->field = $options->getField();
+        $this->options = $options;
 
-        $this->public = isset($options['public']) ? (bool) $options['public'] : true;
-        $this->optional = isset($options['optional']) ? (bool) $options['optional'] : false;
-        $this->aggSize = isset($options['aggs_size']) ? (int) $options['aggs_size'] : null;
-        $this->sortField = isset($options['sort_field']) ? $options['sort_field'] : null;
-        $this->sortOrder = isset($options['sort_order']) ? $options['sort_order'] : 'asc';
-        $this->reversedNested = isset($options['reversed_nested']) ? $options['reversed_nested'] : false;
-        $this->setPostFilter($options);
-
-        if (isset($options['value'])) {
-            $this->setQuery($options['value']);
+        if ($options->hasValue()) {
+            $this->setQuery($options->getValue());
         }
     }
 
@@ -87,14 +60,9 @@ class Filter
         return $this->name;
     }
 
-    public function getSortField(): ?string
+    public function getOptions(): Options
     {
-        return $this->sortField;
-    }
-
-    public function getSortOrder(): string
-    {
-        return $this->sortOrder;
+        return $this->options;
     }
 
     public function getType(): string
@@ -104,7 +72,11 @@ class Filter
 
     public function getField(): string
     {
-        return $this->isNested() ? $this->nestedPath . '.' . $this->field : $this->field;
+        if ($this->getOptions()->hasNestedPath()) {
+            return sprintf('%s.%s', $this->getOptions()->getNestedPath(), $this->field);
+        }
+
+        return $this->field;
     }
 
     public function getValue()
@@ -112,34 +84,22 @@ class Filter
         return $this->value;
     }
 
-    public function hasAggSize(): bool
-    {
-        return $this->aggSize !== null;
-    }
-
-    public function getAggSize(): ?int
-    {
-        return $this->aggSize;
-    }
-
     public function isActive(): bool
     {
         return !empty($this->query);
     }
 
-    public function isOptional(): bool
-    {
-        return $this->optional;
-    }
-
+    /**
+     * Keep used in twig templates
+     */
     public function isPublic(): bool
     {
-        return $this->public;
+        return $this->getOptions()->isPublic();
     }
 
     public function getQuery(): ?array
     {
-        if ($this->optional) {
+        if ($this->getOptions()->isOptional()) {
             return $this->getQueryOptional();
         }
 
@@ -148,7 +108,15 @@ class Filter
 
     public function isPostFilter(): bool
     {
-        return $this->postFilter;
+        if ($this->getOptions()->hasPostFilter()) {
+            return $this->getOptions()->getPostFilter();
+        }
+
+        if ($this->getOptions()->isType(self::TYPE_TERMS) && $this->getOptions()->isPublic()) {
+            return true; //default post filtering for public terms filters
+        }
+
+        return false;
     }
 
     public function handleRequest(Request $request): void
@@ -158,7 +126,7 @@ class Filter
 
         if ($this->value !== null) {
             $this->setQuery($this->value);
-        } elseif ($this->public && $requestValue) {
+        } elseif ($this->getOptions()->isPublic() && $requestValue) {
             $this->setQuery($requestValue);
         }
     }
@@ -200,21 +168,6 @@ class Filter
         $this->setChoices();
 
         return $this->choices;
-    }
-
-    public function isNested(): bool
-    {
-        return null !== $this->nestedPath;
-    }
-
-    public function getNestedPath(): ?string
-    {
-        return $this->nestedPath;
-    }
-
-    public function isReversedNested(): bool
-    {
-        return $this->reversedNested;
     }
 
     private function setQuery($value): void
@@ -281,14 +234,14 @@ class Filter
             return;
         }
 
-        $aggs = ['terms' => ['field' => $this->getField(), 'size' => $this->aggSize]];
-        if ($this->getSortField() !== null) {
-            $aggs['terms']['order'] = [$this->getSortField() => $this->getSortOrder()];
+        $aggs = ['terms' => ['field' => $this->getField(), 'size' => $this->getOptions()->getAggSize()]];
+        if ($this->options->hasSortField()) {
+            $aggs['terms']['order'] = [$this->options->getSortField() => $this->options->getSortOrder()];
         }
 
-        if ($this->isNested()) {
+        if ($this->getOptions()->hasNestedPath()) {
             $aggs = ['nested' => [
-                'path' => $this->getNestedPath()],
+                'path' => $this->getOptions()->getNestedPath()],
                 'aggs' => ['nested' => $aggs]
             ];
         }
@@ -296,7 +249,7 @@ class Filter
         $search = $this->clientRequest->searchArgs(['type' => $this->queryTypes, 'body' => ['query' => $this->queryFilters, 'size' => 0, 'aggs' => [$this->name => $aggs]]]);
 
         $result = $search['aggregations'][$this->name];
-        $buckets = $this->isNested() ? $result['nested']['buckets'] : $result['buckets'];
+        $buckets = $this->getOptions()->hasNestedPath() ? $result['nested']['buckets'] : $result['buckets'];
         $choices = [];
 
         foreach ($buckets as $bucket) {
@@ -308,16 +261,5 @@ class Filter
         }
 
         $this->choices = $choices;
-    }
-
-    private function setPostFilter(array $options)
-    {
-        if (isset($options['post_filter'])) {
-            $this->postFilter = (bool) $options['post_filter'];
-        } else if ($this->type === self::TYPE_TERMS && $this->public) {
-            $this->postFilter = true; //default post filtering for public terms filters
-        } else {
-            $this->postFilter = false;
-        }
     }
 }

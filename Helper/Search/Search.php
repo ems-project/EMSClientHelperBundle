@@ -3,6 +3,8 @@
 namespace EMS\ClientHelperBundle\Helper\Search;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Search\Filter\Filter;
+use EMS\ClientHelperBundle\Helper\Search\Filter\FilterFactory;
 use Symfony\Component\HttpFoundation\Request;
 
 class Search
@@ -66,8 +68,10 @@ class Search
         $this->setSynonyms(($options['synonyms'] ?? []), $clientRequest->getLocale());
 
         $filters = $options['filters'] ?? [];
+        $filterFactory = new FilterFactory($clientRequest);
+
         foreach ($filters as $name => $options) {
-            $this->filters[$name] = new Filter($clientRequest, $name, $options);
+            $this->filters[$name] = $filterFactory->create($name, $options);
         }
     }
 
@@ -172,7 +176,7 @@ class Search
     public function getActiveFilters()
     {
         return \array_filter($this->filters, function (Filter $filter) {
-            return $filter->isActive() && $filter->isPublic();
+            return $filter->isActive() && $filter->getOptions()->isPublic();
         });
     }
 

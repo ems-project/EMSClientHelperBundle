@@ -3,6 +3,7 @@
 namespace EMS\ClientHelperBundle\Helper\Search;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Search\Filter\Filter;
 
 class QueryBuilder
 {
@@ -81,8 +82,8 @@ class QueryBuilder
                 continue;
             }
 
-            if ($filter->isNested()) {
-                $nestedQueries[$filter->getNestedPath()]['bool']['must'][] = $filter->getQuery();
+            if ($filter->getOptions()->hasNestedPath()) {
+                $nestedQueries[$filter->getOptions()->getNestedPath()]['bool']['must'][] = $filter->getQuery();
             } else {
                 $query['bool']['must'][] = $filter->getQuery();
             }
@@ -109,8 +110,8 @@ class QueryBuilder
                 continue;
             }
 
-            if ($filter->isNested() && $filter->getNestedPath() !== $nestedPath) {
-                $nestedQueries[$filter->getNestedPath()]['bool']['must'][] = $filter->getQuery();
+            if ($filter->getOptions()->hasNestedPath() && $filter->getOptions()->getNestedPath() !== $nestedPath) {
+                $nestedQueries[$filter->getOptions()->getNestedPath()]['bool']['must'][] = $filter->getQuery();
             } else {
                 $postFilters[] = $filter->getQuery();
             }
@@ -136,15 +137,15 @@ class QueryBuilder
         }
 
         foreach ($this->search->getFilters() as $filter) {
-            if (!$filter->hasAggSize()) {
+            if (!$filter->getOptions()->hasAggSize()) {
                 continue;
             }
 
             $aggregation =  $hasPostFilter ? $this->getAggPostFilter($filter) : $this->getAgg($filter);
 
-            if ($filter->isNested()) {
+            if ($filter->getOptions()->hasNestedPath()) {
                 $aggregation = [
-                    'nested' => ['path' => $filter->getNestedPath()],
+                    'nested' => ['path' => $filter->getOptions()->getNestedPath()],
                     'aggs' => ['nested' => $aggregation]
                 ];
             }
@@ -157,14 +158,14 @@ class QueryBuilder
 
     private function getAgg(Filter $filter): ?array
     {
-        $agg = ['terms' => ['field' => $filter->getField(), 'size' => $filter->getAggSize()]];
+        $agg = ['terms' => ['field' => $filter->getField(), 'size' => $filter->getOptions()->getAggSize()]];
 
-        if ($filter->isReversedNested()) {
+        if ($filter->getOptions()->isReversedNested()) {
             $agg = array_merge($agg, ['aggs' => [ 'reversed_nested' => [ 'reverse_nested' => new \stdClass() ]]]);
         }
 
-        if ($filter->getSortField() !== null) {
-            $agg['terms']['order'] = [$filter->getSortField() => $filter->getSortOrder(),];
+        if ($filter->getOptions()->hasSortField()) {
+            $agg['terms']['order'] = [$filter->getOptions()->getSortField() => $filter->getOptions()->getSortOrder()];
         }
 
         return $agg;
@@ -176,7 +177,7 @@ class QueryBuilder
     private function getAggPostFilter(Filter $filter)
     {
         $agg = $this->getAgg($filter);
-        $aggFilter = $this->getPostFilters($filter, $filter->getNestedPath());
+        $aggFilter = $this->getPostFilters($filter, $filter->getOptions()->getNestedPath());
 
         if (null === $aggFilter) {
             return $agg;
