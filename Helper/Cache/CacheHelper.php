@@ -4,7 +4,6 @@ namespace EMS\ClientHelperBundle\Helper\Cache;
 
 use Psr\Cache\CacheItemInterface;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
-use Symfony\Component\Cache\CacheItem;
 
 class CacheHelper
 {
@@ -25,7 +24,7 @@ class CacheHelper
         return $this->cache->getItem($key);
     }
 
-    public function isValid(CacheItem $item, \DateTime $lastChanged): bool
+    public function isValid(CacheItemInterface $item, \DateTime $lastChanged): bool
     {
         if (!$item->isHit()) {
             return false;
@@ -37,12 +36,12 @@ class CacheHelper
         return $cacheDate > $lastChanged;
     }
 
-    public function getData(CacheItem $item): array
+    public function getData(CacheItemInterface $item): array
     {
         return $item->get()['data'];
     }
 
-    public function save(CacheItem $item, array $data)
+    public function save(CacheItemInterface $item, array $data)
     {
         $now = new \DateTime();
 
