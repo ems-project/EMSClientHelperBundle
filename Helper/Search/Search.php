@@ -308,7 +308,7 @@ class Search
     {
         if (null == $this->sizes) {
             @trigger_error('Define allow sizes with the search option "sizes"', \E_USER_DEPRECATED);
-             $this->size = (int) $l > 0 ? $l : $this->size;
+             $this->size = (int) $l > 0 ? (int) $l : $this->size;
         } elseif (\in_array($l, $this->sizes)) {
             $this->size = (int) $l;
         } else {
