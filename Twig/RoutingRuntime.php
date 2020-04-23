@@ -43,7 +43,7 @@ class RoutingRuntime implements RuntimeExtensionInterface
      * @param string $locale
      * @param string $baseUrl
      *
-     * @return string
+     * @return null|string|string[]
      */
     public function transform($content, $locale = null, $baseUrl = null)
     {
