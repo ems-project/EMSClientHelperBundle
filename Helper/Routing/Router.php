@@ -110,12 +110,14 @@ class Router extends BaseRouter
         $type = $clientRequest->getOption('[route_type]');
         $lastChanged = $clientRequest->getLastChangeDate($type);
 
-        if ($this->cache->isValid($cacheItem, $lastChanged)) {
+        if (null !== $cacheItem && $this->cache->isValid($cacheItem, $lastChanged)) {
             return $this->cache->getData($cacheItem);
         }
 
         $routes = $this->createRoutes($clientRequest, $type);
-        $this->cache->save($cacheItem, $routes);
+        if (null !== $cacheItem) {
+            $this->cache->save($cacheItem, $routes);
+        }
 
         return $routes;
     }

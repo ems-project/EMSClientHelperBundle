@@ -58,12 +58,14 @@ class TranslationHelper
         $type = $clientRequest->getOption('[translation_type]');
         $lastChanged = $clientRequest->getLastChangeDate($type);
 
-        if ($this->cache->isValid($cacheItem, $lastChanged)) {
+        if (null !== $cacheItem && $this->cache->isValid($cacheItem, $lastChanged)) {
             return $this->cache->getData($cacheItem);
         }
 
         $messages = $this->createMessages($clientRequest, $type);
-        $this->cache->save($cacheItem, $messages);
+        if (null !== $cacheItem) {
+            $this->cache->save($cacheItem, $messages);
+        }
 
         return $messages;
     }
