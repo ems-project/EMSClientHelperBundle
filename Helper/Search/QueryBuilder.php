@@ -127,7 +127,7 @@ class QueryBuilder
         return $postFilters ? ['bool' => ['must' => $postFilters]] : null;
     }
 
-    private function getAggs($hasPostFilter = false): ?array
+    private function getAggs($hasPostFilter = false): array
     {
         $aggs = [];
 
@@ -155,7 +155,7 @@ class QueryBuilder
         return array_filter($aggs);
     }
 
-    private function getAgg(Filter $filter): ?array
+    private function getAgg(Filter $filter): array
     {
         $agg = ['terms' => ['field' => $filter->getField(), 'size' => $filter->getAggSize()]];
 

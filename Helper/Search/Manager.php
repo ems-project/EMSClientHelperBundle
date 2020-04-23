@@ -38,7 +38,7 @@ class Manager
         return [
             'results' => $results,
             'search' => $search,
-            'query' => $search->getQueryString(),
+            'query' => $search->hasQueryString() ? $search->getQueryString() : null,
             'sort' => $search->getSortBy(),
             'facets' => $search->getQueryFacets(),
             'page' => $search->getPage(),

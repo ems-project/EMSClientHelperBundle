@@ -130,8 +130,11 @@ class Search
         return null != $this->queryString;
     }
 
-    public function getQueryString(): ?string
+    public function getQueryString(): string
     {
+        if (null === $this->queryString) {
+            throw new \RuntimeException("Check with hasQueryString before calling getQueryString");
+        }
         return $this->queryString;
     }
 
