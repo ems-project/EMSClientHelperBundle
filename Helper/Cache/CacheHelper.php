@@ -5,6 +5,8 @@ namespace EMS\ClientHelperBundle\Helper\Cache;
 use Psr\Cache\CacheItemInterface;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\CacheItem;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class CacheHelper
 {
@@ -52,5 +54,21 @@ class CacheHelper
         ]);
 
         $this->cache->save($item);
+    }
+
+    public static function setCacheHeaders(Request $request, Response $response): Response
+    {
+        if (is_string($response->getContent())) {
+            $response->setCache([
+                'etag' => \md5($response->getContent()),
+                'max_age' => 600,
+                's_maxage' => 3600,
+                'public' => true,
+                'private' => false,
+            ]);
+            $response->isNotModified($request);
+        }
+
+        return $response;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Controller;
 
+use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
 use EMS\ClientHelperBundle\Helper\Request\Handler;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,7 +26,7 @@ class RouterController
     {
         $result = $this->handler->handle($request);
 
-        return new Response($this->templating->render($result['template'], $result['context']), 200);
+        return CacheHelper::setCacheHeaders($request, new Response($this->templating->render($result['template'], $result['context'])));
     }
 
     public function redirect(Request $request)

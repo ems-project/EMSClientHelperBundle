@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Controller;
 
+use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
 use EMS\ClientHelperBundle\Helper\Request\Handler;
 use EMS\ClientHelperBundle\Helper\Search\Manager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -34,7 +35,7 @@ class SearchController extends AbstractController
 
         $context = array_merge($result['context'], $search);
 
-        return new Response($this->templating->render($result['template'], $context), 200);
+        return CacheHelper::setCacheHeaders($request, new Response($this->templating->render($result['template'], $context), 200));
     }
 
     /**
