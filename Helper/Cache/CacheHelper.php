@@ -10,16 +10,17 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CacheHelper
 {
-    /**
-     * @var AdapterInterface
-     */
+    /** @var AdapterInterface */
     private $cache;
+    /** @var string */
+    private $hashAlgo;
 
     const DATE_KEY = 'cache_date';
 
-    public function __construct(AdapterInterface $cache)
+    public function __construct(AdapterInterface $cache, string $hashAlgo)
     {
         $this->cache = $cache;
+        $this->hashAlgo = $hashAlgo;
     }
 
     public function get(string $key): ?CacheItemInterface
@@ -56,14 +57,14 @@ class CacheHelper
         $this->cache->save($item);
     }
 
-    public static function makeResponseCacheable(Request $request, Response $response): void
+    public function makeResponseCacheable(Request $request, Response $response): void
     {
         if (!is_string($response->getContent())) {
             return;
         }
 
         $response->setCache([
-            'etag' => \md5($response->getContent()),
+            'etag' => \hash($this->hashAlgo, $response->getContent()),
             'max_age' => 600,
             's_maxage' => 3600,
             'public' => true,

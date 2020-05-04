@@ -15,11 +15,14 @@ class RouterController
     private $handler;
     /** @var Environment */
     private $templating;
+    /** @var CacheHelper */
+    private $cacheHelper;
 
-    public function __construct(Handler $handler, Environment $templating)
+    public function __construct(Handler $handler, Environment $templating, CacheHelper $cacheHelper)
     {
         $this->handler = $handler;
         $this->templating = $templating;
+        $this->cacheHelper = $cacheHelper;
     }
 
     public function handle(Request $request): Response
@@ -27,7 +30,7 @@ class RouterController
         $result = $this->handler->handle($request);
 
         $response = new Response($this->templating->render($result['template'], $result['context']));
-        CacheHelper::makeResponseCacheable($request, $response);
+        $this->cacheHelper->makeResponseCacheable($request, $response);
         return $response;
     }
 

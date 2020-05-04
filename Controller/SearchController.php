@@ -19,13 +19,16 @@ class SearchController extends AbstractController
     private $templating;
     /** @var array */
     private $locales;
+    /** @var CacheHelper */
+    private $cacheHelper;
 
-    public function __construct(Manager $manager, Handler $handler, \Twig_Environment $templating, array $locales)
+    public function __construct(Manager $manager, Handler $handler, \Twig_Environment $templating, CacheHelper $cacheHelper, array $locales)
     {
         $this->manager = $manager;
         $this->handler = $handler;
         $this->templating = $templating;
         $this->locales = $locales;
+        $this->cacheHelper = $cacheHelper;
     }
 
     public function handle(Request $request): Response
@@ -36,7 +39,7 @@ class SearchController extends AbstractController
         $context = array_merge($result['context'], $search);
 
         $response = new Response($this->templating->render($result['template'], $context), 200);
-        CacheHelper::makeResponseCacheable($request, $response);
+        $this->cacheHelper->makeResponseCacheable($request, $response);
         return $response;
     }
 
