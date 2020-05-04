@@ -35,7 +35,9 @@ class SearchController extends AbstractController
 
         $context = array_merge($result['context'], $search);
 
-        return CacheHelper::setCacheHeaders($request, new Response($this->templating->render($result['template'], $context), 200));
+        $response = new Response($this->templating->render($result['template'], $context), 200);
+        CacheHelper::makeResponseCacheable($request, $response);
+        return $response;
     }
 
     /**

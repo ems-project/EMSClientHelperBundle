@@ -58,17 +58,17 @@ class CacheHelper
 
     public static function makeResponseCacheable(Request $request, Response $response): void
     {
-        if (is_string($response->getContent())) {
-            $response->setCache([
-                'etag' => \md5($response->getContent()),
-                'max_age' => 600,
-                's_maxage' => 3600,
-                'public' => true,
-                'private' => false,
-            ]);
-            $response->isNotModified($request);
+        if (!is_string($response->getContent())) {
+            return;
         }
 
-        return $response;
+        $response->setCache([
+            'etag' => \md5($response->getContent()),
+            'max_age' => 600,
+            's_maxage' => 3600,
+            'public' => true,
+            'private' => false,
+        ]);
+        $response->isNotModified($request);
     }
 }

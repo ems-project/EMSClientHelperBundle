@@ -26,7 +26,9 @@ class RouterController
     {
         $result = $this->handler->handle($request);
 
-        return CacheHelper::setCacheHeaders($request, new Response($this->templating->render($result['template'], $result['context'])));
+        $response = new Response($this->templating->render($result['template'], $result['context']));
+        CacheHelper::makeResponseCacheable($request, $response);
+        return $response;
     }
 
     public function redirect(Request $request)
