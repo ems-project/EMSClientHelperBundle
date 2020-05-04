@@ -9,49 +9,42 @@ use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\ClientHelperBundle\Helper\Translation\TranslationHelper;
 use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 class KernelListener implements EventSubscriberInterface
 {
-    /**
-     * @var EnvironmentHelper
-     */
+    /** @var EnvironmentHelper */
     private $environmentHelper;
 
-    /**
-     * @var TranslationHelper
-     */
+    /** @var TranslationHelper */
     private $translationHelper;
 
-    /**
-     * @var LocaleHelper
-     */
+    /** @var LocaleHelper */
     private $localeHelper;
 
-    /**
-     * @var ExceptionHelper
-     */
+    /** @var ExceptionHelper */
     private $exceptionHelper;
 
-    /**
-     * @param EnvironmentHelper $environmentHelper
-     * @param TranslationHelper $translationHelper
-     * @param LocaleHelper      $localeHelper
-     * @param ExceptionHelper   $exceptionHelper
-     */
+    /** @var bool */
+    private $bindLocale;
+
     public function __construct(
         EnvironmentHelper $environmentHelper,
         TranslationHelper $translationHelper,
         LocaleHelper $localeHelper,
-        ExceptionHelper $exceptionHelper
+        ExceptionHelper $exceptionHelper,
+        bool $bindLocale
     ) {
         $this->environmentHelper = $environmentHelper;
         $this->translationHelper = $translationHelper;
         $this->localeHelper = $localeHelper;
         $this->exceptionHelper = $exceptionHelper;
+        $this->bindLocale = $bindLocale;
     }
 
     /**
@@ -62,8 +55,10 @@ class KernelListener implements EventSubscriberInterface
         return [
             KernelEvents::REQUEST => [
                 ['bindEnvironment', 100],
-                ['bindLocale', 17],
                 ['loadTranslations', 11],
+            ],
+            KernelEvents::RESPONSE => [
+                ['bindLocale', 17],
             ],
             KernelEvents::EXCEPTION => [
                 ['bindEnvironment', 100],
@@ -100,15 +95,10 @@ class KernelListener implements EventSubscriberInterface
         }
     }
 
-    /**
-     * @param GetResponseEvent $event
-     */
-    public function bindLocale(GetResponseEvent $event)
+    public function bindLocale(ResponseEvent $event)
     {
-        $request = $event->getRequest();
-
-        if ($locale = $this->localeHelper->getLocale($request)) {
-            $request->getSession()->set('_locale', $locale);
+        if ($this->bindLocale && $locale = $this->localeHelper->getLocale($event->getRequest())) {
+            $event->getResponse()->headers->setCookie(new Cookie('_locale', $locale, strtotime('now + 12 months')));
         }
     }
 
