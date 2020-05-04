@@ -56,7 +56,7 @@ class CacheHelper
         $this->cache->save($item);
     }
 
-    public static function setCacheHeaders(Request $request, Response $response): Response
+    public static function makeResponseCacheable(Request $request, Response $response): void
     {
         if (is_string($response->getContent())) {
             $response->setCache([
