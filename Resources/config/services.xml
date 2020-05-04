@@ -54,6 +54,7 @@
             <argument type="service" id="emsch.helper_translation" />
             <argument type="service" id="emsch.helper_locale" />
             <argument type="service" id="emsch.helper_exception" />
+            <argument type="string">%emsch.bind_locale%</argument>
             <tag name="kernel.event_subscriber" />
         </service>
 
