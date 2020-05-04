@@ -37,7 +37,6 @@
             <argument type="service" id="ems_common.storage.processor"/>
             <tag name="controller.service_arguments"/>
         </service>
-        <service id="EMS\ClientHelperBundle\Controller\RouterController" alias="emsch.controller.router" public="true" />
 
         <service id="emsch.controller.pdf" class="EMS\ClientHelperBundle\Controller\PdfController">
             <argument type="service" id="emsch.routing.handler" />
