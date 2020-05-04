@@ -31,6 +31,8 @@ class EMSClientHelperExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         $container->setParameter('emsch.locales', $config['locales']);
+        $container->setParameter('emsch.bind_locale', $config['bind_locale'] ?? true);
+        $container->setParameter('emsch.etag_hash_algo', $config['etag_hash_algo'] ?? 'sha1');
         $container->setParameter('emsch.assets.enabled', $config['dump_assets']);
         $container->setParameter('emsch.request_environments', $config['request_environments']);
 

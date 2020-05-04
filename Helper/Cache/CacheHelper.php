@@ -5,19 +5,22 @@ namespace EMS\ClientHelperBundle\Helper\Cache;
 use Psr\Cache\CacheItemInterface;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\CacheItem;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class CacheHelper
 {
-    /**
-     * @var AdapterInterface
-     */
+    /** @var AdapterInterface */
     private $cache;
+    /** @var string */
+    private $hashAlgo;
 
     const DATE_KEY = 'cache_date';
 
-    public function __construct(AdapterInterface $cache)
+    public function __construct(AdapterInterface $cache, string $hashAlgo)
     {
         $this->cache = $cache;
+        $this->hashAlgo = $hashAlgo;
     }
 
     public function get(string $key): ?CacheItemInterface
@@ -52,5 +55,21 @@ class CacheHelper
         ]);
 
         $this->cache->save($item);
+    }
+
+    public function makeResponseCacheable(Request $request, Response $response): void
+    {
+        if (!is_string($response->getContent())) {
+            return;
+        }
+
+        $response->setCache([
+            'etag' => \hash($this->hashAlgo, $response->getContent()),
+            'max_age' => 600,
+            's_maxage' => 3600,
+            'public' => true,
+            'private' => false,
+        ]);
+        $response->isNotModified($request);
     }
 }

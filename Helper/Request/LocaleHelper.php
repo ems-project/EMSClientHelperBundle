@@ -41,8 +41,8 @@ class LocaleHelper
             $destination = null;
         }
 
-        if ($request->hasSession() && $request->getSession()->has('_locale')) {
-            $url = $request->getUriForPath('/' . $request->getSession()->get('_locale') . $destination);
+        if ($request->cookies->has('_locale')) {
+            $url = $request->getUriForPath('/' . $request->cookies->get('_locale') . $destination);
         } elseif (1 === count($this->locales)) {
             $url = $request->getUriForPath('/' . $this->locales[0] . $destination);
         } else {
