@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Controller;
 
+use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
 use EMS\ClientHelperBundle\Helper\Request\Handler;
 use EMS\CommonBundle\Storage\Processor\Processor;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -17,19 +18,24 @@ class RouterController
     private $templating;
     /** @var Processor*/
     private $processor;
+    /** @var CacheHelper */
+    private $cacheHelper;
 
-    public function __construct(Handler $handler, Environment $templating, Processor $processor)
+    public function __construct(Handler $handler, Environment $templating, Processor $processor, CacheHelper $cacheHelper)
     {
         $this->handler = $handler;
         $this->templating = $templating;
         $this->processor = $processor;
+        $this->cacheHelper = $cacheHelper;
     }
 
     public function handle(Request $request): Response
     {
         $result = $this->handler->handle($request);
 
-        return new Response($this->templating->render($result['template'], $result['context']), 200);
+        $response = new Response($this->templating->render($result['template'], $result['context']));
+        $this->cacheHelper->makeResponseCacheable($request, $response);
+        return $response;
     }
 
     public function redirect(Request $request)

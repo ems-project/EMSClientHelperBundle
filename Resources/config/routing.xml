@@ -35,6 +35,7 @@
             <argument type="service" id="emsch.routing.handler" />
             <argument type="service" id="twig"/>
             <argument type="service" id="ems_common.storage.processor"/>
+            <argument type="service" id="emsch.helper_cache"/>
             <tag name="controller.service_arguments"/>
         </service>
 

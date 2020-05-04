@@ -35,6 +35,7 @@
 
         <service id="emsch.helper_cache" class="EMS\ClientHelperBundle\Helper\Cache\CacheHelper">
             <argument type="service" id="cache.app" />
+            <argument type="string">%emsch.etag_hash_algo%</argument>
         </service>
 
         <service id="emsch.helper_translation" class="EMS\ClientHelperBundle\Helper\Translation\TranslationHelper">
@@ -99,6 +100,7 @@
             <argument type="service" id="emsch.search.manager" />
             <argument type="service" id="emsch.routing.handler" />
             <argument type="service" id="twig" />
+            <argument type="service" id="emsch.helper_cache"/>
             <argument type="string">%emsch.locales%</argument>
         </service>
         <service id="emsch.controller.twig_list" class="EMS\ClientHelperBundle\Controller\TwigListController" public="true">

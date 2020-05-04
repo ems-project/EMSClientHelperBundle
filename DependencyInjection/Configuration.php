@@ -34,6 +34,7 @@ class Configuration implements ConfigurationInterface
                 ->variableNode('request_environments')->isRequired()->end()
                 ->variableNode('locales')->isRequired()->end()
                 ->booleanNode('bind_locale')->end()
+                ->scalarNode('etag_hash_algo')->end()
                 ->booleanNode('dump_assets')
                     ->setDeprecated('The ems_client_helper "%node%" option is deprecated. Will be removed!')
                     ->isRequired()
