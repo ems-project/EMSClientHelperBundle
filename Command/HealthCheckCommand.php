@@ -62,12 +62,8 @@ class HealthCheckCommand extends Command
             ->addOption('green', 'g', InputOption::VALUE_NONE, 'Require a green Elasticsearch cluster health.', null)
             ->addOption('skip-storage', 's', InputOption::VALUE_NONE, 'Skip the storage health check.', null);
     }
-    
-    /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $io->title('Performing Health Check');
@@ -77,6 +73,8 @@ class HealthCheckCommand extends Command
         $this->checkStorage($io, $input->getOption('skip-storage'));
 
         $io->success('Health check finished.');
+
+        return 1;
     }
     
     /**

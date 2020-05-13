@@ -47,6 +47,9 @@ class KernelListener implements EventSubscriberInterface
         $this->bindLocale = $bindLocale;
     }
 
+    /**
+     * @return array<string, array>
+     */
     public static function getSubscribedEvents(): array
     {
         return [
