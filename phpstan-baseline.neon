@@ -31,7 +31,7 @@ parameters:
 			path: Command/HealthCheckCommand.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Command\\\\HealthCheckCommand\\:\\:execute\\(\\) has no return typehint specified\\.$#"
+			message: "#^Method EMS\\\\ClientHelperBundle\\\\Command\\\\HealthCheckCommand\\:\\:execute\\(\\) should return int but return statement is missing\\.$#"
 			count: 1
 			path: Command/HealthCheckCommand.php
 
