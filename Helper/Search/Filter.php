@@ -246,11 +246,11 @@ class Filter
 
         if (!empty($value['start'])) {
             $startDatetime = \DateTime::createFromFormat($format, $value['start'] . ' 00:00:00');
-            $start = $startDatetime ? $startDatetime->format('Y-m-d') : $value['start'];
+            $start = $startDatetime ? $startDatetime->format('Y-m-d') : null;
         }
         if (!empty($value['end'])) {
             $endDatetime = \DateTime::createFromFormat($format, $value['end'] . ' 23:59:59');
-            $end = $endDatetime ? $endDatetime->format('Y-m-d') : $value['end'];
+            $end = $endDatetime ? $endDatetime->format('Y-m-d') : null;
         }
 
         if ($start === null && $end === null) {
