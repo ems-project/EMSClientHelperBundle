@@ -221,7 +221,7 @@ class EMSClientHelperExtension extends Extension
 
     /**
      * @param ContainerBuilder $container
-     * @param array $config
+     * @param array<string> $config
      */
     private function processUserApi(ContainerBuilder $container, array $config): void
     {

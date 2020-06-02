@@ -6,6 +6,10 @@ namespace EMS\ClientHelperBundle\Service\UserApi;
 
 final class UserService extends UserApiService
 {
+    /**
+     * @param array<mixed> $context
+     * @return array<mixed>
+     */
     public function getUsers(array $context): array
     {
         $client = $this->createClient(['X-Auth-Token' => $context['authToken']]);
@@ -14,6 +18,10 @@ final class UserService extends UserApiService
         return \json_decode($response->getBody()->getContents(), true);
     }
 
+    /**
+     * @param array<mixed> $context
+     * @return array<string>
+     */
     public function getProfile(array $context): array
     {
         $client = $this->createClient(['X-Auth-Token' => $context['authToken']]);

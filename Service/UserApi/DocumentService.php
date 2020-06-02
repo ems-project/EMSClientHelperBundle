@@ -6,6 +6,10 @@ namespace EMS\ClientHelperBundle\Service\UserApi;
 
 final class DocumentService extends UserApiService
 {
+    /**
+     * @param array<string, mixed> $context
+     * @return array<mixed>
+     */
     public function getDocument(string $contentType, string $ouuid, array $context): array
     {
         $client = $this->createClient(['X-Auth-Token' => $context['authToken']]);
@@ -14,24 +18,40 @@ final class DocumentService extends UserApiService
         return \json_decode($response->getBody()->getContents(), true);
     }
 
+    /**
+     * @param array<string, mixed> $context
+     * @return array<mixed>
+     */
     public function storeDocument(string $contentType, array $context): array
     {
         $endpoint = \sprintf('api/data/%s/draft', $contentType);
         return $this->actionDocument($contentType, $context, $endpoint);
     }
 
+    /**
+     * @param array<string, mixed> $context
+     * @return array<mixed>
+     */
     public function updateDocument(string $contentType, string $ouuid, array $context): array
     {
         $endpoint = \sprintf('/api/data/%s/replace/%s', $contentType, $ouuid);
         return $this->actionDocument($contentType, $context, $endpoint);
     }
 
+    /**
+     * @param array<string, mixed> $context
+     * @return array<mixed>
+     */
     public function mergeDocument(string $contentType, string $ouuid, array $context): array
     {
         $endpoint = \sprintf('/api/data/%s/merge/%s', $contentType, $ouuid);
         return $this->actionDocument($contentType, $context, $endpoint);
     }
 
+    /**
+     * @param array<string, mixed> $context
+     * @return array<mixed>
+     */
     private function actionDocument(string $contentType, array $context, string $endpoint): array
     {
         $client = $this->createClient(['X-Auth-Token' => $context['authToken']]);

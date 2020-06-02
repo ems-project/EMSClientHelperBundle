@@ -16,6 +16,10 @@ abstract class UserApiService
         $this->baseUrl = $baseUrl;
     }
 
+    /**
+     * @param array<string> $headers
+     * @return Client
+     */
     protected function createClient(array $headers = []): Client
     {
         return new Client([
