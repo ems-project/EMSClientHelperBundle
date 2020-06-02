@@ -223,7 +223,7 @@ class EMSClientHelperExtension extends Extension
      * @param ContainerBuilder $container
      * @param array $config
      */
-    private function processUserApi(ContainerBuilder $container, array $config)
+    private function processUserApi(ContainerBuilder $container, array $config): void
     {
         if (!$config['enabled']) {
             return;

@@ -6,7 +6,7 @@ namespace EMS\ClientHelperBundle\Service\UserApi;
 
 final class AuthService extends UserApiService
 {
-    public function getUserAuthToken(array $credentials)
+    public function getUserAuthToken(array $credentials): string
     {
         $client = $this->createClient(['Content-Type' => 'application/json']);
         $response = $client->post('auth-token', ['body' => \json_encode($credentials)]);
