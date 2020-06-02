@@ -7,6 +7,7 @@ namespace EMS\ClientHelperBundle\Controller\UserApi;
 use EMS\ClientHelperBundle\Service\UserApi\DocumentService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class DocumentController
 {
@@ -31,7 +32,7 @@ final class DocumentController
     {
         $context = [
             'authToken' => $request->headers->get('X-Auth-Token'),
-            'body' => \json_decode($request->getContent(), true)
+            'body' => \json_decode($this->getBodyRequest($request), true)
         ];
 
         return new JsonResponse($this->service->storeDocument($contentType, $context));
@@ -41,7 +42,7 @@ final class DocumentController
     {
         $context = [
             'authToken' => $request->headers->get('X-Auth-Token'),
-            'body' => \json_decode($request->getContent(), true)
+            'body' => \json_decode($this->getBodyRequest($request), true)
         ];
 
         return new JsonResponse($this->service->updateDocument($contentType, $ouuid, $context));
@@ -51,9 +52,19 @@ final class DocumentController
     {
         $context = [
             'authToken' => $request->headers->get('X-Auth-Token'),
-            'body' => \json_decode($request->getContent(), true)
+            'body' => \json_decode($this->getBodyRequest($request), true)
         ];
 
         return new JsonResponse($this->service->mergeDocument($contentType, $ouuid, $context));
+    }
+
+    private function getBodyRequest(Request $request): string
+    {
+        $body = $request->getContent();
+        if (! \is_string($body)) {
+            throw new NotFoundHttpException('JSON file not found');
+        }
+
+        return $body;
     }
 }
