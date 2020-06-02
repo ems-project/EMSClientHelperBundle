@@ -56,6 +56,7 @@ class Configuration implements ConfigurationInterface
         $this->addApiSection($rootNode);
         $this->addTwigListSection($rootNode);
         $this->addRoutingSelection($rootNode);
+        $this->addUserApiSection($rootNode);
 
         return $treeBuilder;
     }

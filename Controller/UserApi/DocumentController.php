@@ -52,7 +52,7 @@ final class DocumentController
     {
         $context = [
             'authToken' => $request->headers->get('X-Auth-Token'),
-            'body' => \json_decode((string) $this->getBodyRequest($request), true)
+            'body' => \json_decode($this->getBodyRequest($request), true)
         ];
 
         return new JsonResponse($this->service->mergeDocument($contentType, $ouuid, $context));
