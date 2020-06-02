@@ -26,6 +26,7 @@ class EMSClientHelperExtension extends Extension
         $loader->load('services.xml');
         $loader->load('routing.xml');
         $loader->load('search.xml');
+        $loader->load('user_api.xml');
 
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
@@ -46,6 +47,7 @@ class EMSClientHelperExtension extends Extension
         $this->processElasticms($container, $loader, $config['elasticms']);
         $this->processApi($container, $config['api']);
         $this->processRoutingSelection($container, $config['routing']);
+        $this->processUserApi($container, $config['user_api']);
 
         if (isset($config['twig_list'])) {
             $definition = $container->getDefinition('emsch.controller.twig_list');
@@ -105,7 +107,7 @@ class EMSClientHelperExtension extends Extension
             ->setArgument(0, $config)
             ->setPublic(true);
         $definition->addTag('emsch.elasticsearch.client');
-        
+
         $container->setDefinition(sprintf('ems_common.elasticsearch.%s', $name), $definition);
     }
 
@@ -215,5 +217,18 @@ class EMSClientHelperExtension extends Extension
         $container->setParameter('emsch.routing.routes', $config['routes']);
         $container->setParameter('emsch.routing.redirect_type', $config['redirect_type']);
         $container->setParameter('emsch.routing.relative_paths', $config['relative_paths']);
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param array $config
+     */
+    private function processUserApi(ContainerBuilder $container, array $config)
+    {
+        if (!$config['enabled']) {
+            return;
+        }
+
+        $container->setParameter('emsch.user_api.url', $config['url']);
     }
 }
