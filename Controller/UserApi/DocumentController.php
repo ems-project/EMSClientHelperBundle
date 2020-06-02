@@ -13,7 +13,7 @@ final class DocumentController
     /** @var DocumentService */
     private $service;
 
-    public function  __construct(DocumentService $service)
+    public function __construct(DocumentService $service)
     {
         $this->service = $service;
     }
