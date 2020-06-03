@@ -13,28 +13,28 @@ final class DocumentController
     /** @var DocumentService */
     private $documentService;
 
-    public function __construct(DocumentService $service)
+    public function __construct(DocumentService $documentService)
     {
-        $this->documentService = $service;
+        $this->documentService = $documentService;
     }
 
     public function show(string $contentType, string $ouuid, Request $request): JsonResponse
     {
-        return new JsonResponse($this->documentService->getDocument($contentType, $ouuid, $request));
+        return $this->documentService->getDocument($contentType, $ouuid, $request);
     }
 
-    public function store(string $contentType, Request $request): JsonResponse
+    public function create(string $contentType, Request $request): JsonResponse
     {
-        return new JsonResponse($this->documentService->storeDocument($contentType, $request));
+        return $this->documentService->createDocument($contentType, $request);
     }
 
     public function update(string $contentType, string $ouuid, Request $request): JsonResponse
     {
-        return new JsonResponse($this->documentService->updateDocument($contentType, $ouuid, $request));
+        return $this->documentService->updateDocument($contentType, $ouuid, $request);
     }
 
     public function merge(string $contentType, string $ouuid, Request $request): JsonResponse
     {
-        return new JsonResponse($this->documentService->mergeDocument($contentType, $ouuid, $request));
+        return $this->documentService->mergeDocument($contentType, $ouuid, $request);
     }
 }
