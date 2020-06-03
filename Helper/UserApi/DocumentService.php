@@ -8,11 +8,19 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-final class DocumentService extends UserApiService
+final class DocumentService
 {
+    /** @var ClientFactory */
+    private $client;
+
+    public function __construct(ClientFactory $client)
+    {
+        $this->client = $client;
+    }
+
     public function getDocument(string $contentType, string $ouuid, Request $request): JsonResponse
     {
-        $client = $this->createClient(['X-Auth-Token' => $request->headers->get('X-Auth-Token')]);
+        $client = $this->client->createClient(['X-Auth-Token' => $request->headers->get('X-Auth-Token')]);
         $response = $client->get(\sprintf('/api/data/%s/%s', $contentType, $ouuid));
 
         return JsonResponse::fromJsonString($response->getBody()->getContents());
@@ -38,7 +46,7 @@ final class DocumentService extends UserApiService
 
     private function createAndFinalizeDraft(string $contentType, Request $request, string $endpoint): JsonResponse
     {
-        $client = $this->createClient(['X-Auth-Token' => $request->headers->get('X-Auth-Token')]);
+        $client = $this->client->createClient(['X-Auth-Token' => $request->headers->get('X-Auth-Token')]);
 
         $body = $request->getContent();
         if (! \is_string($body)) {

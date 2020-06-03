@@ -6,12 +6,18 @@
 
     <services>
         <!-- services -->
-        <service id="emsch.user_api.abstract" class="EMS\ClientHelperBundle\Helper\UserApi\UserApiService" abstract="true" public="false">
+        <service id="emsch.user_api.client_factory" class="EMS\ClientHelperBundle\Helper\UserApi\ClientFactory" public="false">
             <argument type="string">%emsch.user_api.url%</argument>
         </service>
-        <service id="emsch.user_api.auth" class="EMS\ClientHelperBundle\Helper\UserApi\AuthService" parent="emsch.user_api.abstract" public="false" />
-        <service id="emsch.user_api.user" class="EMS\ClientHelperBundle\Helper\UserApi\UserService" parent="emsch.user_api.abstract" public="false" />
-        <service id="emsch.user_api.document" class="EMS\ClientHelperBundle\Helper\UserApi\DocumentService" parent="emsch.user_api.abstract" public="false" />
+        <service id="emsch.user_api.auth" class="EMS\ClientHelperBundle\Helper\UserApi\AuthService" public="false">
+            <argument type="service" id="emsch.user_api.client_factory" />
+        </service>
+        <service id="emsch.user_api.user" class="EMS\ClientHelperBundle\Helper\UserApi\UserService" public="false">
+            <argument type="service" id="emsch.user_api.client_factory" />
+        </service>
+        <service id="emsch.user_api.document" class="EMS\ClientHelperBundle\Helper\UserApi\DocumentService" public="false">
+            <argument type="service" id="emsch.user_api.client_factory" />
+        </service>
 
         <!-- controllers -->
         <service id="emsch.controller.user_api.login" class="EMS\ClientHelperBundle\Controller\UserApi\LoginController" public="true">

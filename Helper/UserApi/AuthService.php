@@ -7,8 +7,16 @@ namespace EMS\ClientHelperBundle\Helper\UserApi;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-final class AuthService extends UserApiService
+final class AuthService
 {
+    /** @var ClientFactory */
+    private $client;
+
+    public function __construct(ClientFactory $client)
+    {
+        $this->client = $client;
+    }
+
     public function getUserAuthToken(Request $request): JsonResponse
     {
         $credentials = [
@@ -16,7 +24,7 @@ final class AuthService extends UserApiService
             'password' => $request->get('password'),
         ];
 
-        $client = $this->createClient(['Content-Type' => 'application/json']);
+        $client = $this->client->createClient(['Content-Type' => 'application/json']);
         $response = $client->post('auth-token', ['body' => \json_encode($credentials)]);
 
         return new JsonResponse($response->getBody()->getContents());

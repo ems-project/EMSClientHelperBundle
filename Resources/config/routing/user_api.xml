@@ -10,7 +10,7 @@
     <route id="emsch_user_api_profile" path="/profile" controller="emsch.controller.user_api.profile" methods="GET" />
 
     <route id="emsch_user_api_document" path="/documents/{contentType}/{ouuid}" controller="emsch.controller.user_api.document::show" methods="GET" />
-    <route id="emsch_user_api_store_document" path="/documents/{contentType}" controller="emsch.controller.user_api.document::store" methods="POST" />
+    <route id="emsch_user_api_create_document" path="/documents/{contentType}" controller="emsch.controller.user_api.document::create" methods="POST" />
     <route id="emsch_user_api_update_document" path="/documents/{contentType}/{ouuid}" controller="emsch.controller.user_api.document::update" methods="PUT" />
     <route id="emsch_user_api_merge_document" path="/documents/{contentType}/{ouuid}" controller="emsch.controller.user_api.document::merge" methods="PATCH" />
 </routes>

@@ -6,7 +6,7 @@ namespace EMS\ClientHelperBundle\Helper\UserApi;
 
 use GuzzleHttp\Client;
 
-abstract class UserApiService
+final class ClientFactory
 {
     /** @var string */
     private $baseUrl;
@@ -20,7 +20,7 @@ abstract class UserApiService
      * @param array<string, string|null> $headers
      * @return Client
      */
-    protected function createClient(array $headers = []): Client
+    public function createClient(array $headers = []): Client
     {
         return new Client([
             'base_uri' => $this->baseUrl,
