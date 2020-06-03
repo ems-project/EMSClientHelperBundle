@@ -20,7 +20,7 @@ final class UserService
     public function getUsers(Request $request): JsonResponse
     {
         $client = $this->client->createClient(['X-Auth-Token' => $request->headers->get('X-Auth-Token')]);
-        $response = $client->get(\sprintf('/api/user-profiles'));
+        $response = $client->get('/api/user-profiles');
 
         return JsonResponse::fromJsonString($response->getBody()->getContents());
     }
@@ -28,7 +28,7 @@ final class UserService
     public function getProfile(Request $request): JsonResponse
     {
         $client = $this->client->createClient(['X-Auth-Token' => $request->headers->get('X-Auth-Token')]);
-        $response = $client->get(\sprintf('/api/user-profile'));
+        $response = $client->get('/api/user-profile');
 
         return JsonResponse::fromJsonString($response->getBody()->getContents());
     }
