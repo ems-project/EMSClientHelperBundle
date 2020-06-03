@@ -56,10 +56,11 @@ class Configuration implements ConfigurationInterface
         $this->addApiSection($rootNode);
         $this->addTwigListSection($rootNode);
         $this->addRoutingSelection($rootNode);
-        
+        $this->addUserApiSection($rootNode);
+
         return $treeBuilder;
     }
-    
+
     /**
      * @param ArrayNodeDefinition $rootNode
      */
@@ -142,7 +143,7 @@ class Configuration implements ConfigurationInterface
             ->end()
         ;
     }
-    
+
     /**
      * @param ArrayNodeDefinition $rootNode
      */
@@ -229,6 +230,26 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                     ->variableNode('routes')->end()
+                ->end()
+            ->end()
+        ;
+    }
+
+    /**
+     * @param ArrayNodeDefinition $rootNode
+     */
+    private function addUserApiSection(ArrayNodeDefinition $rootNode)
+    {
+        $rootNode
+            ->children()
+                ->arrayNode('user_api')
+                    ->canBeEnabled()
+                        ->children()
+                            ->scalarNode('url')
+                                ->info("url of the elasticms without /user_api")
+                                ->isRequired()
+                        ->end()
+                    ->end()
                 ->end()
             ->end()
         ;
