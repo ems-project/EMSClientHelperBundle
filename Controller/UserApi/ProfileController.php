@@ -13,13 +13,13 @@ final class ProfileController
     /** @var UserService */
     private $userService;
 
-    public function __construct(UserService $service)
+    public function __construct(UserService $userService)
     {
-        $this->userService = $service;
+        $this->userService = $userService;
     }
 
     public function __invoke(Request $request): JsonResponse
     {
-        return new JsonResponse($this->userService->getProfile($request));
+        return $this->userService->getProfile($request);
     }
 }
