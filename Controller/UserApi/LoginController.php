@@ -13,13 +13,13 @@ final class LoginController
     /** @var AuthService */
     private $authService;
 
-    public function __construct(AuthService $service)
+    public function __construct(AuthService $authService)
     {
-        $this->authService = $service;
+        $this->authService = $authService;
     }
 
     public function __invoke(Request $request): JsonResponse
     {
-        return new JsonResponse($this->authService->getUserAuthToken($request));
+        return $this->authService->getUserAuthToken($request);
     }
 }
