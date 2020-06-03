@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace EMS\ClientHelperBundle\Service\UserApi;
+namespace EMS\ClientHelperBundle\Helper\UserApi;
 
 use GuzzleHttp\Client;
 

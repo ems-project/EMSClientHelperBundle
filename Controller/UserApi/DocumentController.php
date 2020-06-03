@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Controller\UserApi;
 
-use EMS\ClientHelperBundle\Service\UserApi\DocumentService;
+use EMS\ClientHelperBundle\Helper\UserApi\DocumentService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
