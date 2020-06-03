@@ -11,20 +11,15 @@ use Symfony\Component\HttpFoundation\Request;
 final class LoginController
 {
     /** @var AuthService */
-    private $service;
+    private $authService;
 
     public function __construct(AuthService $service)
     {
-        $this->service = $service;
+        $this->authService = $service;
     }
 
     public function __invoke(Request $request): JsonResponse
     {
-        $credentials = [
-            'username' => $request->get('username'),
-            'password' => $request->get('password'),
-        ];
-
-        return new JsonResponse($this->service->getUserAuthToken($credentials));
+        return new JsonResponse($this->authService->getUserAuthToken($request));
     }
 }

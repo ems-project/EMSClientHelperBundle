@@ -11,19 +11,15 @@ use Symfony\Component\HttpFoundation\Request;
 final class ProfileController
 {
     /** @var UserService */
-    private $service;
+    private $userService;
 
     public function __construct(UserService $service)
     {
-        $this->service = $service;
+        $this->userService = $service;
     }
 
     public function __invoke(Request $request): JsonResponse
     {
-        $context = [
-            'authToken' => $request->headers->get('X-Auth-Token'),
-        ];
-
-        return new JsonResponse($this->service->getProfile($context));
+        return new JsonResponse($this->userService->getProfile($request));
     }
 }

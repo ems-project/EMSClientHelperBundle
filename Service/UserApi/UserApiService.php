@@ -17,7 +17,7 @@ abstract class UserApiService
     }
 
     /**
-     * @param array<string> $headers
+     * @param array<string, string|null> $headers
      * @return Client
      */
     protected function createClient(array $headers = []): Client

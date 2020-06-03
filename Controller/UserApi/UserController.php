@@ -11,19 +11,15 @@ use Symfony\Component\HttpFoundation\Request;
 final class UserController
 {
     /** @var UserService */
-    private $service;
+    private $userService;
 
     public function __construct(UserService $service)
     {
-        $this->service = $service;
+        $this->userService = $service;
     }
 
     public function index(Request $request): JsonResponse
     {
-        $context = [
-            'authToken' => $request->headers->get('X-Auth-Token'),
-        ];
-
-        return new JsonResponse($this->service->getUsers($context));
+        return new JsonResponse($this->userService->getUsers($request));
     }
 }
