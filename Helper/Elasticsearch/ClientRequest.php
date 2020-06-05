@@ -639,12 +639,12 @@ class ClientRequest
     public function searchOne($type, array $body, ?string $indexRegex = null)
     {
         $this->logger->debug('ClientRequest : searchOne for {type}', ['type' => $type, 'body' => $body, 'indexRegex' => $indexRegex]);
-        $search = $this->search($type, $body, 0, 1, [], $indexRegex);
+        $search = $this->search($type, $body, 0, 2, [], $indexRegex);
 
         $hits = $search['hits'];
 
-        if (1 != $hits['total']) {
-            throw new SingleResultException(sprintf('expected 1 result, got %d', $hits['total']));
+        if (1 !== count($hits['hits'])) {
+            throw new SingleResultException(sprintf('expected 1 result, got %d', $hits['hits']));
         }
 
         return $hits['hits'][0];
