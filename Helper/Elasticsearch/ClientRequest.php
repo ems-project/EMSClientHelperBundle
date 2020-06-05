@@ -643,7 +643,7 @@ class ClientRequest
 
         $hits = $search['hits'];
 
-        if (1 !== count($hits['hits'])) {
+        if (1 !== \count($hits['hits'])) {
             throw new SingleResultException(sprintf('expected 1 result, got %d', $hits['hits']));
         }
 
