@@ -110,7 +110,7 @@ class KernelListener implements EventSubscriberInterface
         $request = $event->getRequest();
         $exception = $event->getException();
 
-        if (!$event->isMasterRequest() || !$exception instanceof NotFoundHttpException) {
+        if (!$this->bindLocale || !$event->isMasterRequest() || !$exception instanceof NotFoundHttpException) {
             return;
         }
 
