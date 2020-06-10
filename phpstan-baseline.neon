@@ -31,11 +31,6 @@ parameters:
 			path: Command/HealthCheckCommand.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Command\\\\HealthCheckCommand\\:\\:execute\\(\\) should return int but return statement is missing\\.$#"
-			count: 1
-			path: Command/HealthCheckCommand.php
-
-		-
 			message: "#^Parameter \\#2 \\$green of method EMS\\\\ClientHelperBundle\\\\Command\\\\HealthCheckCommand\\:\\:checkElasticSearch\\(\\) expects bool, array\\<string\\>\\|bool\\|string\\|null given\\.$#"
 			count: 1
 			path: Command/HealthCheckCommand.php
@@ -219,36 +214,6 @@ parameters:
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\EMSClientHelperBundle\\:\\:build\\(\\) has no return typehint specified\\.$#"
 			count: 1
 			path: EMSClientHelperBundle.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\EventListener\\\\KernelListener\\:\\:getSubscribedEvents\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: EventListener/KernelListener.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\EventListener\\\\KernelListener\\:\\:bindEnvironment\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: EventListener/KernelListener.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\EventListener\\\\KernelListener\\:\\:loadTranslations\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: EventListener/KernelListener.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\EventListener\\\\KernelListener\\:\\:bindLocale\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: EventListener/KernelListener.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\EventListener\\\\KernelListener\\:\\:redirectMissingLocale\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: EventListener/KernelListener.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\EventListener\\\\KernelListener\\:\\:customErrorTemplate\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: EventListener/KernelListener.php
 
 		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\EventListener\\\\RedirectListener\\:\\:getSubscribedEvents\\(\\) return type has no value type specified in iterable type array\\.$#"
