@@ -4,6 +4,7 @@ namespace EMS\ClientHelperBundle\Helper\Asset;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\CommonBundle\Storage\StorageManager;
+use Psr\Http\Message\StreamInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Twig\Extension\RuntimeExtensionInterface;
@@ -42,7 +43,7 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
             }
 
             if (!$this->filesystem->exists($directory)) {
-                $this->extract($this->storageManager->getFile($hash), $directory);
+                $this->extract($this->storageManager->getStream($hash), $directory);
                 $this->filesystem->touch($directory . '/' . $hash);
             }
 
@@ -57,7 +58,7 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
     public function unzip(string $hash, string $saveDir): array
     {
         try {
-            $this->extract($this->storageManager->getFile($hash), $saveDir);
+            $this->extract($this->storageManager->getStream($hash), $saveDir);
 
             return iterator_to_array(Finder::create()->in($saveDir)->files()->getIterator());
         } catch (\Exception $e) {
@@ -67,11 +68,14 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
         return [];
     }
 
-    private function extract(string $path, string $destination): bool
+    private function extract(StreamInterface $stream, string $destination): bool
     {
         $zip = new ZipArchive();
 
-        if (false === $open = $zip->open($path)) {
+        $path = tempnam(sys_get_temp_dir(), 'emsch');
+        file_put_contents($path, $stream);
+
+        if (false === $open = $zip->open($stream->getContents())) {
             throw new AssetException(sprintf('Failed opening zip %s (ZipArchive %s)', $path, $open));
         }
 
