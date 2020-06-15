@@ -46,10 +46,10 @@ class ProcessHelper implements RuntimeExtensionInterface
         @trigger_error("ProcessHelper::process is deprecated use the ems_asset twig filter to generate the route", E_USER_DEPRECATED);
 
         if ($configHash) {
-            return $this->processor->fromCache($request, $processor, $assetHash, $configHash);
+            return $this->processor->getResponse($request, $processor, $assetHash, $configHash);
         }
 
-        return  $this->processor->createResponse($request, $processor, $assetHash, $this->getOptions($processor));
+        return new Response('Deprecated use ems_asset twig filter', 500);
     }
 
     /**

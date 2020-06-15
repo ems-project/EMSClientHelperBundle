@@ -70,17 +70,21 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
 
     private function extract(StreamInterface $stream, string $destination): bool
     {
-        $zip = new ZipArchive();
-
         $path = tempnam(sys_get_temp_dir(), 'emsch');
-        file_put_contents($path, $stream);
 
-        if (false === $open = $zip->open($stream->getContents())) {
+        if (!$path) {
+            throw new AssetException(sprintf('Could not create temp file in %s', sys_get_temp_dir()));
+        }
+
+        file_put_contents($path, $stream->getContents());
+
+        $zip = new ZipArchive();
+        if (false === $open = $zip->open($path)) {
             throw new AssetException(sprintf('Failed opening zip %s (ZipArchive %s)', $path, $open));
         }
 
         if (!$zip->extractTo($destination)) {
-            throw new AssetException(sprintf('Extracting of zip file failed (%s)', $path));
+            throw new AssetException(sprintf('Extracting of zip file failed (%s)', $destination));
         }
 
         $zip->close();
