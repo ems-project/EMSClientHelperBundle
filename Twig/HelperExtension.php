@@ -34,8 +34,7 @@ class HelperExtension extends AbstractExtension
             new TwigFunction('emsch_search', [ClientRequestRuntime::class, 'search']),
             new TwigFunction('emsch_search_config', [ClientRequestRuntime::class, 'searchConfig']),
             new TwigFunction('emsch_assets', [AssetHelperRuntime::class, 'assets']),
-            new TwigFunction('emsch_unzip', [AssetHelperRuntime::class, 'unzip']),
-            new TwigFunction('emsch_process_asset', [ProcessHelper::class, 'generate']),
+            new TwigFunction('emsch_unzip', [AssetHelperRuntime::class, 'unzip'])
         ];
     }
 }
