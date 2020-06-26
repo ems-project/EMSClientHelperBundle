@@ -9,6 +9,9 @@
         <service id="emsch.user_api.client_factory" class="EMS\ClientHelperBundle\Helper\UserApi\ClientFactory" public="false">
             <argument type="string">%emsch.user_api.url%</argument>
         </service>
+        <service id="emsch.user_api.test" class="EMS\ClientHelperBundle\Helper\UserApi\TestService" public="false">
+            <argument type="service" id="emsch.user_api.client_factory" />
+        </service>
         <service id="emsch.user_api.auth" class="EMS\ClientHelperBundle\Helper\UserApi\AuthService" public="false">
             <argument type="service" id="emsch.user_api.client_factory" />
         </service>
@@ -20,6 +23,9 @@
         </service>
 
         <!-- controllers -->
+        <service id="emsch.controller.user_api.test" class="EMS\ClientHelperBundle\Controller\UserApi\TestController" public="true">
+            <argument type="service" id="emsch.user_api.test" />
+        </service>
         <service id="emsch.controller.user_api.login" class="EMS\ClientHelperBundle\Controller\UserApi\LoginController" public="true">
             <argument type="service" id="emsch.user_api.auth" />
         </service>

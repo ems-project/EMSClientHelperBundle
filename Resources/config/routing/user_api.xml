@@ -4,6 +4,8 @@
         xsi:schemaLocation="http://symfony.com/schema/routing
         https://symfony.com/schema/routing/routing-1.0.xsd">
 
+    <route id="emsch_user_api_test" path="/test" controller="emsch.controller.user_api.test" methods="GET" />
+
     <route id="emsch_user_api_login" path="/login" controller="emsch.controller.user_api.login" methods="POST" />
 
     <route id="emsch_user_api_users" path="/users" controller="emsch.controller.user_api.user::index" methods="GET" />
