@@ -203,20 +203,31 @@ class QueryBuilder
         return $suggest;
     }
 
-    private function getSort(): ?array
+    private function getSort(): array
     {
         if (null === $sort = $this->search->getSort()) {
-            return null;
+            return $this->buildSort($this->search->getDefaultSorts());
         }
 
-        $field = $sort['field'];
-        $includeScore = $sort['score'] ?? false;
-        unset($sort['field'], $sort['score']);
+        return $this->buildSort([$sort]);
+    }
 
-        if (!isset($sort['order'])) {
-            $sort['order'] = $this->search->getSortOrder();
+    private function buildSort(array $searchSorts): array
+    {
+        $sorts = [];
+
+        foreach ($searchSorts as $sort) {
+            $field = $sort['field'];
+            $includeScore = $sort['score'] ?? false;
+
+            unset($sort['field'], $sort['score']);
+            $sorts[$field] = $sort;
+
+            if ($includeScore) {
+                $sorts['_score'] = ['order' => 'desc'];
+            }
         }
 
-        return $includeScore ? [$field => $sort, '_score' => ['order' => 'desc']] : [$field => $sort];
+        return $sorts;
     }
 }
