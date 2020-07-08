@@ -210,12 +210,13 @@ class QueryBuilder
         }
 
         $field = $sort['field'];
-        unset($sort['field']);
+        $includeScore = $sort['score'] ?? false;
+        unset($sort['field'], $sort['score']);
 
         if (!isset($sort['order'])) {
             $sort['order'] = $this->search->getSortOrder();
         }
 
-        return [$field => $sort];
+        return $includeScore ? [$field => $sort, '_score' => ['order' => 'desc']] : [$field => $sort];
     }
 }
