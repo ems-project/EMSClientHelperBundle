@@ -421,6 +421,11 @@ parameters:
 			path: Helper/Asset/AssetHelperRuntime.php
 
 		-
+			message: "#^Strict comparison using \\=\\=\\= between false and int\\|true will always evaluate to false\\.$#"
+			count: 1
+			path: Helper/Asset/AssetHelperRuntime.php
+
+		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:getData\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Cache/CacheHelper.php
@@ -1196,6 +1201,16 @@ parameters:
 			path: Helper/Search/QueryBuilder.php
 
 		-
+			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\QueryBuilder\\:\\:buildSort\\(\\) has parameter \\$searchSorts with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Helper/Search/QueryBuilder.php
+
+		-
+			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\QueryBuilder\\:\\:buildSort\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Helper/Search/QueryBuilder.php
+
+		-
 			message: "#^Property EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:\\$types type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Search/Search.php
@@ -1217,6 +1232,11 @@ parameters:
 
 		-
 			message: "#^Property EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:\\$sizes type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Helper/Search/Search.php
+
+		-
+			message: "#^Property EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:\\$defaultSorts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Search/Search.php
 
@@ -1271,6 +1291,11 @@ parameters:
 			path: Helper/Search/Search.php
 
 		-
+			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:getDefaultSorts\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Helper/Search/Search.php
+
+		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:getSort\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Search/Search.php
@@ -1291,6 +1316,16 @@ parameters:
 			path: Helper/Search/Search.php
 
 		-
+			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:parseSorts\\(\\) has parameter \\$sorts with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Helper/Search/Search.php
+
+		-
+			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:parseSorts\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Helper/Search/Search.php
+
+		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:setAnalyzer\\(\\) has parameter \\$analyzers with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Search/Search.php
@@ -1302,11 +1337,6 @@ parameters:
 
 		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:setSuggestFields\\(\\) has parameter \\$suggestFields with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Search/Search.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:setSorts\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Search/Search.php
 
