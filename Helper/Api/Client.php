@@ -150,7 +150,7 @@ class Client
         return \json_decode($response->getBody()->getContents(), true);
     }
 
-    public function createFormVerification(string $value): ?int
+    public function createFormVerification(string $value): ?string
     {
         try {
             $response = $this->client->post('/api/forms/verifications', [
@@ -159,14 +159,14 @@ class Client
 
             $json = \json_decode($response->getBody()->getContents(), true);
 
-            return isset($json['code']) ? (int) $json['code'] : null;
+            return isset($json['code']) ? $json['code'] : null;
         } catch (RequestException $e) {
             $this->logger->error($e->getMessage());
             return null;
         }
     }
 
-    public function getFormVerification(string $value): ?int
+    public function getFormVerification(string $value): ?string
     {
         try {
             $response = $this->client->get('/api/forms/verifications', [
@@ -175,7 +175,7 @@ class Client
 
             $json = \json_decode($response->getBody()->getContents(), true);
 
-            return isset($json['code']) ? (int) $json['code'] : null;
+            return isset($json['code']) ? $json['code'] : null;
         } catch (RequestException $e) {
             $this->logger->error($e->getMessage());
             return null;
