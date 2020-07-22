@@ -4,6 +4,8 @@ namespace EMS\ClientHelperBundle\Helper\Api;
 
 use EMS\CommonBundle\Common\HttpClientFactory;
 use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\Exception\RequestException;
+use Psr\Log\LoggerInterface;
 
 class Client
 {
@@ -22,16 +24,20 @@ class Client
      */
     private $name;
 
+    /** @var LoggerInterface */
+    private $logger;
+
     /**
      * @param string $name
      * @param string $baseUrl
      * @param string $key
      */
-    public function __construct($name, $baseUrl, $key)
+    public function __construct($name, $baseUrl, $key, LoggerInterface $logger)
     {
         $this->name = $name;
         $this->key = $key;
         $this->client = HttpClientFactory::create($baseUrl, ['X-Auth-Token' => $this->key]);
+        $this->logger = $logger;
     }
 
     public function getName()
@@ -142,5 +148,37 @@ class Client
         ]);
 
         return \json_decode($response->getBody()->getContents(), true);
+    }
+
+    public function createFormVerification(string $value): ?int
+    {
+        try {
+            $response = $this->client->post('/api/forms/verifications', [
+                'json' => ['value' => $value],
+            ]);
+
+            $json = \json_decode($response->getBody()->getContents(), true);
+
+            return isset($json['code']) ? (int) $json['code'] : null;
+        } catch (RequestException $e) {
+            $this->logger->error($e->getMessage());
+            return null;
+        }
+    }
+
+    public function getFormVerification(string $value): ?int
+    {
+        try {
+            $response = $this->client->get('/api/forms/verifications', [
+                'query' => ['value' => $value],
+            ]);
+
+            $json = \json_decode($response->getBody()->getContents(), true);
+
+            return isset($json['code']) ? (int) $json['code'] : null;
+        } catch (RequestException $e) {
+            $this->logger->error($e->getMessage());
+            return null;
+        }
     }
 }
