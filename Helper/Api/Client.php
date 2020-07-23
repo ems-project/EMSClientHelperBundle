@@ -4,7 +4,6 @@ namespace EMS\ClientHelperBundle\Helper\Api;
 
 use EMS\CommonBundle\Common\HttpClientFactory;
 use GuzzleHttp\Client as HttpClient;
-use GuzzleHttp\Exception\RequestException;
 use Psr\Log\LoggerInterface;
 
 class Client
@@ -160,7 +159,7 @@ class Client
             $json = \json_decode($response->getBody()->getContents(), true);
 
             return isset($json['code']) ? $json['code'] : null;
-        } catch (RequestException $e) {
+        } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
             return null;
         }
@@ -176,7 +175,7 @@ class Client
             $json = \json_decode($response->getBody()->getContents(), true);
 
             return isset($json['code']) ? $json['code'] : null;
-        } catch (RequestException $e) {
+        } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
             return null;
         }
