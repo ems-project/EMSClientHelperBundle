@@ -266,7 +266,7 @@ class ApiService
         throw new NotFoundHttpException();
     }
 
-    private function getApiClient(string $clientName): Client
+    public function getApiClient(string $clientName): Client
     {
         foreach ($this->apiClients as $apiClient) {
             if ($clientName === $apiClient->getName()) {
