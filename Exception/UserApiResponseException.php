@@ -1,9 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Exception;
 
-use \Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ResponseInterface;
 
 final class UserApiResponseException extends \Exception
 {

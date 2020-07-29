@@ -30,13 +30,16 @@ final class FileService
         $client = $this->client->createClient(['X-Auth-Token' => $request->headers->get('X-Auth-Token')]);
 
         $responses = [];
-        foreach($request->files as $file) {
+        foreach ($request->files as $file) {
             $responses = $this->upload($client, $file);
         }
 
-        return JsonResponse::fromJsonString(\json_encode($responses));
+        return JsonResponse::fromJsonString((\json_encode($responses)) ?: null);
     }
 
+    /**
+     * @return array<string>
+     */
     private function upload(Client $client, UploadedFile $file): array
     {
         try {
@@ -56,17 +59,21 @@ final class FileService
             if (!$success) {
                 throw UserApiResponseException::forFileUpload($response, $file);
             }
-
-            return $this->parseEmsResponse($json);
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
         }
+
+        return (isset($json)) ? $this->parseEmsResponse($json) : [];
     }
 
+    /**
+     * @param array<string> $response
+     * @return array<string>
+     */
     private function parseEmsResponse(array $response): array
     {
         //TODO: remove this hack once the ems back is returning the file hash as parameter
-        if (! isset($response[EmsFields::CONTENT_FILE_HASH_FIELD_]) && isset($response['url'])) {
+        if (!isset($response[EmsFields::CONTENT_FILE_HASH_FIELD_]) && isset($response['url'])) {
             $output_array = [];
             \preg_match('/\/data\/file\/view\/(?P<hash>.*)\?.*/', $response['url'], $output_array);
             if (isset($output_array['hash'])) {
