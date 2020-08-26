@@ -781,11 +781,6 @@ parameters:
 			path: Helper/Environment/Environment.php
 
 		-
-			message: "#^Parameter \\#1 \\$key of method Symfony\\\\Component\\\\HttpFoundation\\\\ParameterBag\\:\\:set\\(\\) expects string, int\\|string given\\.$#"
-			count: 1
-			path: Helper/Environment/Environment.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Environment\\\\EnvironmentHelper\\:\\:__construct\\(\\) has parameter \\$environments with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Environment/EnvironmentHelper.php
