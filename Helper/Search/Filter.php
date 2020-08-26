@@ -45,6 +45,8 @@ class Filter
     private $value;
     /** @var array */
     private $choices = [];
+    /** @var bool|string */
+    private $dateFormat;
 
     const TYPE_TERM       = 'term';
     const TYPE_TERMS      = 'terms';
@@ -75,6 +77,7 @@ class Filter
         $this->sortField = isset($options['sort_field']) ? $options['sort_field'] : null;
         $this->sortOrder = isset($options['sort_order']) ? $options['sort_order'] : 'asc';
         $this->reversedNested = isset($options['reversed_nested']) ? $options['reversed_nested'] : false;
+        $this->dateFormat = isset($options['date_format']) ? $options['date_format'] : 'd-m-Y H:i:s';
         $this->setPostFilter($options);
 
         if (isset($options['value'])) {
@@ -241,15 +244,14 @@ class Filter
             return null;
         }
 
-        $format = 'd-m-Y H:i:s';
         $start = $end = null;
 
         if (!empty($value['start'])) {
-            $startDatetime = \DateTime::createFromFormat($format, $value['start'] . ' 00:00:00');
+            $startDatetime = $this->createDateTimeForQuery($value['start'], ' 00:00:00');
             $start = $startDatetime ? $startDatetime->format('Y-m-d') : null;
         }
         if (!empty($value['end'])) {
-            $endDatetime = \DateTime::createFromFormat($format, $value['end'] . ' 23:59:59');
+            $endDatetime = $this->createDateTimeForQuery($value['end'], ' 23:59:59');
             $end = $endDatetime ? $endDatetime->format('Y-m-d') : null;
         }
 
@@ -258,6 +260,21 @@ class Filter
         }
 
         return ['range' => [ $this->getField() => array_filter(['gte' => $start, 'lte' => $end,]) ]];
+    }
+
+    private function createDateTimeForQuery(string $value, ?string $time = null): ?\DateTime
+    {
+        if (false === $this->dateFormat) {
+            return new \DateTime($value);
+        }
+
+        if (!is_string($this->dateFormat)) {
+            return null;
+        }
+
+        $dateTime = \DateTime::createFromFormat($this->dateFormat, sprintf('%s %s', $value, $time));
+
+        return $dateTime instanceof \DateTime ? $dateTime : null;
     }
 
     private function getQueryOptional(): array
