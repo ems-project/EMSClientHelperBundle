@@ -221,11 +221,6 @@ parameters:
 			path: EventListener/RedirectListener.php
 
 		-
-			message: "#^Parameter \\#2 \\$uri of method EMS\\\\ClientHelperBundle\\\\EventListener\\\\RedirectListener\\:\\:forwardNotFound\\(\\) expects string, \\(array\\<string\\>\\)\\|string\\|true given\\.$#"
-			count: 1
-			path: EventListener/RedirectListener.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\EventListener\\\\RedirectListener\\:\\:forwardNotFound\\(\\) has no return typehint specified\\.$#"
 			count: 1
 			path: EventListener/RedirectListener.php
@@ -982,11 +977,6 @@ parameters:
 
 		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Routing\\\\Url\\\\Transformer\\:\\:getDocument\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Routing/Url/Transformer.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Routing\\\\Url\\\\Transformer\\:\\:getDocument\\(\\) should return array\\|false but returns \\(array\\)\\|true\\.$#"
 			count: 1
 			path: Helper/Routing/Url/Transformer.php
 
