@@ -50,24 +50,22 @@ class ApiService
     public function treatFormRequest(Request $request, string $apiName, string $validationTemplate = null)
     {
         $body = $request->request->all();
-        /** @var string $key */
-        /** @var UploadedFile $file */
-        foreach ($request->files as $key => $file) {
-            if ($file !== null) {
-                $response = $this->uploadFile($apiName, $file, $file->getClientOriginalName());
-                if (!$response['uploaded'] || !isset($response[EmsFields::CONTENT_FILE_HASH_FIELD_])) {
-                    throw new \Exception('File hash not found or file not uploaded');
+        /** @var string $fieldKey */
+        foreach ($request->files as $fieldKey => $fileField) {
+            if (is_array($fileField)) {
+                foreach ($fileField as $pos => $collectionOfFields) {
+                    /** @var UploadedFile $file */
+                    foreach ($collectionOfFields as $fileKey => $file) {
+                        if ($file !== null) {
+                            $body[$fieldKey][$pos][$fileKey] = $this->createContentFileHashField($apiName, $file);
+                        }
+                    }
                 }
-                $body[$key] = [
-                    EmsFields::CONTENT_FILE_HASH_FIELD => $response[EmsFields::CONTENT_FILE_HASH_FIELD_],
-                    EmsFields::CONTENT_FILE_HASH_FIELD_ => $response[EmsFields::CONTENT_FILE_HASH_FIELD_],
-                    EmsFields::CONTENT_FILE_NAME_FIELD => $file->getClientOriginalName(),
-                    EmsFields::CONTENT_FILE_NAME_FIELD_ => $file->getClientOriginalName(),
-                    EmsFields::CONTENT_FILE_SIZE_FIELD => $file->getSize(),
-                    EmsFields::CONTENT_FILE_SIZE_FIELD_ => $file->getSize(),
-                    EmsFields::CONTENT_MIME_TYPE_FIELD => $file->getMimeType(),
-                    EmsFields::CONTENT_MIME_TYPE_FIELD_ => $file->getMimeType(),
-                ];
+            } else {
+                /** @var UploadedFile $fileField */
+                if ($fileField !== null) {
+                    $body[$fieldKey] = $this->createContentFileHashField($apiName, $fileField);
+                }
             }
         }
 
@@ -78,6 +76,31 @@ class ApiService
         }
 
         return $body;
+    }
+    
+    /**
+     *
+     * @param string $apiName
+     * @param UploadedFile $file
+     * @throws \Exception
+     * @return array<string, mixed>
+     */
+    private function createContentFileHashField(string $apiName, UploadedFile $file): array
+    {
+        $response = $this->uploadFile($apiName, $file, $file->getClientOriginalName());
+        if (!$response['uploaded'] || !isset($response[EmsFields::CONTENT_FILE_HASH_FIELD_])) {
+            throw new \Exception('File hash not found or file not uploaded');
+        }
+        return [
+            EmsFields::CONTENT_FILE_HASH_FIELD => $response[EmsFields::CONTENT_FILE_HASH_FIELD_],
+            EmsFields::CONTENT_FILE_HASH_FIELD_ => $response[EmsFields::CONTENT_FILE_HASH_FIELD_],
+            EmsFields::CONTENT_FILE_NAME_FIELD => $file->getClientOriginalName(),
+            EmsFields::CONTENT_FILE_NAME_FIELD_ => $file->getClientOriginalName(),
+            EmsFields::CONTENT_FILE_SIZE_FIELD => $file->getSize(),
+            EmsFields::CONTENT_FILE_SIZE_FIELD_ => $file->getSize(),
+            EmsFields::CONTENT_MIME_TYPE_FIELD => $file->getMimeType(),
+            EmsFields::CONTENT_MIME_TYPE_FIELD_ => $file->getMimeType(),
+        ];
     }
 
     /**
