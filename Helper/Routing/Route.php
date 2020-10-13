@@ -51,7 +51,8 @@ class Route
             $this->options['options'],
             $this->options['host'],
             $this->options['schemes'],
-            [$this->options['method']]
+            [$this->options['method']],
+            $this->options['condition']
         );
     }
 
@@ -71,6 +72,8 @@ class Route
                 'type' => null,
                 'query' => null,
                 'template' => null,
+                'index_regex' => null,
+                'condition' => null,
             ])
             ->setNormalizer('defaults', function (Options $options, $value) {
                 if (!isset($value['_controller'])) {
@@ -92,6 +95,7 @@ class Route
 
                 $value['type'] = $options['type'];
                 $value['template'] = $options['template'];
+                $value['index_regex'] = $options['index_regex'];
 
                 return $value;
             })

@@ -26,11 +26,14 @@ class EMSClientHelperExtension extends Extension
         $loader->load('services.xml');
         $loader->load('routing.xml');
         $loader->load('search.xml');
+        $loader->load('user_api.xml');
 
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
         $container->setParameter('emsch.locales', $config['locales']);
+        $container->setParameter('emsch.bind_locale', $config['bind_locale'] ?? true);
+        $container->setParameter('emsch.etag_hash_algo', $config['etag_hash_algo'] ?? 'sha1');
         $container->setParameter('emsch.assets.enabled', $config['dump_assets']);
         $container->setParameter('emsch.request_environments', $config['request_environments']);
 
@@ -44,6 +47,7 @@ class EMSClientHelperExtension extends Extension
         $this->processElasticms($container, $loader, $config['elasticms']);
         $this->processApi($container, $config['api']);
         $this->processRoutingSelection($container, $config['routing']);
+        $this->processUserApi($container, $config['user_api']);
 
         if (isset($config['twig_list'])) {
             $definition = $container->getDefinition('emsch.controller.twig_list');
@@ -79,6 +83,7 @@ class EMSClientHelperExtension extends Extension
             $definition->setArgument(0, $name);
             $definition->setArgument(1, $options['url']);
             $definition->setArgument(2, $options['key']);
+            $definition->setArgument(3, new Reference('logger'));
             $definition->addTag('emsch.api_client');
 
             $container->setDefinition(sprintf('emsch.api_client.%s', $name), $definition);
@@ -103,7 +108,7 @@ class EMSClientHelperExtension extends Extension
             ->setArgument(0, $config)
             ->setPublic(true);
         $definition->addTag('emsch.elasticsearch.client');
-        
+
         $container->setDefinition(sprintf('ems_common.elasticsearch.%s', $name), $definition);
     }
 
@@ -213,5 +218,18 @@ class EMSClientHelperExtension extends Extension
         $container->setParameter('emsch.routing.routes', $config['routes']);
         $container->setParameter('emsch.routing.redirect_type', $config['redirect_type']);
         $container->setParameter('emsch.routing.relative_paths', $config['relative_paths']);
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param array<string> $config
+     */
+    private function processUserApi(ContainerBuilder $container, array $config): void
+    {
+        if (!$config['enabled']) {
+            return;
+        }
+
+        $container->setParameter('emsch.user_api.url', $config['url']);
     }
 }

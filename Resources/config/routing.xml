@@ -34,6 +34,15 @@
         <service id="emsch.controller.router" class="EMS\ClientHelperBundle\Controller\RouterController">
             <argument type="service" id="emsch.routing.handler" />
             <argument type="service" id="twig"/>
+            <argument type="service" id="ems_common.storage.processor"/>
+            <argument type="service" id="emsch.helper_cache"/>
+            <tag name="controller.service_arguments"/>
+        </service>
+
+        <service id="emsch.controller.pdf" class="EMS\ClientHelperBundle\Controller\PdfController">
+            <argument type="service" id="emsch.routing.handler" />
+            <argument type="service" id="twig"/>
+            <argument type="service" id="emsch.common.pdf_generator"/>
             <tag name="controller.service_arguments"/>
         </service>
 

@@ -35,6 +35,7 @@
 
         <service id="emsch.helper_cache" class="EMS\ClientHelperBundle\Helper\Cache\CacheHelper">
             <argument type="service" id="cache.app" />
+            <argument type="string">%emsch.etag_hash_algo%</argument>
         </service>
 
         <service id="emsch.helper_translation" class="EMS\ClientHelperBundle\Helper\Translation\TranslationHelper">
@@ -54,6 +55,7 @@
             <argument type="service" id="emsch.helper_translation" />
             <argument type="service" id="emsch.helper_locale" />
             <argument type="service" id="emsch.helper_exception" />
+            <argument type="string">%emsch.bind_locale%</argument>
             <tag name="kernel.event_subscriber" />
         </service>
 
@@ -71,13 +73,6 @@
             <argument type="string">%kernel.project_dir%</argument>
             <tag name="twig.runtime" />
         </service>
-        <service id="emsch.twig.runtime.process" class="EMS\ClientHelperBundle\Helper\Asset\ProcessHelper">
-            <argument type="service" id="ems_common.storage.processor"/>
-            <argument type="service" id="emsch.manager.client_request" />
-            <argument type="service" id="Symfony\Component\Routing\Generator\UrlGeneratorInterface" />
-            <argument type="service" id="EMS\CommonBundle\Twig\RequestRuntime" />
-            <tag name="twig.runtime" />
-        </service>
         <service id="emsch.twig.runtime.client_request" class="EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestRuntime">
             <argument type="service" id="emsch.manager.client_request" />
             <argument type="service" id="logger" />
@@ -86,9 +81,6 @@
         </service>
 
         <!-- controllers -->
-        <service id="emsch.controller.asset" class="EMS\ClientHelperBundle\Controller\AssetController" public="true">
-            <argument type="service" id="emsch.twig.runtime.process"/>
-        </service>
         <service id="emsch.controller.language_select" class="EMS\ClientHelperBundle\Controller\LanguageSelectController" public="true">
             <argument type="service" id="emsch.manager.client_request" />
             <argument type="string">%emsch.locales%</argument>
@@ -98,6 +90,7 @@
             <argument type="service" id="emsch.search.manager" />
             <argument type="service" id="emsch.routing.handler" />
             <argument type="service" id="twig" />
+            <argument type="service" id="emsch.helper_cache"/>
             <argument type="string">%emsch.locales%</argument>
         </service>
         <service id="emsch.controller.twig_list" class="EMS\ClientHelperBundle\Controller\TwigListController" public="true">

@@ -67,7 +67,7 @@ class QueryBuilder
         return $query;
     }
 
-    private function getQueryFilters(): array
+    public function getQueryFilters(): array
     {
         $query = [];
         $nestedQueries = [];
@@ -203,19 +203,31 @@ class QueryBuilder
         return $suggest;
     }
 
-    private function getSort(): ?array
+    private function getSort(): array
     {
         if (null === $sort = $this->search->getSort()) {
-            return null;
+            return $this->buildSort($this->search->getDefaultSorts());
         }
 
-        $field = $sort['field'];
-        unset($sort['field']);
+        return $this->buildSort([$sort]);
+    }
 
-        if (!isset($sort['order'])) {
-            $sort['order'] = $this->search->getSortOrder();
+    private function buildSort(array $searchSorts): array
+    {
+        $sorts = [];
+
+        foreach ($searchSorts as $sort) {
+            $field = $sort['field'];
+            $includeScore = $sort['score'] ?? false;
+
+            unset($sort['field'], $sort['score']);
+            $sorts[$field] = $sort;
+
+            if ($includeScore) {
+                $sorts['_score'] = ['order' => 'desc'];
+            }
         }
 
-        return [$field => $sort];
+        return $sorts;
     }
 }

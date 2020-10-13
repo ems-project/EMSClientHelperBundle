@@ -22,6 +22,8 @@ class Search
     /** @var array */
     private $sizes = [];
     /** @var array */
+    private $defaultSorts = [];
+    /** @var array */
     private $sorts = [];
     /** @var array */
     private $highlight = [];
@@ -53,7 +55,9 @@ class Search
         $this->types = $options['types']; //required
         $this->facets = $options['facets'] ?? [];
         $this->sizes = $options['sizes'] ?? [];
-        $this->setSorts(($options['sorts'] ?? []), $clientRequest->getLocale());
+        $this->defaultSorts = $this->parseSorts(($options['default_sorts'] ?? []), $clientRequest->getLocale());
+        $this->sorts = $this->parseSorts(($options['sorts'] ?? []), $clientRequest->getLocale());
+
         $this->setHighlight(($options['highlight'] ?? []), $clientRequest->getLocale());
         $this->setFields(($options['fields'] ?? []), $clientRequest->getLocale());
         $this->setSuggestFields(($options['suggestFields'] ?? $options['fields'] ?? []), $clientRequest->getLocale());
@@ -87,11 +91,11 @@ class Search
         }
     }
 
-    public function bindAggregations(array $aggregations): void
+    public function bindAggregations(array $aggregations, array $queryFilters): void
     {
         foreach ($aggregations as $name => $aggregation) {
             if ($this->hasFilter($name)) {
-                $this->getFilter($name)->handleAggregation($aggregation);
+                $this->getFilter($name)->handleAggregation($aggregation, $this->getTypes(), $queryFilters);
             }
         }
     }
@@ -196,6 +200,11 @@ class Search
         return $this->sizes;
     }
 
+    public function getDefaultSorts(): array
+    {
+        return $this->defaultSorts;
+    }
+
     public function getSort(): ?array
     {
         return $this->sorts[$this->sortBy] ?? null;
@@ -236,6 +245,27 @@ class Search
         throw new \LogicException('no search defined!');
     }
 
+    private function parseSorts(array $sorts, string $locale): array
+    {
+        $result = [];
+
+        foreach ($sorts as $name => $options) {
+            if (\is_string($options)) {
+                $options = ['field' => $options];
+            }
+
+            $options['field'] = str_replace('%locale%', $locale, $options['field']);
+
+            if ($options['field'] !== '_score') {
+                $options['missing'] = '_last';
+            }
+
+            $result[$name] = $options;
+        }
+
+        return $result;
+    }
+
     private function setAnalyzer(array $analyzers, string $locale): void
     {
         $this->analyzer = isset($analyzers[$locale]) ? $analyzers[$locale] : 'standard';
@@ -254,21 +284,6 @@ class Search
             $this->suggestFields = $suggestFields[$locale];
         } else {
             $this->suggestFields = [];
-        }
-    }
-
-    public function setSorts(array $data, string $locale): void
-    {
-        foreach ($data as $name => $options) {
-            if (\is_array($options)) {
-                $options['field'] = str_replace('%locale%', $locale, $options['field']);
-                $this->sorts[$name] = array_merge(['missing' => '_last'], $options);
-            } elseif (\is_string($options)) {
-                $this->sorts[$name] = [
-                    'field' => str_replace('%locale%', $locale, $options),
-                    'missing' => '_last'
-                ];
-            }
         }
     }
 
