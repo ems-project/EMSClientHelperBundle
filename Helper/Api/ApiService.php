@@ -14,22 +14,22 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 class ApiService
 {
     const EMS_AJAX_MESSAGE_LEVELS = ['error', 'warning'];
-    
+
     /** @var ClientRequest[] */
     private $clientRequests;
-    
+
     /** @var Client[] */
     private $apiClients;
-    
+
     /** @var UrlGeneratorInterface */
     private $urlGenerator;
-    
+
     /** @var \Twig_Environment */
     private $twig;
-    
+
     /** @var LoggerInterface */
     private $logger;
-    
+
     /**
      * @param LoggerInterface $logger
      * @param \Twig_Environment $twig
@@ -45,7 +45,7 @@ class ApiService
         $this->clientRequests = $clientRequests;
         $this->apiClients = $apiClients;
     }
-    
+
     public function treatFormRequest(Request $request, string $apiName, string $validationTemplate = null)
     {
         $body = $request->request->all();
@@ -118,19 +118,19 @@ class ApiService
             EmsFields::CONTENT_MIME_TYPE_FIELD_ => $file->getMimeType(),
         ];
     }
-    
+
     /**
      * @param ClientRequest $clientRequest
      */
     public function addClientRequest(ClientRequest $clientRequest)
     {
         $name = $clientRequest->getOption('[api][name]', false);
-        
+
         if ($name) {
             $this->clientRequests[$name] = $clientRequest;
         }
     }
-    
+
     /**
      * @param string $apiName
      *
@@ -142,13 +142,13 @@ class ApiService
     {
         $response = new Response();
         $contentTypes = $this->getClientRequest($apiName)->getContentTypes();
-        
+
         foreach ($contentTypes as $contentType) {
             $url = $this->urlGenerator->generate('emsch_api_content_type', [
                 'apiName' => $apiName,
                 'contentType' => $contentType
             ]);
-            
+
             $response->addData('content_types', [
                 'name' => $contentType,
                 '_links' => [
@@ -156,10 +156,10 @@ class ApiService
                 ]
             ]);
         }
-        
+
         return $response;
     }
-    
+
     /**
      * @param string $apiName
      * @param string $contentType
@@ -172,48 +172,48 @@ class ApiService
     public function getContentType($apiName, $contentType, array $filter = [], $size = null, $scrollId = null)
     {
         $response = new Response();
-        
+
         $urlParent = $this->urlGenerator->generate('emsch_api_content_types', ['apiName' => $apiName]);
         $response->addData('_links', [Response::createLink('content-types', $urlParent, 'content types')]);
-        
+
         $results = $this->getClientRequest($apiName)->scroll($contentType, $filter, $size, $scrollId);
-        
+
         $hits = $results['hits'];
-        
+
         $response->addData('count', count($hits['hits']));
         $response->addData('total', $hits['total']);
         $response->addData('scroll', $results['_scroll_id']);
-        
+
         foreach ($hits['hits'] as $document) {
             $url =  $this->urlGenerator->generate('emsch_api_document', [
                 'apiName' => $apiName,
                 'contentType' => $contentType,
                 'ouuid' => $document['_id'],
             ]);
-            
+
             $data = array_merge_recursive(['id' => $document['_id']], $document['_source']);
             $data['_links'] = [Response::createLink('self', $url, $contentType)];
-            
+
             $response->addData('all', $data);
         }
-        
+
         return $response;
     }
-    
+
     public function updateDocument(string $apiName, string $type, string $ouuid, array $body): string
     {
         $apiClient = $this->getApiClient($apiName);
         $response = $apiClient->updateDocument($type, $ouuid, $body);
         return $this->finalizeResponse($apiClient, $response, $type, $ouuid);
     }
-    
+
     public function createDocument(string $apiName, string $type, ?string $ouuid, array $body): string
     {
         $apiClient = $this->getApiClient($apiName);
         $response = $apiClient->initNewDocument($type, $body, $ouuid);
         return $this->finalizeResponse($apiClient, $response, $type, $ouuid);
     }
-    
+
     private function finalizeResponse(Client $apiClient, array $response, string $type, ?string $ouuid): string
     {
         if (! $response['success']) {
@@ -224,10 +224,10 @@ class ApiService
             }
             throw new \Exception('Initialize draft failed');
         }
-        
+
         $revisionId = $response['revision_id'];
         $response = $apiClient->finalize($type, $revisionId);
-        
+
         if (! $response['success']) {
             try {
                 $apiClient->discardDraft($type, $revisionId);
@@ -238,7 +238,7 @@ class ApiService
                     'revision_id' => $revisionId,
                 ]);
             }
-            
+
             foreach (ApiService::EMS_AJAX_MESSAGE_LEVELS as $level) {
                 if (isset($response[$level][0])) {
                     throw new \Exception($response[$level][0]);
@@ -248,7 +248,7 @@ class ApiService
         }
         return $response['ouuid'];
     }
-    
+
     public function uploadFile(string $apiName, \SplFileInfo $file, $filename)
     {
         $response = $this->getApiClient($apiName)->postFile($file, $filename);
@@ -260,10 +260,10 @@ class ApiService
                 $response[EmsFields::CONTENT_FILE_HASH_FIELD_] = $output_array['hash'];
             }
         }
-        
+
         return $response;
     }
-    
+
     /**
      * @param string $apiName
      * @param string $contentType
@@ -277,16 +277,16 @@ class ApiService
             'apiName' => $apiName,
             'contentType' => $contentType
         ]);
-        
+
         $document = $this->getClientRequest($apiName)->get($contentType, $ouuid);
-        
+
         $response = new Response();
         $response->addData('_links', [Response::createLink('all', $urlParent, $contentType)]);
         $response->addData($contentType, array_merge_recursive(['id' => $document['_id']], $document['_source']));
-        
+
         return $response;
     }
-    
+
     /**
      * @param string $apiName
      *
@@ -301,10 +301,10 @@ class ApiService
                 return $clientRequest;
             }
         }
-        
+
         throw new NotFoundHttpException();
     }
-    
+
     public function getApiClient(string $clientName): Client
     {
         foreach ($this->apiClients as $apiClient) {
@@ -312,7 +312,7 @@ class ApiService
                 return $apiClient;
             }
         }
-        
+
         throw new NotFoundHttpException();
     }
 }
