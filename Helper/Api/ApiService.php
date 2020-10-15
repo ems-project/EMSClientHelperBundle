@@ -68,30 +68,29 @@ class ApiService
      */
     private function treatFiles(array $body, string $apiName, $files): array
     {
-        $body_field = $body;
         /** @var string $fieldKey */
         foreach ($files as $fieldKey => $fileField) {
-            if (is_array($fileField)) {
+            if (\is_array($fileField)) {
                 /** @var string $pos */
                 foreach ($fileField as $pos => $collectionOfFields) {
                     /** @var string $fileKey */
                     foreach ($collectionOfFields as $fileKey => $file) {
                         if (is_array($file)) {
-                            $body_field[$fieldKey][$pos] = $this->treatFiles($body[$fieldKey][$pos], $apiName, $collectionOfFields);
+                            $body[$fieldKey][$pos] = $this->treatFiles($body[$fieldKey][$pos], $apiName, $collectionOfFields);
                         } else {
                             if ($file !== null) {
-                                $body_field[$fieldKey][$pos][$fileKey] = $this->createContentFileHashField($apiName, $file);
+                                $body[$fieldKey][$pos][$fileKey] = $this->createContentFileHashField($apiName, $file);
                             }
                         }
                     }
                 }
             } else {
                 if ($fileField !== null) {
-                    $body_field[$fieldKey] = $this->createContentFileHashField($apiName, $fileField);
+                    $body[$fieldKey] = $this->createContentFileHashField($apiName, $fileField);
                 }
             }
         }
-        return $body_field;
+        return $body;
     }
     
     /**
