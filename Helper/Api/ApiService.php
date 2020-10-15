@@ -75,7 +75,7 @@ class ApiService
                 foreach ($fileField as $pos => $collectionOfFields) {
                     /** @var string $fileKey */
                     foreach ($collectionOfFields as $fileKey => $file) {
-                        if (is_array($file)) {
+                        if (\is_array($file)) {
                             $body[$fieldKey][$pos] = $this->treatFiles($body[$fieldKey][$pos], $apiName, $collectionOfFields);
                         } else {
                             if ($file !== null) {
