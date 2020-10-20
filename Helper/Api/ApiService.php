@@ -6,6 +6,7 @@ use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\CommonBundle\Helper\EmsFields;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\FileBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -45,39 +46,76 @@ class ApiService
         $this->apiClients = $apiClients;
     }
 
-
-
     public function treatFormRequest(Request $request, string $apiName, string $validationTemplate = null)
     {
         $body = $request->request->all();
-        /** @var string $key */
-        /** @var UploadedFile $file */
-        foreach ($request->files as $key => $file) {
-            if ($file !== null) {
-                $response = $this->uploadFile($apiName, $file, $file->getClientOriginalName());
-                if (!$response['uploaded'] || !isset($response[EmsFields::CONTENT_FILE_HASH_FIELD_])) {
-                    throw new \Exception('File hash not found or file not uploaded');
-                }
-                $body[$key] = [
-                    EmsFields::CONTENT_FILE_HASH_FIELD => $response[EmsFields::CONTENT_FILE_HASH_FIELD_],
-                    EmsFields::CONTENT_FILE_HASH_FIELD_ => $response[EmsFields::CONTENT_FILE_HASH_FIELD_],
-                    EmsFields::CONTENT_FILE_NAME_FIELD => $file->getClientOriginalName(),
-                    EmsFields::CONTENT_FILE_NAME_FIELD_ => $file->getClientOriginalName(),
-                    EmsFields::CONTENT_FILE_SIZE_FIELD => $file->getSize(),
-                    EmsFields::CONTENT_FILE_SIZE_FIELD_ => $file->getSize(),
-                    EmsFields::CONTENT_MIME_TYPE_FIELD => $file->getMimeType(),
-                    EmsFields::CONTENT_MIME_TYPE_FIELD_ => $file->getMimeType(),
-                ];
-            }
-        }
-
+        $body = $this->treatFiles($body, $apiName, $request->files);
         if ($validationTemplate !== null) {
             return \json_decode($this->twig->render($validationTemplate, [
                 'document' => $body,
             ]), true);
         }
-
+        
         return $body;
+    }
+    
+    /**
+     *
+     * @param array<string,mixed> $body
+     * @param string $apiName
+     * @param FileBag<array>|array<string,mixed> $files
+     * @return array<string,mixed>
+     */
+    private function treatFiles(array $body, string $apiName, $files): array
+    {
+        /** @var string $fieldKey */
+        foreach ($files as $fieldKey => $fileField) {
+            if (\is_array($fileField)) {
+                /** @var string $pos */
+                foreach ($fileField as $pos => $collectionOfFields) {
+                    /** @var string $fileKey */
+                    foreach ($collectionOfFields as $fileKey => $file) {
+                        if (\is_array($file)) {
+                            $body[$fieldKey][$pos] = $this->treatFiles($body[$fieldKey][$pos], $apiName, $collectionOfFields);
+                        } else {
+                            if ($file !== null) {
+                                $body[$fieldKey][$pos][$fileKey] = $this->createContentFileHashField($apiName, $file);
+                            }
+                        }
+                    }
+                }
+            } else {
+                if ($fileField !== null) {
+                    $body[$fieldKey] = $this->createContentFileHashField($apiName, $fileField);
+                }
+            }
+        }
+        return $body;
+    }
+    
+    /**
+     *
+     * @param string $apiName
+     * @param UploadedFile $file
+     * @throws \Exception
+     * @return array<string, mixed>
+     */
+    private function createContentFileHashField(string $apiName, UploadedFile $file): array
+    {
+        $response = $this->uploadFile($apiName, $file, $file->getClientOriginalName());
+        if (!$response['uploaded'] || !isset($response[EmsFields::CONTENT_FILE_HASH_FIELD_])) {
+            throw new \Exception('File hash not found or file not uploaded');
+        }
+        return [
+            EmsFields::CONTENT_FILE_HASH_FIELD => $response[EmsFields::CONTENT_FILE_HASH_FIELD_],
+            EmsFields::CONTENT_FILE_HASH_FIELD_ => $response[EmsFields::CONTENT_FILE_HASH_FIELD_],
+            EmsFields::CONTENT_FILE_NAME_FIELD => $file->getClientOriginalName(),
+            EmsFields::CONTENT_FILE_NAME_FIELD_ => $file->getClientOriginalName(),
+            EmsFields::CONTENT_FILE_SIZE_FIELD => $file->getSize(),
+            EmsFields::CONTENT_FILE_SIZE_FIELD_ => $file->getSize(),
+            EmsFields::CONTENT_MIME_TYPE_FIELD => $file->getMimeType(),
+            EmsFields::CONTENT_MIME_TYPE_FIELD_ => $file->getMimeType(),
+        ];
     }
 
     /**

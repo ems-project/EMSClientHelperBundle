@@ -174,7 +174,7 @@ class ClientRequest
      * @param array  $sourceFields
      * @param array  $source_exclude
      *
-     * @return array | boolean
+     * @return array | false
      */
     public function getByOuuid($type, $ouuid, array $sourceFields = [], array $source_exclude = [])
     {
@@ -689,10 +689,6 @@ class ClientRequest
             'size'   => $size,
             'scroll' => $scrollTimeout
         ];
-
-        if ($scrollId) {
-            $params['scroll_id'] = $scrollId;
-        }
 
         return $this->client->search($params);
     }

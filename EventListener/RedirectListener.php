@@ -85,7 +85,7 @@ class RedirectListener implements EventSubscriberInterface
         
         $forwardUri = $this->redirectHelper->getForwardUri($request);
 
-        if ($forwardUri) {
+        if ($forwardUri && is_string($forwardUri)) {
             $this->forwardNotFound($event, $forwardUri);
         }
     }
