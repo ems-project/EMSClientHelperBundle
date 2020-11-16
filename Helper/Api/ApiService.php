@@ -55,10 +55,10 @@ class ApiService
                 'document' => $body,
             ]), true);
         }
-        
+
         return $body;
     }
-    
+
     /**
      *
      * @param array<string,mixed> $body
@@ -92,7 +92,7 @@ class ApiService
         }
         return $body;
     }
-    
+
     /**
      *
      * @param string $apiName

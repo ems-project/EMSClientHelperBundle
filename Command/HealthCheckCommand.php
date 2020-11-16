@@ -49,10 +49,10 @@ class HealthCheckCommand extends Command
         $this->clients = $clients ?? [];
         $this->clientRequests = $clientRequests ?? [];
         $this->storageManager = $storageManager;
-         
+
         parent::__construct();
     }
-    
+
     protected function configure()
     {
         $this
@@ -67,7 +67,7 @@ class HealthCheckCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $io->title('Performing Health Check');
-        
+
         $this->checkElasticSearch($io, $input->getOption('green'));
         $this->checkIndexes($io);
         $this->checkStorage($io, $input->getOption('skip-storage'));
@@ -76,7 +76,7 @@ class HealthCheckCommand extends Command
 
         return 1;
     }
-    
+
     /**
      * @param SymfonyStyle $io
      * @param bool         $green
@@ -92,13 +92,13 @@ class HealthCheckCommand extends Command
             $io->error('No clients found');
             throw new NoClientsFoundException();
         }
-        
+
         foreach ($this->clients as $client) {
             if ('red' === $client->cluster()->health()['status']) {
                 $io->error('Cluster health is RED');
                 throw new ClusterHealthRedException();
             }
-            
+
             if ($green && 'green' !== $client->cluster()->health()['status']) {
                 $io->error('Cluster health is NOT GREEN');
                 throw new ClusterHealthNotGreenException();
@@ -106,7 +106,7 @@ class HealthCheckCommand extends Command
         }
         $io->success('Elasticsearch is working.');
     }
-    
+
     /**
      * @param SymfonyStyle $io
      * @throws IndexNotFoundException
@@ -114,7 +114,7 @@ class HealthCheckCommand extends Command
     private function checkIndexes(SymfonyStyle $io)
     {
         $io->section('Indexes');
-        
+
         $prefixes = [];
         foreach ($this->clientRequests as $clientRequest) {
             $prefixes = array_merge($prefixes, $clientRequest->getPrefixes());
@@ -129,19 +129,19 @@ class HealthCheckCommand extends Command
                 $indexes[] = $preValue . $postValue;
             }
         }
-        
+
         $index = join(',', $indexes);
-        
+
         foreach ($this->clients as $client) {
             if (!$client->indices()->exists(['index' => $index])) {
                 $io->error('Index ' . $index . ' not found');
                 throw new IndexNotFoundException();
             }
         }
-        
+
         $io->success('Indexes are found.');
     }
-    
+
     /**
      * @param SymfonyStyle $io
      * @param bool         $skip
@@ -151,12 +151,12 @@ class HealthCheckCommand extends Command
     private function checkStorage(SymfonyStyle $io, $skip)
     {
         $io->section('Storage');
-        
+
         if ($skip) {
             $io->note('Skipping Storage Health Check.');
             return;
         }
-        
+
         if (null === $this->storageManager) {
             $io->warning('Skipping assets because health check has no access to a storageManager, enable storage ?');
             return;
