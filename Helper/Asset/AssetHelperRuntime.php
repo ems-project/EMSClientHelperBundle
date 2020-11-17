@@ -46,7 +46,7 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
                 $this->filesystem->touch($directory . \DIRECTORY_SEPARATOR . $hash);
             }
 
-            $this->manager->getLogger()->error('switching assets {symlink} to {hash}', ['symlink' => $symlink, 'hash' => $hash]);
+            $this->manager->getLogger()->warning('switching assets {symlink} to {hash}', ['symlink' => $symlink, 'hash' => $hash]);
             $this->filesystem->remove($symlink);
             $this->filesystem->symlink($directory, $symlink, true);
         } catch (\Exception $e) {
