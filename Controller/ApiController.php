@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Controller;
 
 use EMS\ClientHelperBundle\Helper\Api\ApiService;
@@ -15,7 +17,6 @@ class ApiController
 
     /** @var HashcashHelper */
     private $hashcashHelper;
-
 
     public function __construct(ApiService $service, HashcashHelper $hashcashHelper)
     {
@@ -34,9 +35,8 @@ class ApiController
     }
 
     /**
-     * @param Request $request
-     * @param string  $apiName
-     * @param string  $contentType
+     * @param string $apiName
+     * @param string $contentType
      *
      * @return JsonResponse
      */
@@ -66,7 +66,7 @@ class ApiController
         $this->hashcashHelper->validateHashcash($request, $csrfId, $hashcashLevel, $hashAlgo);
         $data = $this->service->treatFormRequest($request, $apiName, $validationTemplate);
 
-        if ($data === null) {
+        if (null === $data) {
             return new JsonResponse([
                 'success' => false,
                 'message' => 'Empty data',
@@ -74,7 +74,7 @@ class ApiController
         }
 
         try {
-            if ($ouuid === null || $forceCreate) {
+            if (null === $ouuid || $forceCreate) {
                 $ouuid = $this->service->createDocument($apiName, $contentType, $ouuid, $data);
             } else {
                 $ouuid = $this->service->updateDocument($apiName, $contentType, $ouuid, $data);
@@ -97,8 +97,9 @@ class ApiController
         $body = $this->service->treatFormRequest($request, $apiName, $validationTemplate);
         $ouuid = $this->service->createDocument($apiName, $contentType, $ouuid, $body);
 
-        $url = str_replace('%ouuid%', $ouuid, $redirectUrl);
-        $url = str_replace('%contenttype%', $contentType, $url);
+        $url = \str_replace('%ouuid%', $ouuid, $redirectUrl);
+        $url = \str_replace('%contenttype%', $contentType, $url);
+
         return new RedirectResponse($url);
     }
 
@@ -107,8 +108,9 @@ class ApiController
         $body = $this->service->treatFormRequest($request, $apiName, $validationTemplate);
         $ouuid = $this->service->updateDocument($apiName, $contentType, $ouuid, $body);
 
-        $url = str_replace('%ouuid%', $ouuid, $redirectUrl);
-        $url = str_replace('%contenttype%', $contentType, $url);
+        $url = \str_replace('%ouuid%', $ouuid, $redirectUrl);
+        $url = \str_replace('%contenttype%', $contentType, $url);
+
         return new RedirectResponse($url);
     }
 }

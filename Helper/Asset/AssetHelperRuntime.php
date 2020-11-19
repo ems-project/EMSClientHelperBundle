@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Asset;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
@@ -25,26 +27,26 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
     {
         $this->storageManager = $storageManager;
         $this->manager = $manager;
-        $this->publicDir = $projectDir . '/public';
+        $this->publicDir = $projectDir.'/public';
 
         $this->filesystem = new Filesystem();
     }
 
     public function assets(string $hash, string $saveDir = 'bundles'): void
     {
-        $directory = $this->publicDir . '/' . $saveDir . '/' . $hash;
+        $directory = $this->publicDir.'/'.$saveDir.'/'.$hash;
 
         try {
             $cacheKey = $this->manager->getDefault()->getCacheKey();
-            $symlink = $this->publicDir . '/bundles/' . $cacheKey;
+            $symlink = $this->publicDir.'/bundles/'.$cacheKey;
 
-            if ($this->filesystem->exists($symlink . '/' . $hash)) {
+            if ($this->filesystem->exists($symlink.'/'.$hash)) {
                 return; //valid
             }
 
             if (!$this->filesystem->exists($directory)) {
                 $this->extract($this->storageManager->getStream($hash), $directory);
-                $this->filesystem->touch($directory . '/' . $hash);
+                $this->filesystem->touch($directory.'/'.$hash);
             }
 
             $this->manager->getLogger()->error('switching assets {symlink} to {hash}', ['symlink' => $symlink, 'hash' => $hash]);
@@ -60,7 +62,7 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
         try {
             $this->extract($this->storageManager->getStream($hash), $saveDir);
 
-            return iterator_to_array(Finder::create()->in($saveDir)->files()->getIterator());
+            return \iterator_to_array(Finder::create()->in($saveDir)->files()->getIterator());
         } catch (\Exception $e) {
             $this->manager->getLogger()->error('emsch_assets failed : {error}', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
         }
@@ -70,21 +72,21 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
 
     private function extract(StreamInterface $stream, string $destination): bool
     {
-        $path = tempnam(sys_get_temp_dir(), 'emsch');
+        $path = \tempnam(\sys_get_temp_dir(), 'emsch');
 
         if (!$path) {
-            throw new AssetException(sprintf('Could not create temp file in %s', sys_get_temp_dir()));
+            throw new AssetException(\sprintf('Could not create temp file in %s', \sys_get_temp_dir()));
         }
 
-        file_put_contents($path, $stream->getContents());
+        \file_put_contents($path, $stream->getContents());
 
         $zip = new ZipArchive();
         if (false === $open = $zip->open($path)) {
-            throw new AssetException(sprintf('Failed opening zip %s (ZipArchive %s)', $path, $open));
+            throw new AssetException(\sprintf('Failed opening zip %s (ZipArchive %s)', $path, $open));
         }
 
         if (!$zip->extractTo($destination)) {
-            throw new AssetException(sprintf('Extracting of zip file failed (%s)', $destination));
+            throw new AssetException(\sprintf('Extracting of zip file failed (%s)', $destination));
         }
 
         $zip->close();

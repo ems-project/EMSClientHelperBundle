@@ -18,14 +18,13 @@ final class ClientFactory
 
     /**
      * @param array<string, string|null> $headers
-     * @return Client
      */
     public function createClient(array $headers = []): Client
     {
         return new Client([
             'base_uri' => $this->baseUrl,
-            'headers'  => $headers,
-            'timeout'  => 30,
+            'headers' => $headers,
+            'timeout' => 30,
             'allow_redirects' => false,
         ]);
     }

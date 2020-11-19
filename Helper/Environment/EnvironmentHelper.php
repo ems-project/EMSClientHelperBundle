@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Environment;
 
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -32,7 +34,7 @@ class EnvironmentHelper
     {
         $current = $this->requestStack->getCurrentRequest();
 
-        return ($current ? $current->get('_backend') : null);
+        return $current ? $current->get('_backend') : null;
     }
 
     /**
@@ -59,7 +61,7 @@ class EnvironmentHelper
     public function getLocale(): string
     {
         $current = $this->requestStack->getCurrentRequest();
-        
-        return ($current ? $current->getLocale() : null);
+
+        return $current ? $current->getLocale() : null;
     }
 }

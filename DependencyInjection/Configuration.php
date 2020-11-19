@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
@@ -61,9 +63,6 @@ class Configuration implements ConfigurationInterface
         return $treeBuilder;
     }
 
-    /**
-     * @param ArrayNodeDefinition $rootNode
-     */
     private function addElasticmsSection(ArrayNodeDefinition $rootNode)
     {
         $rootNode
@@ -72,8 +71,9 @@ class Configuration implements ConfigurationInterface
                     ->beforeNormalization()
                         ->ifArray()
                         ->then(function ($v) {
-                            if (1 === count($v)) {
-                                $v[key($v)]['default'] = true;
+                            if (1 === \count($v)) {
+                                $v[\key($v)]['default'] = true;
+
                                 return $v;
                             }
 
@@ -89,7 +89,7 @@ class Configuration implements ConfigurationInterface
                                 throw new \InvalidArgumentException('no default elasticms configured');
                             }
 
-                            if (count($default) > 1) {
+                            if (\count($default) > 1) {
                                 throw new \InvalidArgumentException('there can only be 1 default elasticms');
                             }
 
@@ -144,9 +144,6 @@ class Configuration implements ConfigurationInterface
         ;
     }
 
-    /**
-     * @param ArrayNodeDefinition $rootNode
-     */
     private function addApiSection(ArrayNodeDefinition $rootNode)
     {
         $rootNode
@@ -156,11 +153,11 @@ class Configuration implements ConfigurationInterface
                         ->info('name for the ems-project')
                         ->children()
                             ->scalarNode('url')
-                                ->info("url of the elasticms without /api")
+                                ->info('url of the elasticms without /api')
                                 ->isRequired()
                             ->end()
                             ->scalarNode('key')
-                                ->info("api key")
+                                ->info('api key')
                                 ->isRequired()
                             ->end()
                         ->end()
@@ -170,9 +167,6 @@ class Configuration implements ConfigurationInterface
         ;
     }
 
-    /**
-     * @param ArrayNodeDefinition $rootNode
-     */
     private function addTwigListSection(ArrayNodeDefinition $rootNode)
     {
         $rootNode
@@ -181,7 +175,7 @@ class Configuration implements ConfigurationInterface
                     ->children()
                         ->arrayNode('templates')
                             ->defaultValue([
-                                ['path'  => '@EMSBackendBridgeBundle/Resources/views/TwigList', 'namespace'  => '@EMSBackendBridgeBundle/TwigList']
+                                ['path' => '@EMSBackendBridgeBundle/Resources/views/TwigList', 'namespace' => '@EMSBackendBridgeBundle/TwigList'],
                             ])
                             ->prototype('array')
                                 ->children()
@@ -196,9 +190,6 @@ class Configuration implements ConfigurationInterface
         ;
     }
 
-    /**
-     * @param ArrayNodeDefinition $rootNode
-     */
     private function addRoutingSelection(ArrayNodeDefinition $rootNode)
     {
         $rootNode
@@ -210,7 +201,7 @@ class Configuration implements ConfigurationInterface
                         ->isRequired()
                         ->beforeNormalization()
                             ->always(function ($v) {
-                                return 'emsch.client_request.' . $v;
+                                return 'emsch.client_request.'.$v;
                             })
                         ->end()
                     ->end()
@@ -235,9 +226,6 @@ class Configuration implements ConfigurationInterface
         ;
     }
 
-    /**
-     * @param ArrayNodeDefinition $rootNode
-     */
     private function addUserApiSection(ArrayNodeDefinition $rootNode)
     {
         $rootNode
@@ -246,7 +234,7 @@ class Configuration implements ConfigurationInterface
                     ->canBeEnabled()
                         ->children()
                             ->scalarNode('url')
-                                ->info("url of the elasticms without /user_api")
+                                ->info('url of the elasticms without /user_api')
                                 ->isRequired()
                         ->end()
                     ->end()

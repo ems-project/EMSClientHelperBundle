@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Environment;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -10,12 +12,12 @@ class Environment
      * @var string
      */
     private $name;
-    
+
     /**
      * @var string
      */
     private $regex;
-    
+
     /**
      * @var string
      */
@@ -40,7 +42,7 @@ class Environment
         $this->index = $config['index'] ?? null;
         $this->request = $config['request'] ?? [];
     }
-    
+
     /**
      * @return string
      */
@@ -58,10 +60,10 @@ class Environment
         if (null === $this->regex) {
             return true;
         }
-        
-        $url = vsprintf('%s://%s%s', [$request->getScheme(), $request->getHttpHost(), $request->getBasePath() ]);
-        
-        return 1 === preg_match($this->regex, $url) ? true : false;
+
+        $url = \vsprintf('%s://%s%s', [$request->getScheme(), $request->getHttpHost(), $request->getBasePath()]);
+
+        return 1 === \preg_match($this->regex, $url) ? true : false;
     }
 
     public function modifyRequest(Request $request)

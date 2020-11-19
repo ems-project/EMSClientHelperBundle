@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Search;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
@@ -15,11 +17,6 @@ class Analyzer
     }
 
     /**
-     * @param string $field
-     * @param array $tokens
-     * @param string $analyzer
-     * @param array  $synonyms
-     *
      * @return TextValue[]
      */
     public function getTextValues(string $field, string $analyzer, array $tokens, array $synonyms = []): array
@@ -38,7 +35,6 @@ class Analyzer
     }
 
     /**
-     * @param TextValue $textValue
      * @param Synonym[] $synonyms
      */
     private function addSynonyms(TextValue $textValue, array $synonyms = []): void

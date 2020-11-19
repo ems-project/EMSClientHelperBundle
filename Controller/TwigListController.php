@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Finder\SplFileInfo;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 class TwigListController extends AbstractController
@@ -21,10 +23,6 @@ class TwigListController extends AbstractController
      */
     private $locations;
 
-    /**
-     * @param KernelInterface $kernel
-     * @param array           $templates
-     */
     public function __construct(KernelInterface $kernel, array $templates = [])
     {
         $this->kernel = $kernel;
@@ -44,18 +42,17 @@ class TwigListController extends AbstractController
             if ('@' === $path[0]) {
                 $in = $this->kernel->locateResource($path);
             } else {
-                $in = $this->kernel->getRootDir() . '/../' . $path;
+                $in = $this->kernel->getRootDir().'/../'.$path;
             }
 
             $files = Finder::create()->files()->name('*.twig')->in($in);
 
             foreach ($files as $file) {
                 /** @var SplFileInfo $file */
-
                 $relativePathname = $file->getRelativePathname();
 
                 if ($location['namespace']) {
-                    $relativePathname = $location['namespace'] . DIRECTORY_SEPARATOR  . $relativePathname;
+                    $relativePathname = $location['namespace'].DIRECTORY_SEPARATOR.$relativePathname;
                 }
 
                 $list[$path][] = $relativePathname;
@@ -63,13 +60,11 @@ class TwigListController extends AbstractController
         }
 
         return $this->render('@EMSClientHelper/TwigList/Default/templates.html.twig', [
-            'templates' => $list
+            'templates' => $list,
         ]);
     }
 
     /**
-     * @param Request $request
-     *
      * @return Response
      */
     public function template(Request $request)
@@ -78,8 +73,8 @@ class TwigListController extends AbstractController
 
         return $this->render($view, [
             'templates' => [],
-            'template'  => $view,
-            'path'      => $view
+            'template' => $view,
+            'path' => $view,
         ]);
     }
 }

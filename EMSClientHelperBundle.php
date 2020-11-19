@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle;
 
 use EMS\ClientHelperBundle\DependencyInjection\Compiler\ClientHelperPass;

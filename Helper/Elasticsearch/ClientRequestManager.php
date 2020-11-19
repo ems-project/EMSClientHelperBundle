@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
 use Psr\Log\LoggerInterface;
@@ -21,7 +23,6 @@ class ClientRequestManager
 
     /**
      * @param iterable|ClientRequest[] $clientRequests
-     * @param LoggerInterface          $logger
      */
     public function __construct(iterable $clientRequests, LoggerInterface $logger)
     {
@@ -36,17 +37,11 @@ class ClientRequestManager
         }
     }
 
-    /**
-     * @return LoggerInterface
-     */
     public function getLogger(): LoggerInterface
     {
         return $this->logger;
     }
 
-    /**
-     * @return ClientRequest
-     */
     public function getDefault(): ClientRequest
     {
         return $this->default;
@@ -61,16 +56,12 @@ class ClientRequestManager
     }
 
     /**
-     * @param string $name
-     *
-     * @return ClientRequest
-     *
      * @throws \InvalidArgumentException
      */
     public function get(string $name): ClientRequest
     {
         if (!isset($this->clientRequests[$name])) {
-            throw new \InvalidArgumentException(sprintf('Client request %s service not found!', $name));
+            throw new \InvalidArgumentException(\sprintf('Client request %s service not found!', $name));
         }
 
         return $this->clientRequests[$name];

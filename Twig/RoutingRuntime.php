@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Twig;
 
 use EMS\ClientHelperBundle\Helper\Routing\Url\Transformer;
@@ -11,10 +13,7 @@ class RoutingRuntime implements RuntimeExtensionInterface
      * @var Transformer
      */
     private $transformer;
-    
-    /**
-     * @param Transformer $transformer
-     */
+
     public function __construct(Transformer $transformer)
     {
         $this->transformer = $transformer;
@@ -23,21 +22,20 @@ class RoutingRuntime implements RuntimeExtensionInterface
     /**
      * @param string $relativePath
      * @param string $path
-     * @param array  $parameters
      *
      * @return string
      */
     public function createUrl($relativePath, $path, array $parameters = [])
     {
         $url = $this->transformer->getGenerator()->createUrl($relativePath, $path);
-        
+
         if ($parameters) {
-            $url .= '?' . http_build_query($parameters);
+            $url .= '?'.\http_build_query($parameters);
         }
-        
+
         return $url;
     }
-    
+
     /**
      * @param string $content
      * @param string $locale

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Api;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,7 +19,7 @@ class Response
      */
     public function addData($name, $data)
     {
-        if (!is_array($data)) {
+        if (!\is_array($data)) {
             $this->data[$name] = $data;
 
             return;
@@ -51,9 +53,9 @@ class Response
         return [
             $name => [
                 'href' => $href,
-                'rel'  => $rel,
-                'type' => $type
-            ]
+                'rel' => $rel,
+                'type' => $type,
+            ],
         ];
     }
 }

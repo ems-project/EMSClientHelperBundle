@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
 use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
@@ -35,7 +37,7 @@ class Router extends BaseRouter
 
     public function getRouteCollection(): RouteCollection
     {
-        if ($this->collection === null) {
+        if (null === $this->collection) {
             $this->buildRouteCollection();
         }
 
@@ -56,18 +58,18 @@ class Router extends BaseRouter
     private function addEnvRoutes(RouteCollection $collection): void
     {
         foreach ($this->routes as $name => $options) {
-            $route = new Route('ems_' . $name, $options);
+            $route = new Route('ems_'.$name, $options);
             $route->addToCollection($collection, $this->locales);
         }
     }
 
     private function addLanguageSelectionRoute(RouteCollection $collection): void
     {
-        if (isset($this->templates['language']) && count($this->locales) > 1) {
+        if (isset($this->templates['language']) && \count($this->locales) > 1) {
             $langSelectRoute = new Route('emsch_language_selection', [
                 'path' => '/language-selection',
                 'controller' => 'emsch.controller.language_select::view',
-                'defaults' => ['template' => $this->templates['language']]
+                'defaults' => ['template' => $this->templates['language']],
             ]);
             $langSelectRoute->addToCollection($collection);
         }
@@ -76,12 +78,12 @@ class Router extends BaseRouter
     private function addSearchResultRoute(RouteCollection $collection): void
     {
         if (isset($this->templates['search'])) {
-            @trigger_error('Deprecated search template use routing content type!', E_USER_DEPRECATED);
+            @\trigger_error('Deprecated search template use routing content type!', E_USER_DEPRECATED);
 
             $searchRoute = new Route('emsch_search', [
                 'path' => '/{_locale}/search',
                 'controller' => 'emsch.controller.search::results',
-                'defaults' => ['template' => $this->templates['search']]
+                'defaults' => ['template' => $this->templates['search']],
             ]);
             $searchRoute->addToCollection($collection);
         }
@@ -97,7 +99,7 @@ class Router extends BaseRouter
             $routes = $this->getRoutes($clientRequest);
 
             foreach ($routes as $route) {
-                /** @var $route Route */
+                /* @var $route Route */
                 $route->addToCollection($collection, $this->locales);
             }
         }
@@ -126,7 +128,7 @@ class Router extends BaseRouter
         $scroll = $clientRequest->scrollAll([
             'size' => 100,
             'type' => $type,
-            'sort' => ['order']
+            'sort' => ['order'],
         ], '5s');
 
         foreach ($scroll as $hit) {
@@ -134,15 +136,15 @@ class Router extends BaseRouter
             $name = $source['name'];
 
             try {
-                $options = json_decode($source['config'], true);
+                $options = \json_decode($source['config'], true);
 
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    throw new \InvalidArgumentException(sprintf('invalid json %s', $source['config']));
+                if (JSON_ERROR_NONE !== \json_last_error()) {
+                    throw new \InvalidArgumentException(\sprintf('invalid json %s', $source['config']));
                 }
 
                 $options['query'] = $source['query'] ?? null;
 
-                $staticTemplate = isset($source['template_static']) ? '@EMSCH/' . $source['template_static'] : null;
+                $staticTemplate = isset($source['template_static']) ? '@EMSCH/'.$source['template_static'] : null;
                 $options['template'] = $source['template_source'] ?? $staticTemplate;
                 $options['index_regex'] = $source['index_regex'] ?? null;
 

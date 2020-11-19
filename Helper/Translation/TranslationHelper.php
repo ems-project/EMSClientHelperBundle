@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Translation;
 
 use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
@@ -74,13 +76,13 @@ class TranslationHelper
         $scroll = $clientRequest->scrollAll([
             'size' => 100,
             'type' => $type,
-            'sort' => ['_doc']
+            'sort' => ['_doc'],
         ], '5s');
 
         foreach ($scroll as $hit) {
             foreach ($this->locales as $locale) {
-                if (isset($hit['_source']['label_' . $locale])) {
-                    $messages[$locale][$hit['_source']['key']] = $hit['_source']['label_' . $locale];
+                if (isset($hit['_source']['label_'.$locale])) {
+                    $messages[$locale][$hit['_source']['key']] = $hit['_source']['label_'.$locale];
                 }
             }
         }

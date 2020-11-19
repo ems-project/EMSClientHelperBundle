@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Api;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
@@ -30,13 +32,6 @@ class ApiService
     /** @var LoggerInterface */
     private $logger;
 
-    /**
-     * @param LoggerInterface $logger
-     * @param \Twig_Environment $twig
-     * @param UrlGeneratorInterface $urlGenerator
-     * @param iterable $clientRequests
-     * @param iterable $apiClients
-     */
     public function __construct(LoggerInterface $logger, \Twig_Environment $twig, UrlGeneratorInterface $urlGenerator, iterable $clientRequests = [], iterable $apiClients = [])
     {
         $this->logger = $logger;
@@ -50,20 +45,19 @@ class ApiService
     {
         $body = $request->request->all();
         $body = $this->treatFiles($body, $apiName, $request->files);
-        if ($validationTemplate !== null) {
+        if (null !== $validationTemplate) {
             return \json_decode($this->twig->render($validationTemplate, [
                 'document' => $body,
             ]), true);
         }
-        
+
         return $body;
     }
-    
+
     /**
-     *
-     * @param array<string,mixed> $body
-     * @param string $apiName
+     * @param array<string,mixed>                $body
      * @param FileBag<array>|array<string,mixed> $files
+     *
      * @return array<string,mixed>
      */
     private function treatFiles(array $body, string $apiName, $files): array
@@ -78,26 +72,25 @@ class ApiService
                         if (\is_array($file)) {
                             $body[$fieldKey][$pos] = $this->treatFiles($body[$fieldKey][$pos], $apiName, $collectionOfFields);
                         } else {
-                            if ($file !== null) {
+                            if (null !== $file) {
                                 $body[$fieldKey][$pos][$fileKey] = $this->createContentFileHashField($apiName, $file);
                             }
                         }
                     }
                 }
             } else {
-                if ($fileField !== null) {
+                if (null !== $fileField) {
                     $body[$fieldKey] = $this->createContentFileHashField($apiName, $fileField);
                 }
             }
         }
+
         return $body;
     }
-    
+
     /**
-     *
-     * @param string $apiName
-     * @param UploadedFile $file
      * @throws \Exception
+     *
      * @return array<string, mixed>
      */
     private function createContentFileHashField(string $apiName, UploadedFile $file): array
@@ -106,6 +99,7 @@ class ApiService
         if (!$response['uploaded'] || !isset($response[EmsFields::CONTENT_FILE_HASH_FIELD_])) {
             throw new \Exception('File hash not found or file not uploaded');
         }
+
         return [
             EmsFields::CONTENT_FILE_HASH_FIELD => $response[EmsFields::CONTENT_FILE_HASH_FIELD_],
             EmsFields::CONTENT_FILE_HASH_FIELD_ => $response[EmsFields::CONTENT_FILE_HASH_FIELD_],
@@ -118,9 +112,6 @@ class ApiService
         ];
     }
 
-    /**
-     * @param ClientRequest $clientRequest
-     */
     public function addClientRequest(ClientRequest $clientRequest)
     {
         $name = $clientRequest->getOption('[api][name]', false);
@@ -145,14 +136,14 @@ class ApiService
         foreach ($contentTypes as $contentType) {
             $url = $this->urlGenerator->generate('emsch_api_content_type', [
                 'apiName' => $apiName,
-                'contentType' => $contentType
+                'contentType' => $contentType,
             ]);
 
             $response->addData('content_types', [
                 'name' => $contentType,
                 '_links' => [
-                    Response::createLink('self', $url, $contentType)
-                ]
+                    Response::createLink('self', $url, $contentType),
+                ],
             ]);
         }
 
@@ -162,7 +153,6 @@ class ApiService
     /**
      * @param string $apiName
      * @param string $contentType
-     * @param array  $filter
      * @param string $size
      * @param string $scrollId
      *
@@ -179,18 +169,18 @@ class ApiService
 
         $hits = $results['hits'];
 
-        $response->addData('count', count($hits['hits']));
+        $response->addData('count', \count($hits['hits']));
         $response->addData('total', $hits['total']);
         $response->addData('scroll', $results['_scroll_id']);
 
         foreach ($hits['hits'] as $document) {
-            $url =  $this->urlGenerator->generate('emsch_api_document', [
+            $url = $this->urlGenerator->generate('emsch_api_document', [
                 'apiName' => $apiName,
                 'contentType' => $contentType,
                 'ouuid' => $document['_id'],
             ]);
 
-            $data = array_merge_recursive(['id' => $document['_id']], $document['_source']);
+            $data = \array_merge_recursive(['id' => $document['_id']], $document['_source']);
             $data['_links'] = [Response::createLink('self', $url, $contentType)];
 
             $response->addData('all', $data);
@@ -203,6 +193,7 @@ class ApiService
     {
         $apiClient = $this->getApiClient($apiName);
         $response = $apiClient->updateDocument($type, $ouuid, $body);
+
         return $this->finalizeResponse($apiClient, $response, $type, $ouuid);
     }
 
@@ -210,12 +201,13 @@ class ApiService
     {
         $apiClient = $this->getApiClient($apiName);
         $response = $apiClient->initNewDocument($type, $body, $ouuid);
+
         return $this->finalizeResponse($apiClient, $response, $type, $ouuid);
     }
 
     private function finalizeResponse(Client $apiClient, array $response, string $type, ?string $ouuid): string
     {
-        if (! $response['success']) {
+        if (!$response['success']) {
             foreach (ApiService::EMS_AJAX_MESSAGE_LEVELS as $level) {
                 if (isset($response[$level][0])) {
                     throw new \Exception($response[$level][0]);
@@ -227,7 +219,7 @@ class ApiService
         $revisionId = $response['revision_id'];
         $response = $apiClient->finalize($type, $revisionId);
 
-        if (! $response['success']) {
+        if (!$response['success']) {
             try {
                 $apiClient->discardDraft($type, $revisionId);
             } catch (\Exception $e) {
@@ -245,6 +237,7 @@ class ApiService
             }
             throw new \Exception('Finalize draft failed');
         }
+
         return $response['ouuid'];
     }
 
@@ -252,9 +245,9 @@ class ApiService
     {
         $response = $this->getApiClient($apiName)->postFile($file, $filename);
         //TODO: remove this hack once the ems back is returning the file hash as parameter
-        if (! isset($response[EmsFields::CONTENT_FILE_HASH_FIELD_]) && isset($response['url'])) {
+        if (!isset($response[EmsFields::CONTENT_FILE_HASH_FIELD_]) && isset($response['url'])) {
             $output_array = [];
-            preg_match('/\/data\/file\/view\/(?P<hash>.*)\?.*/', $response['url'], $output_array);
+            \preg_match('/\/data\/file\/view\/(?P<hash>.*)\?.*/', $response['url'], $output_array);
             if (isset($output_array['hash'])) {
                 $response[EmsFields::CONTENT_FILE_HASH_FIELD_] = $output_array['hash'];
             }
@@ -274,14 +267,14 @@ class ApiService
     {
         $urlParent = $this->urlGenerator->generate('emsch_api_content_type', [
             'apiName' => $apiName,
-            'contentType' => $contentType
+            'contentType' => $contentType,
         ]);
 
         $document = $this->getClientRequest($apiName)->get($contentType, $ouuid);
 
         $response = new Response();
         $response->addData('_links', [Response::createLink('all', $urlParent, $contentType)]);
-        $response->addData($contentType, array_merge_recursive(['id' => $document['_id']], $document['_source']));
+        $response->addData($contentType, \array_merge_recursive(['id' => $document['_id']], $document['_source']));
 
         return $response;
     }
