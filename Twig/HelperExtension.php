@@ -5,6 +5,7 @@ namespace EMS\ClientHelperBundle\Twig;
 use EMS\ClientHelperBundle\Helper\Asset\AssetHelperRuntime;
 use EMS\ClientHelperBundle\Helper\Asset\ProcessHelper;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestRuntime;
+use EMS\CommonBundle\Twig\AssetRuntime;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -34,7 +35,10 @@ class HelperExtension extends AbstractExtension
             new TwigFunction('emsch_search', [ClientRequestRuntime::class, 'search']),
             new TwigFunction('emsch_search_config', [ClientRequestRuntime::class, 'searchConfig']),
             new TwigFunction('emsch_assets', [AssetHelperRuntime::class, 'assets']),
-            new TwigFunction('emsch_unzip', [AssetHelperRuntime::class, 'unzip'])
+            new TwigFunction('emsch_unzip', [AssetRuntime::class, 'unzip'], [
+                'deprecated' => true,
+                'alternative' => 'ems_unzip'
+            ])
         ];
     }
 }

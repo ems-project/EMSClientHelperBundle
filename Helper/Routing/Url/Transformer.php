@@ -13,12 +13,12 @@ class Transformer
      * @var ClientRequest
      */
     private $clientRequest;
-    
+
     /**
      * @var Generator
      */
     private $generator;
-    
+
     /**
      * @var \Twig_Environment
      */
@@ -53,7 +53,7 @@ class Transformer
         $this->template = $template;
         $this->documents = [];
     }
-    
+
     /**
      * @return Generator
      */
@@ -109,7 +109,7 @@ class Transformer
             return $baseUrl . $route;
         }, $content);
     }
-    
+
     /**
      * @param EMSLink $emsLink
      * @param array   $document
@@ -155,7 +155,7 @@ class Transformer
 
         return null;
     }
-    
+
     /**
      * @param EMSLink $emsLink
      *
@@ -175,12 +175,12 @@ class Transformer
             [],
             ['*.content', '*.attachement', '*._attachement']
         );
-        
+
         if (!$document) {
             throw new \Exception('Document not found for : ' . $emsLink);
         }
         $this->documents[$emsLink->__toString()] = $document;
-        
+
         return $document;
     }
 }
