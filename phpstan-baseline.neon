@@ -51,6 +51,11 @@ parameters:
 			path: Command/HealthCheckCommand.php
 
 		-
+			message: "#^Call to an undefined method EMS\\\\CommonBundle\\\\Storage\\\\StorageManager\\:\\:getAdapters\\(\\)\\.$#"
+			count: 1
+			path: Command/HealthCheckCommand.php
+
+		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Controller\\\\ApiController\\:\\:handleFormPostRequest\\(\\) has no return typehint specified\\.$#"
 			count: 1
 			path: Controller/ApiController.php

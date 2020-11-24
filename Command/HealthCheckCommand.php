@@ -3,11 +3,11 @@
 namespace EMS\ClientHelperBundle\Command;
 
 use Elasticsearch\Client;
-use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Exception\ClusterHealthNotGreenException;
 use EMS\ClientHelperBundle\Exception\ClusterHealthRedException;
 use EMS\ClientHelperBundle\Exception\IndexNotFoundException;
 use EMS\ClientHelperBundle\Exception\NoClientsFoundException;
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\CommonBundle\Storage\StorageManager;
 use Symfony\Component\Console\Command\Command;
@@ -39,9 +39,8 @@ class HealthCheckCommand extends Command
     private $storageManager;
 
     /**
-     * @param EnvironmentHelper $environmentHelper
-     * @param iterable          $clients
-     * @param iterable          $clientRequests
+     * @param iterable $clients
+     * @param iterable $clientRequests
      */
     public function __construct(EnvironmentHelper $environmentHelper, iterable $clients = null, iterable $clientRequests = null, StorageManager $storageManager = null)
     {
@@ -78,8 +77,7 @@ class HealthCheckCommand extends Command
     }
 
     /**
-     * @param SymfonyStyle $io
-     * @param bool         $green
+     * @param bool $green
      *
      * @throws NoClientsFoundException
      * @throws ClusterHealthRedException
@@ -108,7 +106,6 @@ class HealthCheckCommand extends Command
     }
 
     /**
-     * @param SymfonyStyle $io
      * @throws IndexNotFoundException
      */
     private function checkIndexes(SymfonyStyle $io)
@@ -117,7 +114,7 @@ class HealthCheckCommand extends Command
 
         $prefixes = [];
         foreach ($this->clientRequests as $clientRequest) {
-            $prefixes = array_merge($prefixes, $clientRequest->getPrefixes());
+            $prefixes = \array_merge($prefixes, $clientRequest->getPrefixes());
         }
         $postfixes = [];
         foreach ($this->environmentHelper->getEnvironments() as $environment) {
@@ -126,15 +123,15 @@ class HealthCheckCommand extends Command
         $indexes = [];
         foreach ($prefixes as $preValue) {
             foreach ($postfixes as $postValue) {
-                $indexes[] = $preValue . $postValue;
+                $indexes[] = $preValue.$postValue;
             }
         }
 
-        $index = join(',', $indexes);
+        $index = \join(',', $indexes);
 
         foreach ($this->clients as $client) {
             if (!$client->indices()->exists(['index' => $index])) {
-                $io->error('Index ' . $index . ' not found');
+                $io->error('Index '.$index.' not found');
                 throw new IndexNotFoundException();
             }
         }
@@ -143,8 +140,7 @@ class HealthCheckCommand extends Command
     }
 
     /**
-     * @param SymfonyStyle $io
-     * @param bool         $skip
+     * @param bool $skip
      *
      * @return void
      */
@@ -154,18 +150,20 @@ class HealthCheckCommand extends Command
 
         if ($skip) {
             $io->note('Skipping Storage Health Check.');
+
             return;
         }
 
         if (null === $this->storageManager) {
             $io->warning('Skipping assets because health check has no access to a storageManager, enable storage ?');
+
             return;
         }
 
         $adapters = [];
 
         foreach ($this->storageManager->getAdapters() as $adapter) {
-            $adapters[] = get_class($adapter) . ' -> ' . ($adapter->health() ? 'green' : 'red');
+            $adapters[] = \get_class($adapter).' -> '.($adapter->health() ? 'green' : 'red');
         }
 
         $io->listing($adapters);

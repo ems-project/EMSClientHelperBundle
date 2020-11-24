@@ -60,12 +60,7 @@ class ClientRequest
     const OPTION_INDEX_PREFIX = 'index_prefix';
 
     /**
-     * @param Client            $client
-     * @param EnvironmentHelper $environmentHelper
-     * @param LoggerInterface   $logger
-     * @param AdapterInterface   $cache
-     * @param string            $name
-     * @param array             $options
+     * @param string $name
      */
     public function __construct(
         Client $client,
@@ -86,7 +81,6 @@ class ClientRequest
     }
 
     /**
-     * @param string $text
      * @param string $analyzer
      *
      * @return array
@@ -99,15 +93,14 @@ class ClientRequest
 
         $this->logger->debug('ClientRequest : analyze {text} with {analyzer}', ['text' => $text, 'analyzer' => $analyzer]);
         $out = [];
-        preg_match_all('/"(?:\\\\.|[^\\\\"])*"|\S+/', $text, $out);
+        \preg_match_all('/"(?:\\\\.|[^\\\\"])*"|\S+/', $text, $out);
         $words = $out[0];
-
 
         $params = [
             'index' => $this->getFirstIndex(),
             'body' => [
                 'analyzer' => $analyzer,
-            ]
+            ],
         ];
 
         $withoutStopWords = [];
@@ -118,6 +111,7 @@ class ClientRequest
                 $withoutStopWords[] = $word;
             }
         }
+
         return $withoutStopWords;
     }
 
@@ -136,8 +130,8 @@ class ClientRequest
         return $this->searchOne($type, [
             'query' => [
                 'term' => [
-                    '_id' => $id
-                ]
+                    '_id' => $id,
+                ],
             ],
         ]);
     }
@@ -148,9 +142,9 @@ class ClientRequest
         $out = [$emsKey];
         $item = $this->getByEmsKey($emsKey);
 
-        if (isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
+        if (isset($item['_source'][$childrenField]) && \is_array($item['_source'][$childrenField])) {
             foreach ($item['_source'][$childrenField] as $key) {
-                $out = array_merge($out, $this->getAllChildren($key, $childrenField));
+                $out = \array_merge($out, $this->getAllChildren($key, $childrenField));
             }
         }
 
@@ -159,7 +153,6 @@ class ClientRequest
 
     /**
      * @param string $emsLink
-     * @param array  $sourceFields
      *
      * @return array|bool
      */
@@ -171,8 +164,6 @@ class ClientRequest
     /**
      * @param string $type
      * @param string $ouuid
-     * @param array  $sourceFields
-     * @param array  $source_exclude
      *
      * @return array | false
      */
@@ -185,10 +176,10 @@ class ClientRequest
             'body' => [
                 'query' => [
                     'term' => [
-                        '_id' => $ouuid
-                    ]
-                ]
-            ]
+                        '_id' => $ouuid,
+                    ],
+                ],
+            ],
         ];
 
         if (!empty($sourceFields)) {
@@ -223,10 +214,10 @@ class ClientRequest
             'body' => [
                 'query' => [
                     'terms' => [
-                        '_id' => $ouuids
-                    ]
-                ]
-            ]
+                        '_id' => $ouuids,
+                    ],
+                ],
+            ],
         ]);
     }
 
@@ -237,9 +228,9 @@ class ClientRequest
     {
         $index = $this->getIndex();
         $info = $this->client->indices()->getMapping(['index' => $index]);
-        $mapping = array_shift($info);
+        $mapping = \array_shift($info);
 
-        return array_keys($mapping['mappings']);
+        return \array_keys($mapping['mappings']);
     }
 
     /**
@@ -256,13 +247,14 @@ class ClientRequest
         ]);
 
         $analyzer = 'standard';
-        while (is_array($info = array_shift($info))) {
+        while (\is_array($info = \array_shift($info))) {
             if (isset($info['analyzer'])) {
                 $analyzer = $info['analyzer'];
-            } else if (isset($info['mapping'])) {
+            } elseif (isset($info['mapping'])) {
                 $info = $info['mapping'];
             }
         }
+
         return $analyzer;
     }
 
@@ -277,11 +269,11 @@ class ClientRequest
 
         $out = new HierarchicalStructure($item['_type'], $item['_id'], $item['_source'], $activeChild);
 
-        if ($depth === null || $depth) {
-            if (isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
+        if (null === $depth || $depth) {
+            if (isset($item['_source'][$childrenField]) && \is_array($item['_source'][$childrenField])) {
                 foreach ($item['_source'][$childrenField] as $key) {
                     if ($key) {
-                        $child = $this->getHierarchy($key, $childrenField, ($depth === null ? null : $depth - 1), $sourceFields, $activeChild);
+                        $child = $this->getHierarchy($key, $childrenField, (null === $depth ? null : $depth - 1), $sourceFields, $activeChild);
                         if ($child) {
                             $out->addChild($child);
                         }
@@ -300,6 +292,7 @@ class ClientRequest
         foreach ($this->environmentHelper->getEnvironments() as $environment) {
             $environments[] = $environment->getIndex();
         }
+
         return $environments;
     }
 
@@ -317,21 +310,21 @@ class ClientRequest
                                         EmsFields::LOG_OPERATION_UPDATE,
                                         EmsFields::LOG_OPERATION_DELETE,
                                         EmsFields::LOG_OPERATION_CREATE,
-                                    ]
-                                ]
+                                    ],
+                                ],
                             ],
                             [
                                 'terms' => [
-                                    EmsFields::LOG_ENVIRONMENT_FIELD => $this->getEnvironments()
-                                ]
+                                    EmsFields::LOG_ENVIRONMENT_FIELD => $this->getEnvironments(),
+                                ],
                             ],
                             [
                                 'terms' => [
-                                    EmsFields::LOG_INSTANCE_ID_FIELD => $this->getPrefixes()
-                                ]
+                                    EmsFields::LOG_INSTANCE_ID_FIELD => $this->getPrefixes(),
+                                ],
                             ],
-                        ]
-                    ]
+                        ],
+                    ],
                 ],
                 'aggs' => [
                     'lastUpdate' => [
@@ -342,7 +335,7 @@ class ClientRequest
                         'aggs' => [
                             'maxUpdate' => [
                                 'max' => [
-                                    'field' => EmsFields::LOG_DATETIME_FIELD
+                                    'field' => EmsFields::LOG_DATETIME_FIELD,
                                 ],
                             ],
                         ],
@@ -350,7 +343,7 @@ class ClientRequest
                 ],
             ];
             try {
-                $result =  $this->client->search([
+                $result = $this->client->search([
                     'index' => EmsFields::LOG_ALIAS,
                     'type' => EmsFields::LOG_TYPE,
                     'body' => $body,
@@ -366,10 +359,9 @@ class ClientRequest
             }
         }
 
-
-        if (! empty($this->lastUpdateByType)) {
+        if (!empty($this->lastUpdateByType)) {
             $mostRecentUpdate = new \DateTime('2019-06-01T12:00:00Z');
-            $types = explode(',', $type);
+            $types = \explode(',', $type);
             foreach ($types as $currentType) {
                 if (isset($this->lastUpdateByType[$currentType]) && $mostRecentUpdate < $this->lastUpdateByType[$currentType]) {
                     $mostRecentUpdate = $this->lastUpdateByType[$currentType];
@@ -377,8 +369,9 @@ class ClientRequest
             }
             $this->logger->info('log.last_update_date', [
                 'contenttypes' => $type,
-                'lastupdate' => $mostRecentUpdate->format('c')
+                'lastupdate' => $mostRecentUpdate->format('c'),
             ]);
+
             return $mostRecentUpdate;
         }
 
@@ -392,7 +385,7 @@ class ClientRequest
 
         $result = $this->search($type, [
             'sort' => ['_published_datetime' => ['order' => 'desc', 'missing' => '_last']],
-            '_source' => '_published_datetime'
+            '_source' => '_published_datetime',
         ], 0, 1);
 
         if ($result['hits']['total'] > 0 && isset($result['hits']['hits']['0']['_source']['_published_datetime'])) {
@@ -417,20 +410,15 @@ class ClientRequest
      */
     public static function getOuuid($emsLink)
     {
-        if (!strpos($emsLink, ':')) {
+        if (!\strpos($emsLink, ':')) {
             return $emsLink;
         }
 
-        $split = preg_split('/:/', $emsLink);
+        $split = \preg_split('/:/', $emsLink);
 
-        return array_pop($split);
+        return \array_pop($split);
     }
 
-    /**
-     * @param string $option
-     *
-     * @return bool
-     */
     public function hasOption(string $option): bool
     {
         return isset($this->options[$option]) && null != $this->options[$option];
@@ -458,7 +446,7 @@ class ClientRequest
      */
     public function getPrefixes()
     {
-        return explode('|', $this->indexPrefix);
+        return \explode('|', $this->indexPrefix);
     }
 
     /**
@@ -468,11 +456,11 @@ class ClientRequest
      */
     public static function getType($emsLink)
     {
-        if (!strpos($emsLink, ':')) {
+        if (!\strpos($emsLink, ':')) {
             return $emsLink;
         }
 
-        $split = preg_split('/:/', $emsLink);
+        $split = \preg_split('/:/', $emsLink);
 
         return $split[0];
     }
@@ -486,12 +474,12 @@ class ClientRequest
      */
     public function search($type, array $body, $from = 0, $size = 10, array $sourceExclude = [], ?string $regex = null)
     {
-        if ($regex === null) {
+        if (null === $regex) {
             $index = $this->getIndex();
         } else {
             $index = [];
             foreach ($this->getIndex() as $alias) {
-                if (preg_match(sprintf('/%s/', $regex), $alias)) {
+                if (\preg_match(\sprintf('/%s/', $regex), $alias)) {
                     $index[] = $alias;
                 }
             }
@@ -504,15 +492,15 @@ class ClientRequest
                     'aggs' => [
                         'indexes' => [
                             'terms' => [
-                                'field' => '_index'
-                            ]
-                        ]
-                    ]
+                                'field' => '_index',
+                            ],
+                        ],
+                    ],
                 ],
             ]);
 
             foreach ($aggs['aggregations']['indexes']['buckets'] as $bucket) {
-                if (preg_match(sprintf('/%s/', $regex), $bucket['key'])) {
+                if (\preg_match(\sprintf('/%s/', $regex), $bucket['key'])) {
                     $index[] = $bucket['key'];
                 }
             }
@@ -531,12 +519,11 @@ class ClientRequest
         }
 
         $this->logger->debug('ClientRequest : search for {type}', $arguments);
+
         return $this->client->search($arguments);
     }
 
     /**
-     * @param array $arguments
-     *
      * @return array
      *
      * @throws EnvironmentNotFoundException
@@ -551,10 +538,9 @@ class ClientRequest
     }
 
     /**
-     * http://stackoverflow.com/questions/10836142/elasticsearch-duplicate-results-with-paging
+     * http://stackoverflow.com/questions/10836142/elasticsearch-duplicate-results-with-paging.
      *
      * @param string|array $type
-     * @param array        $body
      * @param int          $pageSize
      *
      * @return array
@@ -573,7 +559,7 @@ class ClientRequest
         ];
 
         $totalSearch = $this->client->search($arguments);
-        $total = $totalSearch["hits"]["total"];
+        $total = $totalSearch['hits']['total'];
 
         $results = [];
         $arguments['size'] = $pageSize;
@@ -581,7 +567,7 @@ class ClientRequest
         while ($arguments['from'] < $total) {
             $search = $this->client->search($arguments);
 
-            foreach ($search["hits"]["hits"] as $document) {
+            foreach ($search['hits']['hits'] as $document) {
                 $results[] = $document;
             }
 
@@ -615,8 +601,8 @@ class ClientRequest
                 'term' => [
                     $id => [
                         'value' => $value,
-                    ]
-                ]
+                    ],
+                ],
             ];
         }
 
@@ -644,7 +630,7 @@ class ClientRequest
         $hits = $search['hits'];
 
         if (1 !== \count($hits['hits'])) {
-            throw new SingleResultException(sprintf('expected 1 result, got %d', $hits['hits']));
+            throw new SingleResultException(\sprintf('expected 1 result, got %d', $hits['hits']));
         }
 
         return $hits['hits'][0];
@@ -659,7 +645,7 @@ class ClientRequest
 
         $result = $this->searchBy($type, $parameters, 0, 1);
 
-        if ($result['hits']['total'] == 1) {
+        if (1 == $result['hits']['total']) {
             return $result['hits']['hits'][0];
         }
 
@@ -686,18 +672,17 @@ class ClientRequest
         }
 
         $params = [
-            'index'  => $this->getIndex(),
-            'type'   => $type,
+            'index' => $this->getIndex(),
+            'type' => $type,
             '_source' => $filter,
-            'size'   => $size,
-            'scroll' => $scrollTimeout
+            'size' => $size,
+            'scroll' => $scrollTimeout,
         ];
 
         return $this->client->search($params);
     }
 
     /**
-     * @param array  $params
      * @param string $timeout
      *
      * @return \Generator
@@ -714,7 +699,7 @@ class ClientRequest
 
         $response = $this->client->search($params);
 
-        while (isset($response['hits']['hits']) && count($response['hits']['hits']) > 0) {
+        while (isset($response['hits']['hits']) && \count($response['hits']['hits']) > 0) {
             $scrollId = $response['_scroll_id'];
 
             foreach ($response['hits']['hits'] as $hit) {
@@ -723,7 +708,7 @@ class ClientRequest
 
             $response = $this->client->scroll([
                 'scroll_id' => $scrollId,
-                'scroll' => $timeout
+                'scroll' => $timeout,
             ]);
         }
     }
@@ -737,10 +722,6 @@ class ClientRequest
     }
 
     /**
-     * @param string $prefix
-     *
-     * @return string
-     *
      * @throws EnvironmentNotFoundException
      *
      * @todo rename to getEnvironmentAlias?
@@ -749,7 +730,7 @@ class ClientRequest
     {
         $index = $this->getIndex();
 
-        return $prefix . (is_array($index) ? implode('_', $index) : $index);
+        return $prefix.(\is_array($index) ? \implode('_', $index) : $index);
     }
 
     /**
@@ -761,19 +742,20 @@ class ClientRequest
     {
         $environment = $this->environmentHelper->getEnvironment();
 
-        if ($environment === null) {
+        if (null === $environment) {
             throw new EnvironmentNotFoundException();
         }
 
-        $prefixes = explode('|', $this->indexPrefix);
+        $prefixes = \explode('|', $this->indexPrefix);
         $out = [];
         foreach ($prefixes as $prefix) {
-            $out[] = $prefix . $environment;
+            $out[] = $prefix.$environment;
         }
         if (!empty($out)) {
             return $out;
         }
-        return $this->indexPrefix . $environment;
+
+        return $this->indexPrefix.$environment;
     }
 
     /**
@@ -782,18 +764,18 @@ class ClientRequest
     private function getFirstIndex()
     {
         $aliases = $this->getIndex();
-        if (is_array($aliases) && count($aliases) > 0) {
+        if (\is_array($aliases) && \count($aliases) > 0) {
             $aliases = $aliases[0];
         }
 
-        return array_keys($this->client->indices()->getAlias([
+        return \array_keys($this->client->indices()->getAlias([
             'index' => $aliases,
         ]))[0];
     }
 
     public function getCacheResponse(array $cacheKey, ?string $type, callable $function)
     {
-        if ($type === null) {
+        if (null === $type) {
             return $function();
         }
         $cacheHash = \sha1(\json_encode($cacheKey));
@@ -818,6 +800,7 @@ class ClientRequest
             ]);
             $response = $cachedHierarchy->get();
         }
+
         return $response;
     }
 }

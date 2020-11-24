@@ -25,9 +25,7 @@ class RedirectHelper
     private $redirectType;
 
     /**
-     * @param ClientRequest $clientRequest
-     * @param Transformer   $transformer
-     * @param string        $redirectType
+     * @param string $redirectType
      */
     public function __construct(ClientRequest $clientRequest, Transformer $transformer, $redirectType)
     {
@@ -37,9 +35,7 @@ class RedirectHelper
     }
 
     /**
-     * @param Request $request
-     *
-     * @return bool|null|string|string[]
+     * @return bool|string|string[]|null
      */
     public function getForwardUri(Request $request)
     {
@@ -51,7 +47,7 @@ class RedirectHelper
             );
             $linkTo = $document['_source']['link_to'];
 
-            return $this->transformer->transform('ems://object:' . $linkTo, $locale);
+            return $this->transformer->transform('ems://object:'.$linkTo, $locale);
         } catch (TwigException $ex) {
             throw $ex;
         } catch (\Exception $ex) {
@@ -72,11 +68,11 @@ class RedirectHelper
                 'bool' => [
                     'must' => [
                         'term' => [
-                            'url_' . $locale => urldecode($uri)
-                        ]
-                    ]
-                ]
-            ]
+                            'url_'.$locale => \urldecode($uri),
+                        ],
+                    ],
+                ],
+            ],
         ]);
     }
 }

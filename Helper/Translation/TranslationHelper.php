@@ -74,13 +74,13 @@ class TranslationHelper
         $scroll = $clientRequest->scrollAll([
             'size' => 100,
             'type' => $type,
-            'sort' => ['_doc']
+            'sort' => ['_doc'],
         ], '5s');
 
         foreach ($scroll as $hit) {
             foreach ($this->locales as $locale) {
-                if (isset($hit['_source']['label_' . $locale])) {
-                    $messages[$locale][$hit['_source']['key']] = $hit['_source']['label_' . $locale];
+                if (isset($hit['_source']['label_'.$locale])) {
+                    $messages[$locale][$hit['_source']['key']] = $hit['_source']['label_'.$locale];
                 }
             }
         }

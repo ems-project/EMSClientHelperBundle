@@ -24,12 +24,12 @@ class Route
     {
         $path = $this->options['path'];
 
-        if (is_array($path)) {
+        if (\is_array($path)) {
             foreach ($path as $key => $p) {
                 $locale = \in_array($key, $locales) ? $key : null;
                 $route = $this->createRoute($p, $locale);
 
-                $collection->add(sprintf('%s.%s', $this->name, $key), $route);
+                $collection->add(\sprintf('%s.%s', $this->name, $key), $route);
             }
         } else {
             $collection->add($this->name, $this->createRoute($path));
@@ -84,13 +84,13 @@ class Route
             })
             ->setNormalizer('options', function (Options $options, $value) {
                 if (null !== $options['query']) {
-                    $query = json_decode($options['query']);
+                    $query = \json_decode($options['query']);
 
-                    if (json_last_error() !== JSON_ERROR_NONE) {
+                    if (JSON_ERROR_NONE !== \json_last_error()) {
                         throw new \LogicException('invalid json for query!');
                     }
 
-                    $value['query'] = json_encode($query);
+                    $value['query'] = \json_encode($query);
                 }
 
                 $value['type'] = $options['type'];

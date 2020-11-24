@@ -15,10 +15,10 @@ final class UserApiResponseException extends \Exception
 
     public static function forFileUpload(ResponseInterface $response, \SplFileInfo $file): UserApiResponseException
     {
-        return new self(vsprintf('Upload file %s failed [%d]: %s', [
+        return new self(\vsprintf('Upload file %s failed [%d]: %s', [
             $file->getFilename(),
             $response->getStatusCode(),
-            $response->getBody()->getContents()
+            $response->getBody()->getContents(),
         ]));
     }
 }

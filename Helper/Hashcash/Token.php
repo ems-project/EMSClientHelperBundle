@@ -17,12 +17,12 @@ class Token
 
     public function __construct(string $hashcash)
     {
-        list($this->level, $this->csrf, $this->random) = explode(Token::DELIMITER, $hashcash);
+        list($this->level, $this->csrf, $this->random) = \explode(Token::DELIMITER, $hashcash);
     }
 
     public function getLevel(): int
     {
-        return intval($this->level);
+        return \intval($this->level);
     }
 
     public function getCsrf(): string

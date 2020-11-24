@@ -20,15 +20,15 @@ class QueryBuilder
     public function buildBody(): array
     {
         $postFilter = $this->getPostFilters();
-        $hasPostFilter = $postFilter != null;
+        $hasPostFilter = null != $postFilter;
 
-        return array_filter([
+        return \array_filter([
             'query' => $this->getQuery(),
             'post_filter' => $postFilter,
             'aggs' => $this->getAggs($hasPostFilter),
             'suggest' => $this->getSuggest(),
             'sort' => $this->getSort(),
-            'highlight' => $this->search->getHighlight()
+            'highlight' => $this->search->getHighlight(),
         ]);
     }
 
@@ -92,7 +92,7 @@ class QueryBuilder
             $query['bool']['must'][] = ['nested' => [
                 'path' => $path,
                 'ignore_unmapped' => true,
-                'query' => $queries
+                'query' => $queries,
             ]];
         }
 
@@ -120,7 +120,7 @@ class QueryBuilder
             $postFilters[] = ['nested' => [
                 'path' => $path,
                 'ignore_unmapped' => true,
-                'query' => $queries
+                'query' => $queries,
             ]];
         }
 
@@ -140,19 +140,19 @@ class QueryBuilder
                 continue;
             }
 
-            $aggregation =  $hasPostFilter ? $this->getAggPostFilter($filter) : $this->getAgg($filter);
+            $aggregation = $hasPostFilter ? $this->getAggPostFilter($filter) : $this->getAgg($filter);
 
             if ($filter->isNested()) {
                 $aggregation = [
                     'nested' => ['path' => $filter->getNestedPath()],
-                    'aggs' => ['nested' => $aggregation]
+                    'aggs' => ['nested' => $aggregation],
                 ];
             }
 
             $aggs[$filter->getName()] = $aggregation;
         }
 
-        return array_filter($aggs);
+        return \array_filter($aggs);
     }
 
     private function getAgg(Filter $filter): ?array
@@ -160,18 +160,18 @@ class QueryBuilder
         $agg = ['terms' => ['field' => $filter->getField(), 'size' => $filter->getAggSize()]];
 
         if ($filter->isReversedNested()) {
-            $agg = array_merge($agg, ['aggs' => [ 'reversed_nested' => [ 'reverse_nested' => new \stdClass() ]]]);
+            $agg = \array_merge($agg, ['aggs' => ['reversed_nested' => ['reverse_nested' => new \stdClass()]]]);
         }
 
-        if ($filter->getSortField() !== null) {
-            $agg['terms']['order'] = [$filter->getSortField() => $filter->getSortOrder(),];
+        if (null !== $filter->getSortField()) {
+            $agg['terms']['order'] = [$filter->getSortField() => $filter->getSortOrder()];
         }
 
         return $agg;
     }
 
     /**
-     * If the search uses post filtering, we need to filter other post filter aggregation
+     * If the search uses post filtering, we need to filter other post filter aggregation.
      */
     private function getAggPostFilter(Filter $filter)
     {
@@ -184,7 +184,7 @@ class QueryBuilder
 
         return [
             'filter' => $aggFilter,
-            'aggs' => ['filtered_' . $filter->getName() => $agg]
+            'aggs' => ['filtered_'.$filter->getName() => $agg],
         ];
     }
 
@@ -197,7 +197,7 @@ class QueryBuilder
         $suggest = ['text' => $this->search->getQueryString()];
 
         foreach ($this->search->getSuggestFields() as $field) {
-            $suggest['suggest-' . $field] = ['term' => ['field' => $field]];
+            $suggest['suggest-'.$field] = ['term' => ['field' => $field]];
         }
 
         return $suggest;
