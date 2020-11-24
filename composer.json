@@ -22,6 +22,7 @@
 	],
 	"require" : {
 		"php": "^7.2",
+		"ext-json": "*",
 		"composer/ca-bundle": "^1.1",
 		"elasticms/common-bundle": "~1.8.0",
 		"symfony/config": "^4.4",

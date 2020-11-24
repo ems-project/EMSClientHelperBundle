@@ -31,7 +31,7 @@ class Handler
         $route = $this->getRoute($request);
         $context = ['trans_default_domain' => $this->clientRequest->getCacheKey()];
 
-        if ($document = $this->getDocument($request, $route)) {
+        if (null !== $document = $this->getDocument($request, $route)) {
             $context['document'] = $document;
             $context['source'] = $document['_source'];
             $context['emsLink'] = EMSLink::fromDocument($document);
@@ -55,6 +55,9 @@ class Handler
         return $route;
     }
 
+    /**
+     * @return array{_id:string,_type:string,_source:array<mixed>}|null
+     */
     public function getDocument(Request $request, SymfonyRoute $route): ?array
     {
         $query = $route->getOption('query');

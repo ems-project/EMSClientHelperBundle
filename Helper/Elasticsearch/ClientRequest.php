@@ -174,7 +174,7 @@ class ClientRequest
      * @param array  $sourceFields
      * @param array  $source_exclude
      *
-     * @return array | boolean
+     * @return array | false
      */
     public function getByOuuid($type, $ouuid, array $sourceFields = [], array $source_exclude = [])
     {
@@ -632,24 +632,27 @@ class ClientRequest
     /**
      * @param string|array $type
      *
-     * @return array
+     * @return array{_id:string,_type:string,_source:array<mixed>}
      *
      * @throws SingleResultException
      */
-    public function searchOne($type, array $body, ?string $indexRegex = null)
+    public function searchOne($type, array $body, ?string $indexRegex = null): array
     {
         $this->logger->debug('ClientRequest : searchOne for {type}', ['type' => $type, 'body' => $body, 'indexRegex' => $indexRegex]);
-        $search = $this->search($type, $body, 0, 1, [], $indexRegex);
+        $search = $this->search($type, $body, 0, 2, [], $indexRegex);
 
         $hits = $search['hits'];
 
-        if (1 != $hits['total']) {
-            throw new SingleResultException(sprintf('expected 1 result, got %d', $hits['total']));
+        if (1 !== \count($hits['hits'])) {
+            throw new SingleResultException(sprintf('expected 1 result, got %d', $hits['hits']));
         }
 
         return $hits['hits'][0];
     }
 
+    /**
+     * @return array{_id:string,_type:string,_source:array<mixed>}|null
+     */
     public function searchOneBy(string $type, array $parameters): ?array
     {
         $this->logger->debug('ClientRequest : searchOneBy for type {type}', ['type' => $type]);
@@ -689,10 +692,6 @@ class ClientRequest
             'size'   => $size,
             'scroll' => $scrollTimeout
         ];
-
-        if ($scrollId) {
-            $params['scroll_id'] = $scrollId;
-        }
 
         return $this->client->search($params);
     }

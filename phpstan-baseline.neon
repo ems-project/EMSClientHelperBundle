@@ -31,11 +31,6 @@ parameters:
 			path: Command/HealthCheckCommand.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Command\\\\HealthCheckCommand\\:\\:execute\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: Command/HealthCheckCommand.php
-
-		-
 			message: "#^Parameter \\#2 \\$green of method EMS\\\\ClientHelperBundle\\\\Command\\\\HealthCheckCommand\\:\\:checkElasticSearch\\(\\) expects bool, array\\<string\\>\\|bool\\|string\\|null given\\.$#"
 			count: 1
 			path: Command/HealthCheckCommand.php
@@ -221,42 +216,7 @@ parameters:
 			path: EMSClientHelperBundle.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\EventListener\\\\KernelListener\\:\\:getSubscribedEvents\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: EventListener/KernelListener.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\EventListener\\\\KernelListener\\:\\:bindEnvironment\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: EventListener/KernelListener.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\EventListener\\\\KernelListener\\:\\:loadTranslations\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: EventListener/KernelListener.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\EventListener\\\\KernelListener\\:\\:bindLocale\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: EventListener/KernelListener.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\EventListener\\\\KernelListener\\:\\:redirectMissingLocale\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: EventListener/KernelListener.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\EventListener\\\\KernelListener\\:\\:customErrorTemplate\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: EventListener/KernelListener.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\EventListener\\\\RedirectListener\\:\\:getSubscribedEvents\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: EventListener/RedirectListener.php
-
-		-
-			message: "#^Parameter \\#2 \\$uri of method EMS\\\\ClientHelperBundle\\\\EventListener\\\\RedirectListener\\:\\:forwardNotFound\\(\\) expects string, \\(array\\<string\\>\\)\\|string\\|true given\\.$#"
 			count: 1
 			path: EventListener/RedirectListener.php
 
@@ -449,21 +409,6 @@ parameters:
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Api\\\\Response\\:\\:createLink\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Api/Response.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Asset\\\\AssetHelperRuntime\\:\\:unzip\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Asset/AssetHelperRuntime.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Asset\\\\ProcessHelper\\:\\:generate\\(\\) has parameter \\$options with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Asset/ProcessHelper.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Asset\\\\ProcessHelper\\:\\:getOptions\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Asset/ProcessHelper.php
 
 		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:getData\\(\\) return type has no value type specified in iterable type array\\.$#"
@@ -671,17 +616,7 @@ parameters:
 			path: Helper/Elasticsearch/ClientRequest.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:searchOne\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:searchOneBy\\(\\) has parameter \\$parameters with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:searchOneBy\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Elasticsearch/ClientRequest.php
 
@@ -821,11 +756,6 @@ parameters:
 			path: Helper/Environment/Environment.php
 
 		-
-			message: "#^Parameter \\#1 \\$key of method Symfony\\\\Component\\\\HttpFoundation\\\\ParameterBag\\:\\:set\\(\\) expects string, int\\|string given\\.$#"
-			count: 1
-			path: Helper/Environment/Environment.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Environment\\\\EnvironmentHelper\\:\\:__construct\\(\\) has parameter \\$environments with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Environment/EnvironmentHelper.php
@@ -852,11 +782,6 @@ parameters:
 
 		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Request\\\\Handler\\:\\:handle\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Request/Handler.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Request\\\\Handler\\:\\:getDocument\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Request/Handler.php
 
@@ -1012,11 +937,6 @@ parameters:
 
 		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Routing\\\\Url\\\\Transformer\\:\\:getDocument\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Routing/Url/Transformer.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Routing\\\\Url\\\\Transformer\\:\\:getDocument\\(\\) should return array\\|false but returns \\(array\\)\\|true\\.$#"
 			count: 1
 			path: Helper/Routing/Url/Transformer.php
 
@@ -1211,6 +1131,16 @@ parameters:
 			path: Helper/Search/QueryBuilder.php
 
 		-
+			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\QueryBuilder\\:\\:buildSort\\(\\) has parameter \\$searchSorts with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Helper/Search/QueryBuilder.php
+
+		-
+			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\QueryBuilder\\:\\:buildSort\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Helper/Search/QueryBuilder.php
+
+		-
 			message: "#^Property EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:\\$types type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Search/Search.php
@@ -1232,6 +1162,11 @@ parameters:
 
 		-
 			message: "#^Property EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:\\$sizes type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Helper/Search/Search.php
+
+		-
+			message: "#^Property EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:\\$defaultSorts type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Search/Search.php
 
@@ -1286,6 +1221,11 @@ parameters:
 			path: Helper/Search/Search.php
 
 		-
+			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:getDefaultSorts\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Helper/Search/Search.php
+
+		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:getSort\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Search/Search.php
@@ -1306,6 +1246,16 @@ parameters:
 			path: Helper/Search/Search.php
 
 		-
+			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:parseSorts\\(\\) has parameter \\$sorts with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Helper/Search/Search.php
+
+		-
+			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:parseSorts\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: Helper/Search/Search.php
+
+		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:setAnalyzer\\(\\) has parameter \\$analyzers with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Search/Search.php
@@ -1317,11 +1267,6 @@ parameters:
 
 		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:setSuggestFields\\(\\) has parameter \\$suggestFields with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Search/Search.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Search\\:\\:setSorts\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Search/Search.php
 
