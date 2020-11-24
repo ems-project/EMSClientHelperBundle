@@ -127,7 +127,7 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
         if (1 !== $result['hits']['total']) {
             $this->logger->error(sprintf('emsch_get filter found %d results for the ems key %s', $result['hits']['total'], $input));
         }
-        
+
         $document = new Document($emsLink->getContentType(), $emsLink->getOuuid(), $result['hits']['hits'][0]['_source']);
         $this->documents[$emsLink->__toString()] = $document;
         return $document;

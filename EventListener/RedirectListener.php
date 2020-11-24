@@ -18,12 +18,12 @@ class RedirectListener implements EventSubscriberInterface
      * @var RedirectHelper
      */
     private $redirectHelper;
-    
+
     /**
      * @var HttpKernelInterface
      */
     private $kernel;
-    
+
     /**
      * @var RouterInterface
      */
@@ -43,7 +43,7 @@ class RedirectListener implements EventSubscriberInterface
         $this->kernel = $kernel;
         $this->router = $router;
     }
-    
+
     /**
      * @param GetResponseForExceptionEvent $event
      *
@@ -55,15 +55,15 @@ class RedirectListener implements EventSubscriberInterface
             // don't do anything if it's not the master request
             return;
         }
-        
+
         $exception = $event->getException();
-        
+
         if ($exception instanceof NotFoundHttpException) {
             $this->handleNotFoundException($event);
             return;
         }
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -73,7 +73,7 @@ class RedirectListener implements EventSubscriberInterface
             KernelEvents::EXCEPTION => [['onKernelException', 15]],
         ];
     }
-    
+
     /**
      * @param GetResponseForExceptionEvent $event
      *
@@ -82,7 +82,7 @@ class RedirectListener implements EventSubscriberInterface
     private function handleNotFoundException(GetResponseForExceptionEvent $event)
     {
         $request = $event->getRequest();
-        
+
         $forwardUri = $this->redirectHelper->getForwardUri($request);
 
         if ($forwardUri && is_string($forwardUri)) {
@@ -96,30 +96,30 @@ class RedirectListener implements EventSubscriberInterface
      */
     public function forwardNotFound(GetResponseForExceptionEvent $event, string $uri)
     {
-        
+
         try {
             $this->router->match($uri);
-            
+
             $request = $event->getRequest();
-         
+
             $attributes = [];
 
             $server = array_merge($request->server->all(), ['REQUEST_URI' => $uri]);
             $subRequest = $request->duplicate(null, null, $attributes, null, null, $server);
-            
+
             $subResponse = $this->kernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
-            
+
             $canonical = $this->getHeaderLink($request, $uri);
-            
+
             $subResponse->headers->set('Link', $canonical);
-    
+
             $event->setResponse($subResponse);
         } catch (\Exception $e) {
             $event->setResponse(new RedirectResponse($uri));
         }
         $event->allowCustomResponseCode();
     }
-    
+
     /**
      * @param Request $request
      * @param string  $uri
@@ -133,7 +133,7 @@ class RedirectListener implements EventSubscriberInterface
             $request->getHttpHost(),
             $uri,
         ]);
-        
+
         return sprintf('<%s>; rel="canonical"', $url);
     }
 }
