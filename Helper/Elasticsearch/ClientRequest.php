@@ -632,7 +632,7 @@ class ClientRequest
     /**
      * @param string|array $type
      *
-     * @return array
+     * @return array{_id: string, _type?: string, _source: array}
      *
      * @throws SingleResultException
      */

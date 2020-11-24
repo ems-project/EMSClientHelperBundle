@@ -55,6 +55,11 @@ class Handler
         return $route;
     }
 
+    /**
+     * @param Request $request
+     * @param SymfonyRoute $route
+     * @return array{_id: string, _type?: string, _source: array}|null
+     */
     public function getDocument(Request $request, SymfonyRoute $route): ?array
     {
         $query = $route->getOption('query');
