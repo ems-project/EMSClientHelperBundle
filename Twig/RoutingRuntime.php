@@ -12,9 +12,6 @@ class RoutingRuntime implements RuntimeExtensionInterface
      */
     private $transformer;
 
-    /**
-     * @param Transformer $transformer
-     */
     public function __construct(Transformer $transformer)
     {
         $this->transformer = $transformer;
@@ -23,7 +20,6 @@ class RoutingRuntime implements RuntimeExtensionInterface
     /**
      * @param string $relativePath
      * @param string $path
-     * @param array  $parameters
      *
      * @return string
      */
@@ -32,7 +28,7 @@ class RoutingRuntime implements RuntimeExtensionInterface
         $url = $this->transformer->getGenerator()->createUrl($relativePath, $path);
 
         if ($parameters) {
-            $url .= '?' . http_build_query($parameters);
+            $url .= '?'.http_build_query($parameters);
         }
 
         return $url;

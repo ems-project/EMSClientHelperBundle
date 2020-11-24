@@ -6,9 +6,9 @@ class Synonym
 {
     /** @var array */
     private $types;
-    /** @var null|string */
+    /** @var string|null */
     private $field;
-    /** @var null|string */
+    /** @var string|null */
     private $searchField;
     /** @var array */
     private $filter;
@@ -42,15 +42,14 @@ class Synonym
         $query = [
             'bool' => [
                 'must' => [
-                    $queryTextValue
-                ]
-            ]
+                    $queryTextValue,
+                ],
+            ],
         ];
 
         if ($this->types) {
             $query['bool']['must'][] = ['terms' => ['_contenttype' => $this->types]];
         }
-
 
         if ($this->filter) {
             $query['bool']['must'][] = $this->filter;

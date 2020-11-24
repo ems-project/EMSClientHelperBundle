@@ -10,8 +10,8 @@ use EMS\CommonBundle\Common\EMSLink;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Routing\Route as SymfonyRoute;
+use Symfony\Component\Routing\RouterInterface;
 
 class Handler
 {
@@ -72,13 +72,12 @@ class Handler
         }, $query);
 
         $indexRegex = $route->getOption('index_regex');
-        if ($indexRegex !== null) {
+        if (null !== $indexRegex) {
             $pattern = '/%(?<parameter>(_|)[[:alnum:]]*)%/m';
             $indexRegex = preg_replace_callback($pattern, function ($match) use ($request) {
                 return $request->get($match['parameter'], $match[0]);
             }, $indexRegex);
         }
-
 
         try {
             return $this->clientRequest->searchOne($route->getOption('type'), json_decode($json, true), $indexRegex);
@@ -96,12 +95,12 @@ class Handler
             return $request->get($match['parameter'], $match[0]);
         }, $template);
 
-        if (null === $document || substr($template, 0, 6) === TwigLoader::PREFIX) {
+        if (null === $document || TwigLoader::PREFIX === substr($template, 0, 6)) {
             return $template;
         }
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
 
-        return TwigLoader::PREFIX . '/' . $propertyAccessor->getValue($document, '[_source]' . $template);
+        return TwigLoader::PREFIX.'/'.$propertyAccessor->getValue($document, '[_source]'.$template);
     }
 }

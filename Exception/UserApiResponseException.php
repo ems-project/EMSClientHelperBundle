@@ -18,7 +18,7 @@ final class UserApiResponseException extends \Exception
         return new self(vsprintf('Upload file %s failed [%d]: %s', [
             $file->getFilename(),
             $response->getStatusCode(),
-            $response->getBody()->getContents()
+            $response->getBody()->getContents(),
         ]));
     }
 }

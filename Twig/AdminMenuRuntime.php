@@ -13,9 +13,6 @@ class AdminMenuRuntime implements RuntimeExtensionInterface
      */
     private $environmentHelper;
 
-    /**
-     * @param EnvironmentHelper $environmentHelper
-     */
     public function __construct(EnvironmentHelper $environmentHelper)
     {
         $this->environmentHelper = $environmentHelper;
@@ -23,8 +20,6 @@ class AdminMenuRuntime implements RuntimeExtensionInterface
 
     /**
      * @param EMSLink|string $emsLink
-     *
-     * @return string
      */
     public function showAdminMenu($emsLink): string
     {
@@ -41,7 +36,7 @@ class AdminMenuRuntime implements RuntimeExtensionInterface
         return vsprintf('data-ems-type="%s" data-ems-key="%s" data-ems-url="%s"', [
             $emsLink->getContentType(),
             $emsLink->getOuuid(),
-            $backend
+            $backend,
         ]);
     }
 }

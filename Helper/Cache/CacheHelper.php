@@ -51,7 +51,7 @@ class CacheHelper
 
         $item->set([
             self::DATE_KEY => $now->format(DATE_ATOM),
-            'data' => $data
+            'data' => $data,
         ]);
 
         $this->cache->save($item);

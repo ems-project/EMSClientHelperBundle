@@ -30,10 +30,7 @@ class ExceptionHelper
     private $debug;
 
     /**
-     * @param \Twig\Environment    $twig
-     * @param ClientRequestManager $manager
-     * @param bool                 $debug
-     * @param string               $template
+     * @param string $template
      */
     public function __construct(\Twig\Environment $twig, ClientRequestManager $manager, bool $debug, string $template = null)
     {
@@ -44,8 +41,6 @@ class ExceptionHelper
     }
 
     /**
-     * @param FlattenException $exception
-     *
      * @return Response|false
      */
     public function renderError(FlattenException $exception)
@@ -66,8 +61,6 @@ class ExceptionHelper
     }
 
     /**
-     * @param string $code
-     *
      * @return string
      */
     private function getTemplate(string $code)
@@ -88,8 +81,6 @@ class ExceptionHelper
     }
 
     /**
-     * @param string $template
-     *
      * @return bool
      */
     protected function templateExists(string $template)

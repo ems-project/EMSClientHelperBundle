@@ -4,7 +4,7 @@ namespace EMS\ClientHelperBundle\Helper\Search;
 
 /**
  * If we search for 'foo bar'
- * the SearchManager will create two SearchValue instances
+ * the SearchManager will create two SearchValue instances.
  */
 class TextValue
 {
@@ -38,8 +38,8 @@ class TextValue
                 $synonymField => [
                     'query' => sprintf('%s:%s', $doc['_source']['_contenttype'], $doc['_id']),
                     'operator' => 'AND',
-                ]
-            ]
+                ],
+            ],
         ];
     }
 
@@ -55,7 +55,7 @@ class TextValue
         return [
             'bool' => [
                 'should' => $should,
-            ]
+            ],
         ];
     }
 
@@ -70,25 +70,23 @@ class TextValue
                     ($field ? $field : '_all') => [
                         'analyzer' => $analyzer,
                         'query' => $matches[1][0],
-                        'boost' => $boost
-                    ]
-
-                ]
+                        'boost' => $boost,
+                    ],
+                ],
             ];
         }
 
-        if (strpos($this->text, '*') !== false) {
+        if (false !== strpos($this->text, '*')) {
             return [
                 'query_string' => [
                     'default_field' => $field ?: '_all',
                     'query' => $this->text,
                     'analyzer' => $analyzer,
                     'analyze_wildcard' => true,
-                    'boost' => $boost
-                ]
+                    'boost' => $boost,
+                ],
             ];
         }
-
 
         return [
             'match' => [
@@ -96,7 +94,7 @@ class TextValue
                     'query' => $this->text,
                     'boost' => $boost,
                 ],
-            ]
+            ],
         ];
     }
 }

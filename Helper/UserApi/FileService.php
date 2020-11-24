@@ -50,7 +50,7 @@ final class FileService
                         'contents' => \fopen($file->getPathname(), 'r'),
                         'filename' => $file->getClientOriginalName(),
                     ],
-                ]
+                ],
             ]);
 
             $json = \json_decode($response->getBody()->getContents(), true);
@@ -68,6 +68,7 @@ final class FileService
 
     /**
      * @param array<string> $response
+     *
      * @return array<string>
      */
     private function parseEmsResponse(array $response): array

@@ -16,7 +16,7 @@ class HierarchicalStructure
     private $source;
     /** @var mixed */
     private $data;
-    /** @var bool*/
+    /** @var bool */
     private $active = false;
 
     public function __construct(string $type, string $id, array $source, EMSLink $activeChild = null)
@@ -81,7 +81,7 @@ class HierarchicalStructure
 
     public function getKey(): string
     {
-        return $this->type . ":" . $this->id;
+        return $this->type.':'.$this->id;
     }
 
     public function addChild(HierarchicalStructure $child)

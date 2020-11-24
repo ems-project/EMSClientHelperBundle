@@ -21,7 +21,6 @@ class ClientRequestManager
 
     /**
      * @param iterable|ClientRequest[] $clientRequests
-     * @param LoggerInterface          $logger
      */
     public function __construct(iterable $clientRequests, LoggerInterface $logger)
     {
@@ -36,17 +35,11 @@ class ClientRequestManager
         }
     }
 
-    /**
-     * @return LoggerInterface
-     */
     public function getLogger(): LoggerInterface
     {
         return $this->logger;
     }
 
-    /**
-     * @return ClientRequest
-     */
     public function getDefault(): ClientRequest
     {
         return $this->default;
@@ -61,10 +54,6 @@ class ClientRequestManager
     }
 
     /**
-     * @param string $name
-     *
-     * @return ClientRequest
-     *
      * @throws \InvalidArgumentException
      */
     public function get(string $name): ClientRequest

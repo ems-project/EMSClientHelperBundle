@@ -40,6 +40,7 @@ class SearchController extends AbstractController
 
         $response = new Response($this->templating->render($result['template'], $context), 200);
         $this->cacheHelper->makeResponseCacheable($request, $response);
+
         return $response;
     }
 

@@ -65,7 +65,7 @@ class Search
             'fr' => 'french',
             'nl' => 'dutch',
             'en' => 'english',
-            'de' => 'german'
+            'de' => 'german',
         ]), $clientRequest->getLocale());
         $this->setSynonyms(($options['synonyms'] ?? []), $clientRequest->getLocale());
 
@@ -125,7 +125,6 @@ class Search
 
     public function getSuggestFields(): array
     {
-
         return $this->suggestFields;
     }
 
@@ -256,7 +255,7 @@ class Search
 
             $options['field'] = str_replace('%locale%', $locale, $options['field']);
 
-            if ($options['field'] !== '_score') {
+            if ('_score' !== $options['field']) {
                 $options['missing'] = '_last';
             }
 
@@ -316,14 +315,14 @@ class Search
 
     private function setSortOrder(string $o): void
     {
-        $this->sortOrder = ($o === 'asc' || $o === 'desc') ? $o : 'asc';
+        $this->sortOrder = ('asc' === $o || 'desc' === $o) ? $o : 'asc';
     }
 
     private function setSize(string $l): void
     {
         if (null == $this->sizes) {
             @trigger_error('Define allow sizes with the search option "sizes"', \E_USER_DEPRECATED);
-             $this->size = (int) $l > 0 ? $l : $this->size;
+            $this->size = (int) $l > 0 ? $l : $this->size;
         } elseif (\in_array($l, $this->sizes)) {
             $this->size = (int) $l;
         } else {

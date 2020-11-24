@@ -15,7 +15,7 @@ class Filter
     private $type;
     /** @var string */
     private $field;
-    /** @var null|string */
+    /** @var string|null */
     private $nestedPath;
 
     /** @var ?string */
@@ -25,7 +25,7 @@ class Filter
     /** @var bool */
     private $reversedNested;
 
-    /** @var null|int */
+    /** @var int|null */
     private $aggSize;
     /** @var bool default true for terms, when value passed default false */
     private $postFilter;
@@ -48,8 +48,8 @@ class Filter
     /** @var bool|string */
     private $dateFormat;
 
-    const TYPE_TERM       = 'term';
-    const TYPE_TERMS      = 'terms';
+    const TYPE_TERM = 'term';
+    const TYPE_TERMS = 'terms';
     const TYPE_DATE_RANGE = 'date_range';
 
     const TYPES = [
@@ -107,7 +107,7 @@ class Filter
 
     public function getField(): string
     {
-        return $this->isNested() ? $this->nestedPath . '.' . $this->field : $this->field;
+        return $this->isNested() ? $this->nestedPath.'.'.$this->field : $this->field;
     }
 
     public function getValue()
@@ -117,7 +117,7 @@ class Filter
 
     public function hasAggSize(): bool
     {
-        return $this->aggSize !== null;
+        return null !== $this->aggSize;
     }
 
     public function getAggSize(): ?int
@@ -159,7 +159,7 @@ class Filter
         $this->field = str_replace('%locale%', $request->getLocale(), $this->field);
         $requestValue = $request->get($this->name);
 
-        if ($this->value !== null) {
+        if (null !== $this->value) {
             $this->setQuery($this->value);
         } elseif ($this->public && $requestValue) {
             $this->setQuery($requestValue);
@@ -173,7 +173,7 @@ class Filter
         $this->setChoices();
 
         $data = $aggregation['nested'] ?? $aggregation;
-        $buckets = $data['filtered_' . $this->name]['buckets'] ?? $data['buckets'];
+        $buckets = $data['filtered_'.$this->name]['buckets'] ?? $data['buckets'];
 
         foreach ($buckets as $bucket) {
             if (!isset($this->choices[$bucket['key']])) {
@@ -255,11 +255,11 @@ class Filter
             $end = $endDatetime ? $endDatetime->format('Y-m-d') : null;
         }
 
-        if ($start === null && $end === null) {
+        if (null === $start && null === $end) {
             return null;
         }
 
-        return ['range' => [ $this->getField() => array_filter(['gte' => $start, 'lte' => $end,]) ]];
+        return ['range' => [$this->getField() => array_filter(['gte' => $start, 'lte' => $end])]];
     }
 
     private function createDateTimeForQuery(string $value, ?string $time = null): ?\DateTime
@@ -285,28 +285,28 @@ class Filter
                 'should' => [
                     [$this->query],
                     ['bool' => [
-                        'must_not' => ['exists' => ['field' => $this->getField()]]
-                    ]]
-                ]
-            ]
+                        'must_not' => ['exists' => ['field' => $this->getField()]],
+                    ]],
+                ],
+            ],
         ];
     }
 
     private function setChoices(): void
     {
-        if (null != $this->choices || $this->type !== self::TYPE_TERMS) {
+        if (null != $this->choices || self::TYPE_TERMS !== $this->type) {
             return;
         }
 
         $aggs = ['terms' => ['field' => $this->getField(), 'size' => $this->aggSize]];
-        if ($this->getSortField() !== null) {
+        if (null !== $this->getSortField()) {
             $aggs['terms']['order'] = [$this->getSortField() => $this->getSortOrder()];
         }
 
         if ($this->isNested()) {
             $aggs = ['nested' => [
-                'path' => $this->getNestedPath()],
-                'aggs' => ['nested' => $aggs]
+                'path' => $this->getNestedPath(), ],
+                'aggs' => ['nested' => $aggs],
             ];
         }
 
@@ -320,7 +320,7 @@ class Filter
             $choices[$bucket['key']] = [
                 'total' => $bucket['doc_count'],
                 'filter' => 0,
-                'active' => \in_array($bucket['key'], $this->value ?? [])
+                'active' => \in_array($bucket['key'], $this->value ?? []),
             ];
         }
 
@@ -331,7 +331,7 @@ class Filter
     {
         if (isset($options['post_filter'])) {
             $this->postFilter = (bool) $options['post_filter'];
-        } else if ($this->type === self::TYPE_TERMS && $this->public) {
+        } elseif (self::TYPE_TERMS === $this->type && $this->public) {
             $this->postFilter = true; //default post filtering for public terms filters
         } else {
             $this->postFilter = false;

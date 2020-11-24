@@ -3,9 +3,9 @@
 namespace EMS\ClientHelperBundle\EventListener;
 
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
+use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\ClientHelperBundle\Helper\Request\ExceptionHelper;
 use EMS\ClientHelperBundle\Helper\Request\LocaleHelper;
-use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\ClientHelperBundle\Helper\Translation\TranslationHelper;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -65,7 +65,7 @@ class KernelListener implements EventSubscriberInterface
                 ['redirectMissingLocale', 21],
                 ['loadTranslations', 20], //not found is maybe redirected or custom error pages with translations
                 ['customErrorTemplate', -10],
-            ]
+            ],
         ];
     }
 

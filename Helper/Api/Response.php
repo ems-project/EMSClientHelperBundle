@@ -51,9 +51,9 @@ class Response
         return [
             $name => [
                 'href' => $href,
-                'rel'  => $rel,
-                'type' => $type
-            ]
+                'rel' => $rel,
+                'type' => $type,
+            ],
         ];
     }
 }

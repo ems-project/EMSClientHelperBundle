@@ -18,10 +18,6 @@ class LocaleHelper
      */
     private $locales;
 
-    /**
-     * @param RouterInterface $router
-     * @param array           $locales
-     */
     public function __construct(RouterInterface $router, array $locales)
     {
         $this->router = $router;
@@ -29,8 +25,6 @@ class LocaleHelper
     }
 
     /**
-     * @param Request $request
-     *
      * @return RedirectResponse
      */
     public function redirectMissingLocale(Request $request)
@@ -42,9 +36,9 @@ class LocaleHelper
         }
 
         if ($request->cookies->has('_locale')) {
-            $url = $request->getUriForPath('/' . $request->cookies->get('_locale') . $destination);
+            $url = $request->getUriForPath('/'.$request->cookies->get('_locale').$destination);
         } elseif (1 === count($this->locales)) {
-            $url = $request->getUriForPath('/' . $this->locales[0] . $destination);
+            $url = $request->getUriForPath('/'.$this->locales[0].$destination);
         } else {
             $url = $this->router->generate('emsch_language_selection', ['destination' => $destination]);
         }
@@ -53,8 +47,6 @@ class LocaleHelper
     }
 
     /**
-     * @param Request $request
-     *
      * @return string|false
      */
     public function getLocale(Request $request)
@@ -69,6 +61,7 @@ class LocaleHelper
 
         if ($localeUri) {
             $request->setLocale($localeUri);
+
             return $localeUri;
         }
 
@@ -85,6 +78,6 @@ class LocaleHelper
         $regex = sprintf('/^\/(?P<locale>%s).*$/', implode('|', $this->locales));
         preg_match($regex, $uri, $matches);
 
-        return (isset($matches['locale']) ? $matches['locale'] : false);
+        return isset($matches['locale']) ? $matches['locale'] : false;
     }
 }

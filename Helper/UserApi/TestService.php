@@ -29,9 +29,11 @@ final class TestService
             $json = \json_decode($response->getBody()->getContents(), true);
 
             $status = ($json['success']) ? '{"success": true}' : '{"success": false}';
+
             return JsonResponse::fromJsonString($status);
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
+
             return JsonResponse::fromJsonString('{"success": false}');
         }
     }

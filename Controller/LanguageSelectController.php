@@ -19,10 +19,6 @@ class LanguageSelectController extends AbstractController
      */
     private $locales;
 
-    /**
-     * @param ClientRequestManager $clientRequestManager
-     * @param array                $locales
-     */
     public function __construct(ClientRequestManager $clientRequestManager, array $locales)
     {
         $this->clientRequestManager = $clientRequestManager;
@@ -30,9 +26,6 @@ class LanguageSelectController extends AbstractController
     }
 
     /**
-     * @param Request $request
-     * @param string  $template
-     *
      * @return Response
      */
     public function view(Request $request, string $template)

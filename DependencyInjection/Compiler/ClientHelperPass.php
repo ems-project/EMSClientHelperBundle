@@ -7,9 +7,6 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class ClientHelperPass implements CompilerPassInterface
 {
-    /**
-     * @param ContainerBuilder $container
-     */
     public function process(ContainerBuilder $container)
     {
         //override the default symfony router, with the chain router
@@ -19,9 +16,6 @@ class ClientHelperPass implements CompilerPassInterface
         $this->processRouting($container);
     }
 
-    /**
-     * @param ContainerBuilder $container
-     */
     public function processRouting(ContainerBuilder $container)
     {
         if (!$container->hasParameter('emsch.routing.client_request')) {
