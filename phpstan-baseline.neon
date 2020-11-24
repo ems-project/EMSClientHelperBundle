@@ -411,16 +411,6 @@ parameters:
 			path: Helper/Api/Response.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Asset\\\\AssetHelperRuntime\\:\\:unzip\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Asset/AssetHelperRuntime.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between false and int\\|true will always evaluate to false\\.$#"
-			count: 1
-			path: Helper/Asset/AssetHelperRuntime.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:getData\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Cache/CacheHelper.php
@@ -627,11 +617,6 @@ parameters:
 
 		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:searchOneBy\\(\\) has parameter \\$parameters with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:searchOneBy\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Elasticsearch/ClientRequest.php
 

@@ -636,7 +636,7 @@ class ClientRequest
      *
      * @throws SingleResultException
      */
-    public function searchOne($type, array $body, ?string $indexRegex = null)
+    public function searchOne($type, array $body, ?string $indexRegex = null): array
     {
         $this->logger->debug('ClientRequest : searchOne for {type}', ['type' => $type, 'body' => $body, 'indexRegex' => $indexRegex]);
         $search = $this->search($type, $body, 0, 2, [], $indexRegex);
@@ -650,6 +650,9 @@ class ClientRequest
         return $hits['hits'][0];
     }
 
+    /**
+     * @return array{_id:string,_type:string,_source:array<mixed>}|null
+     */
     public function searchOneBy(string $type, array $parameters): ?array
     {
         $this->logger->debug('ClientRequest : searchOneBy for type {type}', ['type' => $type]);
