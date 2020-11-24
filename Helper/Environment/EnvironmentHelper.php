@@ -59,7 +59,7 @@ class EnvironmentHelper
     public function getLocale(): string
     {
         $current = $this->requestStack->getCurrentRequest();
-        
+
         return ($current ? $current->getLocale() : null);
     }
 }

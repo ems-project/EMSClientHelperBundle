@@ -58,7 +58,7 @@ class RedirectHelper
             return false;
         }
     }
-    
+
     /**
      * @param string $uri
      * @param string $locale

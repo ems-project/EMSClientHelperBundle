@@ -11,17 +11,17 @@ class Generator
      * @var string
      */
     private $baseUrl = '';
-    
+
     /**
      * @var string
      */
     private $phpApp = '';
-    
+
     /**
      * @var array
      */
     private $relativePaths;
-    
+
     /**
      * Regex for getting the base URL without the phpApp
      * So we can relative link to other applications
@@ -35,7 +35,7 @@ class Generator
     public function __construct(RouterInterface $router, array $relativePaths = [])
     {
         preg_match(self::REGEX_BASE_URL, $router->getContext()->getBaseUrl(), $match);
-        
+
         if (isset($match['baseUrl'])) {
             $this->baseUrl = $match['baseUrl'];
         }
@@ -46,7 +46,7 @@ class Generator
 
         $this->relativePaths = $relativePaths;
     }
-    
+
     /**
      * @param string $relativePath
      * @param string $path
@@ -57,7 +57,7 @@ class Generator
     {
         return $this->baseUrl . $relativePath . $this->phpApp . $path;
     }
-    
+
     /**
      * @param EMSLink $emsLink
      * @param string  $url
@@ -67,10 +67,10 @@ class Generator
     public function prependBaseUrl(EMSLink $emsLink, $url)
     {
         $path = $this->getRelativePath($emsLink->getContentType());
-        
+
         return $this->baseUrl . $path . $this->phpApp . $url;
     }
-    
+
     /**
      * @param string $contentType
      *
@@ -83,7 +83,7 @@ class Generator
                 return $value['path'];
             }
         }
-        
+
         return '';
     }
 }

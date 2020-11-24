@@ -66,12 +66,12 @@ class HierarchicalStructure
 
         return $this;
     }
-    
+
     public function getActive(): bool
     {
         return $this->active;
     }
-    
+
     public function setActive(bool $active): HierarchicalStructure
     {
         $this->active = $active;
