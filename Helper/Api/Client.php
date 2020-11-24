@@ -55,7 +55,7 @@ class Client
      */
     public function createDraft($type, $body, $ouuid = null)
     {
-        @trigger_error('Deprecated use the initNewDocument or initNewDraftRevision functions', E_USER_DEPRECATED);
+        @\trigger_error('Deprecated use the initNewDocument or initNewDraftRevision functions', E_USER_DEPRECATED);
 
         return $this->initNewDocument($type, $body, $ouuid);
     }
@@ -70,9 +70,9 @@ class Client
     public function initNewDocument($type, $body, $ouuid = null)
     {
         if (null === $ouuid) {
-            $url = sprintf('api/data/%s/draft', $type);
+            $url = \sprintf('api/data/%s/draft', $type);
         } else {
-            $url = sprintf('api/data/%s/draft/%s', $type, $ouuid);
+            $url = \sprintf('api/data/%s/draft/%s', $type, $ouuid);
         }
 
         $response = $this->client->post(
@@ -93,7 +93,7 @@ class Client
     public function updateDocument($type, $ouuid, $body)
     {
         $response = $this->client->post(
-            sprintf('/api/data/%s/replace/%s', $type, $ouuid),
+            \sprintf('/api/data/%s/replace/%s', $type, $ouuid),
             ['body' => \json_encode($body)]
         );
 
@@ -111,7 +111,7 @@ class Client
     public function finalize($type, $revisionId)
     {
         $response = $this->client->post(
-            sprintf('api/data/%s/finalize/%d', $type, $revisionId)
+            \sprintf('api/data/%s/finalize/%d', $type, $revisionId)
         );
 
         return \json_decode($response->getBody()->getContents(), true);
@@ -128,7 +128,7 @@ class Client
     public function discardDraft($type, $revisionId)
     {
         $response = $this->client->post(
-            sprintf('api/data/%s/discard/%d', $type, $revisionId)
+            \sprintf('api/data/%s/discard/%d', $type, $revisionId)
         );
 
         return \json_decode($response->getBody()->getContents(), true);
@@ -143,7 +143,7 @@ class Client
             'multipart' => [
                 [
                     'name' => 'upload',
-                    'contents' => fopen($file->getPathname(), 'r'),
+                    'contents' => \fopen($file->getPathname(), 'r'),
                     'filename' => $forcedFilename ?? $file->getFilename(),
                 ],
             ],

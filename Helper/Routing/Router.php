@@ -63,7 +63,7 @@ class Router extends BaseRouter
 
     private function addLanguageSelectionRoute(RouteCollection $collection): void
     {
-        if (isset($this->templates['language']) && count($this->locales) > 1) {
+        if (isset($this->templates['language']) && \count($this->locales) > 1) {
             $langSelectRoute = new Route('emsch_language_selection', [
                 'path' => '/language-selection',
                 'controller' => 'emsch.controller.language_select::view',
@@ -76,7 +76,7 @@ class Router extends BaseRouter
     private function addSearchResultRoute(RouteCollection $collection): void
     {
         if (isset($this->templates['search'])) {
-            @trigger_error('Deprecated search template use routing content type!', E_USER_DEPRECATED);
+            @\trigger_error('Deprecated search template use routing content type!', E_USER_DEPRECATED);
 
             $searchRoute = new Route('emsch_search', [
                 'path' => '/{_locale}/search',
@@ -134,10 +134,10 @@ class Router extends BaseRouter
             $name = $source['name'];
 
             try {
-                $options = json_decode($source['config'], true);
+                $options = \json_decode($source['config'], true);
 
-                if (JSON_ERROR_NONE !== json_last_error()) {
-                    throw new \InvalidArgumentException(sprintf('invalid json %s', $source['config']));
+                if (JSON_ERROR_NONE !== \json_last_error()) {
+                    throw new \InvalidArgumentException(\sprintf('invalid json %s', $source['config']));
                 }
 
                 $options['query'] = $source['query'] ?? null;

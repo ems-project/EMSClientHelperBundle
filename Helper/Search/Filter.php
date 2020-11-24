@@ -63,7 +63,7 @@ class Filter
         $this->clientRequest = $clientRequest;
 
         if (!\in_array($options['type'], self::TYPES)) {
-            throw new \Exception(sprintf('invalid filter type %s', $options['type']));
+            throw new \Exception(\sprintf('invalid filter type %s', $options['type']));
         }
 
         $this->name = $name;
@@ -156,7 +156,7 @@ class Filter
 
     public function handleRequest(Request $request): void
     {
-        $this->field = str_replace('%locale%', $request->getLocale(), $this->field);
+        $this->field = \str_replace('%locale%', $request->getLocale(), $this->field);
         $requestValue = $request->get($this->name);
 
         if (null !== $this->value) {
@@ -259,7 +259,7 @@ class Filter
             return null;
         }
 
-        return ['range' => [$this->getField() => array_filter(['gte' => $start, 'lte' => $end])]];
+        return ['range' => [$this->getField() => \array_filter(['gte' => $start, 'lte' => $end])]];
     }
 
     private function createDateTimeForQuery(string $value, ?string $time = null): ?\DateTime
@@ -268,11 +268,11 @@ class Filter
             return new \DateTime($value);
         }
 
-        if (!is_string($this->dateFormat)) {
+        if (!\is_string($this->dateFormat)) {
             return null;
         }
 
-        $dateTime = \DateTime::createFromFormat($this->dateFormat, sprintf('%s %s', $value, $time));
+        $dateTime = \DateTime::createFromFormat($this->dateFormat, \sprintf('%s %s', $value, $time));
 
         return $dateTime instanceof \DateTime ? $dateTime : null;
     }

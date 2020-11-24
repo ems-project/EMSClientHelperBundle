@@ -59,7 +59,7 @@ class ClientRequestManager
     public function get(string $name): ClientRequest
     {
         if (!isset($this->clientRequests[$name])) {
-            throw new \InvalidArgumentException(sprintf('Client request %s service not found!', $name));
+            throw new \InvalidArgumentException(\sprintf('Client request %s service not found!', $name));
         }
 
         return $this->clientRequests[$name];

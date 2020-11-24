@@ -77,7 +77,7 @@ class RedirectListener implements EventSubscriberInterface
 
         $forwardUri = $this->redirectHelper->getForwardUri($request);
 
-        if ($forwardUri && is_string($forwardUri)) {
+        if ($forwardUri && \is_string($forwardUri)) {
             $this->forwardNotFound($event, $forwardUri);
         }
     }
@@ -91,7 +91,7 @@ class RedirectListener implements EventSubscriberInterface
 
             $attributes = [];
 
-            $server = array_merge($request->server->all(), ['REQUEST_URI' => $uri]);
+            $server = \array_merge($request->server->all(), ['REQUEST_URI' => $uri]);
             $subRequest = $request->duplicate(null, null, $attributes, null, null, $server);
 
             $subResponse = $this->kernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
@@ -114,12 +114,12 @@ class RedirectListener implements EventSubscriberInterface
      */
     private function getHeaderLink(Request $request, $uri)
     {
-        $url = vsprintf('%s://%s%s', [
+        $url = \vsprintf('%s://%s%s', [
             $request->getScheme(),
             $request->getHttpHost(),
             $uri,
         ]);
 
-        return sprintf('<%s>; rel="canonical"', $url);
+        return \sprintf('<%s>; rel="canonical"', $url);
     }
 }

@@ -167,7 +167,7 @@ class ApiService
 
         $hits = $results['hits'];
 
-        $response->addData('count', count($hits['hits']));
+        $response->addData('count', \count($hits['hits']));
         $response->addData('total', $hits['total']);
         $response->addData('scroll', $results['_scroll_id']);
 
@@ -178,7 +178,7 @@ class ApiService
                 'ouuid' => $document['_id'],
             ]);
 
-            $data = array_merge_recursive(['id' => $document['_id']], $document['_source']);
+            $data = \array_merge_recursive(['id' => $document['_id']], $document['_source']);
             $data['_links'] = [Response::createLink('self', $url, $contentType)];
 
             $response->addData('all', $data);
@@ -245,7 +245,7 @@ class ApiService
         //TODO: remove this hack once the ems back is returning the file hash as parameter
         if (!isset($response[EmsFields::CONTENT_FILE_HASH_FIELD_]) && isset($response['url'])) {
             $output_array = [];
-            preg_match('/\/data\/file\/view\/(?P<hash>.*)\?.*/', $response['url'], $output_array);
+            \preg_match('/\/data\/file\/view\/(?P<hash>.*)\?.*/', $response['url'], $output_array);
             if (isset($output_array['hash'])) {
                 $response[EmsFields::CONTENT_FILE_HASH_FIELD_] = $output_array['hash'];
             }
@@ -272,7 +272,7 @@ class ApiService
 
         $response = new Response();
         $response->addData('_links', [Response::createLink('all', $urlParent, $contentType)]);
-        $response->addData($contentType, array_merge_recursive(['id' => $document['_id']], $document['_source']));
+        $response->addData($contentType, \array_merge_recursive(['id' => $document['_id']], $document['_source']));
 
         return $response;
     }

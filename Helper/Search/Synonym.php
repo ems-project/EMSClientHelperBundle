@@ -19,11 +19,11 @@ class Synonym
         $this->filter = $data['filter'] ?? [];
 
         if (isset($data['field'])) {
-            $this->field = str_replace('%locale%', $locale, $data['field']);
+            $this->field = \str_replace('%locale%', $locale, $data['field']);
         }
 
         if (isset($data['search'])) {
-            $this->searchField = str_replace('%locale%', $locale, $data['search']);
+            $this->searchField = \str_replace('%locale%', $locale, $data['search']);
         }
     }
 

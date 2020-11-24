@@ -92,7 +92,7 @@ class KernelListener implements EventSubscriberInterface
     public function bindLocale(ResponseEvent $event): void
     {
         if ($this->bindLocale && $locale = $this->localeHelper->getLocale($event->getRequest())) {
-            $event->getResponse()->headers->setCookie(new Cookie('_locale', $locale, strtotime('now + 12 months')));
+            $event->getResponse()->headers->setCookie(new Cookie('_locale', $locale, \strtotime('now + 12 months')));
         }
     }
 
@@ -105,7 +105,7 @@ class KernelListener implements EventSubscriberInterface
             return;
         }
 
-        if (preg_match('/(emsch_api_).*/', $request->attributes->get('_route'))) {
+        if (\preg_match('/(emsch_api_).*/', $request->attributes->get('_route'))) {
             return;
         }
 

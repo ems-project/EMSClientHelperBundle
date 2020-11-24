@@ -57,7 +57,7 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
      */
     public function data(string $input)
     {
-        @trigger_error(sprintf('The filter emsch_data is deprecated and should not be used anymore. use the filter emsch_get instead"'), E_USER_DEPRECATED);
+        @\trigger_error(\sprintf('The filter emsch_data is deprecated and should not be used anymore. use the filter emsch_get instead"'), E_USER_DEPRECATED);
 
         $emsLink = EMSLink::fromText($input);
         $body = [
@@ -114,7 +114,7 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
         }
 
         if (1 !== $result['hits']['total']) {
-            $this->logger->error(sprintf('emsch_get filter found %d results for the ems key %s', $result['hits']['total'], $input));
+            $this->logger->error(\sprintf('emsch_get filter found %d results for the ems key %s', $result['hits']['total'], $input));
         }
 
         $document = new Document($emsLink->getContentType(), $emsLink->getOuuid(), $result['hits']['hits'][0]['_source']);

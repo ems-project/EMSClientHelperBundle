@@ -59,7 +59,7 @@ class CacheHelper
 
     public function makeResponseCacheable(Request $request, Response $response): void
     {
-        if (!is_string($response->getContent())) {
+        if (!\is_string($response->getContent())) {
             return;
         }
 

@@ -71,7 +71,7 @@ class Transformer
             $emsLink = EMSLink::fromMatch($match);
 
             if ('asset' === $emsLink->getLinkType()) {
-                return '/file/view/'.$emsLink->getOuuid().'?'.http_build_query($emsLink->getQuery());
+                return '/file/view/'.$emsLink->getOuuid().'?'.\http_build_query($emsLink->getQuery());
             }
 
             if (!$emsLink->hasContentType()) {
@@ -84,7 +84,7 @@ class Transformer
 
             return $url;
         } catch (\Exception $ex) {
-            $this->logger->error(sprintf('%s match (%s)', $ex->getMessage(), json_encode($match)));
+            $this->logger->error(\sprintf('%s match (%s)', $ex->getMessage(), \json_encode($match)));
 
             return false;
         }
@@ -99,9 +99,9 @@ class Transformer
      */
     public function transform($content, $locale = null, $baseUrl = null)
     {
-        return preg_replace_callback(EMSLink::PATTERN, function ($match) use ($locale, $baseUrl) {
+        return \preg_replace_callback(EMSLink::PATTERN, function ($match) use ($locale, $baseUrl) {
             //array filter to remove empty capture groups
-            $generation = $this->generate(array_filter($match), $locale);
+            $generation = $this->generate(\array_filter($match), $locale);
             $route = $generation ? $generation : $match[0];
 
             return $baseUrl.$route;
@@ -123,7 +123,7 @@ class Transformer
         ];
 
         if ($this->template) {
-            $template = str_replace('{type}', $document['_type'], $this->template);
+            $template = \str_replace('{type}', $document['_type'], $this->template);
 
             if ($result = $this->twigRender($template, $context)) {
                 return $result;

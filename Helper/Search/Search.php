@@ -49,7 +49,7 @@ class Search
         $options = $this->getOptions($clientRequest);
 
         if (isset($options['facets'])) {
-            @trigger_error('Deprecated facets, please use filters setting', E_USER_DEPRECATED);
+            @\trigger_error('Deprecated facets, please use filters setting', E_USER_DEPRECATED);
         }
 
         $this->types = $options['types']; //required
@@ -143,7 +143,7 @@ class Search
         $queryFacets = [];
 
         foreach ($this->queryFacets as $field => $terms) {
-            if (array_key_exists($field, $this->facets) && !empty($terms)) {
+            if (\array_key_exists($field, $this->facets) && !empty($terms)) {
                 $queryFacets[$field] = $terms;
             }
         }
@@ -236,7 +236,7 @@ class Search
         }
 
         if ($clientRequest->hasOption('search')) {
-            @trigger_error('Deprecated search option please use search_config!', E_USER_DEPRECATED);
+            @\trigger_error('Deprecated search option please use search_config!', E_USER_DEPRECATED);
 
             return $clientRequest->getOption('[search]');
         }
@@ -253,7 +253,7 @@ class Search
                 $options = ['field' => $options];
             }
 
-            $options['field'] = str_replace('%locale%', $locale, $options['field']);
+            $options['field'] = \str_replace('%locale%', $locale, $options['field']);
 
             if ('_score' !== $options['field']) {
                 $options['missing'] = '_last';
@@ -272,8 +272,8 @@ class Search
 
     private function setFields(array $fields, string $locale): void
     {
-        $this->fields = array_map(function (string $field) use ($locale) {
-            return str_replace('%locale%', $locale, $field);
+        $this->fields = \array_map(function (string $field) use ($locale) {
+            return \str_replace('%locale%', $locale, $field);
         }, $fields);
     }
 
@@ -290,8 +290,8 @@ class Search
     {
         if (\is_array($data) && isset($data['fields'])) {
             foreach ($data['fields'] as $key => $options) {
-                if (strpos($key, '%locale%')) {
-                    $data['fields'][str_replace('%locale%', $locale, $key)] = $options;
+                if (\strpos($key, '%locale%')) {
+                    $data['fields'][\str_replace('%locale%', $locale, $key)] = $options;
                     unset($data['fields'][$key]);
                 }
             }
@@ -306,7 +306,7 @@ class Search
         }
 
         if (null == $this->sorts) {
-            @trigger_error('Define possible sort fields with the search option "sorts"', \E_USER_DEPRECATED);
+            @\trigger_error('Define possible sort fields with the search option "sorts"', \E_USER_DEPRECATED);
         } elseif (\array_key_exists($name, $this->sorts)) {
             $this->sortBy = $name;
             $this->sortOrder = $this->sorts[$name]['order'] ?? $this->sortOrder;
@@ -321,12 +321,12 @@ class Search
     private function setSize(string $l): void
     {
         if (null == $this->sizes) {
-            @trigger_error('Define allow sizes with the search option "sizes"', \E_USER_DEPRECATED);
+            @\trigger_error('Define allow sizes with the search option "sizes"', \E_USER_DEPRECATED);
             $this->size = (int) $l > 0 ? $l : $this->size;
         } elseif (\in_array($l, $this->sizes)) {
             $this->size = (int) $l;
         } else {
-            $this->size = (int) array_shift($this->sizes);
+            $this->size = (int) \array_shift($this->sizes);
         }
     }
 

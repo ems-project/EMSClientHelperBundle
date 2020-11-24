@@ -95,8 +95,8 @@ class ApiController
         $body = $this->service->treatFormRequest($request, $apiName, $validationTemplate);
         $ouuid = $this->service->createDocument($apiName, $contentType, $ouuid, $body);
 
-        $url = str_replace('%ouuid%', $ouuid, $redirectUrl);
-        $url = str_replace('%contenttype%', $contentType, $url);
+        $url = \str_replace('%ouuid%', $ouuid, $redirectUrl);
+        $url = \str_replace('%contenttype%', $contentType, $url);
 
         return new RedirectResponse($url);
     }
@@ -106,8 +106,8 @@ class ApiController
         $body = $this->service->treatFormRequest($request, $apiName, $validationTemplate);
         $ouuid = $this->service->updateDocument($apiName, $contentType, $ouuid, $body);
 
-        $url = str_replace('%ouuid%', $ouuid, $redirectUrl);
-        $url = str_replace('%contenttype%', $contentType, $url);
+        $url = \str_replace('%ouuid%', $ouuid, $redirectUrl);
+        $url = \str_replace('%contenttype%', $contentType, $url);
 
         return new RedirectResponse($url);
     }

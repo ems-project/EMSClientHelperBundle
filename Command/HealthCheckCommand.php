@@ -114,7 +114,7 @@ class HealthCheckCommand extends Command
 
         $prefixes = [];
         foreach ($this->clientRequests as $clientRequest) {
-            $prefixes = array_merge($prefixes, $clientRequest->getPrefixes());
+            $prefixes = \array_merge($prefixes, $clientRequest->getPrefixes());
         }
         $postfixes = [];
         foreach ($this->environmentHelper->getEnvironments() as $environment) {
@@ -127,7 +127,7 @@ class HealthCheckCommand extends Command
             }
         }
 
-        $index = join(',', $indexes);
+        $index = \join(',', $indexes);
 
         foreach ($this->clients as $client) {
             if (!$client->indices()->exists(['index' => $index])) {
@@ -163,7 +163,7 @@ class HealthCheckCommand extends Command
         $adapters = [];
 
         foreach ($this->storageManager->getAdapters() as $adapter) {
-            $adapters[] = get_class($adapter).' -> '.($adapter->health() ? 'green' : 'red');
+            $adapters[] = \get_class($adapter).' -> '.($adapter->health() ? 'green' : 'red');
         }
 
         $io->listing($adapters);

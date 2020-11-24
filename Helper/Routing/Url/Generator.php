@@ -30,7 +30,7 @@ class Generator
 
     public function __construct(RouterInterface $router, array $relativePaths = [])
     {
-        preg_match(self::REGEX_BASE_URL, $router->getContext()->getBaseUrl(), $match);
+        \preg_match(self::REGEX_BASE_URL, $router->getContext()->getBaseUrl(), $match);
 
         if (isset($match['baseUrl'])) {
             $this->baseUrl = $match['baseUrl'];
@@ -74,7 +74,7 @@ class Generator
     private function getRelativePath($contentType)
     {
         foreach ($this->relativePaths as $value) {
-            if (preg_match($value['regex'], $contentType)) {
+            if (\preg_match($value['regex'], $contentType)) {
                 return $value['path'];
             }
         }

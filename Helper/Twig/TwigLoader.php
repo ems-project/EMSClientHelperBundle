@@ -72,7 +72,7 @@ class TwigLoader implements LoaderInterface
      */
     public function exists($name): bool
     {
-        return self::PREFIX === substr($name, 0, 6);
+        return self::PREFIX === \substr($name, 0, 6);
     }
 
     /**
@@ -102,19 +102,19 @@ class TwigLoader implements LoaderInterface
      */
     private function match($name)
     {
-        preg_match('/^@EMSCH\/(?<content_type>[a-z][a-z0-9\-_]*):(?<search_val>.*)$/', $name, $matchOuuid);
+        \preg_match('/^@EMSCH\/(?<content_type>[a-z][a-z0-9\-_]*):(?<search_val>.*)$/', $name, $matchOuuid);
 
         if ($matchOuuid) {
             return [$matchOuuid['content_type'], $matchOuuid['search_val'], '_id'];
         }
 
-        preg_match('/^@EMSCH\/(?<content_type>[a-z][a-z0-9\-_]*)\/(?<search_val>.*)$/', $name, $matchName);
+        \preg_match('/^@EMSCH\/(?<content_type>[a-z][a-z0-9\-_]*)\/(?<search_val>.*)$/', $name, $matchName);
 
         if ($matchName) {
             return [$matchName['content_type'], $matchName['search_val'], null];
         }
 
-        throw new TwigException(sprintf('Invalid template name: %s', $name));
+        throw new TwigException(\sprintf('Invalid template name: %s', $name));
     }
 
     /**
@@ -143,7 +143,7 @@ class TwigLoader implements LoaderInterface
 
             return ['fresh_time' => $date->getTimestamp(), 'code' => $source[$code]];
         } catch (\Exception $e) {
-            throw new TwigException(sprintf('Template not found %s:%s', $contentType, $searchVal));
+            throw new TwigException(\sprintf('Template not found %s:%s', $contentType, $searchVal));
         }
     }
 }

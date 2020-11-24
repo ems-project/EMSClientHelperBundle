@@ -17,7 +17,7 @@ class Response
      */
     public function addData($name, $data)
     {
-        if (!is_array($data)) {
+        if (!\is_array($data)) {
             $this->data[$name] = $data;
 
             return;

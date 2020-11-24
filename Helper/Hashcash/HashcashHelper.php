@@ -29,7 +29,7 @@ class HashcashHelper
             throw new AccessDeniedHttpException('Insufficient security level by definition');
         }
 
-        if (!preg_match(sprintf('/^0{%d}/', $hashcashLevel), hash($hashAlgo, $hashcash))) {
+        if (!\preg_match(\sprintf('/^0{%d}/', $hashcashLevel), \hash($hashAlgo, $hashcash))) {
             throw new AccessDeniedHttpException('Insufficient security level');
         }
 

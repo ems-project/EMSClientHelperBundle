@@ -33,7 +33,7 @@ class AdminMenuRuntime implements RuntimeExtensionInterface
             $emsLink = EMSLink::fromText($emsLink);
         }
 
-        return vsprintf('data-ems-type="%s" data-ems-key="%s" data-ems-url="%s"', [
+        return \vsprintf('data-ems-type="%s" data-ems-key="%s" data-ems-url="%s"', [
             $emsLink->getContentType(),
             $emsLink->getOuuid(),
             $backend,

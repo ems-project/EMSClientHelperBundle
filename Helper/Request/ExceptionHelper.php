@@ -65,19 +65,19 @@ class ExceptionHelper
      */
     private function getTemplate(string $code)
     {
-        $customCodeTemplate = str_replace('{code}', $code, $this->template);
+        $customCodeTemplate = \str_replace('{code}', $code, $this->template);
 
         if ($this->templateExists($customCodeTemplate)) {
             return $customCodeTemplate;
         }
 
-        $errorTemplate = str_replace('{code}', '', $this->template);
+        $errorTemplate = \str_replace('{code}', '', $this->template);
 
         if ($this->templateExists($errorTemplate)) {
             return $errorTemplate;
         }
 
-        throw new TwigException(sprintf('template "%s" does not exists', $errorTemplate));
+        throw new TwigException(\sprintf('template "%s" does not exists', $errorTemplate));
     }
 
     /**

@@ -77,7 +77,7 @@ class EMSClientHelperExtension extends Extension
             $definition->setArgument(3, new Reference('logger'));
             $definition->addTag('emsch.api_client');
 
-            $container->setDefinition(sprintf('emsch.api_client.%s', $name), $definition);
+            $container->setDefinition(\sprintf('emsch.api_client.%s', $name), $definition);
         }
     }
 
@@ -98,7 +98,7 @@ class EMSClientHelperExtension extends Extension
             ->setPublic(true);
         $definition->addTag('emsch.elasticsearch.client');
 
-        $container->setDefinition(sprintf('ems_common.elasticsearch.%s', $name), $definition);
+        $container->setDefinition(\sprintf('ems_common.elasticsearch.%s', $name), $definition);
     }
 
     private function defineElasticsearchLogger(ContainerBuilder $container, array $options)
@@ -141,7 +141,7 @@ class EMSClientHelperExtension extends Extension
     {
         $definition = new Definition(ClientRequest::class);
         $definition->setArguments([
-            new Reference(sprintf('ems_common.elasticsearch.%s', $name)),
+            new Reference(\sprintf('ems_common.elasticsearch.%s', $name)),
             new Reference('emsch.helper_environment'),
             new Reference('logger'),
             new Reference('cache.app'),
@@ -155,7 +155,7 @@ class EMSClientHelperExtension extends Extension
             $definition->addTag('emsch.client_request.api');
         }
 
-        $container->setDefinition(sprintf('emsch.client_request.%s', $name), $definition);
+        $container->setDefinition(\sprintf('emsch.client_request.%s', $name), $definition);
     }
 
     private function loadClientRequestApi(XmlFileLoader $loader)
@@ -178,12 +178,12 @@ class EMSClientHelperExtension extends Extension
     {
         $loader = new Definition(TwigLoader::class);
         $loader->setArguments([
-            new Reference(sprintf('emsch.client_request.%s', $name)),
+            new Reference(\sprintf('emsch.client_request.%s', $name)),
             $options,
         ]);
         $loader->addTag('twig.loader', ['alias' => $name, 'priority' => 1]);
 
-        $container->setDefinition(sprintf('emsch.twig.loader.%s', $name), $loader);
+        $container->setDefinition(\sprintf('emsch.twig.loader.%s', $name), $loader);
     }
 
     private function processRoutingSelection(ContainerBuilder $container, array $config)

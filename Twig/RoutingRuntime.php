@@ -28,7 +28,7 @@ class RoutingRuntime implements RuntimeExtensionInterface
         $url = $this->transformer->getGenerator()->createUrl($relativePath, $path);
 
         if ($parameters) {
-            $url .= '?'.http_build_query($parameters);
+            $url .= '?'.\http_build_query($parameters);
         }
 
         return $url;

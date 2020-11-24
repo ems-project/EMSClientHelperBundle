@@ -36,7 +36,7 @@ class TextValue
         $this->synonyms[] = [
             'match' => [
                 $synonymField => [
-                    'query' => sprintf('%s:%s', $doc['_source']['_contenttype'], $doc['_id']),
+                    'query' => \sprintf('%s:%s', $doc['_source']['_contenttype'], $doc['_id']),
                     'operator' => 'AND',
                 ],
             ],
@@ -62,7 +62,7 @@ class TextValue
     public function getQuery(string $field, string $analyzer, float $boost = 1.0): array
     {
         $matches = [];
-        preg_match_all('/^\"(.*)\"$/', $this->text, $matches);
+        \preg_match_all('/^\"(.*)\"$/', $this->text, $matches);
 
         if (isset($matches[1][0])) {
             return [
@@ -76,7 +76,7 @@ class TextValue
             ];
         }
 
-        if (false !== strpos($this->text, '*')) {
+        if (false !== \strpos($this->text, '*')) {
             return [
                 'query_string' => [
                     'default_field' => $field ?: '_all',

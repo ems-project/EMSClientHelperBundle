@@ -49,7 +49,7 @@ class Handler
         $route = $this->router->getRouteCollection()->get($name);
 
         if (null === $route) {
-            throw new NotFoundHttpException(sprintf('ems route "%s" not found', $name));
+            throw new NotFoundHttpException(\sprintf('ems route "%s" not found', $name));
         }
 
         return $route;
@@ -67,20 +67,20 @@ class Handler
         }
 
         $pattern = '/%(?<parameter>(_|)[[:alnum:]]*)%/m';
-        $json = preg_replace_callback($pattern, function ($match) use ($request) {
+        $json = \preg_replace_callback($pattern, function ($match) use ($request) {
             return $request->get($match['parameter'], $match[0]);
         }, $query);
 
         $indexRegex = $route->getOption('index_regex');
         if (null !== $indexRegex) {
             $pattern = '/%(?<parameter>(_|)[[:alnum:]]*)%/m';
-            $indexRegex = preg_replace_callback($pattern, function ($match) use ($request) {
+            $indexRegex = \preg_replace_callback($pattern, function ($match) use ($request) {
                 return $request->get($match['parameter'], $match[0]);
             }, $indexRegex);
         }
 
         try {
-            return $this->clientRequest->searchOne($route->getOption('type'), json_decode($json, true), $indexRegex);
+            return $this->clientRequest->searchOne($route->getOption('type'), \json_decode($json, true), $indexRegex);
         } catch (SingleResultException $e) {
             throw new NotFoundHttpException();
         }
@@ -91,11 +91,11 @@ class Handler
         $template = $route->getOption('template');
 
         $pattern = '/%(?<parameter>(_|)[[:alnum:]]*)%/m';
-        $template = preg_replace_callback($pattern, function ($match) use ($request) {
+        $template = \preg_replace_callback($pattern, function ($match) use ($request) {
             return $request->get($match['parameter'], $match[0]);
         }, $template);
 
-        if (null === $document || TwigLoader::PREFIX === substr($template, 0, 6)) {
+        if (null === $document || TwigLoader::PREFIX === \substr($template, 0, 6)) {
             return $template;
         }
 

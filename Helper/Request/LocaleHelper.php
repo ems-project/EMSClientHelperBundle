@@ -37,7 +37,7 @@ class LocaleHelper
 
         if ($request->cookies->has('_locale')) {
             $url = $request->getUriForPath('/'.$request->cookies->get('_locale').$destination);
-        } elseif (1 === count($this->locales)) {
+        } elseif (1 === \count($this->locales)) {
             $url = $request->getUriForPath('/'.$this->locales[0].$destination);
         } else {
             $url = $this->router->generate('emsch_language_selection', ['destination' => $destination]);
@@ -75,8 +75,8 @@ class LocaleHelper
      */
     private function getLocaleFromUri($uri)
     {
-        $regex = sprintf('/^\/(?P<locale>%s).*$/', implode('|', $this->locales));
-        preg_match($regex, $uri, $matches);
+        $regex = \sprintf('/^\/(?P<locale>%s).*$/', \implode('|', $this->locales));
+        \preg_match($regex, $uri, $matches);
 
         return isset($matches['locale']) ? $matches['locale'] : false;
     }

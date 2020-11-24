@@ -69,8 +69,8 @@ class Configuration implements ConfigurationInterface
                     ->beforeNormalization()
                         ->ifArray()
                         ->then(function ($v) {
-                            if (1 === count($v)) {
-                                $v[key($v)]['default'] = true;
+                            if (1 === \count($v)) {
+                                $v[\key($v)]['default'] = true;
 
                                 return $v;
                             }
@@ -87,7 +87,7 @@ class Configuration implements ConfigurationInterface
                                 throw new \InvalidArgumentException('no default elasticms configured');
                             }
 
-                            if (count($default) > 1) {
+                            if (\count($default) > 1) {
                                 throw new \InvalidArgumentException('there can only be 1 default elasticms');
                             }
 

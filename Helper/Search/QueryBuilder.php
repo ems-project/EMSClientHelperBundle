@@ -22,7 +22,7 @@ class QueryBuilder
         $postFilter = $this->getPostFilters();
         $hasPostFilter = null != $postFilter;
 
-        return array_filter([
+        return \array_filter([
             'query' => $this->getQuery(),
             'post_filter' => $postFilter,
             'aggs' => $this->getAggs($hasPostFilter),
@@ -152,7 +152,7 @@ class QueryBuilder
             $aggs[$filter->getName()] = $aggregation;
         }
 
-        return array_filter($aggs);
+        return \array_filter($aggs);
     }
 
     private function getAgg(Filter $filter): ?array
@@ -160,7 +160,7 @@ class QueryBuilder
         $agg = ['terms' => ['field' => $filter->getField(), 'size' => $filter->getAggSize()]];
 
         if ($filter->isReversedNested()) {
-            $agg = array_merge($agg, ['aggs' => ['reversed_nested' => ['reverse_nested' => new \stdClass()]]]);
+            $agg = \array_merge($agg, ['aggs' => ['reversed_nested' => ['reverse_nested' => new \stdClass()]]]);
         }
 
         if (null !== $filter->getSortField()) {

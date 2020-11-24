@@ -93,7 +93,7 @@ class ClientRequest
 
         $this->logger->debug('ClientRequest : analyze {text} with {analyzer}', ['text' => $text, 'analyzer' => $analyzer]);
         $out = [];
-        preg_match_all('/"(?:\\\\.|[^\\\\"])*"|\S+/', $text, $out);
+        \preg_match_all('/"(?:\\\\.|[^\\\\"])*"|\S+/', $text, $out);
         $words = $out[0];
 
         $params = [
@@ -142,9 +142,9 @@ class ClientRequest
         $out = [$emsKey];
         $item = $this->getByEmsKey($emsKey);
 
-        if (isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
+        if (isset($item['_source'][$childrenField]) && \is_array($item['_source'][$childrenField])) {
             foreach ($item['_source'][$childrenField] as $key) {
-                $out = array_merge($out, $this->getAllChildren($key, $childrenField));
+                $out = \array_merge($out, $this->getAllChildren($key, $childrenField));
             }
         }
 
@@ -228,9 +228,9 @@ class ClientRequest
     {
         $index = $this->getIndex();
         $info = $this->client->indices()->getMapping(['index' => $index]);
-        $mapping = array_shift($info);
+        $mapping = \array_shift($info);
 
-        return array_keys($mapping['mappings']);
+        return \array_keys($mapping['mappings']);
     }
 
     /**
@@ -247,7 +247,7 @@ class ClientRequest
         ]);
 
         $analyzer = 'standard';
-        while (is_array($info = array_shift($info))) {
+        while (\is_array($info = \array_shift($info))) {
             if (isset($info['analyzer'])) {
                 $analyzer = $info['analyzer'];
             } elseif (isset($info['mapping'])) {
@@ -270,7 +270,7 @@ class ClientRequest
         $out = new HierarchicalStructure($item['_type'], $item['_id'], $item['_source'], $activeChild);
 
         if (null === $depth || $depth) {
-            if (isset($item['_source'][$childrenField]) && is_array($item['_source'][$childrenField])) {
+            if (isset($item['_source'][$childrenField]) && \is_array($item['_source'][$childrenField])) {
                 foreach ($item['_source'][$childrenField] as $key) {
                     if ($key) {
                         $child = $this->getHierarchy($key, $childrenField, (null === $depth ? null : $depth - 1), $sourceFields, $activeChild);
@@ -361,7 +361,7 @@ class ClientRequest
 
         if (!empty($this->lastUpdateByType)) {
             $mostRecentUpdate = new \DateTime('2019-06-01T12:00:00Z');
-            $types = explode(',', $type);
+            $types = \explode(',', $type);
             foreach ($types as $currentType) {
                 if (isset($this->lastUpdateByType[$currentType]) && $mostRecentUpdate < $this->lastUpdateByType[$currentType]) {
                     $mostRecentUpdate = $this->lastUpdateByType[$currentType];
@@ -410,13 +410,13 @@ class ClientRequest
      */
     public static function getOuuid($emsLink)
     {
-        if (!strpos($emsLink, ':')) {
+        if (!\strpos($emsLink, ':')) {
             return $emsLink;
         }
 
-        $split = preg_split('/:/', $emsLink);
+        $split = \preg_split('/:/', $emsLink);
 
-        return array_pop($split);
+        return \array_pop($split);
     }
 
     public function hasOption(string $option): bool
@@ -446,7 +446,7 @@ class ClientRequest
      */
     public function getPrefixes()
     {
-        return explode('|', $this->indexPrefix);
+        return \explode('|', $this->indexPrefix);
     }
 
     /**
@@ -456,11 +456,11 @@ class ClientRequest
      */
     public static function getType($emsLink)
     {
-        if (!strpos($emsLink, ':')) {
+        if (!\strpos($emsLink, ':')) {
             return $emsLink;
         }
 
-        $split = preg_split('/:/', $emsLink);
+        $split = \preg_split('/:/', $emsLink);
 
         return $split[0];
     }
@@ -479,7 +479,7 @@ class ClientRequest
         } else {
             $index = [];
             foreach ($this->getIndex() as $alias) {
-                if (preg_match(sprintf('/%s/', $regex), $alias)) {
+                if (\preg_match(\sprintf('/%s/', $regex), $alias)) {
                     $index[] = $alias;
                 }
             }
@@ -500,7 +500,7 @@ class ClientRequest
             ]);
 
             foreach ($aggs['aggregations']['indexes']['buckets'] as $bucket) {
-                if (preg_match(sprintf('/%s/', $regex), $bucket['key'])) {
+                if (\preg_match(\sprintf('/%s/', $regex), $bucket['key'])) {
                     $index[] = $bucket['key'];
                 }
             }
@@ -630,7 +630,7 @@ class ClientRequest
         $hits = $search['hits'];
 
         if (1 !== \count($hits['hits'])) {
-            throw new SingleResultException(sprintf('expected 1 result, got %d', $hits['hits']));
+            throw new SingleResultException(\sprintf('expected 1 result, got %d', $hits['hits']));
         }
 
         return $hits['hits'][0];
@@ -699,7 +699,7 @@ class ClientRequest
 
         $response = $this->client->search($params);
 
-        while (isset($response['hits']['hits']) && count($response['hits']['hits']) > 0) {
+        while (isset($response['hits']['hits']) && \count($response['hits']['hits']) > 0) {
             $scrollId = $response['_scroll_id'];
 
             foreach ($response['hits']['hits'] as $hit) {
@@ -730,7 +730,7 @@ class ClientRequest
     {
         $index = $this->getIndex();
 
-        return $prefix.(is_array($index) ? implode('_', $index) : $index);
+        return $prefix.(\is_array($index) ? \implode('_', $index) : $index);
     }
 
     /**
@@ -746,7 +746,7 @@ class ClientRequest
             throw new EnvironmentNotFoundException();
         }
 
-        $prefixes = explode('|', $this->indexPrefix);
+        $prefixes = \explode('|', $this->indexPrefix);
         $out = [];
         foreach ($prefixes as $prefix) {
             $out[] = $prefix.$environment;
@@ -764,11 +764,11 @@ class ClientRequest
     private function getFirstIndex()
     {
         $aliases = $this->getIndex();
-        if (is_array($aliases) && count($aliases) > 0) {
+        if (\is_array($aliases) && \count($aliases) > 0) {
             $aliases = $aliases[0];
         }
 
-        return array_keys($this->client->indices()->getAlias([
+        return \array_keys($this->client->indices()->getAlias([
             'index' => $aliases,
         ]))[0];
     }

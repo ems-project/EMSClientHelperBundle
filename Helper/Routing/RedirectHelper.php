@@ -68,7 +68,7 @@ class RedirectHelper
                 'bool' => [
                     'must' => [
                         'term' => [
-                            'url_'.$locale => urldecode($uri),
+                            'url_'.$locale => \urldecode($uri),
                         ],
                     ],
                 ],
