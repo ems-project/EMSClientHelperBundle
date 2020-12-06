@@ -103,26 +103,13 @@ class EMSClientHelperExtension extends Extension
 
     private function defineElasticsearchLogger(ContainerBuilder $container, array $options)
     {
-        $definition = new Definition(Client::class);
-        $config = [
-            'hosts' => $options['hosts'],
-            'sSLVerification' => CaBundle::getBundledCaBundlePath(),
-        ];
-
-        $definition
-            ->setFactory([new Reference('ems_common.elasticsearch.factory'), 'fromConfig'])
-            ->setArgument(0, $config)
-            ->setPublic(true);
-
-        $container->setDefinition('ems_common.elasticsearch.log.client', $definition);
-
         $definition = new Definition(ElasticsearchLogger::class);
         $definition->setArguments([
             'info',
             $options['instance_id'],
             '',
             'ems_client',
-            new Reference('ems_common.elasticsearch.log.client'),
+            new Reference('ems_common.elastica.client'),
             new Reference('security.helper'),
             $options['by_pass'],
         ]);
