@@ -64,7 +64,7 @@ Example uri for filtering all documents in november 2018.
 
 ### Date Version
 
-Elasticms support versioning on documents. Documents share a version uuid and have a from and to date. 
+Elasticms supports versioning on documents. Documents share a version uuid and have a from and to date. 
 The document without a to date is the current version.
 
 This means we can search for date and get the matching version document. 
