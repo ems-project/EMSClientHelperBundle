@@ -111,6 +111,7 @@ class EMSClientHelperExtension extends Extension
             'ems_client',
             new Reference('ems_common.elastica.client'),
             new Reference('security.helper'),
+            new Reference('ems_common.service.mapping'),
             $options['by_pass'],
         ]);
         $definition->addTag('kernel.cache_warmer');
