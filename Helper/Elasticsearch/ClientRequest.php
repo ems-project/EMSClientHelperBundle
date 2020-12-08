@@ -618,7 +618,7 @@ class ClientRequest
     /**
      * @param string|array $type
      *
-     * @return array{_id:string,_type:string,_source:array<mixed>}
+     * @return array{_id: string, _type?: string, _source: array}
      *
      * @throws SingleResultException
      */

@@ -56,7 +56,7 @@ class Handler
     }
 
     /**
-     * @return array{_id:string,_type:string,_source:array<mixed>}|null
+     * @return array{_id: string, _type?: string, _source: array}|null
      */
     public function getDocument(Request $request, SymfonyRoute $route): ?array
     {

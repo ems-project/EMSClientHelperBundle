@@ -162,8 +162,8 @@ class HealthCheckCommand extends Command
 
         $adapters = [];
 
-        foreach ($this->storageManager->getAdapters() as $adapter) {
-            $adapters[] = \get_class($adapter).' -> '.($adapter->health() ? 'green' : 'red');
+        foreach ($this->storageManager->getHealthStatuses() as $name => $status) {
+            $adapters[] = $name . ' -> ' . ($status ? 'green' : 'red');
         }
 
         $io->listing($adapters);
