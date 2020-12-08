@@ -51,11 +51,6 @@ parameters:
 			path: Command/HealthCheckCommand.php
 
 		-
-			message: "#^Call to an undefined method EMS\\\\CommonBundle\\\\Storage\\\\StorageManager\\:\\:getAdapters\\(\\)\\.$#"
-			count: 1
-			path: Command/HealthCheckCommand.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Controller\\\\ApiController\\:\\:handleFormPostRequest\\(\\) has no return typehint specified\\.$#"
 			count: 1
 			path: Controller/ApiController.php
@@ -986,11 +981,6 @@ parameters:
 			path: Helper/Search/Filter.php
 
 		-
-			message: "#^Property EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Filter\\:\\:\\$query type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Search/Filter.php
-
-		-
 			message: "#^Property EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Filter\\:\\:\\$value type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Search/Filter.php
@@ -1046,22 +1036,12 @@ parameters:
 			path: Helper/Search/Filter.php
 
 		-
-			message: "#^Property EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Filter\\:\\:\\$query \\(array\\) does not accept array\\|null\\.$#"
-			count: 1
-			path: Helper/Search/Filter.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Filter\\:\\:getQueryDateRange\\(\\) has parameter \\$value with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Search/Filter.php
 
 		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Filter\\:\\:getQueryDateRange\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Search/Filter.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Filter\\:\\:getQueryOptional\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Search/Filter.php
 
