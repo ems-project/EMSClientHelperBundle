@@ -32,7 +32,7 @@ class EnvironmentHelper
     {
         $current = $this->requestStack->getCurrentRequest();
 
-        return ($current ? $current->get('_backend') : null);
+        return $current ? $current->get('_backend') : null;
     }
 
     /**
@@ -60,6 +60,6 @@ class EnvironmentHelper
     {
         $current = $this->requestStack->getCurrentRequest();
 
-        return ($current ? $current->getLocale() : null);
+        return $current ? $current->getLocale() : null;
     }
 }

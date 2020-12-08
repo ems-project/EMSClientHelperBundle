@@ -4,12 +4,12 @@ namespace EMS\ClientHelperBundle\EventListener;
 
 use EMS\ClientHelperBundle\Helper\Routing\RedirectHelper;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\RouterInterface;
 
 class RedirectListener implements EventSubscriberInterface
@@ -29,11 +29,6 @@ class RedirectListener implements EventSubscriberInterface
      */
     private $router;
 
-    /**
-     * @param RedirectHelper      $redirectHelper
-     * @param HttpKernelInterface $kernel
-     * @param RouterInterface     $router
-     */
     public function __construct(
         RedirectHelper $redirectHelper,
         HttpKernelInterface $kernel,
@@ -45,8 +40,6 @@ class RedirectListener implements EventSubscriberInterface
     }
 
     /**
-     * @param GetResponseForExceptionEvent $event
-     *
      * @return void
      */
     public function onKernelException(GetResponseForExceptionEvent $event)
@@ -60,6 +53,7 @@ class RedirectListener implements EventSubscriberInterface
 
         if ($exception instanceof NotFoundHttpException) {
             $this->handleNotFoundException($event);
+
             return;
         }
     }
@@ -75,8 +69,6 @@ class RedirectListener implements EventSubscriberInterface
     }
 
     /**
-     * @param GetResponseForExceptionEvent $event
-     *
      * @return void
      */
     private function handleNotFoundException(GetResponseForExceptionEvent $event)
@@ -85,18 +77,13 @@ class RedirectListener implements EventSubscriberInterface
 
         $forwardUri = $this->redirectHelper->getForwardUri($request);
 
-        if ($forwardUri && is_string($forwardUri)) {
+        if ($forwardUri && \is_string($forwardUri)) {
             $this->forwardNotFound($event, $forwardUri);
         }
     }
 
-    /**
-     * @param GetResponseForExceptionEvent $event
-     * @param string                       $uri
-     */
     public function forwardNotFound(GetResponseForExceptionEvent $event, string $uri)
     {
-
         try {
             $this->router->match($uri);
 
@@ -104,7 +91,7 @@ class RedirectListener implements EventSubscriberInterface
 
             $attributes = [];
 
-            $server = array_merge($request->server->all(), ['REQUEST_URI' => $uri]);
+            $server = \array_merge($request->server->all(), ['REQUEST_URI' => $uri]);
             $subRequest = $request->duplicate(null, null, $attributes, null, null, $server);
 
             $subResponse = $this->kernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
@@ -121,19 +108,18 @@ class RedirectListener implements EventSubscriberInterface
     }
 
     /**
-     * @param Request $request
-     * @param string  $uri
+     * @param string $uri
      *
      * @return string
      */
     private function getHeaderLink(Request $request, $uri)
     {
-        $url = vsprintf('%s://%s%s', [
+        $url = \vsprintf('%s://%s%s', [
             $request->getScheme(),
             $request->getHttpHost(),
             $uri,
         ]);
 
-        return sprintf('<%s>; rel="canonical"', $url);
+        return \sprintf('<%s>; rel="canonical"', $url);
     }
 }

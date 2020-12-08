@@ -23,27 +23,27 @@ class AssetHelperRuntime implements RuntimeExtensionInterface
     {
         $this->storageManager = $storageManager;
         $this->manager = $manager;
-        $this->publicDir = $projectDir . '/public';
+        $this->publicDir = $projectDir.'/public';
 
         $this->filesystem = new Filesystem();
     }
 
     public function assets(string $hash, string $saveDir = 'bundles'): void
     {
-        $basePath = $this->publicDir . \DIRECTORY_SEPARATOR . $saveDir . \DIRECTORY_SEPARATOR;
-        $directory = $basePath . $hash;
+        $basePath = $this->publicDir.\DIRECTORY_SEPARATOR.$saveDir.\DIRECTORY_SEPARATOR;
+        $directory = $basePath.$hash;
 
         try {
             $cacheKey = $this->manager->getDefault()->getCacheKey();
-            $symlink = $basePath . $cacheKey;
+            $symlink = $basePath.$cacheKey;
 
-            if ($this->filesystem->exists($symlink . \DIRECTORY_SEPARATOR . $hash)) {
+            if ($this->filesystem->exists($symlink.\DIRECTORY_SEPARATOR.$hash)) {
                 return; //valid
             }
 
             if (!$this->filesystem->exists($directory)) {
                 AssetRuntime::extract($this->storageManager->getStream($hash), $directory);
-                $this->filesystem->touch($directory . \DIRECTORY_SEPARATOR . $hash);
+                $this->filesystem->touch($directory.\DIRECTORY_SEPARATOR.$hash);
             }
 
             $this->manager->getLogger()->warning('switching assets {symlink} to {hash}', ['symlink' => $symlink, 'hash' => $hash]);

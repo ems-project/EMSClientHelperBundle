@@ -59,9 +59,9 @@ class Environment
             return true;
         }
 
-        $url = vsprintf('%s://%s%s', [$request->getScheme(), $request->getHttpHost(), $request->getBasePath() ]);
+        $url = \vsprintf('%s://%s%s', [$request->getScheme(), $request->getHttpHost(), $request->getBasePath()]);
 
-        return 1 === preg_match($this->regex, $url) ? true : false;
+        return 1 === \preg_match($this->regex, $url) ? true : false;
     }
 
     public function modifyRequest(Request $request)

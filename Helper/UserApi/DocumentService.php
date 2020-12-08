@@ -29,18 +29,21 @@ final class DocumentService
     public function createDocument(string $contentType, Request $request): JsonResponse
     {
         $endpoint = \sprintf('api/data/%s/draft', $contentType);
+
         return $this->createAndFinalizeDraft($contentType, $request, $endpoint);
     }
 
     public function updateDocument(string $contentType, string $ouuid, Request $request): JsonResponse
     {
         $endpoint = \sprintf('/api/data/%s/replace/%s', $contentType, $ouuid);
+
         return $this->createAndFinalizeDraft($contentType, $request, $endpoint);
     }
 
     public function mergeDocument(string $contentType, string $ouuid, Request $request): JsonResponse
     {
         $endpoint = \sprintf('/api/data/%s/merge/%s', $contentType, $ouuid);
+
         return $this->createAndFinalizeDraft($contentType, $request, $endpoint);
     }
 
@@ -49,7 +52,7 @@ final class DocumentService
         $client = $this->client->createClient(['X-Auth-Token' => $request->headers->get('X-Auth-Token')]);
 
         $body = $request->getContent();
-        if (! \is_string($body)) {
+        if (!\is_string($body)) {
             throw new NotFoundHttpException('JSON file not found');
         }
 

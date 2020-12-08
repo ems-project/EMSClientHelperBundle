@@ -2,11 +2,9 @@
 
 namespace EMS\ClientHelperBundle\Exception;
 
-/**
- */
 class MissingTranslationException extends \Exception
 {
-    protected $AVAILABLE_LANGUAGES = ["fr", "nl", "de", "en"];
+    protected $AVAILABLE_LANGUAGES = ['fr', 'nl', 'de', 'en'];
 
     private $linkLabels;
     private $ouuid;

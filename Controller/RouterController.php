@@ -16,7 +16,7 @@ class RouterController
     private $handler;
     /** @var Environment */
     private $templating;
-    /** @var Processor*/
+    /** @var Processor */
     private $processor;
     /** @var CacheHelper */
     private $cacheHelper;
@@ -35,6 +35,7 @@ class RouterController
 
         $response = new Response($this->templating->render($result['template'], $result['context']));
         $this->cacheHelper->makeResponseCacheable($request, $response);
+
         return $response;
     }
 
@@ -54,6 +55,7 @@ class RouterController
         $json = $this->templating->render($result['template'], $result['context']);
 
         $data = \json_decode($json, true);
+
         return $this->processor->getResponse($request, $data['hash'], $data['config'], $data['filename']);
     }
 }
