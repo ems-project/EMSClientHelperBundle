@@ -3,9 +3,9 @@
 namespace EMS\ClientHelperBundle\EventListener;
 
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
+use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\ClientHelperBundle\Helper\Request\ExceptionHelper;
 use EMS\ClientHelperBundle\Helper\Request\LocaleHelper;
-use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\ClientHelperBundle\Helper\Translation\TranslationHelper;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -65,7 +65,7 @@ class KernelListener implements EventSubscriberInterface
                 ['redirectMissingLocale', 21],
                 ['loadTranslations', 20], //not found is maybe redirected or custom error pages with translations
                 ['customErrorTemplate', -10],
-            ]
+            ],
         ];
     }
 
@@ -92,7 +92,7 @@ class KernelListener implements EventSubscriberInterface
     public function bindLocale(ResponseEvent $event): void
     {
         if ($this->bindLocale && $locale = $this->localeHelper->getLocale($event->getRequest())) {
-            $event->getResponse()->headers->setCookie(new Cookie('_locale', $locale, strtotime('now + 12 months')));
+            $event->getResponse()->headers->setCookie(new Cookie('_locale', $locale, \strtotime('now + 12 months')));
         }
     }
 
@@ -105,7 +105,7 @@ class KernelListener implements EventSubscriberInterface
             return;
         }
 
-        if (preg_match('/(emsch_api_).*/', $request->attributes->get('_route'))) {
+        if (\preg_match('/(emsch_api_).*/', $request->attributes->get('_route'))) {
             return;
         }
 

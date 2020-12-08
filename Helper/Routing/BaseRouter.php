@@ -4,11 +4,11 @@ namespace EMS\ClientHelperBundle\Helper\Routing;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGenerator;
+use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
 
 abstract class BaseRouter implements RouterInterface, RequestMatcherInterface
 {
@@ -33,7 +33,7 @@ abstract class BaseRouter implements RouterInterface, RequestMatcherInterface
     protected $generator;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getContext()
     {
@@ -41,7 +41,7 @@ abstract class BaseRouter implements RouterInterface, RequestMatcherInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function setContext(RequestContext $context)
     {
@@ -49,7 +49,7 @@ abstract class BaseRouter implements RouterInterface, RequestMatcherInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function match($pathInfo)
     {
@@ -57,7 +57,7 @@ abstract class BaseRouter implements RouterInterface, RequestMatcherInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function matchRequest(Request $request)
     {
@@ -65,16 +65,13 @@ abstract class BaseRouter implements RouterInterface, RequestMatcherInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function generate($name, $parameters = [], $referenceType = self::ABSOLUTE_PATH)
     {
         return $this->getGenerator()->generate($name, $parameters, $referenceType);
     }
 
-    /**
-     * @return UrlMatcher
-     */
     private function getMatcher(): UrlMatcher
     {
         if (null === $this->matcher) {
@@ -84,9 +81,6 @@ abstract class BaseRouter implements RouterInterface, RequestMatcherInterface
         return $this->matcher;
     }
 
-    /**
-     * @return UrlGenerator
-     */
     private function getGenerator(): UrlGenerator
     {
         if (null === $this->generator) {

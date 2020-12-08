@@ -62,6 +62,43 @@ Example uri for filtering all documents in november 2018.
 
 /search?**fdate[start_date]**=1-11-2018&**fdate[end_date]**=30-11-2018
 
+### Date Version
+
+Elasticms supports versioning on documents. Documents share a version uuid and have a from and to date. 
+The document without a to date is the current version.
+
+This means we can search for date and get the matching version document. 
+We will never have multiple results for a certain date because elasticms does not create gabs between versions.
+
+Example:
+
+````json
+{
+   "search_version": { "type": "date_version", "date_format": "d/m/Y", "value": "now"}
+}
+````
+Default config options:
+- **field**: version_from_date
+- **secondary_field**: version_to_date
+
+| Document X | version_from_date | version_to_date |
+|---|---|---|
+| Original document | 2019-01-01T14:54:09+02:00 |  **2019-06-06T16:30:08+02:00** |
+| Major version | **2019-06-06T16:30:08+02:00** |  2019-08-08T19:22:05+02:00 |
+| Minor version | 2019-08-08T19:22:05+02:00 |  2020-01-01T10:15:17+02:00 |
+| Current version | 2020-01-01T10:15:17+02:00 |   |
+
+| Search value | result | 
+|---|---|
+| empty | Current version (because value = 'now') |
+| 19/02/2020 | Current version |
+| 01/01/2020 | Current version |
+| 31/12/2019 | Minor version |
+| 07/07/2018 | No result (document created on 01/01/2019) |
+| 06/06/2019 | Major version |
+| 19/02/2019 | Original document |
+| 01/08/2019 | Minor version |
+
 ## Nested queries
 
 If facets depends on facets, we can create a nested collection for filtering.

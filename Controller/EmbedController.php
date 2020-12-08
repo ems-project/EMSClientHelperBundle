@@ -32,6 +32,7 @@ class EmbedController extends AbstractController
 
         return $this->clientRequest->getCacheResponse($cacheKey, $cacheType, function () use ($template, $parent, $field, $depth, $sourceFields, $args) {
             $hierarchy = $this->clientRequest->getHierarchy($parent, $field, $depth, $sourceFields, $args['activeChild'] ?? null);
+
             return $this->render($template, [
                 'translation_domain' => $this->clientRequest->getCacheKey(),
                 'args' => $args,
@@ -56,6 +57,7 @@ class EmbedController extends AbstractController
 
         return $this->clientRequest->getCacheResponse($cacheKey, $cacheType, function () use ($searchType, $body, $template, $args, $from, $size, $sourceExclude) {
             $result = $this->clientRequest->search($searchType, $body, $from, $size, $sourceExclude);
+
             return $this->render($template, [
                 'translation_domain' => $this->clientRequest->getCacheKey(),
                 'args' => $args,

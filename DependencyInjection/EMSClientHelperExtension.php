@@ -22,7 +22,7 @@ class EMSClientHelperExtension extends Extension
      */
     public function load(array $configs, ContainerBuilder $container)
     {
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
         $loader->load('routing.xml');
         $loader->load('search.xml');
@@ -55,11 +55,6 @@ class EMSClientHelperExtension extends Extension
         }
     }
 
-    /**
-     * @param ContainerBuilder $container
-     * @param XmlFileLoader    $loader
-     * @param array            $config
-     */
     private function processElasticms(ContainerBuilder $container, XmlFileLoader $loader, array $config)
     {
         foreach ($config as $name => $options) {
@@ -72,10 +67,6 @@ class EMSClientHelperExtension extends Extension
         }
     }
 
-    /**
-     * @param ContainerBuilder $container
-     * @param array $config
-     */
     private function processApi(ContainerBuilder $container, array $config)
     {
         foreach ($config as $name => $options) {
@@ -86,14 +77,12 @@ class EMSClientHelperExtension extends Extension
             $definition->setArgument(3, new Reference('logger'));
             $definition->addTag('emsch.api_client');
 
-            $container->setDefinition(sprintf('emsch.api_client.%s', $name), $definition);
+            $container->setDefinition(\sprintf('emsch.api_client.%s', $name), $definition);
         }
     }
 
     /**
-     * @param ContainerBuilder $container
      * @param string $name
-     * @param array $options
      */
     private function defineElasticsearchClient(ContainerBuilder $container, $name, array $options)
     {
@@ -109,32 +98,20 @@ class EMSClientHelperExtension extends Extension
             ->setPublic(true);
         $definition->addTag('emsch.elasticsearch.client');
 
-        $container->setDefinition(sprintf('ems_common.elasticsearch.%s', $name), $definition);
+        $container->setDefinition(\sprintf('ems_common.elasticsearch.%s', $name), $definition);
     }
 
     private function defineElasticsearchLogger(ContainerBuilder $container, array $options)
     {
-        $definition = new Definition(Client::class);
-        $config = [
-            'hosts' => $options['hosts'],
-            'sSLVerification' => CaBundle::getBundledCaBundlePath(),
-        ];
-
-        $definition
-            ->setFactory([new Reference('ems_common.elasticsearch.factory'), 'fromConfig'])
-            ->setArgument(0, $config)
-            ->setPublic(true);
-
-        $container->setDefinition('ems_common.elasticsearch.log.client', $definition);
-
         $definition = new Definition(ElasticsearchLogger::class);
         $definition->setArguments([
             'info',
             $options['instance_id'],
             '',
             'ems_client',
-            new Reference('ems_common.elasticsearch.log.client'),
+            new Reference('ems_common.elastica.client'),
             new Reference('security.helper'),
+            new Reference('ems_common.service.mapping'),
             $options['by_pass'],
         ]);
         $definition->addTag('kernel.cache_warmer');
@@ -146,21 +123,18 @@ class EMSClientHelperExtension extends Extension
     }
 
     /**
-     * @param ContainerBuilder $container
-     * @param XmlFileLoader    $loader
-     * @param string           $name
-     * @param array            $options
+     * @param string $name
      */
     private function defineClientRequest(ContainerBuilder $container, XmlFileLoader $loader, $name, array $options)
     {
         $definition = new Definition(ClientRequest::class);
         $definition->setArguments([
-            new Reference(sprintf('ems_common.elasticsearch.%s', $name)),
+            new Reference(\sprintf('ems_common.elasticsearch.%s', $name)),
             new Reference('emsch.helper_environment'),
             new Reference('logger'),
             new Reference('cache.app'),
             $name,
-            $options
+            $options,
         ]);
         $definition->addTag('emsch.client_request');
 
@@ -169,12 +143,9 @@ class EMSClientHelperExtension extends Extension
             $definition->addTag('emsch.client_request.api');
         }
 
-        $container->setDefinition(sprintf('emsch.client_request.%s', $name), $definition);
+        $container->setDefinition(\sprintf('emsch.client_request.%s', $name), $definition);
     }
 
-    /**
-     * @param XmlFileLoader $loader
-     */
     private function loadClientRequestApi(XmlFileLoader $loader)
     {
         static $loaded = false;
@@ -188,26 +159,21 @@ class EMSClientHelperExtension extends Extension
     }
 
     /**
-     * @param ContainerBuilder $container
-     * @param string           $name
-     * @param array            $options
+     * @param string $name
+     * @param array  $options
      */
     private function defineTwigLoader(ContainerBuilder $container, $name, $options)
     {
         $loader = new Definition(TwigLoader::class);
         $loader->setArguments([
-            new Reference(sprintf('emsch.client_request.%s', $name)),
-            $options
+            new Reference(\sprintf('emsch.client_request.%s', $name)),
+            $options,
         ]);
         $loader->addTag('twig.loader', ['alias' => $name, 'priority' => 1]);
 
-        $container->setDefinition(sprintf('emsch.twig.loader.%s', $name), $loader);
+        $container->setDefinition(\sprintf('emsch.twig.loader.%s', $name), $loader);
     }
 
-    /**
-     * @param ContainerBuilder $container
-     * @param array            $config
-     */
     private function processRoutingSelection(ContainerBuilder $container, array $config)
     {
         if (!$config['enabled']) {
@@ -221,7 +187,6 @@ class EMSClientHelperExtension extends Extension
     }
 
     /**
-     * @param ContainerBuilder $container
      * @param array<string> $config
      */
     private function processUserApi(ContainerBuilder $container, array $config): void

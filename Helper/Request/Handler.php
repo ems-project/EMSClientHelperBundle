@@ -10,8 +10,8 @@ use EMS\CommonBundle\Common\EMSLink;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Routing\Route as SymfonyRoute;
+use Symfony\Component\Routing\RouterInterface;
 
 class Handler
 {
@@ -31,7 +31,7 @@ class Handler
         $route = $this->getRoute($request);
         $context = ['trans_default_domain' => $this->clientRequest->getCacheKey()];
 
-        if ($document = $this->getDocument($request, $route)) {
+        if (null !== $document = $this->getDocument($request, $route)) {
             $context['document'] = $document;
             $context['source'] = $document['_source'];
             $context['emsLink'] = EMSLink::fromDocument($document);
@@ -49,12 +49,15 @@ class Handler
         $route = $this->router->getRouteCollection()->get($name);
 
         if (null === $route) {
-            throw new NotFoundHttpException(sprintf('ems route "%s" not found', $name));
+            throw new NotFoundHttpException(\sprintf('ems route "%s" not found', $name));
         }
 
         return $route;
     }
 
+    /**
+     * @return array{_id: string, _type?: string, _source: array}|null
+     */
     public function getDocument(Request $request, SymfonyRoute $route): ?array
     {
         $query = $route->getOption('query');
@@ -64,21 +67,20 @@ class Handler
         }
 
         $pattern = '/%(?<parameter>(_|)[[:alnum:]]*)%/m';
-        $json = preg_replace_callback($pattern, function ($match) use ($request) {
+        $json = \preg_replace_callback($pattern, function ($match) use ($request) {
             return $request->get($match['parameter'], $match[0]);
         }, $query);
 
         $indexRegex = $route->getOption('index_regex');
-        if ($indexRegex !== null) {
+        if (null !== $indexRegex) {
             $pattern = '/%(?<parameter>(_|)[[:alnum:]]*)%/m';
-            $indexRegex = preg_replace_callback($pattern, function ($match) use ($request) {
+            $indexRegex = \preg_replace_callback($pattern, function ($match) use ($request) {
                 return $request->get($match['parameter'], $match[0]);
             }, $indexRegex);
         }
 
-
         try {
-            return $this->clientRequest->searchOne($route->getOption('type'), json_decode($json, true), $indexRegex);
+            return $this->clientRequest->searchOne($route->getOption('type'), \json_decode($json, true), $indexRegex);
         } catch (SingleResultException $e) {
             throw new NotFoundHttpException();
         }
@@ -89,16 +91,16 @@ class Handler
         $template = $route->getOption('template');
 
         $pattern = '/%(?<parameter>(_|)[[:alnum:]]*)%/m';
-        $template = preg_replace_callback($pattern, function ($match) use ($request) {
+        $template = \preg_replace_callback($pattern, function ($match) use ($request) {
             return $request->get($match['parameter'], $match[0]);
         }, $template);
 
-        if (null === $document || substr($template, 0, 6) === TwigLoader::PREFIX) {
+        if (null === $document || TwigLoader::PREFIX === \substr($template, 0, 6)) {
             return $template;
         }
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
 
-        return TwigLoader::PREFIX . '/' . $propertyAccessor->getValue($document, '[_source]' . $template);
+        return TwigLoader::PREFIX.'/'.$propertyAccessor->getValue($document, '[_source]'.$template);
     }
 }

@@ -411,16 +411,6 @@ parameters:
 			path: Helper/Api/Response.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Asset\\\\AssetHelperRuntime\\:\\:unzip\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Asset/AssetHelperRuntime.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between false and int\\|true will always evaluate to false\\.$#"
-			count: 1
-			path: Helper/Asset/AssetHelperRuntime.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:getData\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Cache/CacheHelper.php
@@ -626,17 +616,7 @@ parameters:
 			path: Helper/Elasticsearch/ClientRequest.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:searchOne\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:searchOneBy\\(\\) has parameter \\$parameters with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:searchOneBy\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Elasticsearch/ClientRequest.php
 
@@ -802,11 +782,6 @@ parameters:
 
 		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Request\\\\Handler\\:\\:handle\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Request/Handler.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Request\\\\Handler\\:\\:getDocument\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Request/Handler.php
 
@@ -1006,11 +981,6 @@ parameters:
 			path: Helper/Search/Filter.php
 
 		-
-			message: "#^Property EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Filter\\:\\:\\$query type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Search/Filter.php
-
-		-
 			message: "#^Property EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Filter\\:\\:\\$value type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Search/Filter.php
@@ -1066,22 +1036,12 @@ parameters:
 			path: Helper/Search/Filter.php
 
 		-
-			message: "#^Property EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Filter\\:\\:\\$query \\(array\\) does not accept array\\|null\\.$#"
-			count: 1
-			path: Helper/Search/Filter.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Filter\\:\\:getQueryDateRange\\(\\) has parameter \\$value with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Search/Filter.php
 
 		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Filter\\:\\:getQueryDateRange\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Search/Filter.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Search\\\\Filter\\:\\:getQueryOptional\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Search/Filter.php
 
