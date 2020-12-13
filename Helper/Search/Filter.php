@@ -361,7 +361,20 @@ class Filter
             ];
         }
 
-        $search = $this->clientRequest->searchArgs(['type' => $this->queryTypes, 'body' => ['query' => $this->queryFilters, 'size' => 0, 'aggs' => [$this->name => $aggs]]]);
+        $args = [
+            'type' => $this->queryTypes,
+            'body' => [
+                'size' => 0,
+                'aggs' => [
+                    $this->name => $aggs
+                ]
+            ]
+        ];
+        if (\count($this->queryFilters) > 0) {
+            $args['body']['query'] = $this->queryFilters;
+        }
+
+        $search = $this->clientRequest->searchArgs($args);
 
         $result = $search['aggregations'][$this->name];
         $buckets = $this->isNested() ? $result['nested']['buckets'] : $result['buckets'];
