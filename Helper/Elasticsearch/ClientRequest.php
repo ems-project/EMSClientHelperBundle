@@ -570,21 +570,17 @@ class ClientRequest
         $scrollTimeout = '30s';
 
         if ($scrollId) {
-            return $this->client->scroll([
-                'scroll_id' => $scrollId,
-                'scroll' => $scrollTimeout,
-            ]);
+            return $this->elasticaService->nextScroll($scrollId, $scrollTimeout)->getData();
         }
 
-        $params = [
+        $search = $this->elasticaService->convertElasticsearchSearch([
             'index' => $this->getIndex(),
             'type' => $type,
             '_source' => $filter,
             'size' => $size,
-            'scroll' => $scrollTimeout,
-        ];
+        ]);
 
-        return $this->client->search($params);
+        return $this->elasticaService->scrollById($search, $scrollTimeout)->getResponse()->getData();
     }
 
     /**
