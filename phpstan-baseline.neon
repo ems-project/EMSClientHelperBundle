@@ -566,21 +566,6 @@ parameters:
 			path: Helper/Elasticsearch/ClientRequest.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:searchAll\\(\\) has parameter \\$body with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:searchAll\\(\\) has parameter \\$type with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:searchAll\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:searchBy\\(\\) has parameter \\$parameters with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Elasticsearch/ClientRequest.php

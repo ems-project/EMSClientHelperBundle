@@ -494,48 +494,9 @@ class ClientRequest
         if (!isset($arguments['index'])) {
             $arguments['index'] = $this->getIndex();
         }
+        $search = $this->elasticaService->convertElasticsearchSearch($arguments);
 
-        return $this->client->search($arguments);
-    }
-
-    /**
-     * http://stackoverflow.com/questions/10836142/elasticsearch-duplicate-results-with-paging.
-     *
-     * @param string|array $type
-     * @param int          $pageSize
-     *
-     * @return array
-     */
-    public function searchAll($type, array $body, $pageSize = 10)
-    {
-        $this->logger->debug('ClientRequest : searchAll for {type}', ['type' => $type, 'body' => $body]);
-        $arguments = [
-            'preference' => '_primary', //see function description
-            //TODO: should be replace by an order by _ouid (in case of insert in the index the pagination will be inconsistent)
-            'from' => 0,
-            'size' => 0,
-            'index' => $this->getIndex(),
-            'type' => $type,
-            'body' => $body,
-        ];
-
-        $totalSearch = $this->client->search($arguments);
-        $total = $totalSearch['hits']['total'];
-
-        $results = [];
-        $arguments['size'] = $pageSize;
-
-        while ($arguments['from'] < $total) {
-            $search = $this->client->search($arguments);
-
-            foreach ($search['hits']['hits'] as $document) {
-                $results[] = $document;
-            }
-
-            $arguments['from'] += $pageSize;
-        }
-
-        return $results;
+        return $this->elasticaService->search($search)->getResponse()->getData();
     }
 
     /**
