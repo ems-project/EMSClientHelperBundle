@@ -528,13 +528,15 @@ class ClientRequest
             ];
         }
 
-        return $this->client->search([
+        $search = $this->elasticaService->convertElasticsearchSearch([
             'index' => $this->getIndex(),
             'type' => $type,
             'body' => $body,
             'size' => $size,
             'from' => $from,
         ]);
+
+        return $this->elasticaService->search($search)->getResponse()->getData();
     }
 
     /**
