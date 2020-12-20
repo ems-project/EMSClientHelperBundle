@@ -431,11 +431,6 @@ parameters:
 			path: Helper/Elasticsearch/ClientRequest.php
 
 		-
-			message: "#^Property EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:\\$lastUpdateByType type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:__construct\\(\\) has parameter \\$options with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Elasticsearch/ClientRequest.php

@@ -23,41 +23,22 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class ClientRequest
 {
-    const CONTENT_TYPE_LIMIT = 500;
-    /**
-     * @var Client
-     */
+    /** @var int */
+    private const CONTENT_TYPE_LIMIT = 500;
+    /** @var Client */
     private $client;
-
-    /**
-     * @var EnvironmentHelper
-     */
+    /** @var EnvironmentHelper */
     private $environmentHelper;
-
-    /**
-     * @var string
-     */
+    /** @var string */
     private $indexPrefix;
-
-    /**
-     * @var LoggerInterface
-     */
+    /** @var LoggerInterface */
     private $logger;
-
-    /**
-     * @var AdapterInterface
-     */
+    /** @var AdapterInterface */
     private $cache;
-
-    /**
-     * @var array
-     */
+    /** @var array */
     private $options;
-
-    /**
-     * @var array
-     */
-    private $lastUpdateByType = [];
+    /** @var array<string, \DateTime> */
+    private $lastUpdateByType;
 
     /**
      * @var string
