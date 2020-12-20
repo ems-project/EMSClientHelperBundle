@@ -34,7 +34,7 @@ final class FileService
             $responses = $this->upload($client, $file);
         }
         $encodedResponse = \json_encode($responses);
-        if ($encodedResponse === false) {
+        if (false === $encodedResponse) {
             $this->logger->error('Unexpected json_encode error of file upload\'s response messages : {error}', ['error' => \json_last_error_msg()]);
             $encodedResponse = '{}';
         }

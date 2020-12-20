@@ -59,7 +59,7 @@ class EnvironmentHelper
     public function getLocale(): string
     {
         $current = $this->requestStack->getCurrentRequest();
-        if ($current === null) {
+        if (null === $current) {
             throw new \RuntimeException('Unexpected null request');
         }
 
