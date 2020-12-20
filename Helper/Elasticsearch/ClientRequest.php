@@ -143,7 +143,7 @@ class ClientRequest
     {
         $this->logger->debug('ClientRequest : getByOuuid {type}:{id}', ['type' => $type, 'id' => $ouuid]);
         if (!empty($source_exclude)) {
-            $this->logger->warning('_source_exclude field are not supported anymore');
+            @\trigger_error('_source_exclude field are not supported anymore', E_USER_DEPRECATED);
         }
 
         foreach ($this->getIndex() as $index) {
