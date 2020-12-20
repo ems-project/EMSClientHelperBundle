@@ -2,13 +2,13 @@
 
 namespace EMS\ClientHelperBundle\Command;
 
-use Elasticsearch\Client;
 use EMS\ClientHelperBundle\Exception\ClusterHealthNotGreenException;
 use EMS\ClientHelperBundle\Exception\ClusterHealthRedException;
 use EMS\ClientHelperBundle\Exception\IndexNotFoundException;
 use EMS\ClientHelperBundle\Exception\NoClientsFoundException;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
+use EMS\CommonBundle\Service\ElasticaService;
 use EMS\CommonBundle\Storage\StorageManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,34 +18,24 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class HealthCheckCommand extends Command
 {
-    /**
-     * @var Client[]
-     */
-    private $clients = [];
-
-    /**
-     * @var ClientRequest[]
-     */
+    /** @var ClientRequest[] */
     private $clientRequests;
 
-    /**
-     * @var EnvironmentHelper
-     */
+    /** @var EnvironmentHelper */
     private $environmentHelper;
 
-    /**
-     * @var StorageManager
-     */
+    /** @var StorageManager */
     private $storageManager;
 
+    private ElasticaService $elasticaService;
+
     /**
-     * @param iterable $clients
      * @param iterable $clientRequests
      */
-    public function __construct(EnvironmentHelper $environmentHelper, iterable $clients = null, iterable $clientRequests = null, StorageManager $storageManager = null)
+    public function __construct(EnvironmentHelper $environmentHelper, ElasticaService $elasticaService, iterable $clientRequests = null, StorageManager $storageManager = null)
     {
         $this->environmentHelper = $environmentHelper;
-        $this->clients = $clients ?? [];
+        $this->elasticaService = $elasticaService;
         $this->clientRequests = $clientRequests ?? [];
         $this->storageManager = $storageManager;
 
@@ -86,22 +76,18 @@ class HealthCheckCommand extends Command
     private function checkElasticSearch(SymfonyStyle $io, $green)
     {
         $io->section('Elasticsearch');
-        if (empty($this->clients)) {
-            $io->error('No clients found');
-            throw new NoClientsFoundException();
+        $status = $this->elasticaService->getHealthStatus();
+
+        if ('red' === $status) {
+            $io->error('Cluster health is RED');
+            throw new ClusterHealthRedException();
         }
 
-        foreach ($this->clients as $client) {
-            if ('red' === $client->cluster()->health()['status']) {
-                $io->error('Cluster health is RED');
-                throw new ClusterHealthRedException();
-            }
-
-            if ($green && 'green' !== $client->cluster()->health()['status']) {
-                $io->error('Cluster health is NOT GREEN');
-                throw new ClusterHealthNotGreenException();
-            }
+        if ($green && 'green' !== $status) {
+            $io->error('Cluster health is NOT GREEN');
+            throw new ClusterHealthNotGreenException();
         }
+
         $io->success('Elasticsearch is working.');
     }
 
@@ -127,11 +113,11 @@ class HealthCheckCommand extends Command
             }
         }
 
-        $index = \join(',', $indexes);
-
-        foreach ($this->clients as $client) {
-            if (!$client->indices()->exists(['index' => $index])) {
-                $io->error('Index '.$index.' not found');
+        foreach ($indexes as $index) {
+            try {
+                $this->elasticaService->getIndexFromAlias($index);
+            } catch (\Throwable $e) {
+                $io->error(\sprintf('Index %s not found with error: %s', $index, $e->getMessage()));
                 throw new IndexNotFoundException();
             }
         }

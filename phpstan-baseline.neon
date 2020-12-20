@@ -6,16 +6,6 @@ parameters:
 			path: Command/HealthCheckCommand.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Command\\\\HealthCheckCommand\\:\\:__construct\\(\\) has parameter \\$clients with no value type specified in iterable type iterable\\.$#"
-			count: 1
-			path: Command/HealthCheckCommand.php
-
-		-
-			message: "#^Property EMS\\\\ClientHelperBundle\\\\Command\\\\HealthCheckCommand\\:\\:\\$clients \\(array\\<Elasticsearch\\\\Client\\>\\) does not accept iterable\\.$#"
-			count: 1
-			path: Command/HealthCheckCommand.php
-
-		-
 			message: "#^Property EMS\\\\ClientHelperBundle\\\\Command\\\\HealthCheckCommand\\:\\:\\$clientRequests \\(array\\<EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\>\\) does not accept iterable\\.$#"
 			count: 1
 			path: Command/HealthCheckCommand.php
