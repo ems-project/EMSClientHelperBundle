@@ -33,8 +33,13 @@ final class FileService
         foreach ($request->files as $file) {
             $responses = $this->upload($client, $file);
         }
+        $encodedResponse = \json_encode($responses);
+        if ($encodedResponse === false) {
+            $this->logger->error('Unexpected json_encode error of file upload\'s response messages : {error}', ['error' => \json_last_error_msg()]);
+            $encodedResponse = '{}';
+        }
 
-        return JsonResponse::fromJsonString((\json_encode($responses)) ?: null);
+        return JsonResponse::fromJsonString($encodedResponse);
     }
 
     /**

@@ -766,11 +766,6 @@ parameters:
 			path: Helper/Environment/EnvironmentHelper.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Environment\\\\EnvironmentHelper\\:\\:getLocale\\(\\) should return string but returns string\\|null\\.$#"
-			count: 1
-			path: Helper/Environment/EnvironmentHelper.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Hashcash\\\\HashcashHelper\\:\\:validateHashcash\\(\\) has no return typehint specified\\.$#"
 			count: 1
 			path: Helper/Hashcash/HashcashHelper.php
