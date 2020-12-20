@@ -5,7 +5,6 @@ namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 use Elastica\Aggregation\Max;
 use Elastica\Aggregation\Terms;
 use Elastica\Exception\ResponseException;
-use Elasticsearch\Client;
 use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
@@ -25,8 +24,6 @@ class ClientRequest
 {
     /** @var int */
     private const CONTENT_TYPE_LIMIT = 500;
-    /** @var Client */
-    private $client;
     /** @var EnvironmentHelper */
     private $environmentHelper;
     /** @var string */
@@ -53,7 +50,6 @@ class ClientRequest
      * @param string $name
      */
     public function __construct(
-        Client $client,
         ElasticaService $elasticaService,
         EnvironmentHelper $environmentHelper,
         LoggerInterface $logger,
@@ -61,7 +57,6 @@ class ClientRequest
         $name,
         array $options = []
     ) {
-        $this->client = $client;
         $this->environmentHelper = $environmentHelper;
         $this->logger = $logger;
         $this->cache = $cache;
@@ -592,25 +587,16 @@ class ClientRequest
      */
     public function scrollAll(array $params, $timeout = '30s'): iterable
     {
-        $params['scroll'] = $timeout;
+        $search = $this->elasticaService->convertElasticsearchSearch($params);
+        $scroll = $this->elasticaService->scroll($search, $timeout);
 
-        if (!isset($params['index'])) {
-            $params['index'] = $this->getIndex();
-        }
-
-        $response = $this->client->search($params);
-
-        while (isset($response['hits']['hits']) && \count($response['hits']['hits']) > 0) {
-            $scrollId = $response['_scroll_id'];
-
-            foreach ($response['hits']['hits'] as $hit) {
-                yield $hit;
+        foreach ($scroll as $resultSet) {
+            foreach ($resultSet as $result) {
+                if (false === $result) {
+                    continue;
+                }
+                yield $result->getHit();
             }
-
-            $response = $this->client->scroll([
-                'scroll_id' => $scrollId,
-                'scroll' => $timeout,
-            ]);
         }
     }
 

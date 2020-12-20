@@ -2,8 +2,6 @@
 
 namespace EMS\ClientHelperBundle\DependencyInjection;
 
-use Composer\CaBundle\CaBundle;
-use Elasticsearch\Client;
 use EMS\ClientHelperBundle\Helper\Api\Client as ApiClient;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Twig\TwigLoader;
@@ -58,7 +56,6 @@ class EMSClientHelperExtension extends Extension
     private function processElasticms(ContainerBuilder $container, XmlFileLoader $loader, array $config)
     {
         foreach ($config as $name => $options) {
-            $this->defineElasticsearchClient($container, $name, $options);
             $this->defineClientRequest($container, $loader, $name, $options);
 
             if (isset($options['templates'])) {
@@ -79,26 +76,6 @@ class EMSClientHelperExtension extends Extension
 
             $container->setDefinition(\sprintf('emsch.api_client.%s', $name), $definition);
         }
-    }
-
-    /**
-     * @param string $name
-     */
-    private function defineElasticsearchClient(ContainerBuilder $container, $name, array $options)
-    {
-        $definition = new Definition(Client::class);
-        $config = [
-            'hosts' => $options['hosts'],
-            'sSLVerification' => CaBundle::getBundledCaBundlePath(),
-        ];
-
-        $definition
-            ->setFactory([new Reference('ems_common.elasticsearch.factory'), 'fromConfig'])
-            ->setArgument(0, $config)
-            ->setPublic(true);
-        $definition->addTag('emsch.elasticsearch.client');
-
-        $container->setDefinition(\sprintf('ems_common.elasticsearch.%s', $name), $definition);
     }
 
     private function defineElasticsearchLogger(ContainerBuilder $container, array $options)
@@ -129,7 +106,6 @@ class EMSClientHelperExtension extends Extension
     {
         $definition = new Definition(ClientRequest::class);
         $definition->setArguments([
-            new Reference(\sprintf('ems_common.elasticsearch.%s', $name)),
             new Reference('ems_common.service.elastica'),
             new Reference('emsch.helper_environment'),
             new Reference('logger'),

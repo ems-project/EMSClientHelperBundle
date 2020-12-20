@@ -156,16 +156,6 @@ parameters:
 			path: DependencyInjection/EMSClientHelperExtension.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\DependencyInjection\\\\EMSClientHelperExtension\\:\\:defineElasticsearchClient\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: DependencyInjection/EMSClientHelperExtension.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\DependencyInjection\\\\EMSClientHelperExtension\\:\\:defineElasticsearchClient\\(\\) has parameter \\$options with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: DependencyInjection/EMSClientHelperExtension.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\DependencyInjection\\\\EMSClientHelperExtension\\:\\:defineElasticsearchLogger\\(\\) has no return typehint specified\\.$#"
 			count: 1
 			path: DependencyInjection/EMSClientHelperExtension.php
