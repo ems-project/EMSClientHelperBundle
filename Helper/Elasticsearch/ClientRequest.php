@@ -2,9 +2,10 @@
 
 namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
+use Elastica\Aggregation\Max;
 use Elastica\Aggregation\Terms;
+use Elastica\Exception\ResponseException;
 use Elasticsearch\Client;
-use Elasticsearch\Common\Exceptions\Missing404Exception;
 use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
@@ -275,60 +276,39 @@ class ClientRequest
     public function getLastChangeDate(string $type): \DateTime
     {
         if (empty($this->lastUpdateByType)) {
-            $body = [
-                'size' => 0,
-                'query' => [
-                    'bool' => [
-                        'must' => [
-                            [
-                                'terms' => [
-                                    EmsFields::LOG_OPERATION_FIELD => [
-                                        EmsFields::LOG_OPERATION_UPDATE,
-                                        EmsFields::LOG_OPERATION_DELETE,
-                                        EmsFields::LOG_OPERATION_CREATE,
-                                    ],
-                                ],
-                            ],
-                            [
-                                'terms' => [
-                                    EmsFields::LOG_ENVIRONMENT_FIELD => $this->getEnvironments(),
-                                ],
-                            ],
-                            [
-                                'terms' => [
-                                    EmsFields::LOG_INSTANCE_ID_FIELD => $this->getPrefixes(),
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-                'aggs' => [
-                    'lastUpdate' => [
-                        'terms' => [
-                            'field' => EmsFields::LOG_CONTENTTYPE_FIELD,
-                            'size' => 100,
-                        ],
-                        'aggs' => [
-                            'maxUpdate' => [
-                                'max' => [
-                                    'field' => EmsFields::LOG_DATETIME_FIELD,
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-            ];
-            try {
-                $result = $this->client->search([
-                    'index' => EmsFields::LOG_ALIAS,
-                    'type' => EmsFields::LOG_TYPE,
-                    'body' => $body,
-                ]);
+            $boolQuery = $this->elasticaService->getBoolQuery();
+            $operationQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_OPERATION_FIELD, [
+                EmsFields::LOG_OPERATION_UPDATE,
+                EmsFields::LOG_OPERATION_DELETE,
+                EmsFields::LOG_OPERATION_CREATE,
+            ]);
+            $boolQuery->addMust($operationQuery);
 
-                foreach ($result['aggregations']['lastUpdate']['buckets'] as $maxDate) {
+            $environmentQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_ENVIRONMENT_FIELD, $this->getEnvironments());
+            $boolQuery->addMust($environmentQuery);
+
+            $instanceQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_INSTANCE_ID_FIELD, $this->getPrefixes());
+            $boolQuery->addMust($instanceQuery);
+
+            $search = new Search([EmsFields::LOG_ALIAS], $boolQuery);
+            $search->setSize(0);
+
+            $maxUpdate = new Max('maxUpdate');
+            $maxUpdate->setField(EmsFields::LOG_DATETIME_FIELD);
+            $lastUpdate = new Terms('lastUpdate');
+            $lastUpdate->setField(EmsFields::LOG_CONTENTTYPE_FIELD);
+            $lastUpdate->setSize(100);
+            $lastUpdate->addAggregation($maxUpdate);
+            $search->addAggregation($lastUpdate);
+
+            try {
+                $resultSet = $this->elasticaService->search($search);
+                $lastUpdateAggregation = $resultSet->getAggregation('lastUpdate');
+
+                foreach ($lastUpdateAggregation['buckets'] as $maxDate) {
                     $this->lastUpdateByType[$maxDate['key']] = new \DateTime($maxDate['maxUpdate']['value_as_string']);
                 }
-            } catch (Missing404Exception $e) {
+            } catch (ResponseException $e) {
                 $this->logger->warning('log.ems_log_alias_not_found', [
                     'alias' => EmsFields::LOG_ALIAS,
                 ]);
