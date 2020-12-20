@@ -182,26 +182,19 @@ class ClientRequest
     }
 
     /**
-     * @param string $type
-     * @param string $ouuids
+     * @param string[] $ouuids
      *
-     * @return array
+     * @return array<mixed>
      */
-    public function getByOuuids($type, $ouuids)
+    public function getByOuuids(string $type, array $ouuids): array
     {
         $this->logger->debug('ClientRequest : getByOuuids {type}:{id}', ['type' => $type, 'id' => $ouuids]);
 
-        return $this->client->search([
-            'index' => $this->getIndex(),
-            'type' => $type,
-            'body' => [
-                'query' => [
-                    'terms' => [
-                        '_id' => $ouuids,
-                    ],
-                ],
-            ],
-        ]);
+        $query = $this->elasticaService->getTermsQuery('_id', $ouuids);
+        $query = $this->elasticaService->filterByContentTypes($query, [$type]);
+        $search = new Search($this->getIndex(), $query);
+
+        return $this->elasticaService->search($search)->getResponse()->getData();
     }
 
     /**
