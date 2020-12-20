@@ -130,6 +130,7 @@ class EMSClientHelperExtension extends Extension
         $definition = new Definition(ClientRequest::class);
         $definition->setArguments([
             new Reference(\sprintf('ems_common.elasticsearch.%s', $name)),
+            new Reference('ems_common.service.elastica'),
             new Reference('emsch.helper_environment'),
             new Reference('logger'),
             new Reference('cache.app'),

@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
+use Elastica\Aggregation\Terms;
 use Elasticsearch\Client;
 use Elasticsearch\Common\Exceptions\Missing404Exception;
 use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
@@ -9,7 +10,10 @@ use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\CommonBundle\Common\EMSLink;
+use EMS\CommonBundle\Elasticsearch\Document\EMSSource;
 use EMS\CommonBundle\Helper\EmsFields;
+use EMS\CommonBundle\Search\Search;
+use EMS\CommonBundle\Service\ElasticaService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,6 +21,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class ClientRequest
 {
+    const CONTENT_TYPE_LIMIT = 500;
     /**
      * @var Client
      */
@@ -59,11 +64,14 @@ class ClientRequest
 
     const OPTION_INDEX_PREFIX = 'index_prefix';
 
+    private ElasticaService $elasticaService;
+
     /**
      * @param string $name
      */
     public function __construct(
         Client $client,
+        ElasticaService $elasticaService,
         EnvironmentHelper $environmentHelper,
         LoggerInterface $logger,
         AdapterInterface $cache,
@@ -75,6 +83,7 @@ class ClientRequest
         $this->logger = $logger;
         $this->cache = $cache;
         $this->options = $options;
+        $this->elasticaService = $elasticaService;
         $this->lastUpdateByType = [];
         $this->indexPrefix = isset($options[self::OPTION_INDEX_PREFIX]) ? $options[self::OPTION_INDEX_PREFIX] : null;
         $this->name = $name;
@@ -95,24 +104,9 @@ class ClientRequest
         $out = [];
         \preg_match_all('/"(?:\\\\.|[^\\\\"])*"|\S+/', $text, $out);
         $words = $out[0];
+        $index = $this->getFirstIndex();
 
-        $params = [
-            'index' => $this->getFirstIndex(),
-            'body' => [
-                'analyzer' => $analyzer,
-            ],
-        ];
-
-        $withoutStopWords = [];
-        foreach ($words as $word) {
-            $params['body']['text'] = $word;
-            $analyzed = $this->client->indices()->analyze($params);
-            if (isset($analyzed['tokens'][0]['token'])) {
-                $withoutStopWords[] = $word;
-            }
-        }
-
-        return $withoutStopWords;
+        return $this->elasticaService->filterStopWords($index, $analyzer, $words);
     }
 
     /**
@@ -222,15 +216,28 @@ class ClientRequest
     }
 
     /**
-     * @return array
+     * @return string[]
      */
-    public function getContentTypes()
+    public function getContentTypes(): array
     {
         $index = $this->getIndex();
-        $info = $this->client->indices()->getMapping(['index' => $index]);
-        $mapping = \array_shift($info);
+        $search = new Search($index);
+        $search->setSize(0);
+        $terms = new Terms(EMSSource::FIELD_CONTENT_TYPE);
+        $terms->setField(EMSSource::FIELD_CONTENT_TYPE);
+        $terms->setSize(self::CONTENT_TYPE_LIMIT);
+        $search->addAggregation($terms);
+        $resultSet = $this->elasticaService->search($search);
+        $aggregation = $resultSet->getAggregation(EMSSource::FIELD_CONTENT_TYPE);
+        $contentTypes = [];
+        foreach ($aggregation['buckets'] ?? [] as $bucket) {
+            $contentTypes[] = $bucket['key'];
+        }
+        if (\count($contentTypes) >= self::CONTENT_TYPE_LIMIT) {
+            $this->logger->warning('The get content type function is only considering the first {limit} content type', ['limit' => self::CONTENT_TYPE_LIMIT]);
+        }
 
-        return \array_keys($mapping['mappings']);
+        return $contentTypes;
     }
 
     /**
@@ -241,21 +248,8 @@ class ClientRequest
     public function getFieldAnalyzer($field)
     {
         $this->logger->debug('ClientRequest : getFieldAnalyzer {field}', ['field' => $field]);
-        $info = $this->client->indices()->getFieldMapping([
-            'index' => $this->getFirstIndex(),
-            'field' => $field,
-        ]);
 
-        $analyzer = 'standard';
-        while (\is_array($info = \array_shift($info))) {
-            if (isset($info['analyzer'])) {
-                $analyzer = $info['analyzer'];
-            } elseif (isset($info['mapping'])) {
-                $info = $info['mapping'];
-            }
-        }
-
-        return $analyzer;
+        return $this->elasticaService->getFieldAnalyzer($this->getFirstIndex(), $field);
     }
 
     public function getHierarchy(string $emsKey, string $childrenField, int $depth = null, array $sourceFields = [], EMSLink $activeChild = null): ?HierarchicalStructure
@@ -730,15 +724,13 @@ class ClientRequest
     {
         $index = $this->getIndex();
 
-        return $prefix.(\is_array($index) ? \implode('_', $index) : $index);
+        return $prefix.\implode('_', $index);
     }
 
     /**
-     * @return string|array
-     *
-     * @throws EnvironmentNotFoundException
+     * @return string[]
      */
-    private function getIndex()
+    private function getIndex(): array
     {
         $environment = $this->environmentHelper->getEnvironment();
 
@@ -755,7 +747,7 @@ class ClientRequest
             return $out;
         }
 
-        return $this->indexPrefix.$environment;
+        return [$this->indexPrefix.$environment];
     }
 
     /**
@@ -764,13 +756,11 @@ class ClientRequest
     private function getFirstIndex()
     {
         $aliases = $this->getIndex();
-        if (\is_array($aliases) && \count($aliases) > 0) {
-            $aliases = $aliases[0];
+        if (\count($aliases) <= 0) {
+            throw new \RuntimeException('Unexpected missing alias');
         }
 
-        return \array_keys($this->client->indices()->getAlias([
-            'index' => $aliases,
-        ]))[0];
+        return $this->elasticaService->getIndexFromAlias(\reset($aliases));
     }
 
     public function getCacheResponse(array $cacheKey, ?string $type, callable $function)
