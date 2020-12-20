@@ -124,7 +124,11 @@ class QueryBuilder
             ]];
         }
 
-        return $postFilters ? ['bool' => ['must' => $postFilters]] : null;
+        if (0 === \count($postFilters)) {
+            return null;
+        }
+
+        return $postFilters;
     }
 
     private function getAggs($hasPostFilter = false): ?array
@@ -176,14 +180,14 @@ class QueryBuilder
     private function getAggPostFilter(Filter $filter)
     {
         $agg = $this->getAgg($filter);
-        $aggFilter = $this->getPostFilters($filter, $filter->getNestedPath());
+        $postFilters = $this->getPostFilters($filter, $filter->getNestedPath());
 
-        if (null === $aggFilter) {
+        if (null === $postFilters) {
             return $agg;
         }
 
         return [
-            'filter' => $aggFilter,
+            'filter' => ['bool' => ['must' => $postFilters]],
             'aggs' => ['filtered_'.$filter->getName() => $agg],
         ];
     }
