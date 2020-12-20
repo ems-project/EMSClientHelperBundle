@@ -422,14 +422,22 @@ class ClientRequest
     }
 
     /**
-     * @param string|array $type
-     * @param int          $from
-     * @param int          $size
+     * @param string|array|null $type
+     * @param int               $from
+     * @param int               $size
      *
      * @return array
      */
     public function search($type, array $body, $from = 0, $size = 10, array $sourceExclude = [], ?string $regex = null)
     {
+        if (null === $type) {
+            $types = [];
+        } elseif (\is_array($type)) {
+            $types = $type;
+        } else {
+            $types = \explode(',', $type);
+        }
+
         if (null === $regex) {
             $index = $this->getIndex();
         } else {
@@ -439,23 +447,18 @@ class ClientRequest
                     $index[] = $alias;
                 }
             }
+            $query = null;
+            if (\count($types) > 0) {
+                $query = $this->elasticaService->filterByContentTypes(null, $types);
+            }
+            $search = new Search($index, $query);
+            $search->setSize(0);
+            $terms = new Terms('indexes');
+            $terms->setField('_index');
+            $search->addAggregation($terms);
+            $resultSet = $this->elasticaService->search($search);
 
-            $aggs = $this->client->search([
-                'index' => $this->getIndex(),
-                'type' => $type,
-                'body' => [
-                    'size' => 0,
-                    'aggs' => [
-                        'indexes' => [
-                            'terms' => [
-                                'field' => '_index',
-                            ],
-                        ],
-                    ],
-                ],
-            ]);
-
-            foreach ($aggs['aggregations']['indexes']['buckets'] as $bucket) {
+            foreach ($resultSet->getAggregation('indexes')['buckets'] as $bucket) {
                 if (\preg_match(\sprintf('/%s/', $regex), $bucket['key'])) {
                     $index[] = $bucket['key'];
                 }
@@ -471,12 +474,14 @@ class ClientRequest
         ];
 
         if (!empty($sourceExclude)) {
-            $arguments['_source_exclude'] = $sourceExclude;
+            @\trigger_error('_source_exclude field are not supported anymore', E_USER_DEPRECATED);
         }
 
         $this->logger->debug('ClientRequest : search for {type}', $arguments);
+        $search = $this->elasticaService->convertElasticsearchSearch($arguments);
+        $resultSet = $this->elasticaService->search($search);
 
-        return $this->client->search($arguments);
+        return $resultSet->getResponse()->getData();
     }
 
     /**
