@@ -11,6 +11,7 @@ use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\CommonBundle\Common\EMSLink;
 use EMS\CommonBundle\Elasticsearch\Document\EMSSource;
+use EMS\CommonBundle\Elasticsearch\Exception\NotFoundException;
 use EMS\CommonBundle\Helper\EmsFields;
 use EMS\CommonBundle\Search\Search;
 use EMS\CommonBundle\Service\ElasticaService;
@@ -164,29 +165,17 @@ class ClientRequest
     public function getByOuuid($type, $ouuid, array $sourceFields = [], array $source_exclude = [])
     {
         $this->logger->debug('ClientRequest : getByOuuid {type}:{id}', ['type' => $type, 'id' => $ouuid]);
-        $arguments = [
-            'index' => $this->getIndex(),
-            'type' => $type,
-            'body' => [
-                'query' => [
-                    'term' => [
-                        '_id' => $ouuid,
-                    ],
-                ],
-            ],
-        ];
-
-        if (!empty($sourceFields)) {
-            $arguments['_source'] = $sourceFields;
-        }
         if (!empty($source_exclude)) {
-            $arguments['_source_exclude'] = $source_exclude;
+            $this->logger->warning('_source_exclude field are not supported anymore');
         }
 
-        $result = $this->client->search($arguments);
+        foreach ($this->getIndex() as $index) {
+            try {
+                $document = $this->elasticaService->getDocument($index, $type, $ouuid, $sourceFields);
 
-        if (isset($result['hits']['hits'][0])) {
-            return $result['hits']['hits'][0];
+                return $document->getRaw();
+            } catch (NotFoundException $e) {
+            }
         }
 
         return false;
