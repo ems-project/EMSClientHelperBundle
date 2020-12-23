@@ -2,7 +2,18 @@
 
 namespace EMS\ClientHelperBundle\Helper\Search;
 
+use Elastica\Aggregation\AbstractAggregation;
+use Elastica\Aggregation\Filter as FilterAggregation;
+use Elastica\Aggregation\Nested as NestedAggregation;
+use Elastica\Aggregation\ReverseNested;
+use Elastica\Aggregation\Terms as TermsAggregation;
+use Elastica\Query\AbstractQuery;
+use Elastica\Query\BoolQuery;
+use Elastica\Query\Nested;
+use Elastica\Query\Terms;
+use Elastica\Suggest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
+use EMS\CommonBundle\Search\Search as CommonSearch;
 
 class QueryBuilder
 {
@@ -17,111 +28,129 @@ class QueryBuilder
         $this->search = $search;
     }
 
-    public function buildBody(): array
+    /**
+     * @param string[] $types
+     */
+    public function buildSearch(array $types): CommonSearch
     {
-        $postFilter = $this->getPostFilters();
-        $hasPostFilter = null != $postFilter;
+        $query = $this->getQuery();
+        $search = $this->clientRequest->initializeCommonSearch($types, $query);
+        $search->setPostFilter($this->getPostFilters());
+        $hasPostFilter = (null !== $search->getPostFilter());
+        foreach ($this->getAggs($hasPostFilter) as $aggregation) {
+            $search->addAggregation($aggregation);
+        }
+        $search->setSort($this->getSort());
+        $suggest = $this->getSuggest();
+        if (null !== $suggest) {
+            $search->setSuggest($suggest);
+        }
+        $search->setHighlight($this->search->getHighlight());
 
-        return \array_filter([
-            'query' => $this->getQuery(),
-            'post_filter' => $postFilter,
-            'aggs' => $this->getAggs($hasPostFilter),
-            'suggest' => $this->getSuggest(),
-            'sort' => $this->getSort(),
-            'highlight' => $this->search->getHighlight(),
-        ]);
+        return $search;
     }
 
-    private function getQuery(): ?array
+    private function getQuery(): ?AbstractQuery
     {
-        $filterMust = $this->getQueryFilters();
-
-        if ($this->search->hasQueryString()) {
-            return $this->getQueryWithString($this->search->getQueryString());
-        } elseif ($filterMust) {
-            return $filterMust;
+        $queryString = $this->search->getQueryString();
+        if (null !== $queryString) {
+            return $this->getQueryWithString($queryString);
         }
 
-        return null;
+        return $this->getQueryFilters();
     }
 
-    private function getQueryWithString(string $queryString): array
+    private function getQueryWithString(string $queryString): ?AbstractQuery
     {
-        $query = ['bool' => ['should' => []]];
+        $query = new BoolQuery();
         $filterMust = $this->getQueryFilters();
+        if (null === $filterMust) {
+            $filterMust = new BoolQuery();
+        }
 
         $analyzer = new Analyzer($this->clientRequest);
         $tokens = $this->clientRequest->analyze($queryString, $this->search->getAnalyzer());
 
         foreach ($this->search->getFields() as $field) {
             $textValues = $analyzer->getTextValues($field, $this->search->getAnalyzer(), $tokens, $this->search->getSynonyms());
-
-            $textMust = [];
-            foreach ($textValues as $textValue) {
-                $textMust['bool']['must'][] = $textValue->makeShould();
+            if (0 === \count($textValues)) {
+                continue;
             }
 
-            $query['bool']['should'][] = \array_merge_recursive($filterMust, $textMust);
+            $textMust = clone $filterMust;
+            foreach ($textValues as $textValue) {
+                $textMust->addMust($textValue->makeShould());
+            }
+            $query->addShould($textMust);
+        }
+
+        if (0 === $query->count()) {
+            return null;
         }
 
         return $query;
     }
 
-    public function getQueryFilters(): array
+    public function getQueryFilters(): ?BoolQuery
     {
-        $query = [];
-        $nestedQueries = [];
+        $query = new BoolQuery();
 
         foreach ($this->search->getQueryFacets() as $field => $terms) {
-            $query['bool']['must'][] = ['terms' => [$field => $terms]];
+            $query->addMust(new Terms($field, $terms));
         }
 
         foreach ($this->search->getFilters() as $filter) {
             if (!$filter->isActive() || $filter->isPostFilter()) {
                 continue;
             }
+            $queryFilter = $filter->getQuery();
+            if (null === $queryFilter) {
+                continue;
+            }
 
-            if ($filter->isNested()) {
-                $nestedQueries[$filter->getNestedPath()]['bool']['must'][] = $filter->getQuery();
+            $nestedPath = $filter->getNestedPath();
+            if (null !== $nestedPath) {
+                $nested = new Nested();
+                $nested->setPath($nestedPath);
+                $nested->setQuery($queryFilter);
+                $nested->setParam('ignore_unmapped', true);
+                $query->addMust($nested);
             } else {
-                $query['bool']['must'][] = $filter->getQuery();
+                $query->addMust($queryFilter);
             }
         }
 
-        foreach ($nestedQueries as $path => $queries) {
-            $query['bool']['must'][] = ['nested' => [
-                'path' => $path,
-                'ignore_unmapped' => true,
-                'query' => $queries,
-            ]];
+        if (0 === $query->count()) {
+            return null;
         }
 
         return $query;
     }
 
-    private function getPostFilters(Filter $exclude = null, $nestedPath = null): ?array
+    private function getPostFilters(Filter $exclude = null, string $nestedPath = null): ?AbstractQuery
     {
-        $postFilters = [];
-        $nestedQueries = [];
+        $postFilters = new BoolQuery();
 
         foreach ($this->search->getFilters() as $filter) {
             if (!$filter->isActive() || !$filter->isPostFilter() || $filter === $exclude) {
                 continue;
             }
-
-            if ($filter->isNested() && $filter->getNestedPath() !== $nestedPath) {
-                $nestedQueries[$filter->getNestedPath()]['bool']['must'][] = $filter->getQuery();
-            } else {
-                $postFilters[] = $filter->getQuery();
+            $query = $filter->getQuery();
+            if (null === $query) {
+                continue;
             }
-        }
 
-        foreach ($nestedQueries as $path => $queries) {
-            $postFilters[] = ['nested' => [
-                'path' => $path,
-                'ignore_unmapped' => true,
-                'query' => $queries,
-            ]];
+            $filterNestedPath = $filter->getNestedPath();
+            if (null !== $filterNestedPath && $filterNestedPath !== $nestedPath) {
+                $nested = new Nested();
+                $nested->setPath($filterNestedPath);
+                $nested->setQuery($query);
+                $nested->setParam('ignore_unmapped', true);
+                $nestedQueries[$filter->getNestedPath()]['bool']['must'][] = $filter->getQuery();
+                $postFilters->addMust($nestedQueries);
+            } else {
+                $postFilters->addMust($query);
+            }
         }
 
         if (0 === \count($postFilters)) {
@@ -131,12 +160,18 @@ class QueryBuilder
         return $postFilters;
     }
 
-    private function getAggs($hasPostFilter = false): ?array
+    /**
+     * @return AbstractAggregation[]
+     */
+    private function getAggs(bool $hasPostFilter = false): array
     {
         $aggs = [];
 
         foreach ($this->search->getQueryFacets() as $facet => $size) {
-            $aggs[$facet] = ['terms' => ['field' => $facet, 'size' => $size]];
+            $terms = new TermsAggregation($facet);
+            $terms->setField($facet);
+            $terms->setSize($size);
+            $aggs[$facet] = $terms;
         }
 
         foreach ($this->search->getFilters() as $filter) {
@@ -146,11 +181,10 @@ class QueryBuilder
 
             $aggregation = $hasPostFilter ? $this->getAggPostFilter($filter) : $this->getAgg($filter);
 
-            if ($filter->isNested()) {
-                $aggregation = [
-                    'nested' => ['path' => $filter->getNestedPath()],
-                    'aggs' => ['nested' => $aggregation],
-                ];
+            $nestedPath = $filter->getNestedPath();
+            if (null !== $nestedPath) {
+                $nested = new NestedAggregation($filter->getName(), $nestedPath);
+                $nested->addAggregation($aggregation);
             }
 
             $aggs[$filter->getName()] = $aggregation;
@@ -159,16 +193,23 @@ class QueryBuilder
         return \array_filter($aggs);
     }
 
-    private function getAgg(Filter $filter): ?array
+    private function getAgg(Filter $filter, string $prefix = ''): AbstractAggregation
     {
-        $agg = ['terms' => ['field' => $filter->getField(), 'size' => $filter->getAggSize()]];
-
-        if ($filter->isReversedNested()) {
-            $agg = \array_merge($agg, ['aggs' => ['reversed_nested' => ['reverse_nested' => new \stdClass()]]]);
+        $agg = new TermsAggregation($prefix.$filter->getName());
+        $agg->setField($filter->getField());
+        $aggSize = $filter->getAggSize();
+        if (null !== $aggSize) {
+            $agg->setSize($aggSize);
         }
 
-        if (null !== $filter->getSortField()) {
-            $agg['terms']['order'] = [$filter->getSortField() => $filter->getSortOrder()];
+        if ($filter->isReversedNested()) {
+            $subAggregation = new ReverseNested('reversed_nested');
+            $agg->addAggregation($subAggregation);
+        }
+
+        $orderField = $filter->getSortField();
+        if (null !== $orderField) {
+            $agg->setOrder($orderField, $filter->getSortOrder());
         }
 
         return $agg;
@@ -177,36 +218,41 @@ class QueryBuilder
     /**
      * If the search uses post filtering, we need to filter other post filter aggregation.
      */
-    private function getAggPostFilter(Filter $filter)
+    private function getAggPostFilter(Filter $filter): AbstractAggregation
     {
-        $agg = $this->getAgg($filter);
+        $agg = $this->getAgg($filter, 'filtered_');
         $postFilters = $this->getPostFilters($filter, $filter->getNestedPath());
 
         if (null === $postFilters) {
             return $agg;
         }
+        $filterAggregation = new FilterAggregation($filter->getName());
+        $filterAggregation->setFilter($postFilters);
+        $filterAggregation->addAggregation($agg);
 
-        return [
-            'filter' => ['bool' => ['must' => $postFilters]],
-            'aggs' => ['filtered_'.$filter->getName() => $agg],
-        ];
+        return $filterAggregation;
     }
 
-    private function getSuggest(): ?array
+    private function getSuggest(): ?Suggest
     {
-        if (!$this->search->hasQueryString()) {
+        $queryString = $this->search->getQueryString();
+        if (null === $queryString) {
             return null;
         }
 
-        $suggest = ['text' => $this->search->getQueryString()];
-
+        $suggest = new Suggest();
         foreach ($this->search->getSuggestFields() as $field) {
-            $suggest['suggest-'.$field] = ['term' => ['field' => $field]];
+            $term = new Suggest\Term('suggest-'.$field, $field);
+            $term->setText($queryString);
+            $suggest->addSuggestion($term);
         }
 
         return $suggest;
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function getSort(): array
     {
         if (null === $sort = $this->search->getSort()) {
@@ -216,12 +262,21 @@ class QueryBuilder
         return $this->buildSort([$sort]);
     }
 
+    /**
+     * @param array<mixed> $searchSorts
+     *
+     * @return array<string, mixed>
+     */
     private function buildSort(array $searchSorts): array
     {
         $sorts = [];
 
         foreach ($searchSorts as $sort) {
-            $field = $sort['field'];
+            $field = $sort['field'] ?? null;
+            if (!\is_string($field)) {
+                throw new \RuntimeException('Unexpected not named search sort');
+            }
+
             $includeScore = $sort['score'] ?? false;
 
             unset($sort['field'], $sort['score']);

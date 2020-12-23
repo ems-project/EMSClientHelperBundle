@@ -5,6 +5,9 @@ namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 use Elastica\Aggregation\Max;
 use Elastica\Aggregation\Terms;
 use Elastica\Exception\ResponseException;
+use Elastica\Query\AbstractQuery;
+use Elastica\Query\BoolQuery;
+use Elastica\ResultSet;
 use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
@@ -252,7 +255,7 @@ class ClientRequest
     public function getLastChangeDate(string $type): \DateTime
     {
         if (empty($this->lastUpdateByType)) {
-            $boolQuery = $this->elasticaService->getBoolQuery();
+            $boolQuery = new BoolQuery();
             $operationQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_OPERATION_FIELD, [
                 EmsFields::LOG_OPERATION_UPDATE,
                 EmsFields::LOG_OPERATION_DELETE,
@@ -360,7 +363,7 @@ class ClientRequest
      * @param string $propertyPath
      * @param string $default
      *
-     * @return mixed
+     * @return mixed|null
      */
     public function getOption($propertyPath, $default = null)
     {
@@ -458,6 +461,21 @@ class ClientRequest
         $resultSet = $this->elasticaService->search($search);
 
         return $resultSet->getResponse()->getData();
+    }
+
+    /**
+     * @param string[] $types
+     */
+    public function initializeCommonSearch(array $types, ?AbstractQuery $query = null): Search
+    {
+        $query = $this->elasticaService->filterByContentTypes($query, $types);
+
+        return new Search($this->getIndex(), $query);
+    }
+
+    public function commonSearch(Search $search): ResultSet
+    {
+        return $this->elasticaService->search($search);
     }
 
     /**
