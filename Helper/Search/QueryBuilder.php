@@ -52,9 +52,8 @@ class QueryBuilder
 
     private function getQuery(): ?AbstractQuery
     {
-        $queryString = $this->search->getQueryString();
-        if (null !== $queryString) {
-            return $this->getQueryWithString($queryString);
+        if ($this->search->hasQueryString()) {
+            return $this->getQueryWithString($this->search->getQueryString());
         }
 
         return $this->getQueryFilters();
@@ -193,9 +192,9 @@ class QueryBuilder
         return \array_filter($aggs);
     }
 
-    private function getAgg(Filter $filter, string $prefix = ''): AbstractAggregation
+    private function getAgg(Filter $filter): AbstractAggregation
     {
-        $agg = new TermsAggregation($prefix.$filter->getName());
+        $agg = new TermsAggregation($filter->getName());
         $agg->setField($filter->getField());
         $aggSize = $filter->getAggSize();
         if (null !== $aggSize) {
@@ -220,7 +219,7 @@ class QueryBuilder
      */
     private function getAggPostFilter(Filter $filter): AbstractAggregation
     {
-        $agg = $this->getAgg($filter, 'filtered_');
+        $agg = $this->getAgg($filter);
         $postFilters = $this->getPostFilters($filter, $filter->getNestedPath());
 
         if (null === $postFilters) {
@@ -228,6 +227,8 @@ class QueryBuilder
         }
         $filterAggregation = new FilterAggregation($filter->getName());
         $filterAggregation->setFilter($postFilters);
+
+        $agg->setName('filtered_'.$filter->getName());
         $filterAggregation->addAggregation($agg);
 
         return $filterAggregation;
