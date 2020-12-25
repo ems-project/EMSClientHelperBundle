@@ -2,35 +2,36 @@
 
 namespace EMS\ClientHelperBundle\Helper\Search;
 
+use Elastica\Query\AbstractQuery;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use Symfony\Component\HttpFoundation\Request;
 
 class Search
 {
-    /** @var array */
-    private $types = [];
-    /** @var array [facet_name => size], used for aggregation */
-    private $facets = [];
+    /** @var string[] */
+    private $types;
+    /** @var array<string, int> [facet_name => size], used for aggregation */
+    private $facets;
     /** @var Synonym[] */
     private $synonyms = [];
-    /** @var array */
+    /** @var string[] */
     private $fields = [];
-    /** @var array */
+    /** @var string[] */
     private $suggestFields = [];
     /** @var Filter[] */
     private $filters = [];
-    /** @var array */
-    private $sizes = [];
-    /** @var array */
-    private $defaultSorts = [];
-    /** @var array */
-    private $sorts = [];
-    /** @var array */
+    /** @var int[] */
+    private $sizes;
+    /** @var array<mixed> */
+    private $defaultSorts;
+    /** @var array<mixed> */
+    private $sorts;
+    /** @var array<mixed> */
     private $highlight = [];
 
     /** @var string|null free text search */
     private $queryString;
-    /** @var array */
+    /** @var array<string, mixed> */
     private $queryFacets = [];
 
     /** @var int */
@@ -91,7 +92,10 @@ class Search
         }
     }
 
-    public function bindAggregations(array $aggregations, array $queryFilters): void
+    /**
+     * @param array<mixed> $aggregations
+     */
+    public function bindAggregations(array $aggregations, ?AbstractQuery $queryFilters): void
     {
         foreach ($aggregations as $name => $aggregation) {
             if ($this->hasFilter($name)) {
@@ -100,6 +104,9 @@ class Search
         }
     }
 
+    /**
+     * @return string[]
+     */
     public function getTypes(): array
     {
         return $this->types;
@@ -113,6 +120,9 @@ class Search
         return $this->synonyms;
     }
 
+    /**
+     * @return string[]
+     */
     public function getFields(): array
     {
         return $this->fields;
@@ -123,6 +133,9 @@ class Search
         return $this->analyzer;
     }
 
+    /**
+     * @return string[]
+     */
     public function getSuggestFields(): array
     {
         return $this->suggestFields;
@@ -138,6 +151,9 @@ class Search
         return $this->queryString;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getQueryFacets(): array
     {
         $queryFacets = [];
@@ -194,16 +210,25 @@ class Search
         return $this->size;
     }
 
+    /**
+     * @return int[]
+     */
     public function getSizes(): array
     {
         return $this->sizes;
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getDefaultSorts(): array
     {
         return $this->defaultSorts;
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getSort(): ?array
     {
         return $this->sorts[$this->sortBy] ?? null;
@@ -219,16 +244,25 @@ class Search
         return $this->sortOrder;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getSorts(): array
     {
         return $this->sorts;
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getHighlight(): array
     {
         return $this->highlight;
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function getOptions(ClientRequest $clientRequest): array
     {
         if ($clientRequest->hasOption('search_config')) {
@@ -244,6 +278,11 @@ class Search
         throw new \LogicException('no search defined!');
     }
 
+    /**
+     * @param array<string, array|string> $sorts
+     *
+     * @return array<string, array>
+     */
     private function parseSorts(array $sorts, string $locale): array
     {
         $result = [];
@@ -265,11 +304,17 @@ class Search
         return $result;
     }
 
+    /**
+     * @param string[] $analyzers
+     */
     private function setAnalyzer(array $analyzers, string $locale): void
     {
         $this->analyzer = isset($analyzers[$locale]) ? $analyzers[$locale] : 'standard';
     }
 
+    /**
+     * @param string[] $fields
+     */
     private function setFields(array $fields, string $locale): void
     {
         $this->fields = \array_map(function (string $field) use ($locale) {
@@ -277,6 +322,9 @@ class Search
         }, $fields);
     }
 
+    /**
+     * @param array<string, string[]> $suggestFields
+     */
     private function setSuggestFields(array $suggestFields, string $locale): void
     {
         if (isset($suggestFields[$locale])) {
@@ -286,6 +334,9 @@ class Search
         }
     }
 
+    /**
+     * @param array<mixed> $data
+     */
     private function setHighlight(array $data, string $locale): void
     {
         if (\is_array($data) && isset($data['fields'])) {
@@ -299,7 +350,7 @@ class Search
         }
     }
 
-    private function setSortBy(?string $name)
+    private function setSortBy(?string $name): void
     {
         if (null === $name) {
             return;
@@ -322,14 +373,17 @@ class Search
     {
         if (null == $this->sizes) {
             @\trigger_error('Define allow sizes with the search option "sizes"', \E_USER_DEPRECATED);
-            $this->size = (int) $l > 0 ? $l : $this->size;
+            $this->size = \intval((int) $l > 0 ? $l : $this->size);
         } elseif (\in_array($l, $this->sizes)) {
             $this->size = (int) $l;
         } else {
-            $this->size = (int) \array_shift($this->sizes);
+            $this->size = (int) \reset($this->sizes);
         }
     }
 
+    /**
+     * @param array<mixed> $synonyms
+     */
     private function setSynonyms(array $synonyms, string $locale): void
     {
         foreach ($synonyms as $options) {

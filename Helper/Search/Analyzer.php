@@ -15,6 +15,9 @@ class Analyzer
     }
 
     /**
+     * @param string[]  $tokens
+     * @param Synonym[] $synonyms
+     *
      * @return TextValue[]
      */
     public function getTextValues(string $field, string $analyzer, array $tokens, array $synonyms = []): array
@@ -48,8 +51,13 @@ class Analyzer
                 continue;
             }
 
+            $field = $synonym->getField();
+            if (null === $field) {
+                continue;
+            }
+
             foreach ($documents['hits']['hits'] as $doc) {
-                $textValue->addSynonym($synonym->getField(), $doc);
+                $textValue->addSynonym($field, $doc);
             }
         }
     }

@@ -2,6 +2,14 @@
 
 namespace EMS\ClientHelperBundle\Helper\Search;
 
+use Elastica\Aggregation\Nested;
+use Elastica\Aggregation\Terms as TermsAggregation;
+use Elastica\Query\AbstractQuery;
+use Elastica\Query\BoolQuery;
+use Elastica\Query\Exists;
+use Elastica\Query\Range;
+use Elastica\Query\Term;
+use Elastica\Query\Terms;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -35,17 +43,17 @@ class Filter
     private $public;
     /** @var bool if not all doc contain the filter */
     private $optional;
-    /** @var array */
-    private $queryFilters = [];
-    /** @var array */
+    /** @var AbstractQuery|null */
+    private $queryFilters = null;
+    /** @var string[] */
     private $queryTypes = [];
 
-    /** @var array<mixed>|null */
-    private $query = [];
+    /** @var AbstractQuery|null */
+    private $query = null;
 
-    /** @var array|string|null */
+    /** @var mixed|null */
     private $value;
-    /** @var array */
+    /** @var array<mixed> */
     private $choices = [];
     /** @var bool|string */
     private $dateFormat;
@@ -62,6 +70,9 @@ class Filter
         self::TYPE_DATE_VERSION,
     ];
 
+    /**
+     * @param array<mixed> $options
+     */
     public function __construct(ClientRequest $clientRequest, string $name, array $options)
     {
         $this->clientRequest = $clientRequest;
@@ -115,6 +126,9 @@ class Filter
         return $this->isNested() ? $this->nestedPath.'.'.$this->field : $this->field;
     }
 
+    /**
+     * @return mixed|null
+     */
     public function getValue()
     {
         return $this->value;
@@ -145,9 +159,9 @@ class Filter
         return $this->public;
     }
 
-    public function getQuery(): ?array
+    public function getQuery(): ?AbstractQuery
     {
-        if ($this->optional && self::TYPE_DATE_VERSION !== $this->type) {
+        if ($this->optional && self::TYPE_DATE_VERSION !== $this->type && null !== $this->query) {
             return $this->getQueryOptional($this->getField(), $this->query);
         }
 
@@ -173,7 +187,11 @@ class Filter
         }
     }
 
-    public function handleAggregation(array $aggregation, array $types = [], array $queryFilters = [])
+    /**
+     * @param array<mixed> $aggregation
+     * @param string[]     $types
+     */
+    public function handleAggregation(array $aggregation, array $types = [], ?AbstractQuery $queryFilters = null): void
     {
         $this->queryTypes = $types;
         $this->queryFilters = $queryFilters;
@@ -205,6 +223,9 @@ class Filter
         return $this->choices[$choice]['active'];
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getChoices(): array
     {
         $this->setChoices();
@@ -227,16 +248,22 @@ class Filter
         return $this->reversedNested;
     }
 
+    /**
+     * @param mixed $value
+     */
     private function setQuery($value): void
     {
         switch ($this->type) {
             case self::TYPE_TERM:
                 $this->value = $value;
-                $this->query = ['term' => [$this->getField() => ['value' => $value]]];
+                $term = new Term();
+                $term->setTerm($this->getField(), $value);
+                $this->query = $term;
                 break;
             case self::TYPE_TERMS:
                 $this->value = \is_array($value) ? $value : [$value];
-                $this->query = ['terms' => [$this->getField() => $value]];
+                $term = new Terms($this->getField(), $value);
+                $this->query = $term;
                 break;
             case self::TYPE_DATE_RANGE:
                 $this->value = \is_array($value) ? $value : [$value];
@@ -249,7 +276,10 @@ class Filter
         }
     }
 
-    private function getQueryDateRange(array $value): ?array
+    /**
+     * @param array<mixed> $value
+     */
+    private function getQueryDateRange(array $value): ?AbstractQuery
     {
         if (!isset($value['start']) && !isset($value['end'])) {
             return null;
@@ -270,13 +300,10 @@ class Filter
             return null;
         }
 
-        return ['range' => [$this->getField() => \array_filter(['gte' => $start, 'lte' => $end])]];
+        return new Range($this->getField(), \array_filter(['gte' => $start, 'lte' => $end]));
     }
 
-    /**
-     * @return array<mixed>
-     */
-    private function getQueryVersion(): ?array
+    private function getQueryVersion(): ?AbstractQuery
     {
         if (null === $this->value || !\is_string($this->value)) {
             return null;
@@ -298,16 +325,13 @@ class Filter
         $fromField = $this->field ?? 'version_from_date';
         $toField = $this->secondaryField ?? 'version_to_date';
 
-        return [
-            'bool' => [
-                'must' => [
-                    ['range' => [$fromField => ['lte' => $dateString, 'format' => 'yyyy-MM-dd']]],
-                    $this->getQueryOptional($toField, [
-                        'range' => [$toField => ['gt' => $dateString, 'format' => 'yyyy-MM-dd']],
-                    ]),
-                ],
-            ],
-        ];
+        $boolQuery = new BoolQuery();
+        $before = new Range($fromField, ['lte' => $dateString, 'format' => 'yyyy-MM-dd']);
+        $after = new Range($toField, ['gt' => $dateString, 'format' => 'yyyy-MM-dd']);
+        $boolQuery->addMust($before);
+        $boolQuery->addMust($this->getQueryOptional($toField, $after));
+
+        return $boolQuery;
     }
 
     private function createDateTimeForQuery(string $value, ?string $time = ''): ?\DateTime
@@ -325,22 +349,16 @@ class Filter
         return $dateTime instanceof \DateTime ? $dateTime : null;
     }
 
-    /**
-     * @param array<mixed>|null $query
-     *
-     * @return array<mixed>
-     */
-    private function getQueryOptional(string $field, ?array $query): array
+    private function getQueryOptional(string $field, AbstractQuery $query): AbstractQuery
     {
-        return [
-            'bool' => [
-                'minimum_should_match' => 1,
-                'should' => [
-                    [$query],
-                    ['bool' => ['must_not' => ['exists' => ['field' => $field]]]],
-                ],
-            ],
-        ];
+        $boolQuery = new BoolQuery();
+        $boolQuery->setMinimumShouldMatch(1);
+        $orMustNotExists = new BoolQuery();
+        $orMustNotExists->addMustNot(new Exists($field));
+        $boolQuery->addShould($query);
+        $boolQuery->addShould($orMustNotExists);
+
+        return $boolQuery;
     }
 
     private function setChoices(): void
@@ -349,32 +367,30 @@ class Filter
             return;
         }
 
-        $aggs = ['terms' => ['field' => $this->getField(), 'size' => $this->aggSize]];
-        if (null !== $this->getSortField()) {
-            $aggs['terms']['order'] = [$this->getSortField() => $this->getSortOrder()];
+        $search = $this->clientRequest->initializeCommonSearch($this->queryTypes, $this->queryFilters);
+
+        $aggs = new TermsAggregation($this->name);
+        $aggs->setField($this->getField());
+        if (null !== $this->aggSize) {
+            $aggs->setSize($this->aggSize);
         }
 
-        if ($this->isNested()) {
-            $aggs = ['nested' => [
-                'path' => $this->getNestedPath(), ],
-                'aggs' => ['nested' => $aggs],
-            ];
+        $sortField = $this->getSortField();
+        if (null !== $sortField) {
+            $aggs->setOrder($sortField, $this->getSortOrder());
         }
 
-        $args = [
-            'type' => $this->queryTypes,
-            'body' => [
-                'size' => 0,
-                'aggs' => [
-                    $this->name => $aggs
-                ]
-            ]
-        ];
-        if (\count($this->queryFilters) > 0) {
-            $args['body']['query'] = $this->queryFilters;
+        $nestedPath = $this->getNestedPath();
+        if (null === $nestedPath) {
+            $search->addAggregation($aggs);
+        } else {
+            $nested = new Nested($this->name, $nestedPath);
+            $nested->addAggregation($aggs);
+            $search->addAggregation($nested);
         }
+        $search->setSize(0);
 
-        $search = $this->clientRequest->searchArgs($args);
+        $search = $this->clientRequest->commonSearch($search)->getResponse()->getData();
 
         $result = $search['aggregations'][$this->name];
         $buckets = $this->isNested() ? $result['nested']['buckets'] : $result['buckets'];
@@ -391,7 +407,10 @@ class Filter
         $this->choices = $choices;
     }
 
-    private function setPostFilter(array $options)
+    /**
+     * @param array<mixed> $options
+     */
+    private function setPostFilter(array $options): void
     {
         if (isset($options['post_filter'])) {
             $this->postFilter = (bool) $options['post_filter'];
