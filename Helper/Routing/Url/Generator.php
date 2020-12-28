@@ -64,7 +64,8 @@ class Generator
         $url = \trim($url);
         $path = $this->getRelativePath($emsLink->getContentType());
         $baseUrl = $this->baseUrl.$path.$this->phpApp;
-        if (0 === \strpos($url, $baseUrl)) {
+
+        if ($baseUrl && 0 === \strpos($url, $baseUrl)) {
             return $url;
         }
 

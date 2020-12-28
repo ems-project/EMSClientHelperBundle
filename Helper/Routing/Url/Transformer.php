@@ -84,8 +84,7 @@ class Transformer
 
             return $url;
         } catch (\Exception $ex) {
-            $this->logger->error(\sprintf('%s match (%s)', $ex->getMessage(), \json_encode($match)));
-
+            $this->logger->error('Url generation failed', ['exception' => $ex, 'match' => $match, 'locale' => $locale]);
             return false;
         }
     }
