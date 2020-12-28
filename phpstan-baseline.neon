@@ -696,16 +696,6 @@ parameters:
 			path: Helper/Environment/Environment.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Environment\\\\EnvironmentHelper\\:\\:__construct\\(\\) has parameter \\$environments with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Environment/EnvironmentHelper.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Environment\\\\EnvironmentHelper\\:\\:getEnvironments\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Environment/EnvironmentHelper.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Hashcash\\\\HashcashHelper\\:\\:validateHashcash\\(\\) has no return typehint specified\\.$#"
 			count: 1
 			path: Helper/Hashcash/HashcashHelper.php
