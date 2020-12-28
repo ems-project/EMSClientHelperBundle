@@ -2,9 +2,15 @@
 
 namespace EMS\ClientHelperBundle\DependencyInjection;
 
+use EMS\ClientHelperBundle\EventListener\RedirectListener;
 use EMS\ClientHelperBundle\Helper\Api\Client as ApiClient;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Routing\RedirectHelper;
+use EMS\ClientHelperBundle\Helper\Routing\Router;
+use EMS\ClientHelperBundle\Helper\Routing\Url\Generator;
+use EMS\ClientHelperBundle\Helper\Routing\Url\Transformer;
 use EMS\ClientHelperBundle\Helper\Twig\TwigLoader;
+use EMS\ClientHelperBundle\Twig\RoutingRuntime;
 use EMS\CommonBundle\Logger\ElasticsearchLogger;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -38,13 +44,15 @@ class EMSClientHelperExtension extends Extension
         $templates = $config['templates'];
         $container->setParameter('emsch.templates', $config['templates']);
         $container->getDefinition('emsch.helper_exception')->replaceArgument(3, $templates['error']);
-        $container->getDefinition('emsch.routing.url.transformer')->replaceArgument(4, $templates['ems_link']);
 
         $this->defineElasticsearchLogger($container, $config['log']);
 
         $this->processElasticms($container, $loader, $config['elasticms']);
         $this->processApi($container, $config['api']);
-        $this->processRoutingSelection($container, $config['routing']);
+        if (isset($config['routing'])) {
+            $this->processRoutingSelection($container, $config['routing'], $config['locales'], $config['templates']);
+            $container->getDefinition('emsch.routing.url.transformer')->replaceArgument(4, $templates['ems_link']);
+        }
         $this->processUserApi($container, $config['user_api']);
 
         if (isset($config['twig_list'])) {
@@ -151,16 +159,70 @@ class EMSClientHelperExtension extends Extension
         $container->setDefinition(\sprintf('emsch.twig.loader.%s', $name), $loader);
     }
 
-    private function processRoutingSelection(ContainerBuilder $container, array $config)
+    private function processRoutingSelection(ContainerBuilder $container, array $config, $locales, $templates)
     {
-        if (!$config['enabled']) {
-            return;
-        }
-
         $container->setParameter('emsch.routing.client_request', $config['client_request']);
         $container->setParameter('emsch.routing.routes', $config['routes']);
         $container->setParameter('emsch.routing.redirect_type', $config['redirect_type']);
         $container->setParameter('emsch.routing.relative_paths', $config['relative_paths']);
+
+        echo $config['client_request'];
+
+        $router = new Definition(Router::class);
+        $router->setArguments([
+            new Reference('emsch.manager.client_request'),
+            new Reference('emsch.helper_cache'),
+            $locales,
+            $templates,
+            $config['routes'],
+        ]);
+        $router->addTag('emsch.router', ['priority' => 100]);
+        $container->setDefinition('emsch.router', $router);
+
+
+        $generator = new Definition(Generator::class);
+        $generator->setArguments([
+            new Reference('Symfony\\Component\\Routing\\RouterInterface'),
+            $config['relative_paths'],
+        ]);
+        $container->setDefinition('emsch.routing.url.generator', $generator);
+
+        $transformer = new Definition(Transformer::class);
+        $transformer->setArguments([
+            new Reference(\sprintf('emsch.client_request.%s', $config['client_request'])),
+            new Reference('emsch.routing.url.generator'),
+            new Reference('twig'),
+            new Reference('logger'),
+            null,
+        ]);
+        $transformer->addTag('monolog.logger', ['channel' => 'emsch_routing']);
+        $container->setDefinition('emsch.routing.url.transformer', $transformer);
+
+        $redirectHelper = new Definition(RedirectHelper::class);
+        $redirectHelper->setArguments([
+            new Reference(\sprintf('emsch.client_request.%s', $config['client_request'])),
+            new Reference('emsch.routing.url.transformer'),
+            $config['redirect_type'],
+        ]);
+        $container->setDefinition('emsch.routing.redirect_helper', $redirectHelper);
+
+        $redirectListener = new Definition(RedirectListener::class);
+        $redirectListener->setArguments([
+            new Reference('emsch.routing.redirect_helper'),
+            new Reference('http_kernel'),
+            new Reference('Symfony\\Component\\Routing\\RouterInterface'),
+        ]);
+        $redirectListener->addTag('kernel.event_subscriber');
+        $container->setDefinition('emsch.redirect_listener', $redirectListener);
+
+        $routing = new Definition(RoutingRuntime::class);
+        $routing->setArguments([
+            new Reference('emsch.routing.url.transformer'),
+        ]);
+        $routing->addTag('twig.runtime');
+        $container->setDefinition('emsch.twig.runtime.routing', $routing);
+
+
     }
 
     /**

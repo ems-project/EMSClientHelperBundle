@@ -193,7 +193,6 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->arrayNode('routing')
-                ->canBeEnabled()
                 ->children()
                     ->scalarNode('client_request')
                         ->isRequired()
