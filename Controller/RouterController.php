@@ -5,6 +5,7 @@ namespace EMS\ClientHelperBundle\Controller;
 use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
 use EMS\ClientHelperBundle\Helper\Request\Handler;
 use EMS\CommonBundle\Storage\Processor\Processor;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -57,5 +58,25 @@ class RouterController
         $data = \json_decode($json, true);
 
         return $this->processor->getResponse($request, $data['hash'], $data['config'], $data['filename']);
+    }
+
+    public function makeResponse(Request $request): Response
+    {
+        $result = $this->handler->handle($request);
+        $json = $this->templating->render($result['template'], $result['context']);
+
+        $data = \json_decode($json, true);
+
+        $response = new Response();
+
+        foreach ($data['headers'] as $key => $value) {
+            $response->headers->add([
+                $key => $value,
+            ]);
+        }
+
+        $response->setContent($data['content']);
+
+        return $response;
     }
 }
