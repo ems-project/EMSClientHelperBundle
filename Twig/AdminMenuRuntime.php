@@ -25,7 +25,7 @@ class AdminMenuRuntime implements RuntimeExtensionInterface
     {
         $backend = $this->environmentHelper->getBackend();
 
-        if (!$backend) {
+        if (null === $backend || \strlen($backend) <= 0) {
             return '';
         }
 

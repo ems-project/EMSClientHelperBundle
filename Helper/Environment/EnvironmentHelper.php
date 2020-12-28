@@ -28,7 +28,7 @@ class EnvironmentHelper
         return $this->environments;
     }
 
-    public function getBackend(): string
+    public function getBackend(): ?string
     {
         $current = $this->requestStack->getCurrentRequest();
 
@@ -59,7 +59,10 @@ class EnvironmentHelper
     public function getLocale(): string
     {
         $current = $this->requestStack->getCurrentRequest();
+        if (null === $current) {
+            throw new \RuntimeException('Unexpected null request');
+        }
 
-        return $current ? $current->getLocale() : null;
+        return $current->getLocale();
     }
 }

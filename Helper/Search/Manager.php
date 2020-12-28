@@ -21,32 +21,42 @@ class Manager
         return $this->clientRequest;
     }
 
-    public function search(Request $request)
+    /**
+     * @return array<mixed>
+     */
+    public function search(Request $request): array
     {
-        $search = new Search($this->clientRequest);
-        $search->bindRequest($request);
+        $requestSearch = new Search($this->clientRequest);
+        $requestSearch->bindRequest($request);
 
-        $qbService = new QueryBuilder($this->clientRequest, $search);
-        $body = $qbService->buildBody();
+        $qbService = new QueryBuilder($this->clientRequest, $requestSearch);
+        $search = $qbService->buildSearch($requestSearch->getTypes());
+        $search->setFrom($requestSearch->getFrom());
+        $search->setSize($requestSearch->getSize());
 
-        $results = $this->clientRequest->search($search->getTypes(), $body, $search->getFrom(), $search->getSize());
+        $results = $this->clientRequest->commonSearch($search)->getResponse()->getData();
 
         if (isset($results['aggregations'])) {
-            $search->bindAggregations($results['aggregations'], $qbService->getQueryFilters());
+            $requestSearch->bindAggregations($results['aggregations'], $qbService->getQueryFilters());
         }
 
         return [
             'results' => $results,
-            'search' => $search,
-            'query' => $search->getQueryString(),
-            'sort' => $search->getSortBy(),
-            'facets' => $search->getQueryFacets(),
-            'page' => $search->getPage(),
-            'size' => $search->getSize(),
+            'search' => $requestSearch,
+            'query' => $requestSearch->getQueryString(),
+            'sort' => $requestSearch->getSortBy(),
+            'facets' => $requestSearch->getQueryFacets(),
+            'page' => $requestSearch->getPage(),
+            'size' => $requestSearch->getSize(),
             'counters' => $this->getCountInfo($results),
         ];
     }
 
+    /**
+     * @param array<mixed> $results
+     *
+     * @return array<int|string, array>
+     */
     private function getCountInfo(array $results): array
     {
         $counters = [];
