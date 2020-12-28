@@ -50,7 +50,7 @@ class Environment
             return $this->index;
         }
 
-        return $this->request['_environment'] ? $this->request['_environment'] : $this->name;
+        return $this->request['_environment'] ?? $this->name;
     }
 
     public function matchRequest(Request $request)
