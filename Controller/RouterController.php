@@ -69,13 +69,13 @@ class RouterController
 
         $response = new Response();
 
+        $response->setContent($data['content']);
+
         foreach ($data['headers'] as $key => $value) {
             $response->headers->add([
                 $key => $value,
             ]);
         }
-
-        $response->setContent($data['content']);
 
         return $response;
     }
