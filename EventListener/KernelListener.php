@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\EventListener;
 
+use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\ClientHelperBundle\Helper\Request\ExceptionHelper;
@@ -32,19 +33,22 @@ class KernelListener implements EventSubscriberInterface
 
     /** @var bool */
     private $bindLocale;
+    private bool $ignoreNotFoundEnvironment;
 
     public function __construct(
         EnvironmentHelper $environmentHelper,
         TranslationHelper $translationHelper,
         LocaleHelper $localeHelper,
         ExceptionHelper $exceptionHelper,
-        bool $bindLocale
+        bool $bindLocale,
+        bool $ignoreNotFoundEnvironment
     ) {
         $this->environmentHelper = $environmentHelper;
         $this->translationHelper = $translationHelper;
         $this->localeHelper = $localeHelper;
         $this->exceptionHelper = $exceptionHelper;
         $this->bindLocale = $bindLocale;
+        $this->ignoreNotFoundEnvironment = $ignoreNotFoundEnvironment;
     }
 
     /**
@@ -85,7 +89,13 @@ class KernelListener implements EventSubscriberInterface
     public function loadTranslations(KernelEvent $event): void
     {
         if ($event->isMasterRequest()) {
-            $this->translationHelper->addCatalogues();
+            try {
+                $this->translationHelper->addCatalogues();
+            } catch (EnvironmentNotFoundException $e) {
+                if (!$this->ignoreNotFoundEnvironment) {
+                    throw $e;
+                }
+            }
         }
     }
 

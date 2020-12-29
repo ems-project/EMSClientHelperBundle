@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
+use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
@@ -22,8 +23,9 @@ class Router extends BaseRouter
     private $templates;
     /** @var array */
     private $routes;
+    private bool $ignoreNotFoundEnvironment;
 
-    public function __construct(ClientRequestManager $manager, CacheHelper $cacheHelper, array $locales, array $templates, array $routes)
+    public function __construct(ClientRequestManager $manager, CacheHelper $cacheHelper, array $locales, array $templates, array $routes, bool $ignoreNotFoundEnvironment)
     {
         $this->manager = $manager;
         $this->logger = $manager->getLogger();
@@ -31,6 +33,7 @@ class Router extends BaseRouter
         $this->locales = $locales;
         $this->templates = $templates;
         $this->routes = $routes;
+        $this->ignoreNotFoundEnvironment = $ignoreNotFoundEnvironment;
     }
 
     public function getRouteCollection(): RouteCollection
@@ -47,7 +50,13 @@ class Router extends BaseRouter
         $collection = new RouteCollection();
         $this->addSearchResultRoute($collection);
         $this->addLanguageSelectionRoute($collection);
-        $this->addEMSRoutes($collection);
+        try {
+            $this->addEMSRoutes($collection);
+        } catch (EnvironmentNotFoundException $e) {
+            if (!$this->ignoreNotFoundEnvironment) {
+                throw $e;
+            }
+        }
         $this->addEnvRoutes($collection);
 
         $this->collection = $collection;
