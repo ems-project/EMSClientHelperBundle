@@ -2,7 +2,6 @@
 
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
-use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
@@ -23,9 +22,8 @@ class Router extends BaseRouter
     private $templates;
     /** @var array */
     private $routes;
-    private bool $ignoreNotFoundEnvironment;
 
-    public function __construct(ClientRequestManager $manager, CacheHelper $cacheHelper, array $locales, array $templates, array $routes, bool $ignoreNotFoundEnvironment)
+    public function __construct(ClientRequestManager $manager, CacheHelper $cacheHelper, array $locales, array $templates, array $routes)
     {
         $this->manager = $manager;
         $this->logger = $manager->getLogger();
@@ -33,7 +31,6 @@ class Router extends BaseRouter
         $this->locales = $locales;
         $this->templates = $templates;
         $this->routes = $routes;
-        $this->ignoreNotFoundEnvironment = $ignoreNotFoundEnvironment;
     }
 
     public function getRouteCollection(): RouteCollection
@@ -50,13 +47,7 @@ class Router extends BaseRouter
         $collection = new RouteCollection();
         $this->addSearchResultRoute($collection);
         $this->addLanguageSelectionRoute($collection);
-        try {
-            $this->addEMSRoutes($collection);
-        } catch (EnvironmentNotFoundException $e) {
-            if (!$this->ignoreNotFoundEnvironment) {
-                throw $e;
-            }
-        }
+        $this->addEMSRoutes($collection);
         $this->addEnvRoutes($collection);
 
         $this->collection = $collection;
@@ -100,6 +91,10 @@ class Router extends BaseRouter
     {
         foreach ($this->manager->all() as $clientRequest) {
             if (!$clientRequest->hasOption('route_type')) {
+                continue;
+            }
+
+            if (!$clientRequest->mustBeBind() && !$clientRequest->hasEnvironments()) {
                 continue;
             }
 

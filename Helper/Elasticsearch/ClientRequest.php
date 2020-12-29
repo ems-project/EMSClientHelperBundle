@@ -241,6 +241,16 @@ class ClientRequest
         return $out;
     }
 
+    public function mustBeBind(): bool
+    {
+        return $this->options['must_be_bind'] ?? true;
+    }
+
+    public function hasEnvironments(): bool
+    {
+        return \count($this->getEnvironments()) > 0;
+    }
+
     public function getEnvironments(): array
     {
         $environments = [];

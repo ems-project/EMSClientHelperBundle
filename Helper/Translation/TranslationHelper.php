@@ -35,6 +35,10 @@ class TranslationHelper
                 continue;
             }
 
+            if (!$clientRequest->mustBeBind() && !$clientRequest->hasEnvironments()) {
+                continue;
+            }
+
             $messages = $this->getMessages($clientRequest);
 
             foreach ($this->locales as $locale) {
