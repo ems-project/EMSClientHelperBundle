@@ -5,8 +5,6 @@ namespace EMS\ClientHelperBundle\Controller;
 use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
 use EMS\ClientHelperBundle\Helper\Request\Handler;
 use EMS\CommonBundle\Storage\Processor\Processor;
-use http\Exception\RuntimeException;
-use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -68,20 +66,23 @@ class RouterController
 
         $data = \json_decode($json, true);
 
-        if ($data === false) {
+        if (false === $data) {
             throw new \RuntimeException('JSON is expected with at least a content field as a string');
         }
 
-        if (!array_key_exists('content', $data)) {
+        if (!\is_string($data['content'] ?? null)) {
             throw new \RuntimeException('JSON requires at least a content field as a string');
         }
 
         $response = new Response();
 
-
         $response->setContent($data['content']);
 
         $headers = $data['headers'] ?? ['Content-Type' => 'text/plain'];
+
+        if (!\is_array($headers)) {
+            throw new \RuntimeException('Unexpected non-array headers parameter');
+        }
 
         foreach ($headers as $key => $value) {
             $response->headers->add([
