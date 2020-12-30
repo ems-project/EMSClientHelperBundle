@@ -106,6 +106,7 @@ class Configuration implements ConfigurationInterface
                                 ->defaultValue(null)
                             ->end()
                             ->booleanNode('default')->end()
+                            ->booleanNode('must_be_bind')->defaultValue(true)->end()
                             ->scalarNode('translation_type')
                                 ->info("example: 'test_i18n'")
                                 ->defaultValue(null)

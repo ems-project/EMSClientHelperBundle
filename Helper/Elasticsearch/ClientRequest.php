@@ -11,7 +11,7 @@ use Elastica\ResultSet;
 use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
-use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
+use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelperInterface;
 use EMS\CommonBundle\Common\EMSLink;
 use EMS\CommonBundle\Elasticsearch\Document\EMSSource;
 use EMS\CommonBundle\Elasticsearch\Exception\NotFoundException;
@@ -27,7 +27,7 @@ class ClientRequest
 {
     /** @var int */
     private const CONTENT_TYPE_LIMIT = 500;
-    /** @var EnvironmentHelper */
+    /** @var EnvironmentHelperInterface */
     private $environmentHelper;
     /** @var string */
     private $indexPrefix;
@@ -54,7 +54,7 @@ class ClientRequest
      */
     public function __construct(
         ElasticaService $elasticaService,
-        EnvironmentHelper $environmentHelper,
+        EnvironmentHelperInterface $environmentHelper,
         LoggerInterface $logger,
         AdapterInterface $cache,
         $name,
@@ -239,6 +239,16 @@ class ClientRequest
         }
 
         return $out;
+    }
+
+    public function mustBeBind(): bool
+    {
+        return $this->options['must_be_bind'] ?? true;
+    }
+
+    public function hasEnvironments(): bool
+    {
+        return \count($this->getEnvironments()) > 0;
     }
 
     public function getEnvironments(): array

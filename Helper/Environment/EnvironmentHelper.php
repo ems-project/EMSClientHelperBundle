@@ -4,7 +4,7 @@ namespace EMS\ClientHelperBundle\Helper\Environment;
 
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class EnvironmentHelper
+class EnvironmentHelper implements EnvironmentHelperInterface
 {
     /** @var Environment[] */
     private $environments = [];
@@ -13,6 +13,9 @@ class EnvironmentHelper
     /** @var string */
     private $emschEnv;
 
+    /**
+     * @param array<string, array> $environments
+     */
     public function __construct(RequestStack $requestStack, string $emschEnv, array $environments)
     {
         $this->requestStack = $requestStack;
@@ -41,9 +44,9 @@ class EnvironmentHelper
      */
     public function getEnvironment(): ?string
     {
-        static $env = false;
+        static $env = null;
 
-        if (!$env) {
+        if (null === $env) {
             $current = $this->requestStack->getCurrentRequest();
 
             if ($current) {
