@@ -53,7 +53,12 @@ class QueryBuilder
     private function getQuery(): ?AbstractQuery
     {
         if ($this->search->hasQueryString()) {
-            return $this->getQueryWithString($this->search->getQueryString());
+            $queryString = $this->search->getQueryString();
+            if (null === $queryString) {
+                throw new \RuntimeException('Unexpected null query string');
+            }
+
+            return $this->getQueryWithString($queryString);
         }
 
         return $this->getQueryFilters();
