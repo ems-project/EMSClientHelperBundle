@@ -58,4 +58,38 @@ class RouterController
 
         return $this->processor->getResponse($request, $data['hash'], $data['config'], $data['filename']);
     }
+
+    public function makeResponse(Request $request): Response
+    {
+        $result = $this->handler->handle($request);
+        $json = $this->templating->render($result['template'], $result['context']);
+
+        $data = \json_decode($json, true);
+
+        if (false === $data) {
+            throw new \RuntimeException('JSON is expected with at least a content field as a string');
+        }
+
+        if (!\is_string($data['content'] ?? null)) {
+            throw new \RuntimeException('JSON requires at least a content field as a string');
+        }
+
+        $response = new Response();
+
+        $response->setContent($data['content']);
+
+        $headers = $data['headers'] ?? ['Content-Type' => 'text/plain'];
+
+        if (!\is_array($headers)) {
+            throw new \RuntimeException('Unexpected non-array headers parameter');
+        }
+
+        foreach ($headers as $key => $value) {
+            $response->headers->add([
+                $key => $value,
+            ]);
+        }
+
+        return $response;
+    }
 }
