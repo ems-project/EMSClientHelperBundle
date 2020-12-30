@@ -26,7 +26,7 @@ class EnvironmentHelper implements EnvironmentHelperInterface
         }
     }
 
-    public function addEnvironment(Environment $environment): array
+    public function addEnvironment(Environment $environment): void
     {
         $this->environments[] = $environment;
     }
