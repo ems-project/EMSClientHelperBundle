@@ -69,12 +69,17 @@ class RouterController
         $data = \json_decode($json, true);
 
         if ($data === false) {
-            throw new \RuntimeException('Failed to decode JSON');
+            throw new \RuntimeException('JSON is expected with at least a content field as a string');
+        }
+
+        if (!array_key_exists('content', $data)) {
+            throw new \RuntimeException('JSON requires at least a content field as a string');
         }
 
         $response = new Response();
 
-        $response->setContent($data['content'] ?? null);
+
+        $response->setContent($data['content']);
 
         $headers = $data['headers'] ?? ['Content-Type' => 'text/plain'];
 
