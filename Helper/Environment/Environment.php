@@ -35,7 +35,7 @@ class Environment
     {
         $this->name = $name;
 
-        $this->regex = $config['regex'] ?? '*';
+        $this->regex = $config['regex'] ?? '/.*/';
         $this->backend = $config['backend'] ?? false;
         $this->index = $config['index'] ?? null;
         $this->request = $config['request'] ?? [];
