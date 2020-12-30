@@ -5,6 +5,7 @@ namespace EMS\ClientHelperBundle\Controller;
 use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
 use EMS\ClientHelperBundle\Helper\Request\Handler;
 use EMS\CommonBundle\Storage\Processor\Processor;
+use http\Exception\RuntimeException;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -67,11 +68,17 @@ class RouterController
 
         $data = \json_decode($json, true);
 
+        if ($data === false) {
+            throw new \RuntimeException('Failed to decode JSON');
+        }
+
         $response = new Response();
 
-        $response->setContent($data['content']);
+        $response->setContent($data['content'] ?? null);
 
-        foreach ($data['headers'] as $key => $value) {
+        $headers = $data['headers'] ?? ['Content-Type' => 'text/plain'];
+
+        foreach ($headers as $key => $value) {
             $response->headers->add([
                 $key => $value,
             ]);
