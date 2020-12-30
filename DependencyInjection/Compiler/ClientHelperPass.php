@@ -10,7 +10,7 @@ class ClientHelperPass implements CompilerPassInterface
     public function process(ContainerBuilder $container)
     {
         //override the default symfony router, with the chain router
-        $container->setAlias('router', 'emch.routing.chain_router');
+        $container->setAlias('router', 'emsch.routing.chain_router');
         $container->getAlias('router')->setPublic(true);
 
         $this->processRouting($container);

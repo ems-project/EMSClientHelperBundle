@@ -4,7 +4,7 @@ namespace EMS\ClientHelperBundle\Helper\Environment;
 
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class EnvironmentHelper
+class EnvironmentHelper implements EnvironmentHelperInterface
 {
     /** @var Environment[] */
     private $environments = [];
@@ -13,6 +13,9 @@ class EnvironmentHelper
     /** @var string */
     private $emschEnv;
 
+    /**
+     * @param array<string, array> $environments
+     */
     public function __construct(RequestStack $requestStack, string $emschEnv, array $environments)
     {
         $this->requestStack = $requestStack;
@@ -28,7 +31,7 @@ class EnvironmentHelper
         return $this->environments;
     }
 
-    public function getBackend(): string
+    public function getBackend(): ?string
     {
         $current = $this->requestStack->getCurrentRequest();
 
@@ -41,9 +44,9 @@ class EnvironmentHelper
      */
     public function getEnvironment(): ?string
     {
-        static $env = false;
+        static $env = null;
 
-        if (!$env) {
+        if (null === $env) {
             $current = $this->requestStack->getCurrentRequest();
 
             if ($current) {
@@ -59,7 +62,10 @@ class EnvironmentHelper
     public function getLocale(): string
     {
         $current = $this->requestStack->getCurrentRequest();
+        if (null === $current) {
+            throw new \RuntimeException('Unexpected null request');
+        }
 
-        return $current ? $current->getLocale() : null;
+        return $current->getLocale();
     }
 }

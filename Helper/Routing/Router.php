@@ -94,6 +94,10 @@ class Router extends BaseRouter
                 continue;
             }
 
+            if (!$clientRequest->mustBeBind() && !$clientRequest->hasEnvironments()) {
+                continue;
+            }
+
             $routes = $this->getRoutes($clientRequest);
 
             foreach ($routes as $route) {

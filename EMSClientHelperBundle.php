@@ -14,6 +14,6 @@ class EMSClientHelperBundle extends Bundle
         parent::build($container);
 
         $container->addCompilerPass(new ClientHelperPass());
-        $container->addCompilerPass(new RegisterRoutersPass('emch.routing.chain_router', 'emsch.router'));
+        $container->addCompilerPass(new RegisterRoutersPass('emsch.routing.chain_router', 'emsch.router'));
     }
 }

@@ -61,9 +61,14 @@ class Generator
      */
     public function prependBaseUrl(EMSLink $emsLink, $url)
     {
+        $url = \trim($url);
         $path = $this->getRelativePath($emsLink->getContentType());
+        $baseUrl = $this->baseUrl.$path.$this->phpApp;
+        if (0 === \strpos($url, $baseUrl)) {
+            return $url;
+        }
 
-        return $this->baseUrl.$path.$this->phpApp.$url;
+        return $baseUrl.$url;
     }
 
     /**
