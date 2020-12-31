@@ -11,7 +11,7 @@ use Elastica\ResultSet;
 use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
-use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelperInterface;
+use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\CommonBundle\Common\EMSLink;
 use EMS\CommonBundle\Elasticsearch\Document\EMSSource;
 use EMS\CommonBundle\Elasticsearch\Exception\NotFoundException;
@@ -27,7 +27,7 @@ class ClientRequest
 {
     /** @var int */
     private const CONTENT_TYPE_LIMIT = 500;
-    /** @var EnvironmentHelperInterface */
+    /** @var EnvironmentHelper */
     private $environmentHelper;
     /** @var string */
     private $indexPrefix;
@@ -54,7 +54,7 @@ class ClientRequest
      */
     public function __construct(
         ElasticaService $elasticaService,
-        EnvironmentHelperInterface $environmentHelper,
+        EnvironmentHelper $environmentHelper,
         LoggerInterface $logger,
         AdapterInterface $cache,
         $name,
@@ -260,6 +260,11 @@ class ClientRequest
         }
 
         return $environments;
+    }
+
+    public function getCurrentEnvironment(): Environment
+    {
+        return $this->environmentHelper->getEnvironment();
     }
 
     public function getLastChangeDate(string $type): \DateTime
@@ -653,7 +658,7 @@ class ClientRequest
      */
     private function getIndex(): array
     {
-        $environment = $this->environmentHelper->getEnvironment();
+        $environment = $this->environmentHelper->getEnvironmentName();
 
         if (null === $environment) {
             throw new EnvironmentNotFoundException();
