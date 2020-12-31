@@ -615,6 +615,7 @@ class ClientRequest
      */
     public function scrollAll(array $params, $timeout = '30s'): iterable
     {
+        $params['index'] = $this->getIndex();
         $search = $this->elasticaService->convertElasticsearchSearch($params);
         $scroll = $this->elasticaService->scroll($search, $timeout);
 
