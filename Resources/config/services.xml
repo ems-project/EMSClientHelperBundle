@@ -43,6 +43,7 @@
             <argument type="service" id="translator.default" />
             <argument type="service" id="emsch.helper_cache" />
             <argument type="string">%emsch.locales%</argument>
+            <tag name="kernel.cache_warmer" />
         </service>
 
         <service id="emsch.helper_hashcash" class="EMS\ClientHelperBundle\Helper\Hashcash\HashcashHelper">
