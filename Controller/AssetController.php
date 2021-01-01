@@ -79,17 +79,13 @@ final class AssetController extends AbstractController
             throw new BadRequestHttpException('Host and referer\'s host does not match');
         }
 
-        if (isset($referer['query'])) {
+        $path = \substr($referer['path'] ?? '', \strlen($request->getBasePath()));
+        $matches = [];
+        if (!\preg_match($pathRegex, $path, $matches) && isset($referer['query'])) {
             return $this->proxyToZipArchive($requestPath, $referer['query']);
         }
 
-        $path = \substr($referer['path'] ?? '', \strlen($request->getBasePath()));
-        $matches = [];
-        if (!\preg_match($pathRegex, $path, $matches)) {
-            throw new NotFoundHttpException(\sprintf('Pattern %s not found', $pathRegex));
-        }
-
-        $environment = $matches['environment'];
+        $environment = $matches['environment'] ?? null;
         if (!\is_string($environment)) {
             throw new NotFoundHttpException('Environment not found');
         }
