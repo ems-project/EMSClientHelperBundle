@@ -6,17 +6,17 @@ Coding standards
 PHP Code Sniffer is available via composer, the standard used is defined in phpcs.xml.diff:
 ````bash
 composer phpcs
-````
-
-If your code is not compliant, you could try fixing it automatically:
-````bash
-composer phpcbf
-````
 
 PHPStan is run at level 4, you can check for errors locally using:
 `````bash
 composer phpstan
 `````
+
+If you want to regenerate the PHPStan's baseline run the following command:
+`````bash
+vendor/bin/phpstan analyse ./  --generate-baseline
+`````
+
 
 Documentation
 -------------
