@@ -620,6 +620,7 @@ class ClientRequest
      */
     public function scrollAll(array $params, $timeout = '30s'): iterable
     {
+        $params['index'] = $this->getIndex();
         $search = $this->elasticaService->convertElasticsearchSearch($params);
         $scroll = $this->elasticaService->scroll($search, $timeout);
 
@@ -646,9 +647,9 @@ class ClientRequest
      *
      * @todo rename to getEnvironmentAlias?
      */
-    public function getCacheKey(string $prefix = ''): string
+    public function getCacheKey(string $prefix = '', string $environment = null): string
     {
-        $index = $this->getIndex();
+        $index = $this->getIndex($environment);
 
         return $prefix.\implode('_', $index);
     }
@@ -656,9 +657,11 @@ class ClientRequest
     /**
      * @return string[]
      */
-    private function getIndex(): array
+    private function getIndex(string $environment = null): array
     {
-        $environment = $this->environmentHelper->getEnvironmentName();
+        if (null === $environment) {
+            $environment = $this->environmentHelper->getEnvironmentName();
+        }
 
         if (null === $environment) {
             throw new EnvironmentNotFoundException();
