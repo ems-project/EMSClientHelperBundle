@@ -5,6 +5,7 @@ namespace EMS\ClientHelperBundle\Helper\Routing\Url;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Twig\TwigException;
 use EMS\CommonBundle\Common\EMSLink;
+use EMS\CommonBundle\Elasticsearch\Document\EMSSource;
 use Psr\Log\LoggerInterface;
 
 class Transformer
@@ -122,15 +123,16 @@ class Transformer
             'url' => $emsLink,
         ];
 
+        $contentType = $document['_source'][EMSSource::FIELD_CONTENT_TYPE] ?? $document['_type'];
         if ($this->template) {
-            $template = \str_replace('{type}', $document['_type'], $this->template);
+            $template = \str_replace('{type}', $contentType, $this->template);
 
             if ($result = $this->twigRender($template, $context)) {
                 return $result;
             }
         }
 
-        return $this->twigRender('@EMSCH/routing/'.$document['_type'], $context);
+        return $this->twigRender('@EMSCH/routing/'.$contentType, $context);
     }
 
     private function twigRender(string $template, array $context): ?string
