@@ -756,16 +756,6 @@ parameters:
 			path: Helper/Routing/Router.php
 
 		-
-			message: "#^Parameter \\#1 \\$item of method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:isValid\\(\\) expects Symfony\\\\Component\\\\Cache\\\\CacheItem, Psr\\\\Cache\\\\CacheItemInterface\\|null given\\.$#"
-			count: 1
-			path: Helper/Routing/Router.php
-
-		-
-			message: "#^Parameter \\#1 \\$item of method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:getData\\(\\) expects Symfony\\\\Component\\\\Cache\\\\CacheItem, Psr\\\\Cache\\\\CacheItemInterface\\|null given\\.$#"
-			count: 1
-			path: Helper/Routing/Router.php
-
-		-
 			message: "#^Parameter \\#1 \\$item of method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:save\\(\\) expects Symfony\\\\Component\\\\Cache\\\\CacheItem, Psr\\\\Cache\\\\CacheItemInterface\\|null given\\.$#"
 			count: 1
 			path: Helper/Routing/Router.php
