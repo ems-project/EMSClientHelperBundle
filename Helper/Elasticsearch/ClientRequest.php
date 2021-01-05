@@ -117,6 +117,10 @@ class ClientRequest
         $out = [$emsKey];
         $item = $this->getByEmsKey($emsKey);
 
+        if (false === $item) {
+            return $out;
+        }
+
         if (isset($item['_source'][$childrenField]) && \is_array($item['_source'][$childrenField])) {
             foreach ($item['_source'][$childrenField] as $key) {
                 $out = \array_merge($out, $this->getAllChildren($key, $childrenField));
@@ -129,7 +133,7 @@ class ClientRequest
     /**
      * @param string $emsLink
      *
-     * @return array|bool
+     * @return array<string, mixed>|false
      */
     public function getByEmsKey($emsLink, array $sourceFields = [])
     {
@@ -140,7 +144,7 @@ class ClientRequest
      * @param string $type
      * @param string $ouuid
      *
-     * @return array | false
+     * @return array<string, mixed>|false
      */
     public function getByOuuid($type, $ouuid, array $sourceFields = [], array $source_exclude = [])
     {
@@ -219,11 +223,11 @@ class ClientRequest
         $this->logger->debug('ClientRequest : getHierarchy for {emsKey}', ['emsKey' => $emsKey]);
         $item = $this->getByEmsKey($emsKey, $sourceFields);
 
-        if (empty($item)) {
+        if (false === $item) {
             return null;
         }
-
-        $out = new HierarchicalStructure($item['_type'], $item['_id'], $item['_source'], $activeChild);
+        $contentType = $item['_source'][EMSSource::FIELD_CONTENT_TYPE] ?? $item['_type'];
+        $out = new HierarchicalStructure($contentType, $item['_id'], $item['_source'], $activeChild);
 
         if (null === $depth || $depth) {
             if (isset($item['_source'][$childrenField]) && \is_array($item['_source'][$childrenField])) {
