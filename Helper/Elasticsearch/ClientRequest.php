@@ -667,8 +667,13 @@ class ClientRequest
         if (null === $environment) {
             $environment = $this->environmentHelper->getEnvironmentName();
         }
+        $indexPrefixes = \explode('|', $this->indexPrefix);
+        $key = [];
+        foreach ($indexPrefixes as $indexPrefix) {
+            $key[] = $indexPrefix.$environment;
+        }
 
-        return \sprintf('%s_%s', $prefix, $environment);
+        return $prefix.\implode('_', $key);
     }
 
     /**
