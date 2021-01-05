@@ -2,9 +2,11 @@
 
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
+use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
+use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -109,7 +111,30 @@ class Router extends BaseRouter
 
     private function getRoutes(ClientRequest $clientRequest): array
     {
-        $cacheItem = $this->cache->get($clientRequest->getCacheKey('routes'));
+        if ($clientRequest->isBind()) {
+            return $this->getRoutesByEnvironment($clientRequest, null);
+        }
+
+        $routes = [];
+        foreach ($clientRequest->getEnvironments() as $environment) {
+            if (\strlen($environment->getRoutePrefix()) > 0) {
+                $routes = \array_merge($routes, $this->getRoutesByEnvironment($clientRequest, $environment));
+            }
+        }
+
+        return $routes;
+    }
+
+    /**
+     * @return Route[]
+     */
+    private function getRoutesByEnvironment(ClientRequest $clientRequest, ?Environment $environment): array
+    {
+        if (null === $environment) {
+            $environment = $clientRequest->getCurrentEnvironment();
+        }
+
+        $cacheItem = $this->cache->get($clientRequest->getCacheKey('routes', $environment->getName()));
 
         $type = $clientRequest->getOption('[route_type]');
         $lastChanged = $clientRequest->getLastChangeDate($type);
@@ -118,24 +143,33 @@ class Router extends BaseRouter
             return $this->cache->getData($cacheItem);
         }
 
-        $routes = $this->createRoutes($clientRequest, $type);
+        try {
+            $routes = $this->createRoutes($clientRequest, $environment, $type);
+        } catch (EnvironmentNotFoundException $e) {
+            $routes = [];
+        }
         $this->cache->save($cacheItem, $routes);
 
         return $routes;
     }
 
-    private function createRoutes(ClientRequest $clientRequest, string $type): array
+    /**
+     * @return Route[]
+     */
+    private function createRoutes(ClientRequest $clientRequest, Environment $environment, string $type): array
     {
+        $baseUrl = $environment->getBaseUrl();
+        $routePrefix = $environment->getRoutePrefix();
         $routes = [];
         $scroll = $clientRequest->scrollAll([
             'size' => 100,
             'type' => $type,
             'sort' => ['order'],
-        ], '5s');
+        ], '5s', $environment->getIndexSuffix());
 
         foreach ($scroll as $hit) {
             $source = $hit['_source'];
-            $name = $source['name'];
+            $name = $routePrefix.$source['name'];
 
             try {
                 $options = \json_decode($source['config'], true);
@@ -150,6 +184,10 @@ class Router extends BaseRouter
                 $options['template'] = $source['template_source'] ?? $staticTemplate;
                 $options['index_regex'] = $source['index_regex'] ?? null;
 
+                if (\strlen($baseUrl) > 0) {
+                    $options['path'] = $this->prependBaseUrl($options['path'] ?? null, $baseUrl);
+                }
+
                 $routes[] = new Route($name, $options);
             } catch (\Exception $e) {
                 $this->logger->error('Router failed to create ems route {name} : {error}', ['name' => $name, 'error' => $e->getMessage()]);
@@ -157,5 +195,25 @@ class Router extends BaseRouter
         }
 
         return $routes;
+    }
+
+    /**
+     * @param array<string, string>|string|null $path
+     *
+     * @return array<string, string>|string
+     */
+    private function prependBaseUrl($path, string $baseUrl)
+    {
+        if (\is_array($path)) {
+            foreach ($path as $locale => $subpath) {
+                $path[$locale] = \sprintf('%s/%s', $baseUrl, '/' === \substr($subpath, 0, 1) ? \substr($subpath, 1) : $subpath);
+            }
+        } elseif (\is_string($path)) {
+            $path = \sprintf('%s/%s', $baseUrl, '/' === \substr($path, 0, 1) ? \substr($path, 1) : $path);
+        } else {
+            throw new \RuntimeException('Unexpected path type');
+        }
+
+        return $path;
     }
 }

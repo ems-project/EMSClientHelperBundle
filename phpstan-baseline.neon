@@ -286,11 +286,6 @@ parameters:
 			path: Helper/Api/ApiService.php
 
 		-
-			message: "#^Parameter \\#2 \\$default of method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getOption\\(\\) expects string\\|null, false given\\.$#"
-			count: 2
-			path: Helper/Api/ApiService.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Api\\\\ApiService\\:\\:getContentType\\(\\) has parameter \\$filter with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Api/ApiService.php
@@ -431,17 +426,7 @@ parameters:
 			path: Helper/Elasticsearch/ClientRequest.php
 
 		-
-			message: "#^Cannot access offset '_source' on array\\|bool\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getByEmsKey\\(\\) has parameter \\$sourceFields with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getByEmsKey\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Elasticsearch/ClientRequest.php
 
@@ -466,32 +451,7 @@ parameters:
 			path: Helper/Elasticsearch/ClientRequest.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getByOuuid\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getHierarchy\\(\\) has parameter \\$sourceFields with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Cannot access offset '_id' on array\\|true\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Cannot access offset '_source' on array\\|true\\.$#"
-			count: 2
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Cannot access offset '_type' on array\\|true\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getEnvironments\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Elasticsearch/ClientRequest.php
 
@@ -581,11 +541,6 @@ parameters:
 			path: Helper/Elasticsearch/ClientRequest.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:scrollAll\\(\\) return type has no value type specified in iterable type Generator\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getCacheResponse\\(\\) has no return typehint specified\\.$#"
 			count: 1
 			path: Helper/Elasticsearch/ClientRequest.php
@@ -599,11 +554,6 @@ parameters:
 			message: "#^Parameter \\#1 \\$str of function sha1 expects string, string\\|false given\\.$#"
 			count: 1
 			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Parameter \\#2 \\$default of method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getOption\\(\\) expects string\\|null, false given\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequestManager.php
 
 		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequestRuntime\\:\\:search\\(\\) has parameter \\$body with no value type specified in iterable type array\\.$#"
@@ -677,11 +627,6 @@ parameters:
 
 		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Environment\\\\Environment\\:\\:__construct\\(\\) has parameter \\$config with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Environment/Environment.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Environment\\\\Environment\\:\\:__construct\\(\\) has parameter \\$name with no typehint specified\\.$#"
 			count: 1
 			path: Helper/Environment/Environment.php
 
@@ -822,11 +767,6 @@ parameters:
 
 		-
 			message: "#^Parameter \\#1 \\$item of method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:save\\(\\) expects Symfony\\\\Component\\\\Cache\\\\CacheItem, Psr\\\\Cache\\\\CacheItemInterface\\|null given\\.$#"
-			count: 1
-			path: Helper/Routing/Router.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Routing\\\\Router\\:\\:createRoutes\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Routing/Router.php
 
