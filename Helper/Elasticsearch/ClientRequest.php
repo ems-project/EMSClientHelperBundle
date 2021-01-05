@@ -11,7 +11,7 @@ use Elastica\ResultSet;
 use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
-use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelperInterface;
+use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\CommonBundle\Common\EMSLink;
 use EMS\CommonBundle\Elasticsearch\Document\EMSSource;
 use EMS\CommonBundle\Elasticsearch\Exception\NotFoundException;
@@ -27,7 +27,7 @@ class ClientRequest
 {
     /** @var int */
     private const CONTENT_TYPE_LIMIT = 500;
-    /** @var EnvironmentHelperInterface */
+    /** @var EnvironmentHelper */
     private $environmentHelper;
     /** @var string */
     private $indexPrefix;
@@ -54,7 +54,7 @@ class ClientRequest
      */
     public function __construct(
         ElasticaService $elasticaService,
-        EnvironmentHelperInterface $environmentHelper,
+        EnvironmentHelper $environmentHelper,
         LoggerInterface $logger,
         AdapterInterface $cache,
         $name,
@@ -255,15 +255,35 @@ class ClientRequest
         return \count($this->getEnvironments()) > 0;
     }
 
+    public function isBind(): bool
+    {
+        return $this->hasEnvironments() && null !== $this->environmentHelper->getEnvironmentName();
+    }
+
+    /**
+     * @return Environment[]
+     */
     public function getEnvironments(): array
     {
-        $environments = [];
-        /** @var Environment $environment */
+        return $this->environmentHelper->getEnvironments();
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getIndexSuffixes(): array
+    {
+        $indexSuffixes = [];
         foreach ($this->environmentHelper->getEnvironments() as $environment) {
-            $environments[] = $environment->getIndex();
+            $indexSuffixes[] = $environment->getIndexSuffix();
         }
 
-        return $environments;
+        return $indexSuffixes;
+    }
+
+    public function getCurrentEnvironment(): Environment
+    {
+        return $this->environmentHelper->getEnvironment();
     }
 
     public function getLastChangeDate(string $type): \DateTime
@@ -277,7 +297,7 @@ class ClientRequest
             ]);
             $boolQuery->addMust($operationQuery);
 
-            $environmentQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_ENVIRONMENT_FIELD, $this->getEnvironments());
+            $environmentQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_ENVIRONMENT_FIELD, $this->getIndexSuffixes());
             $boolQuery->addMust($environmentQuery);
 
             $instanceQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_INSTANCE_ID_FIELD, $this->getPrefixes());
@@ -328,7 +348,7 @@ class ClientRequest
             'alias' => EmsFields::LOG_ALIAS,
             'type' => EmsFields::LOG_TYPE,
             'types' => $type,
-            'environments' => $this->getEnvironments(),
+            'environments' => $this->getIndexSuffixes(),
             'instance_ids' => $this->getPrefixes(),
         ]);
 
@@ -375,7 +395,7 @@ class ClientRequest
 
     /**
      * @param string $propertyPath
-     * @param string $default
+     * @param mixed  $default
      *
      * @return mixed|null
      */
@@ -611,15 +631,11 @@ class ClientRequest
     }
 
     /**
-     * @param string $timeout
-     *
-     * @return \Generator
-     *
-     * @throws EnvironmentNotFoundException
+     * @return \Generator<array>
      */
-    public function scrollAll(array $params, $timeout = '30s'): iterable
+    public function scrollAll(array $params, string $timeout = '30s', string $indexSuffix = null): iterable
     {
-        $params['index'] = $this->getIndex();
+        $params['index'] = $this->getIndex($indexSuffix);
         $search = $this->elasticaService->convertElasticsearchSearch($params);
         $scroll = $this->elasticaService->scroll($search, $timeout);
 
@@ -646,9 +662,9 @@ class ClientRequest
      *
      * @todo rename to getEnvironmentAlias?
      */
-    public function getCacheKey(string $prefix = ''): string
+    public function getCacheKey(string $prefix = '', string $environment = null): string
     {
-        $index = $this->getIndex();
+        $index = $this->getIndex($environment);
 
         return $prefix.\implode('_', $index);
     }
@@ -656,24 +672,22 @@ class ClientRequest
     /**
      * @return string[]
      */
-    private function getIndex(): array
+    private function getIndex(string $indexSuffix = null): array
     {
-        $environment = $this->environmentHelper->getEnvironment();
-
-        if (null === $environment) {
-            throw new EnvironmentNotFoundException();
+        if (null === $indexSuffix) {
+            $indexSuffix = $this->getCurrentEnvironment()->getIndexSuffix();
         }
 
         $prefixes = \explode('|', $this->indexPrefix);
         $out = [];
         foreach ($prefixes as $prefix) {
-            $out[] = $prefix.$environment;
+            $out[] = $prefix.$indexSuffix;
         }
         if (!empty($out)) {
             return $out;
         }
 
-        return [$this->indexPrefix.$environment];
+        return [$this->indexPrefix.$indexSuffix];
     }
 
     /**

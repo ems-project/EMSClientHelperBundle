@@ -3,6 +3,7 @@
 namespace EMS\ClientHelperBundle\Helper\Environment;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class Environment
 {
@@ -30,21 +31,43 @@ class Environment
      * @var array
      */
     private $request = [];
+    private string $baseUrl;
+    private string $routePrefix;
+    /** @var array<mixed> */
+    private array $options;
 
-    public function __construct($name, array $config)
+    public function __construct(string $name, array $config)
     {
         $this->name = $name;
 
-        $this->regex = $config['regex'] ?? '*';
+        $this->regex = $config['regex'] ?? '/.*/';
+        $this->baseUrl = $config['base_url'] ?? '';
+        $this->routePrefix = $config['route_prefix'] ?? '';
         $this->backend = $config['backend'] ?? false;
         $this->index = $config['index'] ?? null;
         $this->request = $config['request'] ?? [];
+        $this->options = $config;
+    }
+
+    public function getBaseUrl(): string
+    {
+        return $this->baseUrl;
+    }
+
+    public function getRoutePrefix(): string
+    {
+        return $this->routePrefix;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
     }
 
     /**
      * @return string
      */
-    public function getIndex()
+    public function getIndexSuffix()
     {
         if ($this->index) {
             return $this->index;
@@ -59,7 +82,11 @@ class Environment
             return true;
         }
 
-        $url = \vsprintf('%s://%s%s', [$request->getScheme(), $request->getHttpHost(), $request->getBasePath()]);
+        if (\strlen($this->baseUrl) > 0) {
+            $url = \vsprintf('%s://%s%s%s', [$request->getScheme(), $request->getHttpHost(), $request->getBasePath(), $request->getPathInfo()]);
+        } else {
+            $url = \vsprintf('%s://%s%s', [$request->getScheme(), $request->getHttpHost(), $request->getBasePath()]);
+        }
 
         return 1 === \preg_match($this->regex, $url) ? true : false;
     }
@@ -67,7 +94,7 @@ class Environment
     public function modifyRequest(Request $request)
     {
         // backward compatibility
-        $request->attributes->set('_environment', $this->getIndex());
+        $request->attributes->set('_environment', $this->getIndexSuffix());
         $request->attributes->set('_backend', $this->backend);
 
         if (!empty($this->request)) {
@@ -79,5 +106,26 @@ class Environment
                 }
             }
         }
+    }
+
+    /**
+     * @param mixed|null $default
+     *
+     * @return mixed|null
+     */
+    public function getOption(string $propertyPath, $default = null)
+    {
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+
+        if (!$propertyAccessor->isReadable($this->options, $propertyPath)) {
+            return $default;
+        }
+
+        return $propertyAccessor->getValue($this->options, $propertyPath);
+    }
+
+    public function hasOption(string $option): bool
+    {
+        return isset($this->options[$option]) && null !== $this->options[$option];
     }
 }
