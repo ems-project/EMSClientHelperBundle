@@ -248,7 +248,7 @@ class ClientRequest
 
     public function hasEnvironments(): bool
     {
-        return \count($this->getIndexes()) > 0;
+        return \count($this->getEnvironments()) > 0;
     }
 
     public function isBind(): bool
@@ -267,14 +267,14 @@ class ClientRequest
     /**
      * @return string[]
      */
-    public function getIndexes(): array
+    public function getIndexPostfixes(): array
     {
-        $indexes = [];
+        $indexPostfixes = [];
         foreach ($this->environmentHelper->getEnvironments() as $environment) {
-            $indexes[] = $environment->getIndex();
+            $indexPostfixes[] = $environment->getIndexPostfix();
         }
 
-        return $indexes;
+        return $indexPostfixes;
     }
 
     public function getCurrentEnvironment(): Environment
@@ -293,7 +293,7 @@ class ClientRequest
             ]);
             $boolQuery->addMust($operationQuery);
 
-            $environmentQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_ENVIRONMENT_FIELD, $this->getIndexes());
+            $environmentQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_ENVIRONMENT_FIELD, $this->getIndexPostfixes());
             $boolQuery->addMust($environmentQuery);
 
             $instanceQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_INSTANCE_ID_FIELD, $this->getPrefixes());
@@ -344,7 +344,7 @@ class ClientRequest
             'alias' => EmsFields::LOG_ALIAS,
             'type' => EmsFields::LOG_TYPE,
             'types' => $type,
-            'environments' => $this->getIndexes(),
+            'environments' => $this->getIndexPostfixes(),
             'instance_ids' => $this->getPrefixes(),
         ]);
 
@@ -668,26 +668,22 @@ class ClientRequest
     /**
      * @return string[]
      */
-    private function getIndex(string $environment = null): array
+    private function getIndex(string $indexPostfix = null): array
     {
-        if (null === $environment) {
-            $environment = $this->environmentHelper->getEnvironmentName();
-        }
-
-        if (null === $environment) {
-            throw new EnvironmentNotFoundException();
+        if (null === $indexPostfix) {
+            $indexPostfix = $this->getCurrentEnvironment()->getIndexPostfix();
         }
 
         $prefixes = \explode('|', $this->indexPrefix);
         $out = [];
         foreach ($prefixes as $prefix) {
-            $out[] = $prefix.$environment;
+            $out[] = $prefix.$indexPostfix;
         }
         if (!empty($out)) {
             return $out;
         }
 
-        return [$this->indexPrefix.$environment];
+        return [$this->indexPrefix.$indexPostfix];
     }
 
     /**

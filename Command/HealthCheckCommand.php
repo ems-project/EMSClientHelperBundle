@@ -104,7 +104,7 @@ class HealthCheckCommand extends Command
         }
         $postfixes = [];
         foreach ($this->environmentHelper->getEnvironments() as $environment) {
-            $postfixes[] = $environment->getIndex();
+            $postfixes[] = $environment->getIndexPostfix();
         }
         $indexes = [];
         foreach ($prefixes as $preValue) {

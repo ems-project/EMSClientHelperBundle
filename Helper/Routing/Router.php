@@ -165,7 +165,7 @@ class Router extends BaseRouter
             'size' => 100,
             'type' => $type,
             'sort' => ['order'],
-        ], '5s', $environment->getIndex());
+        ], '5s', $environment->getIndexPostfix());
 
         foreach ($scroll as $hit) {
             $source = $hit['_source'];
