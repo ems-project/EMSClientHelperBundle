@@ -8,6 +8,7 @@ use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\Routing\RouteCollection;
 
 class Router extends BaseRouter
@@ -135,8 +136,14 @@ class Router extends BaseRouter
         }
 
         $cacheItem = $this->cache->get($clientRequest->getCacheKey('routes', $environment->getName()));
-
         $type = $clientRequest->getOption('[route_type]');
+
+        if (!$cacheItem instanceof CacheItem) {
+            $this->logger->warning('Unexpected non-CacheItem cache item');
+
+            return $this->createRoutes($clientRequest, $environment, $type);
+        }
+
         $lastChanged = $clientRequest->getLastChangeDate($type);
 
         if ($this->cache->isValid($cacheItem, $lastChanged)) {
