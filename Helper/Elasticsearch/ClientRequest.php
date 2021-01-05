@@ -664,9 +664,11 @@ class ClientRequest
      */
     public function getCacheKey(string $prefix = '', string $environment = null): string
     {
-        $index = $this->getIndex($environment);
+        if (null === $environment) {
+            $environment = $this->environmentHelper->getEnvironmentName();
+        }
 
-        return $prefix.\implode('_', $index);
+        return \sprintf('%s_%s', $prefix, $environment);
     }
 
     /**
