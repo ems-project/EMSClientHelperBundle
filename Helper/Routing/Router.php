@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
+use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
@@ -142,7 +143,11 @@ class Router extends BaseRouter
             return $this->cache->getData($cacheItem);
         }
 
-        $routes = $this->createRoutes($clientRequest, $environment, $type);
+        try {
+            $routes = $this->createRoutes($clientRequest, $environment, $type);
+        } catch (EnvironmentNotFoundException $e) {
+            $routes = [];
+        }
         $this->cache->save($cacheItem, $routes);
 
         return $routes;
