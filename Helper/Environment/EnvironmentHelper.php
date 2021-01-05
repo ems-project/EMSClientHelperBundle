@@ -84,7 +84,7 @@ class EnvironmentHelper
         if (null === $current) {
             throw new EnvironmentNotFoundException();
         }
-        $environmentName = $current->get('_environment', null);
+        $environmentName = $this->getEnvironmentName();
         if (null === $environmentName) {
             throw new EnvironmentNotFoundException();
         }

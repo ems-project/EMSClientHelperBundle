@@ -441,7 +441,7 @@ class ClientRequest
      *
      * @return array
      */
-    public function search($type, array $body, $from = 0, $size = 10, array $sourceExclude = [], ?string $regex = null)
+    public function search($type, array $body, $from = 0, $size = 10, array $sourceExclude = [], ?string $regex = null, string $indexSuffix = null)
     {
         if (null === $type) {
             $types = [];
@@ -452,10 +452,10 @@ class ClientRequest
         }
 
         if (null === $regex) {
-            $index = $this->getIndex();
+            $index = $this->getIndex($indexSuffix);
         } else {
             $index = [];
-            foreach ($this->getIndex() as $alias) {
+            foreach ($this->getIndex($indexSuffix) as $alias) {
                 if (\preg_match(\sprintf('/%s/', $regex), $alias)) {
                     $index[] = $alias;
                 }
@@ -667,8 +667,13 @@ class ClientRequest
         if (null === $environment) {
             $environment = $this->environmentHelper->getEnvironmentName();
         }
+        $indexPrefixes = \explode('|', $this->indexPrefix);
+        $key = [];
+        foreach ($indexPrefixes as $indexPrefix) {
+            $key[] = $indexPrefix.$environment;
+        }
 
-        return \sprintf('%s_%s', $prefix, $environment);
+        return $prefix.\implode('_', $key);
     }
 
     /**

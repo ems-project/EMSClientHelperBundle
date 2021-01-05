@@ -8,6 +8,7 @@ use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\Routing\RouteCollection;
 
 class Router extends BaseRouter
@@ -135,8 +136,14 @@ class Router extends BaseRouter
         }
 
         $cacheItem = $this->cache->get($clientRequest->getCacheKey('routes', $environment->getName()));
-
         $type = $clientRequest->getOption('[route_type]');
+
+        if (!$cacheItem instanceof CacheItem) {
+            $this->logger->warning('Unexpected non-CacheItem cache item');
+
+            return $this->createRoutes($clientRequest, $environment, $type);
+        }
+
         $lastChanged = $clientRequest->getLastChangeDate($type);
 
         if ($this->cache->isValid($cacheItem, $lastChanged)) {
@@ -161,13 +168,17 @@ class Router extends BaseRouter
         $baseUrl = $environment->getBaseUrl();
         $routePrefix = $environment->getRoutePrefix();
         $routes = [];
-        $scroll = $clientRequest->scrollAll([
-            'size' => 100,
-            'type' => $type,
-            'sort' => ['order'],
-        ], '5s', $environment->getIndexSuffix());
 
-        foreach ($scroll as $hit) {
+        $search = $clientRequest->search($type, [
+            'sort' => ['order'],
+        ], 0, 1000, [], null, $environment->getIndexSuffix());
+
+        $total = $search['hits']['total']['value'] ?? $search['hits']['total'];
+        if ($total > 1000) {
+            $this->logger->error('Only the first 1000 routes have been loaded on a total of {total}', ['total' => $total]);
+        }
+
+        foreach ($search['hits']['hits'] as $hit) {
             $source = $hit['_source'];
             $name = $routePrefix.$source['name'];
 
