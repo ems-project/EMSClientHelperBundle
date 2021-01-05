@@ -126,6 +126,6 @@ class Environment
 
     public function hasOption(string $option): bool
     {
-        return isset($this->options[$option]) && null != $this->options[$option];
+        return isset($this->options[$option]) && null !== $this->options[$option];
     }
 }
