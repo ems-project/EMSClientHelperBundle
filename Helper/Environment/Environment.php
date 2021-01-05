@@ -81,7 +81,12 @@ class Environment
         if (null === $this->regex) {
             return true;
         }
-        $url = \vsprintf('%s://%s%s/%s', [$request->getScheme(), $request->getHttpHost(), $request->getBasePath(), $this->baseUrl]);
+
+        if (\strlen($this->baseUrl) > 0) {
+            $url = \vsprintf('%s://%s%s%s', [$request->getScheme(), $request->getHttpHost(), $request->getBasePath(), $request->getPathInfo()]);
+        } else {
+            $url = \vsprintf('%s://%s%s', [$request->getScheme(), $request->getHttpHost(), $request->getBasePath()]);
+        }
 
         return 1 === \preg_match($this->regex, $url) ? true : false;
     }
