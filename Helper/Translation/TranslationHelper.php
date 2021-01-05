@@ -99,6 +99,9 @@ class TranslationHelper
 
     public function warmUp(): void
     {
-        $this->addCatalogues();
+        try {
+            $this->addCatalogues();
+        } catch (\Throwable $e) {
+        }
     }
 }
