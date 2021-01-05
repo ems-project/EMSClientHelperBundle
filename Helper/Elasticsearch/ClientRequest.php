@@ -629,12 +629,9 @@ class ClientRequest
     /**
      * @return \Generator<array>
      */
-    public function scrollAll(array $params, string $timeout = '30s', string $index = null): iterable
+    public function scrollAll(array $params, string $timeout = '30s', string $environment = null): iterable
     {
-        if (null === $index) {
-            $index = $this->getIndex();
-        }
-        $params['index'] = $index;
+        $params['index'] = $this->getIndex($environment);
         $search = $this->elasticaService->convertElasticsearchSearch($params);
         $scroll = $this->elasticaService->scroll($search, $timeout);
 
