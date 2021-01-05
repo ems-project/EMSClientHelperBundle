@@ -67,7 +67,7 @@ class Environment
     /**
      * @return string
      */
-    public function getIndexPostfix()
+    public function getIndexSuffix()
     {
         if ($this->index) {
             return $this->index;
@@ -94,7 +94,7 @@ class Environment
     public function modifyRequest(Request $request)
     {
         // backward compatibility
-        $request->attributes->set('_environment', $this->getIndexPostfix());
+        $request->attributes->set('_environment', $this->getIndexSuffix());
         $request->attributes->set('_backend', $this->backend);
 
         if (!empty($this->request)) {

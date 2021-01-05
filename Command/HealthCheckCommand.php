@@ -102,13 +102,13 @@ class HealthCheckCommand extends Command
         foreach ($this->clientRequests as $clientRequest) {
             $prefixes = \array_merge($prefixes, $clientRequest->getPrefixes());
         }
-        $postfixes = [];
+        $suffixes = [];
         foreach ($this->environmentHelper->getEnvironments() as $environment) {
-            $postfixes[] = $environment->getIndexPostfix();
+            $suffixes[] = $environment->getIndexSuffix();
         }
         $indexes = [];
         foreach ($prefixes as $preValue) {
-            foreach ($postfixes as $postValue) {
+            foreach ($suffixes as $postValue) {
                 $indexes[] = $preValue.$postValue;
             }
         }

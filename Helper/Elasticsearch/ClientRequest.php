@@ -267,14 +267,14 @@ class ClientRequest
     /**
      * @return string[]
      */
-    public function getIndexPostfixes(): array
+    public function getIndexSuffixes(): array
     {
-        $indexPostfixes = [];
+        $indexSuffixes = [];
         foreach ($this->environmentHelper->getEnvironments() as $environment) {
-            $indexPostfixes[] = $environment->getIndexPostfix();
+            $indexSuffixes[] = $environment->getIndexSuffix();
         }
 
-        return $indexPostfixes;
+        return $indexSuffixes;
     }
 
     public function getCurrentEnvironment(): Environment
@@ -293,7 +293,7 @@ class ClientRequest
             ]);
             $boolQuery->addMust($operationQuery);
 
-            $environmentQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_ENVIRONMENT_FIELD, $this->getIndexPostfixes());
+            $environmentQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_ENVIRONMENT_FIELD, $this->getIndexSuffixes());
             $boolQuery->addMust($environmentQuery);
 
             $instanceQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_INSTANCE_ID_FIELD, $this->getPrefixes());
@@ -344,7 +344,7 @@ class ClientRequest
             'alias' => EmsFields::LOG_ALIAS,
             'type' => EmsFields::LOG_TYPE,
             'types' => $type,
-            'environments' => $this->getIndexPostfixes(),
+            'environments' => $this->getIndexSuffixes(),
             'instance_ids' => $this->getPrefixes(),
         ]);
 
@@ -629,9 +629,9 @@ class ClientRequest
     /**
      * @return \Generator<array>
      */
-    public function scrollAll(array $params, string $timeout = '30s', string $environment = null): iterable
+    public function scrollAll(array $params, string $timeout = '30s', string $indexSuffix = null): iterable
     {
-        $params['index'] = $this->getIndex($environment);
+        $params['index'] = $this->getIndex($indexSuffix);
         $search = $this->elasticaService->convertElasticsearchSearch($params);
         $scroll = $this->elasticaService->scroll($search, $timeout);
 
@@ -668,22 +668,22 @@ class ClientRequest
     /**
      * @return string[]
      */
-    private function getIndex(string $indexPostfix = null): array
+    private function getIndex(string $indexSuffix = null): array
     {
-        if (null === $indexPostfix) {
-            $indexPostfix = $this->getCurrentEnvironment()->getIndexPostfix();
+        if (null === $indexSuffix) {
+            $indexSuffix = $this->getCurrentEnvironment()->getIndexSuffix();
         }
 
         $prefixes = \explode('|', $this->indexPrefix);
         $out = [];
         foreach ($prefixes as $prefix) {
-            $out[] = $prefix.$indexPostfix;
+            $out[] = $prefix.$indexSuffix;
         }
         if (!empty($out)) {
             return $out;
         }
 
-        return [$this->indexPrefix.$indexPostfix];
+        return [$this->indexPrefix.$indexSuffix];
     }
 
     /**
