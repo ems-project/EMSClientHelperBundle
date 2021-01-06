@@ -257,7 +257,7 @@ class ClientRequest
 
     public function isBind(): bool
     {
-        return $this->hasEnvironments() && null !== $this->environmentHelper->getEnvironmentName();
+        return $this->hasEnvironments() && null !== $this->environmentHelper->getEnvironmentSuffix();
     }
 
     /**
@@ -283,7 +283,7 @@ class ClientRequest
 
     public function getCurrentEnvironment(): Environment
     {
-        return $this->environmentHelper->getEnvironment();
+        return $this->environmentHelper->getCurrentEnvironment();
     }
 
     public function getLastChangeDate(string $type): \DateTime
@@ -665,7 +665,7 @@ class ClientRequest
     public function getCacheKey(string $prefix = '', string $environment = null): string
     {
         if (null === $environment) {
-            $environment = $this->environmentHelper->getEnvironmentName();
+            $environment = $this->environmentHelper->getEnvironmentSuffix();
         }
         $indexPrefixes = \explode('|', $this->indexPrefix);
         $key = [];
@@ -682,7 +682,7 @@ class ClientRequest
     private function getIndex(string $indexSuffix = null): array
     {
         if (null === $indexSuffix) {
-            $indexSuffix = $this->getCurrentEnvironment()->getIndexSuffix();
+            $indexSuffix = $this->environmentHelper->getIndexSuffix();
         }
 
         $prefixes = \explode('|', $this->indexPrefix);
