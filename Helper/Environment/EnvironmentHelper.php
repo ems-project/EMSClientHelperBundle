@@ -51,20 +51,20 @@ class EnvironmentHelper
      */
     public function getBindEnvironmentName(): ?string
     {
-        static $suffix = null;
+        static $name = null;
 
-        if (null !== $suffix) {
-            return $suffix;
+        if (null !== $name) {
+            return $name;
         }
 
         $current = $this->requestStack->getCurrentRequest();
         if (null !== $current) {
-            $suffix = $current->get(Environment::ENVIRONMENT_ATTRIBUTE, null);
+            $name = $current->get(Environment::ENVIRONMENT_ATTRIBUTE, null);
         } elseif ('cli' === PHP_SAPI) {
-            $suffix = $this->emschEnv;
+            $name = $this->emschEnv;
         }
 
-        return $suffix;
+        return $name;
     }
 
     public function getLocale(): string
