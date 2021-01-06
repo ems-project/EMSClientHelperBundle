@@ -25,57 +25,44 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class ClientRequest
 {
-    /** @var int */
     private const CONTENT_TYPE_LIMIT = 500;
-    /** @var EnvironmentHelper */
-    private $environmentHelper;
-    /** @var string */
-    private $indexPrefix;
-    /** @var LoggerInterface */
-    private $logger;
-    /** @var AdapterInterface */
-    private $cache;
-    /** @var array */
-    private $options;
+    private EnvironmentHelper $environmentHelper;
+    private LoggerInterface $logger;
+    private AdapterInterface $cache;
+    /** @var array<string, mixed> */
+    private array $options;
     /** @var array<string, \DateTime> */
-    private $lastUpdateByType;
-
-    /**
-     * @var string
-     */
-    private $name;
-
-    const OPTION_INDEX_PREFIX = 'index_prefix';
-
+    private array $lastUpdateByType;
+    private string $name;
     private ElasticaService $elasticaService;
 
     /**
-     * @param string $name
+     * @param array<string, mixed> $options
      */
     public function __construct(
         ElasticaService $elasticaService,
         EnvironmentHelper $environmentHelper,
         LoggerInterface $logger,
         AdapterInterface $cache,
-        $name,
+        string $name,
         array $options = []
     ) {
+        if (!isset($options['index_prefix'])) {
+            throw new \RuntimeException('Client request index_prefix is deprecated and must be removed now: Environment name === Elasticsearch alias name');
+        }
         $this->environmentHelper = $environmentHelper;
         $this->logger = $logger;
         $this->cache = $cache;
         $this->options = $options;
         $this->elasticaService = $elasticaService;
         $this->lastUpdateByType = [];
-        $this->indexPrefix = isset($options[self::OPTION_INDEX_PREFIX]) ? $options[self::OPTION_INDEX_PREFIX] : null;
         $this->name = $name;
     }
 
     /**
-     * @param string $analyzer
-     *
-     * @return array
+     * @return string[]
      */
-    public function analyze(string $text, $analyzer)
+    public function analyze(string $text, string $analyzer): array
     {
         if (empty($text)) {
             return [];
@@ -91,14 +78,9 @@ class ClientRequest
     }
 
     /**
-     * @param string $type
-     * @param string $id
-     *
-     * @return array
-     *
-     * @throws SingleResultException
+     * @return array{_id: string, _type?: string, _source: array}
      */
-    public function get($type, $id)
+    public function get(string $type, string $id): array
     {
         $this->logger->debug('ClientRequest : get {type}:{id}', ['type' => $type, 'id' => $id]);
 
@@ -111,6 +93,9 @@ class ClientRequest
         ]);
     }
 
+    /**
+     * @return string[]
+     */
     public function getAllChildren(string $emsKey, string $childrenField): array
     {
         $this->logger->debug('ClientRequest : getAllChildren for {emsKey}', ['emsKey' => $emsKey]);
@@ -131,29 +116,38 @@ class ClientRequest
     }
 
     /**
-     * @param string $emsLink
+     * @param string[] $sourceFields
      *
      * @return array<string, mixed>|false
      */
-    public function getByEmsKey($emsLink, array $sourceFields = [])
+    public function getByEmsKey(string $emsLink, array $sourceFields = [])
     {
-        return $this->getByOuuid(static::getType($emsLink), static::getOuuid($emsLink), $sourceFields);
+        $type = static::getType($emsLink);
+        if (null === $type) {
+            throw new \RuntimeException('Unexpected null type');
+        }
+        $ouuid = static::getOuuid($emsLink);
+        if (null === $ouuid) {
+            throw new \RuntimeException('Unexpected null ouuid');
+        }
+
+        return $this->getByOuuid($type, $ouuid, $sourceFields);
     }
 
     /**
-     * @param string $type
-     * @param string $ouuid
+     * @param string[] $sourceFields
+     * @param string[] $source_exclude
      *
      * @return array<string, mixed>|false
      */
-    public function getByOuuid($type, $ouuid, array $sourceFields = [], array $source_exclude = [])
+    public function getByOuuid(string $type, string $ouuid, array $sourceFields = [], array $source_exclude = [])
     {
         $this->logger->debug('ClientRequest : getByOuuid {type}:{id}', ['type' => $type, 'id' => $ouuid]);
         if (!empty($source_exclude)) {
             @\trigger_error('_source_exclude field are not supported anymore', E_USER_DEPRECATED);
         }
 
-        foreach ($this->getIndex() as $index) {
+        foreach ($this->elasticaService->getIndicesFromAlias($this->getAlias()) as $index) {
             try {
                 $document = $this->elasticaService->getDocument($index, $type, $ouuid, $sourceFields);
 
@@ -176,7 +170,7 @@ class ClientRequest
 
         $query = $this->elasticaService->getTermsQuery('_id', $ouuids);
         $query = $this->elasticaService->filterByContentTypes($query, [$type]);
-        $search = new Search($this->getIndex(), $query);
+        $search = new Search([$this->getAlias()], $query);
 
         return $this->elasticaService->search($search)->getResponse()->getData();
     }
@@ -186,8 +180,7 @@ class ClientRequest
      */
     public function getContentTypes(): array
     {
-        $index = $this->getIndex();
-        $search = new Search($index);
+        $search = new Search([$this->getAlias()]);
         $search->setSize(0);
         $terms = new Terms(EMSSource::FIELD_CONTENT_TYPE);
         $terms->setField(EMSSource::FIELD_CONTENT_TYPE);
@@ -206,18 +199,16 @@ class ClientRequest
         return $contentTypes;
     }
 
-    /**
-     * @param string $field
-     *
-     * @return string
-     */
-    public function getFieldAnalyzer($field)
+    public function getFieldAnalyzer(string $field): string
     {
         $this->logger->debug('ClientRequest : getFieldAnalyzer {field}', ['field' => $field]);
 
         return $this->elasticaService->getFieldAnalyzer($this->getFirstIndex(), $field);
     }
 
+    /**
+     * @param string[] $sourceFields
+     */
     public function getHierarchy(string $emsKey, string $childrenField, int $depth = null, array $sourceFields = [], EMSLink $activeChild = null): ?HierarchicalStructure
     {
         $this->logger->debug('ClientRequest : getHierarchy for {emsKey}', ['emsKey' => $emsKey]);
@@ -257,7 +248,7 @@ class ClientRequest
 
     public function isBind(): bool
     {
-        return $this->hasEnvironments() && null !== $this->environmentHelper->getEnvironmentSuffix();
+        return $this->hasEnvironments() && null !== $this->environmentHelper->getBindEnvironmentName();
     }
 
     /**
@@ -268,19 +259,6 @@ class ClientRequest
         return $this->environmentHelper->getEnvironments();
     }
 
-    /**
-     * @return string[]
-     */
-    public function getIndexSuffixes(): array
-    {
-        $indexSuffixes = [];
-        foreach ($this->environmentHelper->getEnvironments() as $environment) {
-            $indexSuffixes[] = $environment->getIndexSuffix();
-        }
-
-        return $indexSuffixes;
-    }
-
     public function getCurrentEnvironment(): Environment
     {
         return $this->environmentHelper->getCurrentEnvironment();
@@ -288,6 +266,7 @@ class ClientRequest
 
     public function getLastChangeDate(string $type): \DateTime
     {
+        $environment = $this->environmentHelper->getCurrentEnvironment();
         if (empty($this->lastUpdateByType)) {
             $boolQuery = new BoolQuery();
             $operationQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_OPERATION_FIELD, [
@@ -297,10 +276,10 @@ class ClientRequest
             ]);
             $boolQuery->addMust($operationQuery);
 
-            $environmentQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_ENVIRONMENT_FIELD, $this->getIndexSuffixes());
+            $environmentQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_ENVIRONMENT_FIELD, $environment->getCacheEnvironments());
             $boolQuery->addMust($environmentQuery);
 
-            $instanceQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_INSTANCE_ID_FIELD, $this->getPrefixes());
+            $instanceQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_INSTANCE_ID_FIELD, $environment->getCacheInstanceIds());
             $boolQuery->addMust($instanceQuery);
 
             $search = new Search([EmsFields::LOG_ALIAS], $boolQuery);
@@ -348,8 +327,8 @@ class ClientRequest
             'alias' => EmsFields::LOG_ALIAS,
             'type' => EmsFields::LOG_TYPE,
             'types' => $type,
-            'environments' => $this->getIndexSuffixes(),
-            'instance_ids' => $this->getPrefixes(),
+            'environments' => $environment->getCacheEnvironments(),
+            'instance_ids' => $environment->getCacheInstanceIds(),
         ]);
 
         $result = $this->search($type, [
@@ -373,19 +352,25 @@ class ClientRequest
     }
 
     /**
-     * @param string $emsLink
-     *
      * @return string|null
      */
-    public static function getOuuid($emsLink)
+    public static function getOuuid(string $emsLink)
     {
         if (!\strpos($emsLink, ':')) {
             return $emsLink;
         }
 
         $split = \preg_split('/:/', $emsLink);
+        if (!\is_array($split)) {
+            throw new \RuntimeException(\sprintf('Unexpected not support emslink format : %s', $emsLink));
+        }
+        $ouuid = \end($split);
 
-        return \array_pop($split);
+        if (false === $ouuid) {
+            return null;
+        }
+
+        return $ouuid;
     }
 
     public function hasOption(string $option): bool
@@ -394,12 +379,11 @@ class ClientRequest
     }
 
     /**
-     * @param string $propertyPath
-     * @param mixed  $default
+     * @param mixed $default
      *
      * @return mixed|null
      */
-    public function getOption($propertyPath, $default = null)
+    public function getOption(string $propertyPath, $default = null)
     {
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
 
@@ -410,20 +394,7 @@ class ClientRequest
         return $propertyAccessor->getValue($this->options, $propertyPath);
     }
 
-    /**
-     * @return array
-     */
-    public function getPrefixes()
-    {
-        return \explode('|', $this->indexPrefix);
-    }
-
-    /**
-     * @param string $emsLink
-     *
-     * @return string|null
-     */
-    public static function getType($emsLink)
+    public static function getType(string $emsLink): ?string
     {
         if (!\strpos($emsLink, ':')) {
             return $emsLink;
@@ -431,17 +402,21 @@ class ClientRequest
 
         $split = \preg_split('/:/', $emsLink);
 
-        return $split[0];
+        if (\is_array($split) && \is_string($split[0] ?? null)) {
+            return $split[0];
+        }
+
+        return null;
     }
 
     /**
-     * @param string|array|null $type
-     * @param int               $from
-     * @param int               $size
+     * @param string|string[]|null $type
+     * @param array<mixed>         $body
+     * @param string[]             $sourceExclude
      *
-     * @return array
+     * @return array<mixed>
      */
-    public function search($type, array $body, $from = 0, $size = 10, array $sourceExclude = [], ?string $regex = null, string $indexSuffix = null)
+    public function search($type, array $body, int $from = 0, int $size = 10, array $sourceExclude = [], ?string $regex = null, string $index = null)
     {
         if (null === $type) {
             $types = [];
@@ -451,8 +426,12 @@ class ClientRequest
             $types = \explode(',', $type);
         }
 
+        if (null === $index) {
+            $index = $this->getAlias();
+        }
+
         $arguments = [
-            'index' => $this->getIndex($indexSuffix),
+            'index' => $index,
             'type' => $type,
             'body' => $body,
             'size' => $body['size'] ?? $size,
@@ -479,7 +458,7 @@ class ClientRequest
     {
         $query = $this->elasticaService->filterByContentTypes($query, $types);
 
-        return new Search($this->getIndex(), $query);
+        return new Search([$this->getAlias()], $query);
     }
 
     public function commonSearch(Search $search): ResultSet
@@ -488,14 +467,14 @@ class ClientRequest
     }
 
     /**
-     * @return array
+     * @param array<string, mixed> $arguments
      *
-     * @throws EnvironmentNotFoundException
+     * @return array<mixed>
      */
-    public function searchArgs(array $arguments)
+    public function searchArgs(array $arguments): array
     {
         if (!isset($arguments['index'])) {
-            $arguments['index'] = $this->getIndex();
+            $arguments['index'] = $this->getAlias();
         }
         $search = $this->elasticaService->convertElasticsearchSearch($arguments);
 
@@ -503,14 +482,11 @@ class ClientRequest
     }
 
     /**
-     * @param string $type
-     * @param array  $parameters
-     * @param int    $from
-     * @param int    $size
+     * @param array<string, mixed> $parameters
      *
-     * @return array
+     * @return array<mixed>
      */
-    public function searchBy($type, $parameters, $from = 0, $size = 10)
+    public function searchBy(string $type, array $parameters, int $from = 0, int $size = 10): array
     {
         $this->logger->debug('ClientRequest : searchBy for type {type}', ['type' => $type]);
         $body = [
@@ -532,7 +508,7 @@ class ClientRequest
         }
 
         $search = $this->elasticaService->convertElasticsearchSearch([
-            'index' => $this->getIndex(),
+            'index' => $this->getAlias(),
             'type' => $type,
             'body' => $body,
             'size' => $size,
@@ -543,11 +519,10 @@ class ClientRequest
     }
 
     /**
-     * @param string|array $type
+     * @param string|string[]      $type
+     * @param array<string, mixed> $body
      *
      * @return array{_id: string, _type?: string, _source: array}
-     *
-     * @throws SingleResultException
      */
     public function searchOne($type, array $body, ?string $indexRegex = null): array
     {
@@ -564,6 +539,8 @@ class ClientRequest
     }
 
     /**
+     * @param array<string, mixed> $parameters
+     *
      * @return array{_id:string,_type:string,_source:array<mixed>}|null
      */
     public function searchOneBy(string $type, array $parameters): ?array
@@ -580,14 +557,11 @@ class ClientRequest
     }
 
     /**
-     * @param string $type
-     * @param array  $filter
-     * @param int    $size
-     * @param string $scrollId
+     * @param string[] $filter
      *
-     * @return array
+     * @return array<mixed>
      */
-    public function scroll($type, $filter = [], $size = 10, $scrollId = null)
+    public function scroll(string $type, array $filter = [], int $size = 10, string $scrollId = null): array
     {
         $scrollTimeout = '30s';
 
@@ -596,7 +570,7 @@ class ClientRequest
         }
 
         $search = $this->elasticaService->convertElasticsearchSearch([
-            'index' => $this->getIndex(),
+            'index' => $this->getAlias(),
             'type' => $type,
             '_source' => $filter,
             'size' => $size,
@@ -606,11 +580,16 @@ class ClientRequest
     }
 
     /**
+     * @param array<mixed> $params
+     *
      * @return \Generator<array>
      */
-    public function scrollAll(array $params, string $timeout = '30s', string $indexSuffix = null): iterable
+    public function scrollAll(array $params, string $timeout = '30s', string $index = null): iterable
     {
-        $params['index'] = $this->getIndex($indexSuffix);
+        if (null !== $index) {
+            $index = $this->getAlias();
+        }
+        $params['index'] = $index;
         $search = $this->elasticaService->convertElasticsearchSearch($params);
         $scroll = $this->elasticaService->scroll($search, $timeout);
 
@@ -624,52 +603,28 @@ class ClientRequest
         }
     }
 
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @throws EnvironmentNotFoundException
-     *
-     * @todo rename to getEnvironmentAlias?
-     */
     public function getCacheKey(string $prefix = '', string $environment = null): string
     {
         if (null === $environment) {
-            $environment = $this->environmentHelper->getEnvironmentSuffix();
-        }
-        $indexPrefixes = \explode('|', $this->indexPrefix);
-        $key = [];
-        foreach ($indexPrefixes as $indexPrefix) {
-            $key[] = $indexPrefix.$environment;
+            $environment = $this->environmentHelper->getBindEnvironmentName();
         }
 
-        return $prefix.\implode('_', $key);
+        return $prefix.$environment;
     }
 
-    /**
-     * @return string[]
-     */
-    private function getIndex(string $indexSuffix = null): array
+    private function getAlias(): string
     {
-        if (null === $indexSuffix) {
-            $indexSuffix = $this->environmentHelper->getIndexSuffix();
+        $name = $this->environmentHelper->getBindEnvironmentName();
+        if (null === $name) {
+            throw new EnvironmentNotFoundException();
         }
 
-        $prefixes = \explode('|', $this->indexPrefix);
-        $out = [];
-        foreach ($prefixes as $prefix) {
-            $out[] = $prefix.$indexSuffix;
-        }
-        if (!empty($out)) {
-            return $out;
-        }
-
-        return [$this->indexPrefix.$indexSuffix];
+        return $name;
     }
 
     /**
@@ -677,20 +632,22 @@ class ClientRequest
      */
     private function getFirstIndex()
     {
-        $aliases = $this->getIndex();
-        if (\count($aliases) <= 0) {
-            throw new \RuntimeException('Unexpected missing alias');
-        }
-
-        return $this->elasticaService->getIndexFromAlias(\reset($aliases));
+        return $this->elasticaService->getIndexFromAlias($this->getAlias());
     }
 
-    public function getCacheResponse(array $cacheKey, ?string $type, callable $function)
+    /**
+     * @param array<mixed> $cacheKey
+     */
+    public function getCacheResponse(array $cacheKey, ?string $type, callable $function): Response
     {
         if (null === $type) {
             return $function();
         }
-        $cacheHash = \sha1(\json_encode($cacheKey));
+        $jsonEncoded = \json_encode($cacheKey);
+        if (false === $jsonEncoded) {
+            throw new \RuntimeException('Unexpected false json_encode result');
+        }
+        $cacheHash = \sha1($jsonEncoded);
 
         $cachedHierarchy = $this->cache->getItem($cacheHash);
         $lastUpdate = $this->getLastChangeDate($type);
