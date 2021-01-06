@@ -7,6 +7,14 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class Environment
 {
+    const ENVIRONMENT_ATTRIBUTE = '_environment';
+    const BACKEND_ATTRIBUTE = '_backend';
+    const LOCALE_ATTRIBUTE = '_locale';
+    const REGEX_CONFIG = 'regex';
+    const BASE_URL_CONFIG = 'base_url';
+    const ROUTE_PREFIX_CONFIG = 'route_prefix';
+    const BACKEND_CONFIG = 'backend';
+    const REQUEST_CONFIG = 'request';
     private string $name;
     private ?string $regex;
     private ?string $backend;
@@ -28,11 +36,11 @@ class Environment
         }
         $this->name = $name;
 
-        $this->regex = $config['regex'] ?? null;
-        $this->baseUrl = $config['base_url'] ?? '';
-        $this->routePrefix = $config['route_prefix'] ?? '';
-        $this->backend = $config['backend'] ?? false;
-        $this->request = $config['request'] ?? [];
+        $this->regex = $config[self::REGEX_CONFIG] ?? null;
+        $this->baseUrl = $config[self::BASE_URL_CONFIG] ?? '';
+        $this->routePrefix = $config[self::ROUTE_PREFIX_CONFIG] ?? '';
+        $this->backend = $config[self::BACKEND_CONFIG] ?? false;
+        $this->request = $config[self::REQUEST_CONFIG] ?? [];
         $this->options = $config;
     }
 
@@ -68,12 +76,12 @@ class Environment
 
     public function modifyRequest(Request $request): void
     {
-        $request->attributes->set('_environment', $this->name);
-        $request->attributes->set('_backend', $this->backend);
+        $request->attributes->set(self::ENVIRONMENT_ATTRIBUTE, $this->name);
+        $request->attributes->set(self::BACKEND_ATTRIBUTE, $this->backend);
 
         foreach ($this->request as $key => $value) {
             $request->attributes->set($key, $value);
-            if ('_locale' === $key) {
+            if (self::LOCALE_ATTRIBUTE === $key) {
                 $request->setLocale($value);
             }
         }
