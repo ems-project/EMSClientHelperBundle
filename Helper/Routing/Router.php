@@ -170,7 +170,13 @@ class Router extends BaseRouter
         $routes = [];
 
         $search = $clientRequest->search($type, [
-            'sort' => ['order'],
+            'sort' => [
+                'order' => [
+                    'order' => 'asc',
+                    'missing' => '_last',
+                    'unmapped_type' => 'long',
+                ],
+            ],
         ], 0, 1000, [], null, $environment->getIndexSuffix());
 
         $total = $search['hits']['total']['value'] ?? $search['hits']['total'];
