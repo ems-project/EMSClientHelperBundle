@@ -44,11 +44,11 @@ class Environment
 
         $this->regex = $config[self::REGEX_CONFIG] ?? null;
         $this->cacheEnvironments = $config[self::CACHE_ENVIRONMENTS_CONFIG] ?? [];
-        if (!\is_array($this->cacheEnvironments) || \count($this->cacheEnvironments) === 0) {
+        if (!\is_array($this->cacheEnvironments) || 0 === \count($this->cacheEnvironments)) {
             throw new \RuntimeException(\sprintf('The environment option %s must contain at least one elasticms environment name (the one with the routes, the labels and the templates)', self::CACHE_ENVIRONMENTS_CONFIG));
         }
         $this->cacheInstanceIds = $config[self::CACHE_INSTANCE_IDS_CONFIG] ?? [];
-        if (!\is_array($this->cacheInstanceIds) || \count($this->cacheInstanceIds) === 0) {
+        if (!\is_array($this->cacheInstanceIds) || 0 === \count($this->cacheInstanceIds)) {
             throw new \RuntimeException(\sprintf('The environment option %s must contain at least one elasticms environment name (the one with the routes, the labels and the templates)', self::CACHE_INSTANCE_IDS_CONFIG));
         }
         $this->regex = $config[self::REGEX_CONFIG] ?? null;
@@ -138,6 +138,4 @@ class Environment
     {
         return $this->cacheInstanceIds;
     }
-
-
 }
