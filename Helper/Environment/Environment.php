@@ -7,44 +7,31 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class Environment
 {
-    /**
-     * @var string
-     */
-    private $name;
+    private string $name;
+    private ?string $regex;
+    private ?string $backend;
 
-    /**
-     * @var string
-     */
-    private $regex;
-
-    /**
-     * @var string
-     */
-    private $index;
-
-    /**
-     * @var string
-     */
-    private $backend;
-
-    /**
-     * @var array
-     */
-    private $request = [];
+    /** @var array<string, mixed> */
+    private array $request = [];
     private string $baseUrl;
     private string $routePrefix;
     /** @var array<mixed> */
     private array $options;
 
+    /**
+     * @param array<string, mixed> $config
+     */
     public function __construct(string $name, array $config)
     {
+        if (isset($config['index'])) {
+            throw new \RuntimeException('Index environment attribute has been deprecated and must be removed: Environment name === Elasticsearch alias name');
+        }
         $this->name = $name;
 
-        $this->regex = $config['regex'] ?? '/.*/';
+        $this->regex = $config['regex'] ?? null;
         $this->baseUrl = $config['base_url'] ?? '';
         $this->routePrefix = $config['route_prefix'] ?? '';
         $this->backend = $config['backend'] ?? false;
-        $this->index = $config['index'] ?? null;
         $this->request = $config['request'] ?? [];
         $this->options = $config;
     }
@@ -64,19 +51,7 @@ class Environment
         return $this->name;
     }
 
-    /**
-     * @return string
-     */
-    public function getIndexSuffix()
-    {
-        if ($this->index) {
-            return $this->index;
-        }
-
-        return $this->request['_environment'] ?? $this->name;
-    }
-
-    public function matchRequest(Request $request)
+    public function matchRequest(Request $request): bool
     {
         if (null === $this->regex) {
             return true;
@@ -88,22 +63,18 @@ class Environment
             $url = \vsprintf('%s://%s%s', [$request->getScheme(), $request->getHttpHost(), $request->getBasePath()]);
         }
 
-        return 1 === \preg_match($this->regex, $url) ? true : false;
+        return 1 === \preg_match($this->regex, $url);
     }
 
-    public function modifyRequest(Request $request)
+    public function modifyRequest(Request $request): void
     {
-        // backward compatibility
-        $request->attributes->set('_environment', $this->getIndexSuffix());
+        $request->attributes->set('_environment', $this->name);
         $request->attributes->set('_backend', $this->backend);
 
-        if (!empty($this->request)) {
-            foreach ($this->request as $key => $value) {
-                $request->attributes->set($key, $value);
-
-                if ('_locale' === $key) {
-                    $request->setLocale($value);
-                }
+        foreach ($this->request as $key => $value) {
+            $request->attributes->set($key, $value);
+            if ('_locale' === $key) {
+                $request->setLocale($value);
             }
         }
     }
