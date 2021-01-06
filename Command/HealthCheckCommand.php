@@ -97,32 +97,19 @@ class HealthCheckCommand extends Command
     private function checkIndexes(SymfonyStyle $io)
     {
         $io->section('Indexes');
-
-        $prefixes = [];
-        foreach ($this->clientRequests as $clientRequest) {
-            $prefixes = \array_merge($prefixes, $clientRequest->getPrefixes());
-        }
-        $suffixes = [];
+        $countAliases = 0;
+        $countIndices = 0;
         foreach ($this->environmentHelper->getEnvironments() as $environment) {
-            $suffixes[] = $environment->getIndexSuffix();
-        }
-        $indexes = [];
-        foreach ($prefixes as $preValue) {
-            foreach ($suffixes as $postValue) {
-                $indexes[] = $preValue.$postValue;
-            }
-        }
-
-        foreach ($indexes as $index) {
-            try {
-                $this->elasticaService->getIndexFromAlias($index);
-            } catch (\Throwable $e) {
-                $io->error(\sprintf('Index %s not found with error: %s', $index, $e->getMessage()));
-                throw new IndexNotFoundException();
-            }
+            ++$countAliases;
+//            try {
+            $countIndices += \count($this->elasticaService->getIndicesFromAlias($environment->getName()));
+//            } catch (\Throwable $e) {
+//                $io->error(\sprintf('Alias %s not found with error: %s', $environment->getName(), $e->getMessage()));
+//                throw new IndexNotFoundException();
+//            }
         }
 
-        $io->success('Indexes are found.');
+        $io->success(\sprintf('%d indices have been found in %d aliases.', $countIndices, $countAliases));
     }
 
     /**
