@@ -95,6 +95,10 @@ class Environment
         $request->attributes->set(self::BACKEND_ATTRIBUTE, $this->backend);
 
         foreach ($this->request as $key => $value) {
+            if (self::ENVIRONMENT_ATTRIBUTE === $key) {
+                continue;
+            }
+
             $request->attributes->set($key, $value);
             if (self::LOCALE_ATTRIBUTE === $key) {
                 $request->setLocale($value);
