@@ -451,35 +451,8 @@ class ClientRequest
             $types = \explode(',', $type);
         }
 
-        if (null === $regex) {
-            $index = $this->getIndex($indexSuffix);
-        } else {
-            $index = [];
-            foreach ($this->getIndex($indexSuffix) as $alias) {
-                if (\preg_match(\sprintf('/%s/', $regex), $alias)) {
-                    $index[] = $alias;
-                }
-            }
-            $query = null;
-            if (\count($types) > 0) {
-                $query = $this->elasticaService->filterByContentTypes(null, $types);
-            }
-            $search = new Search($index, $query);
-            $search->setSize(0);
-            $terms = new Terms('indexes');
-            $terms->setField('_index');
-            $search->addAggregation($terms);
-            $resultSet = $this->elasticaService->search($search);
-
-            foreach ($resultSet->getAggregation('indexes')['buckets'] as $bucket) {
-                if (\preg_match(\sprintf('/%s/', $regex), $bucket['key'])) {
-                    $index[] = $bucket['key'];
-                }
-            }
-        }
-
         $arguments = [
-            'index' => $index,
+            'index' => $this->getIndex($indexSuffix),
             'type' => $type,
             'body' => $body,
             'size' => $body['size'] ?? $size,
@@ -492,6 +465,8 @@ class ClientRequest
 
         $this->logger->debug('ClientRequest : search for {type}', $arguments);
         $search = $this->elasticaService->convertElasticsearchSearch($arguments);
+        $search->setContentTypes($types);
+        $search->setRegex($regex);
         $resultSet = $this->elasticaService->search($search);
 
         return $resultSet->getResponse()->getData();
