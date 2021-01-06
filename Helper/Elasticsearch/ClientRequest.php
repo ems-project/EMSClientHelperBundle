@@ -586,7 +586,7 @@ class ClientRequest
      */
     public function scrollAll(array $params, string $timeout = '30s', string $index = null): iterable
     {
-        if (null !== $index) {
+        if (null === $index) {
             $index = $this->getAlias();
         }
         $params['index'] = $index;
