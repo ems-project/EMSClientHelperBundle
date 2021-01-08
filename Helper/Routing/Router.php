@@ -3,12 +3,10 @@
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
 use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
-use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\Routing\RouteCollection;
 
 class Router extends BaseRouter
@@ -17,8 +15,6 @@ class Router extends BaseRouter
     private $manager;
     /** @var LoggerInterface */
     private $logger;
-    /** @var CacheHelper */
-    private $cache;
     /** @var array */
     private $locales;
     /** @var array */
@@ -26,11 +22,10 @@ class Router extends BaseRouter
     /** @var array */
     private $routes;
 
-    public function __construct(ClientRequestManager $manager, CacheHelper $cacheHelper, array $locales, array $templates, array $routes)
+    public function __construct(ClientRequestManager $manager, array $locales, array $templates, array $routes)
     {
         $this->manager = $manager;
         $this->logger = $manager->getLogger();
-        $this->cache = $cacheHelper;
         $this->locales = $locales;
         $this->templates = $templates;
         $this->routes = $routes;
@@ -113,7 +108,7 @@ class Router extends BaseRouter
     private function getRoutes(ClientRequest $clientRequest): array
     {
         if ($clientRequest->isBind()) {
-            return $this->getRoutesByEnvironment($clientRequest, null);
+            return $this->getRoutesByEnvironment($clientRequest, $clientRequest->getCurrentEnvironment());
         }
 
         $routes = [];
@@ -129,35 +124,25 @@ class Router extends BaseRouter
     /**
      * @return Route[]
      */
-    private function getRoutesByEnvironment(ClientRequest $clientRequest, ?Environment $environment): array
+    private function getRoutesByEnvironment(ClientRequest $clientRequest, Environment $environment): array
     {
-        if (null === $environment) {
-            $environment = $clientRequest->getCurrentEnvironment();
+        if (null === $contentType = $clientRequest->getRouteContentType()) {
+            return [];
         }
 
-        $cacheItem = $this->cache->get($clientRequest->getCacheKey('routes', $environment->getName()));
-        $type = $clientRequest->getOption('[route_type]');
-
-        if (!$cacheItem instanceof CacheItem) {
-            $this->logger->warning('Unexpected non-CacheItem cache item');
-
-            return $this->createRoutes($clientRequest, $environment, $type);
-        }
-
-        $lastChanged = $clientRequest->getLastChangeDate($type);
-
-        if ($this->cache->isValid($cacheItem, $lastChanged)) {
-            return $this->cache->getData($cacheItem);
+        if (null !== $cache = $contentType->getCache()) {
+            return $cache;
         }
 
         try {
-            $routes = $this->createRoutes($clientRequest, $environment, $type);
-        } catch (EnvironmentNotFoundException $e) {
-            $routes = [];
-        }
-        $this->cache->save($cacheItem, $routes);
+            $routes = $this->createRoutes($clientRequest, $environment, $contentType->getName());
+            $contentType->setCache($routes);
+            $clientRequest->cacheContentType($contentType);
 
-        return $routes;
+            return $routes;
+        } catch (EnvironmentNotFoundException $e) {
+            return [];
+        }
     }
 
     /**

@@ -2,58 +2,60 @@
 
 namespace EMS\ClientHelperBundle\Helper\Cache;
 
+use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use Psr\Cache\CacheItemInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
-use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class CacheHelper
 {
-    /** @var AdapterInterface */
-    private $cache;
-    /** @var string */
-    private $hashAlgo;
+    private AdapterInterface $cache;
+    private LoggerInterface $logger;
+    private string $hashAlgo;
 
-    const DATE_KEY = 'cache_date';
-
-    public function __construct(AdapterInterface $cache, string $hashAlgo)
+    public function __construct(AdapterInterface $cache, LoggerInterface $logger, string $hashAlgo)
     {
         $this->cache = $cache;
+        $this->logger = $logger;
         $this->hashAlgo = $hashAlgo;
     }
 
-    public function get(string $key): ?CacheItemInterface
+    public function getContentType(ContentType $contentType): ?ContentType
     {
-        return $this->cache->getItem($key);
-    }
+        $item = $this->cache->getItem($contentType->getCacheKey());
 
-    public function isValid(CacheItem $item, \DateTime $lastChanged): bool
-    {
         if (!$item->isHit()) {
-            return false;
+            return null;
         }
 
-        $data = $item->get();
-        $cacheDate = \DateTime::createFromFormat(DATE_ATOM, $data[self::DATE_KEY]);
+        $cachedContentType = $item->get();
 
-        return $cacheDate > $lastChanged;
+        if (!$cachedContentType instanceof ContentType) {
+            return null;
+        }
+
+        if ($cachedContentType->getCacheValidityTag() !== $contentType->getCacheValidityTag()) {
+            $this->cache->deleteItem($contentType->getCacheKey());
+
+            return null;
+        }
+
+        return $cachedContentType;
     }
 
-    public function getData(CacheItem $item): array
+    public function saveContentType(ContentType $contentType): void
     {
-        return $item->get()['data'];
-    }
+        $item = $this->cache->getItem($contentType->getCacheKey());
 
-    public function save(CacheItem $item, array $data)
-    {
-        $now = new \DateTime();
+        if (!$item instanceof CacheItemInterface) {
+            $this->logger->warning('Unexpected non-CacheItem cache item');
 
-        $item->set([
-            self::DATE_KEY => $now->format(DATE_ATOM),
-            'data' => $data,
-        ]);
+            return;
+        }
 
+        $item->set($contentType);
         $this->cache->save($item);
     }
 

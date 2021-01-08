@@ -2,20 +2,19 @@
 
 namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
-use Elastica\Aggregation\Max;
 use Elastica\Aggregation\Terms;
-use Elastica\Exception\ResponseException;
 use Elastica\Query\AbstractQuery;
-use Elastica\Query\BoolQuery;
 use Elastica\ResultSet;
 use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
+use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
+use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
+use EMS\ClientHelperBundle\Helper\ContentType\ContentTypeHelper;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\CommonBundle\Common\EMSLink;
 use EMS\CommonBundle\Elasticsearch\Document\EMSSource;
 use EMS\CommonBundle\Elasticsearch\Exception\NotFoundException;
-use EMS\CommonBundle\Helper\EmsFields;
 use EMS\CommonBundle\Search\Search;
 use EMS\CommonBundle\Service\ElasticaService;
 use Psr\Log\LoggerInterface;
@@ -27,6 +26,8 @@ class ClientRequest
 {
     private const CONTENT_TYPE_LIMIT = 500;
     private EnvironmentHelper $environmentHelper;
+    private CacheHelper $cacheHelper;
+    private ContentTypeHelper $contentTypeHelper;
     private LoggerInterface $logger;
     private AdapterInterface $cache;
     /** @var array<string, mixed> */
@@ -42,6 +43,8 @@ class ClientRequest
     public function __construct(
         ElasticaService $elasticaService,
         EnvironmentHelper $environmentHelper,
+        CacheHelper $cacheHelper,
+        ContentTypeHelper $contentTypeHelper,
         LoggerInterface $logger,
         AdapterInterface $cache,
         string $name,
@@ -51,6 +54,8 @@ class ClientRequest
             throw new \RuntimeException('Client request index_prefix is deprecated and must be removed now: Environment name === Elasticsearch alias name');
         }
         $this->environmentHelper = $environmentHelper;
+        $this->cacheHelper = $cacheHelper;
+        $this->contentTypeHelper = $contentTypeHelper;
         $this->logger = $logger;
         $this->cache = $cache;
         $this->options = $options;
@@ -264,83 +269,30 @@ class ClientRequest
         return $this->environmentHelper->getCurrentEnvironment();
     }
 
-    public function getLastChangeDate(string $type): \DateTime
+    public function cacheContentType(ContentType $contentType): void
     {
-        $environment = $this->environmentHelper->getCurrentEnvironment();
-        if (empty($this->lastUpdateByType)) {
-            $boolQuery = new BoolQuery();
-            $operationQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_OPERATION_FIELD, [
-                EmsFields::LOG_OPERATION_UPDATE,
-                EmsFields::LOG_OPERATION_DELETE,
-                EmsFields::LOG_OPERATION_CREATE,
-            ]);
-            $boolQuery->addMust($operationQuery);
+        $this->cacheHelper->saveContentType($contentType);
+    }
 
-            $environmentQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_ENVIRONMENT_FIELD, $environment->getCacheEnvironments());
-            $boolQuery->addMust($environmentQuery);
+    public function getRouteContentType(): ?ContentType
+    {
+        return $this->getContentType($this->getOption('[route_type]'));
+    }
 
-            $instanceQuery = $this->elasticaService->getTermsQuery(EmsFields::LOG_INSTANCE_ID_FIELD, $environment->getCacheInstanceIds());
-            $boolQuery->addMust($instanceQuery);
+    public function getTranslationContentType(): ?ContentType
+    {
+        return $this->getContentType($this->getOption('[translation_type]'));
+    }
 
-            $search = new Search([EmsFields::LOG_ALIAS], $boolQuery);
-            $search->setSize(0);
-
-            $maxUpdate = new Max('maxUpdate');
-            $maxUpdate->setField(EmsFields::LOG_DATETIME_FIELD);
-            $lastUpdate = new Terms('lastUpdate');
-            $lastUpdate->setField(EmsFields::LOG_CONTENTTYPE_FIELD);
-            $lastUpdate->setSize(100);
-            $lastUpdate->addAggregation($maxUpdate);
-            $search->addAggregation($lastUpdate);
-
-            try {
-                $resultSet = $this->elasticaService->search($search);
-                $lastUpdateAggregation = $resultSet->getAggregation('lastUpdate');
-
-                foreach ($lastUpdateAggregation['buckets'] as $maxDate) {
-                    $this->lastUpdateByType[$maxDate['key']] = new \DateTime($maxDate['maxUpdate']['value_as_string']);
-                }
-            } catch (ResponseException $e) {
-                $this->logger->warning('log.ems_log_alias_not_found', [
-                    'alias' => EmsFields::LOG_ALIAS,
-                ]);
-            }
+    public function getContentType(string $name): ?ContentType
+    {
+        if (null === $contentType = $this->contentTypeHelper->get($this, $name)) {
+            return null;
         }
 
-        if (!empty($this->lastUpdateByType)) {
-            $mostRecentUpdate = new \DateTime('2019-06-01T12:00:00Z');
-            $types = \explode(',', $type);
-            foreach ($types as $currentType) {
-                if (isset($this->lastUpdateByType[$currentType]) && $mostRecentUpdate < $this->lastUpdateByType[$currentType]) {
-                    $mostRecentUpdate = $this->lastUpdateByType[$currentType];
-                }
-            }
-            $this->logger->info('log.last_update_date', [
-                'contenttypes' => $type,
-                'lastupdate' => $mostRecentUpdate->format('c'),
-            ]);
+        $cachedContentType = $this->cacheHelper->getContentType($contentType);
 
-            return $mostRecentUpdate;
-        }
-
-        $this->logger->warning('log.ems_log_not_found', [
-            'alias' => EmsFields::LOG_ALIAS,
-            'type' => EmsFields::LOG_TYPE,
-            'types' => $type,
-            'environments' => $environment->getCacheEnvironments(),
-            'instance_ids' => $environment->getCacheInstanceIds(),
-        ]);
-
-        $result = $this->search($type, [
-            'sort' => ['_published_datetime' => ['order' => 'desc', 'missing' => '_last']],
-            '_source' => '_published_datetime',
-        ], 0, 1);
-
-        if ($result['hits']['total'] > 0 && isset($result['hits']['hits']['0']['_source']['_published_datetime'])) {
-            return new \DateTime($result['hits']['hits']['0']['_source']['_published_datetime']);
-        }
-
-        return new \DateTime('Wed, 09 Feb 1977 16:00:00 GMT');
+        return $cachedContentType ? $cachedContentType : $contentType;
     }
 
     /**
@@ -617,7 +569,7 @@ class ClientRequest
         return $prefix.$environment;
     }
 
-    private function getAlias(): string
+    public function getAlias(): string
     {
         $name = $this->environmentHelper->getBindEnvironmentName();
         if (null === $name) {
@@ -650,7 +602,9 @@ class ClientRequest
         $cacheHash = \sha1($jsonEncoded);
 
         $cachedHierarchy = $this->cache->getItem($cacheHash);
-        $lastUpdate = $this->getLastChangeDate($type);
+
+        $contentType = $this->getContentType($type);
+        $lastUpdate = $contentType ? $contentType->getLastPublished() : new \DateTimeImmutable('Wed, 09 Feb 1977 16:00:00 GMT');
 
         /** @var Response $response */
         $response = $cachedHierarchy->get();

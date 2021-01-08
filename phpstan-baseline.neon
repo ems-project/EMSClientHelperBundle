@@ -386,21 +386,6 @@ parameters:
 			path: Helper/Api/Response.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:getData\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Cache/CacheHelper.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:save\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: Helper/Cache/CacheHelper.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:save\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Cache/CacheHelper.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequestRuntime\\:\\:search\\(\\) has parameter \\$body with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Elasticsearch/ClientRequestRuntime.php
@@ -646,21 +631,6 @@ parameters:
 			path: Helper/Translation/TranslationHelper.php
 
 		-
-			message: "#^Parameter \\#1 \\$item of method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:isValid\\(\\) expects Symfony\\\\Component\\\\Cache\\\\CacheItem, Psr\\\\Cache\\\\CacheItemInterface\\|null given\\.$#"
-			count: 1
-			path: Helper/Translation/TranslationHelper.php
-
-		-
-			message: "#^Parameter \\#1 \\$item of method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:getData\\(\\) expects Symfony\\\\Component\\\\Cache\\\\CacheItem, Psr\\\\Cache\\\\CacheItemInterface\\|null given\\.$#"
-			count: 1
-			path: Helper/Translation/TranslationHelper.php
-
-		-
-			message: "#^Parameter \\#1 \\$item of method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:save\\(\\) expects Symfony\\\\Component\\\\Cache\\\\CacheItem, Psr\\\\Cache\\\\CacheItemInterface\\|null given\\.$#"
-			count: 1
-			path: Helper/Translation/TranslationHelper.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Translation\\\\TranslationHelper\\:\\:createMessages\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Translation/TranslationHelper.php
@@ -686,17 +656,7 @@ parameters:
 			path: Helper/Twig/TwigLoader.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Twig\\\\TwigLoader\\:\\:getTemplate\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Twig/TwigLoader.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Twig\\\\TwigLoader\\:\\:match\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Twig/TwigLoader.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Twig\\\\TwigLoader\\:\\:search\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Twig/TwigLoader.php
 

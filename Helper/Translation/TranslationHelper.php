@@ -2,7 +2,6 @@
 
 namespace EMS\ClientHelperBundle\Helper\Translation;
 
-use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use Symfony\Bundle\FrameworkBundle\Translation\Translator;
@@ -15,16 +14,13 @@ class TranslationHelper
     private $manager;
     /** @var TranslatorBagInterface */
     private $translator;
-    /** @var CacheHelper */
-    private $cache;
     /** @var array */
     private $locales;
 
-    public function __construct(ClientRequestManager $manager, Translator $translator, CacheHelper $cache, array $locales)
+    public function __construct(ClientRequestManager $manager, Translator $translator, array $locales)
     {
         $this->manager = $manager;
         $this->translator = $translator;
-        $this->cache = $cache;
         $this->locales = $locales;
     }
 
@@ -57,17 +53,17 @@ class TranslationHelper
 
     private function getMessages(ClientRequest $clientRequest): array
     {
-        $cacheItem = $this->cache->get($clientRequest->getCacheKey('translations'));
-
-        $type = $clientRequest->getOption('[translation_type]');
-        $lastChanged = $clientRequest->getLastChangeDate($type);
-
-        if ($this->cache->isValid($cacheItem, $lastChanged)) {
-            return $this->cache->getData($cacheItem);
+        if (null === $contentType = $clientRequest->getTranslationContentType()) {
+            return [];
         }
 
-        $messages = $this->createMessages($clientRequest, $type);
-        $this->cache->save($cacheItem, $messages);
+        if (null !== $cache = $contentType->getCache()) {
+            return $cache;
+        }
+
+        $messages = $this->createMessages($clientRequest, $contentType->getName());
+        $contentType->setCache($messages);
+        $clientRequest->cacheContentType($contentType);
 
         return $messages;
     }
