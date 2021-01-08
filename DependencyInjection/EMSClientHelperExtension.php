@@ -108,6 +108,8 @@ class EMSClientHelperExtension extends Extension
         $definition->setArguments([
             new Reference('ems_common.service.elastica'),
             new Reference('emsch.helper_environment'),
+            new Reference('emsch.helper_cache'),
+            new Reference('emsch.helper_content_type'),
             new Reference('logger'),
             new Reference('cache.app'),
             $name,

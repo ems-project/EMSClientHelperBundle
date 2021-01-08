@@ -386,176 +386,6 @@ parameters:
 			path: Helper/Api/Response.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:getData\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Cache/CacheHelper.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:save\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: Helper/Cache/CacheHelper.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:save\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Cache/CacheHelper.php
-
-		-
-			message: "#^Property EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:\\$options type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:__construct\\(\\) has parameter \\$options with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:analyze\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:get\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getAllChildren\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getByEmsKey\\(\\) has parameter \\$sourceFields with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Parameter \\#1 \\$type of method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getByOuuid\\(\\) expects string, string\\|null given\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Parameter \\#2 \\$ouuid of method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getByOuuid\\(\\) expects string, string\\|null given\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getByOuuid\\(\\) has parameter \\$sourceFields with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getByOuuid\\(\\) has parameter \\$source_exclude with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getHierarchy\\(\\) has parameter \\$sourceFields with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Parameter \\#1 \\$stack of function array_pop expects array, array\\<int, string\\>\\|false given\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getPrefixes\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Cannot access offset 0 on array\\<int, string\\>\\|false\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:search\\(\\) has parameter \\$body with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:search\\(\\) has parameter \\$sourceExclude with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:search\\(\\) has parameter \\$type with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:search\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:searchArgs\\(\\) has parameter \\$arguments with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:searchArgs\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:searchBy\\(\\) has parameter \\$parameters with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:searchBy\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:searchOne\\(\\) has parameter \\$body with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:searchOne\\(\\) has parameter \\$type with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:searchOneBy\\(\\) has parameter \\$parameters with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:scroll\\(\\) has parameter \\$filter with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:scroll\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:scrollAll\\(\\) has parameter \\$params with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getCacheResponse\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\:\\:getCacheResponse\\(\\) has parameter \\$cacheKey with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
-			message: "#^Parameter \\#1 \\$str of function sha1 expects string, string\\|false given\\.$#"
-			count: 1
-			path: Helper/Elasticsearch/ClientRequest.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequestRuntime\\:\\:search\\(\\) has parameter \\$body with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Elasticsearch/ClientRequestRuntime.php
@@ -619,26 +449,6 @@ parameters:
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\HierarchicalStructure\\:\\:addChild\\(\\) has no return typehint specified\\.$#"
 			count: 1
 			path: Helper/Elasticsearch/HierarchicalStructure.php
-
-		-
-			message: "#^Property EMS\\\\ClientHelperBundle\\\\Helper\\\\Environment\\\\Environment\\:\\:\\$request type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Environment/Environment.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Environment\\\\Environment\\:\\:__construct\\(\\) has parameter \\$config with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Environment/Environment.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Environment\\\\Environment\\:\\:matchRequest\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: Helper/Environment/Environment.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Environment\\\\Environment\\:\\:modifyRequest\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: Helper/Environment/Environment.php
 
 		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Hashcash\\\\HashcashHelper\\:\\:validateHashcash\\(\\) has no return typehint specified\\.$#"
@@ -821,21 +631,6 @@ parameters:
 			path: Helper/Translation/TranslationHelper.php
 
 		-
-			message: "#^Parameter \\#1 \\$item of method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:isValid\\(\\) expects Symfony\\\\Component\\\\Cache\\\\CacheItem, Psr\\\\Cache\\\\CacheItemInterface\\|null given\\.$#"
-			count: 1
-			path: Helper/Translation/TranslationHelper.php
-
-		-
-			message: "#^Parameter \\#1 \\$item of method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:getData\\(\\) expects Symfony\\\\Component\\\\Cache\\\\CacheItem, Psr\\\\Cache\\\\CacheItemInterface\\|null given\\.$#"
-			count: 1
-			path: Helper/Translation/TranslationHelper.php
-
-		-
-			message: "#^Parameter \\#1 \\$item of method EMS\\\\ClientHelperBundle\\\\Helper\\\\Cache\\\\CacheHelper\\:\\:save\\(\\) expects Symfony\\\\Component\\\\Cache\\\\CacheItem, Psr\\\\Cache\\\\CacheItemInterface\\|null given\\.$#"
-			count: 1
-			path: Helper/Translation/TranslationHelper.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Translation\\\\TranslationHelper\\:\\:createMessages\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Translation/TranslationHelper.php
@@ -861,17 +656,7 @@ parameters:
 			path: Helper/Twig/TwigLoader.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Twig\\\\TwigLoader\\:\\:getTemplate\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Twig/TwigLoader.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Twig\\\\TwigLoader\\:\\:match\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: Helper/Twig/TwigLoader.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Twig\\\\TwigLoader\\:\\:search\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: Helper/Twig/TwigLoader.php
 

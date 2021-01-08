@@ -8,11 +8,9 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class EnvironmentHelper
 {
     /** @var Environment[] */
-    private $environments = [];
-    /** @var RequestStack */
-    private $requestStack;
-    /** @var string */
-    private $emschEnv;
+    private array $environments = [];
+    private RequestStack $requestStack;
+    private string $emschEnv;
 
     /**
      * @param array<string, array> $environments
@@ -44,29 +42,29 @@ class EnvironmentHelper
     {
         $current = $this->requestStack->getCurrentRequest();
 
-        return $current ? $current->get('_backend') : null;
+        return null !== $current ? $current->get(Environment::BACKEND_ATTRIBUTE) : null;
     }
 
     /**
      * Important for twig loader on kernel terminate we don't have a current request.
      * So this function remembers it's environment and can still return it.
      */
-    public function getEnvironmentSuffix(): ?string
+    public function getBindEnvironmentName(): ?string
     {
-        static $suffix = null;
+        static $name = null;
 
-        if (null !== $suffix) {
-            return $suffix;
+        if (null !== $name) {
+            return $name;
         }
 
         $current = $this->requestStack->getCurrentRequest();
         if (null !== $current) {
-            $suffix = $current->get('_environment', null);
+            $name = $current->get(Environment::ENVIRONMENT_ATTRIBUTE, null);
         } elseif ('cli' === PHP_SAPI) {
-            $suffix = $this->emschEnv;
+            $name = $this->emschEnv;
         }
 
-        return $suffix;
+        return $name;
     }
 
     public function getLocale(): string
@@ -81,31 +79,14 @@ class EnvironmentHelper
 
     public function getCurrentEnvironment(): Environment
     {
-        $current = $this->requestStack->getCurrentRequest();
-        if (null === $current) {
-            throw new EnvironmentNotFoundException();
-        }
+        $name = $this->getBindEnvironmentName();
 
         foreach ($this->environments as $environment) {
-            if (null !== $current && $environment->matchRequest($current)) {
+            if ($environment->getName() === $name) {
                 return $environment;
             }
         }
 
         throw new EnvironmentNotFoundException();
-    }
-
-    public function getIndexSuffix(): string
-    {
-        try {
-            return $this->getCurrentEnvironment()->getIndexSuffix();
-        } catch (EnvironmentNotFoundException $e) {
-        }
-        $suffix = $this->getEnvironmentSuffix();
-        if (null === $suffix) {
-            throw new EnvironmentNotFoundException();
-        }
-
-        return $suffix;
     }
 }
