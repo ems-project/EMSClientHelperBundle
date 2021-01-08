@@ -15,7 +15,7 @@ final class ContentTypeCollection
     {
         $collection = new self();
 
-        if (null === $aggContentType = $response->getAggregation('contentTypes')) {
+        if (null === $aggContentType = $response->getAggregation(ContentTypeHelper::AGG_CONTENT_TYPE)) {
             return $collection;
         }
 
@@ -26,7 +26,9 @@ final class ContentTypeCollection
 
             $contentType = new ContentType($alias, $contentTypeName, $contentTypeBucket->getCount());
 
-            if (null !== $lastPublishedValue = $contentTypeBucket->getRaw()['lastPublished']['value_as_string']) {
+            $contentTypeBucketRaw = $contentTypeBucket->getRaw();
+            $lastPublishedValue = $contentTypeBucketRaw[ContentTypeHelper::AGG_LAST_PUBLISHED]['value_as_string'] ?? [];
+            if (null !== $lastPublishedValue) {
                 $contentType->setLastPublishedValue($lastPublishedValue);
             }
 

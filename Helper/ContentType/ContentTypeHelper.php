@@ -16,6 +16,9 @@ final class ContentTypeHelper
     private LoggerInterface $logger;
     private ?ContentTypeCollection $contentTypeCollection = null;
 
+    public const AGG_CONTENT_TYPE = 'contentType';
+    public const AGG_LAST_PUBLISHED = 'lastPublished';
+
     public function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
@@ -37,10 +40,10 @@ final class ContentTypeHelper
 
     private function makeContentTypeCollection(ClientRequest $clientRequest): ContentTypeCollection
     {
-        $maxUpdate = new Max('lastPublished');
+        $maxUpdate = new Max(self::AGG_LAST_PUBLISHED);
         $maxUpdate->setField('_published_datetime');
 
-        $lastUpdate = new Terms('contentTypes');
+        $lastUpdate = new Terms(self::AGG_CONTENT_TYPE);
         $lastUpdate->setField('_contenttype');
         $lastUpdate->setSize(100);
         $lastUpdate->addAggregation($maxUpdate);
