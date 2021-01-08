@@ -15,8 +15,6 @@ class Environment
     const ROUTE_PREFIX_CONFIG = 'route_prefix';
     const BACKEND_CONFIG = 'backend';
     const REQUEST_CONFIG = 'request';
-    const CACHE_ENVIRONMENTS_CONFIG = 'cache_environments';
-    const CACHE_INSTANCE_IDS_CONFIG = 'cache_instance_ids';
     private string $name;
     private ?string $regex;
     private ?string $backend;
@@ -27,10 +25,6 @@ class Environment
     private string $routePrefix;
     /** @var array<mixed> */
     private array $options;
-    /** @var string[] */
-    private array $cacheEnvironments;
-    /** @var string[] */
-    private array $cacheInstanceIds;
 
     /**
      * @param array<string, mixed> $config
@@ -43,14 +37,6 @@ class Environment
         $this->name = $name;
 
         $this->regex = $config[self::REGEX_CONFIG] ?? null;
-        $this->cacheEnvironments = $config[self::CACHE_ENVIRONMENTS_CONFIG] ?? [];
-        if (!\is_array($this->cacheEnvironments) || 0 === \count($this->cacheEnvironments)) {
-            throw new \RuntimeException(\sprintf('The environment option %s must contain at least one elasticms environment name (the one with the routes, the labels and the templates)', self::CACHE_ENVIRONMENTS_CONFIG));
-        }
-        $this->cacheInstanceIds = $config[self::CACHE_INSTANCE_IDS_CONFIG] ?? [];
-        if (!\is_array($this->cacheInstanceIds) || 0 === \count($this->cacheInstanceIds)) {
-            throw new \RuntimeException(\sprintf('The environment option %s must contain at least one elasticms environment name (the one with the routes, the labels and the templates)', self::CACHE_INSTANCE_IDS_CONFIG));
-        }
         $this->regex = $config[self::REGEX_CONFIG] ?? null;
         $this->baseUrl = $config[self::BASE_URL_CONFIG] ?? '';
         $this->routePrefix = $config[self::ROUTE_PREFIX_CONFIG] ?? '';
@@ -125,21 +111,5 @@ class Environment
     public function hasOption(string $option): bool
     {
         return isset($this->options[$option]) && null !== $this->options[$option];
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getCacheEnvironments(): array
-    {
-        return $this->cacheEnvironments;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getCacheInstanceIds(): array
-    {
-        return $this->cacheInstanceIds;
     }
 }
