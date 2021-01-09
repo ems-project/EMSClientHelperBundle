@@ -54,6 +54,9 @@
 			"EMS\\ClientHelperBundle\\Tests\\" : "tests/"
 		}
 	},
+	"config": {
+		"lock": false
+	},
 	"extra" : {
 		"branch-alias" : {
 			"dev-master" : "0.1-dev"
