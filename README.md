@@ -14,7 +14,7 @@ composer phpstan
 
 If you want to regenerate the PHPStan's baseline run the following command:
 `````bash
-vendor/bin/phpstan analyse ./  --generate-baseline
+vendor/bin/phpstan analyse --generate-baseline
 `````
 
 
