@@ -26,18 +26,14 @@ final class ContentTypeHelper
         $this->logger = $logger;
     }
 
-    public function get(ClientRequest $clientRequest, string $contentTypeName, ?Environment $environment = null): ?ContentType
+    public function get(ClientRequest $clientRequest, string $contentTypeName, Environment $environment): ?ContentType
     {
         return $this->getContentTypeCollection($clientRequest, $environment)->getByName($contentTypeName);
     }
 
-    public function getContentTypeCollection(ClientRequest $clientRequest, ?Environment $environment = null): ContentTypeCollection
+    public function getContentTypeCollection(ClientRequest $clientRequest, Environment $environment): ContentTypeCollection
     {
-        if (null === $environment) {
-            $environmentName = $clientRequest->getCurrentEnvironment()->getName();
-        } else {
-            $environmentName = $environment->getName();
-        }
+        $environmentName = $environment->getName();
         if (!isset($this->contentTypeCollections[$environmentName])) {
             $this->contentTypeCollections[$environmentName] = $this->makeContentTypeCollection($clientRequest, $environment);
         }
@@ -45,7 +41,7 @@ final class ContentTypeHelper
         return $this->contentTypeCollections[$environmentName];
     }
 
-    private function makeContentTypeCollection(ClientRequest $clientRequest, ?Environment $environment = null): ContentTypeCollection
+    private function makeContentTypeCollection(ClientRequest $clientRequest, Environment $environment): ContentTypeCollection
     {
         $maxUpdate = new Max(self::AGG_LAST_PUBLISHED);
         $maxUpdate->setField('_published_datetime');
@@ -55,17 +51,12 @@ final class ContentTypeHelper
         $lastUpdate->setSize(100);
         $lastUpdate->addAggregation($maxUpdate);
 
-        if (null === $environment) {
-            $alias = $clientRequest->getAlias();
-        } else {
-            $alias = $environment->getName();
-        }
-        $search = new Search([$alias]);
+        $search = new Search([$environment->getName()]);
         $search->setSize(0);
         $search->addAggregation($lastUpdate);
 
         $response = Response::fromResultSet($clientRequest->commonSearch($search));
 
-        return ContentTypeCollection::fromResponse($alias, $response);
+        return ContentTypeCollection::fromResponse($environment->getName(), $response);
     }
 }

@@ -274,7 +274,7 @@ class ClientRequest
         $this->cacheHelper->saveContentType($contentType);
     }
 
-    public function getRouteContentType(?Environment $environment = null): ?ContentType
+    public function getRouteContentType(Environment $environment): ?ContentType
     {
         return $this->getContentType($this->getOption('[route_type]'), $environment);
     }
@@ -286,6 +286,9 @@ class ClientRequest
 
     public function getContentType(string $name, ?Environment $environment = null): ?ContentType
     {
+        if (null === $environment) {
+            $environment = $this->environmentHelper->getCurrentEnvironment();
+        }
         if (null === $contentType = $this->contentTypeHelper->get($this, $name, $environment)) {
             return null;
         }
