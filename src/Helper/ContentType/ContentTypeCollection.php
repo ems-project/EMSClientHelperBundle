@@ -27,8 +27,8 @@ final class ContentTypeCollection
             $contentType = new ContentType($alias, $contentTypeName, $contentTypeBucket->getCount());
 
             $contentTypeBucketRaw = $contentTypeBucket->getRaw();
-            $lastPublishedValue = $contentTypeBucketRaw[ContentTypeHelper::AGG_LAST_PUBLISHED]['value_as_string'] ?? [];
-            if (null !== $lastPublishedValue) {
+            $lastPublishedValue = $contentTypeBucketRaw[ContentTypeHelper::AGG_LAST_PUBLISHED]['value_as_string'] ?? null;
+            if (\is_string($lastPublishedValue)) {
                 $contentType->setLastPublishedValue($lastPublishedValue);
             }
 
