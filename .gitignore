@@ -1,11 +1,2 @@
-.idea
-/.sass-cache/
-/.settings/
-.DS_Store
-/.buildpath
-/.project
-/nbproject/
 /vendor
 /.php_cs.cache
-composer.lock
-phpunit.xml
