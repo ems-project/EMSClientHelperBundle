@@ -126,7 +126,7 @@ class Router extends BaseRouter
      */
     private function getRoutesByEnvironment(ClientRequest $clientRequest, Environment $environment): array
     {
-        if (null === $contentType = $clientRequest->getRouteContentType()) {
+        if (null === $contentType = $clientRequest->getRouteContentType($environment)) {
             return [];
         }
 

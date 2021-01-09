@@ -7,6 +7,7 @@ namespace EMS\ClientHelperBundle\Helper\ContentType;
 use Elastica\Aggregation\Max;
 use Elastica\Aggregation\Terms;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\CommonBundle\Elasticsearch\Response\Response;
 use EMS\CommonBundle\Search\Search;
 use Psr\Log\LoggerInterface;
@@ -14,7 +15,8 @@ use Psr\Log\LoggerInterface;
 final class ContentTypeHelper
 {
     private LoggerInterface $logger;
-    private ?ContentTypeCollection $contentTypeCollection = null;
+    /** @var ContentTypeCollection[] */
+    private array $contentTypeCollections = [];
 
     public const AGG_CONTENT_TYPE = 'contentType';
     public const AGG_LAST_PUBLISHED = 'lastPublished';
@@ -24,21 +26,26 @@ final class ContentTypeHelper
         $this->logger = $logger;
     }
 
-    public function get(ClientRequest $clientRequest, string $contentTypeName): ?ContentType
+    public function get(ClientRequest $clientRequest, string $contentTypeName, ?Environment $environment = null): ?ContentType
     {
-        return $this->getContentTypeCollection($clientRequest)->getByName($contentTypeName);
+        return $this->getContentTypeCollection($clientRequest, $environment)->getByName($contentTypeName);
     }
 
-    public function getContentTypeCollection(ClientRequest $clientRequest): ContentTypeCollection
+    public function getContentTypeCollection(ClientRequest $clientRequest, ?Environment $environment = null): ContentTypeCollection
     {
-        if (null === $this->contentTypeCollection) {
-            $this->contentTypeCollection = $this->makeContentTypeCollection($clientRequest);
+        if (null === $environment) {
+            $environmentName = $clientRequest->getCurrentEnvironment()->getName();
+        } else {
+            $environmentName = $environment->getName();
+        }
+        if (!isset($this->contentTypeCollections[$environmentName])) {
+            $this->contentTypeCollections[$environmentName] = $this->makeContentTypeCollection($clientRequest, $environment);
         }
 
-        return $this->contentTypeCollection;
+        return $this->contentTypeCollections[$environmentName];
     }
 
-    private function makeContentTypeCollection(ClientRequest $clientRequest): ContentTypeCollection
+    private function makeContentTypeCollection(ClientRequest $clientRequest, ?Environment $environment = null): ContentTypeCollection
     {
         $maxUpdate = new Max(self::AGG_LAST_PUBLISHED);
         $maxUpdate->setField('_published_datetime');
@@ -48,7 +55,11 @@ final class ContentTypeHelper
         $lastUpdate->setSize(100);
         $lastUpdate->addAggregation($maxUpdate);
 
-        $alias = $clientRequest->getAlias();
+        if (null === $environment) {
+            $alias = $clientRequest->getAlias();
+        } else {
+            $alias = $environment->getName();
+        }
         $search = new Search([$alias]);
         $search->setSize(0);
         $search->addAggregation($lastUpdate);

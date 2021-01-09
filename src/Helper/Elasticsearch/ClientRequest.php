@@ -274,9 +274,9 @@ class ClientRequest
         $this->cacheHelper->saveContentType($contentType);
     }
 
-    public function getRouteContentType(): ?ContentType
+    public function getRouteContentType(?Environment $environment = null): ?ContentType
     {
-        return $this->getContentType($this->getOption('[route_type]'));
+        return $this->getContentType($this->getOption('[route_type]'), $environment);
     }
 
     public function getTranslationContentType(): ?ContentType
@@ -284,9 +284,9 @@ class ClientRequest
         return $this->getContentType($this->getOption('[translation_type]'));
     }
 
-    public function getContentType(string $name): ?ContentType
+    public function getContentType(string $name, ?Environment $environment = null): ?ContentType
     {
-        if (null === $contentType = $this->contentTypeHelper->get($this, $name)) {
+        if (null === $contentType = $this->contentTypeHelper->get($this, $name, $environment)) {
             return null;
         }
 
