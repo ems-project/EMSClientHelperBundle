@@ -7,7 +7,8 @@ namespace EMS\ClientHelperBundle\Helper\ContentType;
 final class ContentType
 {
     private string $alias;
-    private string $name;
+    /** @var string[] */
+    private array $names;
     private \DateTimeImmutable $lastPublished;
     private int $total;
     /** @var ?array<mixed> */
@@ -16,14 +17,14 @@ final class ContentType
     public function __construct(string $alias, string $name, int $total)
     {
         $this->alias = $alias;
-        $this->name = $name;
+        $this->names = [$name];
         $this->total = $total;
         $this->lastPublished = new \DateTimeImmutable();
     }
 
     public function getName(): string
     {
-        return $this->name;
+        return \implode('|', $this->names);
     }
 
     public function isLastPublishedAfterTime(int $timestamp): bool
@@ -42,7 +43,7 @@ final class ContentType
 
     public function getCacheKey(): string
     {
-        return \sprintf('%s_%s', $this->alias, $this->name);
+        return \sprintf('%s_%s', $this->alias, $this->getName());
     }
 
     /**
@@ -73,5 +74,26 @@ final class ContentType
         if ($lastPublished) {
             $this->lastPublished = $lastPublished;
         }
+    }
+
+    public function addContentType(ContentType $newType): void
+    {
+        if (1 !== \count($newType->names)) {
+            throw new \RuntimeException('Can not add a non single item ContentType');
+        }
+
+        $name = \reset($newType->names);
+        if (\in_array($name, $this->names, true)) {
+            return;
+        }
+
+        if ($this->alias !== $newType->alias) {
+            throw new \RuntimeException(\sprintf('Alias mismatched ! %s vs. %s', $this->alias, $newType->alias));
+        }
+
+        $this->names[] = $name;
+        \sort($this->names);
+        $this->total += $newType->total;
+        $this->lastPublished = new \DateTimeImmutable();
     }
 }
