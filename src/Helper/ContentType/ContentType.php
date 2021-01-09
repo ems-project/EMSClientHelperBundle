@@ -54,6 +54,29 @@ final class ContentType
     }
 
     /**
+     * @return mixed|null
+     */
+    public function getCacheItem(string $itemId)
+    {
+        if (null !== $this->cache && isset($this->cache[$itemId])) {
+            return $this->cache[$itemId];
+        }
+
+        return null;
+    }
+
+    /**
+     * @param mixed $cacheable
+     */
+    public function setCacheItem(string $itemId, $cacheable): void
+    {
+        if (null === $this->cache) {
+            $this->cache = [];
+        }
+        $this->cache[$itemId] = $cacheable;
+    }
+
+    /**
      * @param ?array<mixed> $cache
      */
     public function setCache(?array $cache): void
