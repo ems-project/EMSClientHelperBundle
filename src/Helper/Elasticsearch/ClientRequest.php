@@ -77,9 +77,15 @@ class ClientRequest
         $out = [];
         \preg_match_all('/"(?:\\\\.|[^\\\\"])*"|\S+/', $text, $out);
         $words = $out[0];
-        $index = $this->getFirstIndex();
 
-        return $this->elasticaService->filterStopWords($index, $analyzer, $words);
+        foreach ($this->elasticaService->getIndicesFromAlias($this->getAlias()) as $index) {
+            try {
+                return $this->elasticaService->filterStopWords($index, $analyzer, $words);
+            } catch (\Throwable $e) {
+            }
+        }
+
+        throw new \RuntimeException('Analyzer not found');
     }
 
     /**
