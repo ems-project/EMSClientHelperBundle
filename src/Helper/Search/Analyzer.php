@@ -44,7 +44,7 @@ class Analyzer
             $queryText = $textValue->getQuery($synonym->getSearchField(), $textValue->getAnalyzer());
             $querySynonym = $synonym->getQuery($queryText);
 
-            $body = ['_source' => ['_contenttype'], 'query' => $querySynonym];
+            $body = ['_source' => ['_contenttype'], 'query' => $querySynonym->toArray()];
             $documents = $this->clientRequest->search([], $body, 0, 20);
 
             if ($documents['hits']['total'] > 20) {
