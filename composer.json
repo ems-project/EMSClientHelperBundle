@@ -43,7 +43,7 @@
 	},
 	"autoload" : {
 		"psr-4" : {
-			"EMS\\ClientHelperBundle\\" : ""
+			"EMS\\ClientHelperBundle\\" : "src/"
 		},
 		"exclude-from-classmap" : [
 			"tests/"
@@ -53,6 +53,9 @@
 		"psr-4" : {
 			"EMS\\ClientHelperBundle\\Tests\\" : "tests/"
 		}
+	},
+	"config": {
+		"lock": false
 	},
 	"extra" : {
 		"branch-alias" : {

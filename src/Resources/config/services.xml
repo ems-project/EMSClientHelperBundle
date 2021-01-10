@@ -17,6 +17,10 @@
             <tag name="monolog.logger" channel="emsch_manager"/>
         </service>
 
+        <service id="emsch.helper_content_type" class="EMS\ClientHelperBundle\Helper\ContentType\ContentTypeHelper">
+            <argument type="service" id="logger" />
+        </service>
+
         <service id="emsch.helper_environment" class="EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper">
             <argument type="service" id="request_stack" />
             <argument type="string">%env(string:EMSCH_ENV)%</argument>
@@ -35,13 +39,13 @@
 
         <service id="emsch.helper_cache" class="EMS\ClientHelperBundle\Helper\Cache\CacheHelper">
             <argument type="service" id="cache.app" />
+            <argument type="service" id="logger" />
             <argument type="string">%emsch.etag_hash_algo%</argument>
         </service>
 
         <service id="emsch.helper_translation" class="EMS\ClientHelperBundle\Helper\Translation\TranslationHelper">
             <argument type="service" id="emsch.manager.client_request" />
             <argument type="service" id="translator.default" />
-            <argument type="service" id="emsch.helper_cache" />
             <argument type="string">%emsch.locales%</argument>
             <tag name="kernel.cache_warmer" />
         </service>
