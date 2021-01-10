@@ -176,6 +176,8 @@ class ClientRequest
         $query = $this->elasticaService->getTermsQuery('_id', $ouuids);
         $query = $this->elasticaService->filterByContentTypes($query, [$type]);
         $search = new Search([$this->getAlias()], $query);
+        $search->setContentTypes([$type]);
+        $search->setSize(\count($ouuids));
 
         return $this->elasticaService->search($search)->getResponse()->getData();
     }
