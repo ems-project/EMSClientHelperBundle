@@ -85,7 +85,7 @@ class ClientRequest
             }
         }
 
-        throw new \RuntimeException('Analyzer not found');
+        throw new \RuntimeException(\sprintf('Analyzer %s not found', $analyzer));
     }
 
     /**
@@ -214,7 +214,14 @@ class ClientRequest
     {
         $this->logger->debug('ClientRequest : getFieldAnalyzer {field}', ['field' => $field]);
 
-        return $this->elasticaService->getFieldAnalyzer($this->getFirstIndex(), $field);
+        foreach ($this->elasticaService->getIndicesFromAlias($this->getAlias()) as $index) {
+            try {
+                return $this->elasticaService->getFieldAnalyzer($index, $field);
+            } catch (\Throwable $e) {
+            }
+        }
+
+        throw new \RuntimeException(\sprintf('Field analyzer %s not found', $field));
     }
 
     /**
@@ -586,14 +593,6 @@ class ClientRequest
         }
 
         return $name;
-    }
-
-    /**
-     * @return string
-     */
-    private function getFirstIndex()
-    {
-        return $this->elasticaService->getIndexFromAlias($this->getAlias());
     }
 
     /**
