@@ -33,12 +33,12 @@ final class ContentTypeHelper
 
     public function getContentTypeCollection(ClientRequest $clientRequest, Environment $environment): ContentTypeCollection
     {
-        $environmentName = $environment->getName();
-        if (!isset($this->contentTypeCollections[$environmentName])) {
-            $this->contentTypeCollections[$environmentName] = $this->makeContentTypeCollection($clientRequest, $environment);
+        $aliasName = $environment->getAlias();
+        if (!isset($this->contentTypeCollections[$aliasName])) {
+            $this->contentTypeCollections[$aliasName] = $this->makeContentTypeCollection($clientRequest, $environment);
         }
 
-        return $this->contentTypeCollections[$environmentName];
+        return $this->contentTypeCollections[$aliasName];
     }
 
     private function makeContentTypeCollection(ClientRequest $clientRequest, Environment $environment): ContentTypeCollection
@@ -51,12 +51,12 @@ final class ContentTypeHelper
         $lastUpdate->setSize(100);
         $lastUpdate->addAggregation($maxUpdate);
 
-        $search = new Search([$environment->getName()]);
+        $search = new Search([$environment->getAlias()]);
         $search->setSize(0);
         $search->addAggregation($lastUpdate);
 
         $response = Response::fromResultSet($clientRequest->commonSearch($search));
 
-        return ContentTypeCollection::fromResponse($environment->getName(), $response);
+        return ContentTypeCollection::fromResponse($environment->getAlias(), $response);
     }
 }

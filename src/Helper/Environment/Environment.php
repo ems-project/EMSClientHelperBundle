@@ -15,7 +15,9 @@ class Environment
     const ROUTE_PREFIX_CONFIG = 'route_prefix';
     const BACKEND_CONFIG = 'backend';
     const REQUEST_CONFIG = 'request';
+    const ALIAS_CONFIG = 'alias';
     private string $name;
+    private string $alias;
     private ?string $regex;
     private ?string $backend;
 
@@ -36,7 +38,7 @@ class Environment
         }
         $this->name = $name;
 
-        $this->regex = $config[self::REGEX_CONFIG] ?? null;
+        $this->alias = $config[self::ALIAS_CONFIG] ?? $name;
         $this->regex = $config[self::REGEX_CONFIG] ?? null;
         $this->baseUrl = $config[self::BASE_URL_CONFIG] ?? '';
         $this->routePrefix = $config[self::ROUTE_PREFIX_CONFIG] ?? '';
@@ -58,6 +60,11 @@ class Environment
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function getAlias(): string
+    {
+        return $this->alias;
     }
 
     public function matchRequest(Request $request): bool
