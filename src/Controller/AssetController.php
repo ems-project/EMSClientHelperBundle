@@ -121,6 +121,9 @@ final class AssetController extends AbstractController
             case 'css':
                 $response->headers->set('Content-Type', 'text/css');
                 break;
+            case 'svg':
+                $response->headers->set('Content-Type', 'image/svg+xml');
+                break;
         }
     }
 }
