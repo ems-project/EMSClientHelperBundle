@@ -1,56 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Property EMS\\\\ClientHelperBundle\\\\Exception\\\\MissingTranslationException\\:\\:\\$AVAILABLE_LANGUAGES has no typehint specified\\.$#"
-			count: 1
-			path: src/Exception/MissingTranslationException.php
-
-		-
-			message: "#^Property EMS\\\\ClientHelperBundle\\\\Exception\\\\MissingTranslationException\\:\\:\\$linkLabels type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Exception/MissingTranslationException.php
-
-		-
-			message: "#^Property EMS\\\\ClientHelperBundle\\\\Exception\\\\MissingTranslationException\\:\\:\\$ouuid has no typehint specified\\.$#"
-			count: 1
-			path: src/Exception/MissingTranslationException.php
-
-		-
-			message: "#^Property EMS\\\\ClientHelperBundle\\\\Exception\\\\MissingTranslationException\\:\\:\\$linkType has no typehint specified\\.$#"
-			count: 1
-			path: src/Exception/MissingTranslationException.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Exception\\\\MissingTranslationException\\:\\:__construct\\(\\) has parameter \\$linkLabels with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Exception/MissingTranslationException.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Exception\\\\MissingTranslationException\\:\\:__construct\\(\\) has parameter \\$linkType with no typehint specified\\.$#"
-			count: 1
-			path: src/Exception/MissingTranslationException.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Exception\\\\MissingTranslationException\\:\\:__construct\\(\\) has parameter \\$ouuid with no typehint specified\\.$#"
-			count: 1
-			path: src/Exception/MissingTranslationException.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Exception\\\\MissingTranslationException\\:\\:getLinkLabels\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: src/Exception/MissingTranslationException.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Exception\\\\MissingTranslationException\\:\\:getOuuid\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: src/Exception/MissingTranslationException.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Exception\\\\MissingTranslationException\\:\\:getLinkType\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: src/Exception/MissingTranslationException.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Api\\\\ApiService\\:\\:__construct\\(\\) has parameter \\$apiClients with no value type specified in iterable type iterable\\.$#"
 			count: 1
 			path: src/Helper/Api/ApiService.php
