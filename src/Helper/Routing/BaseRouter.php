@@ -16,8 +16,8 @@ abstract class BaseRouter implements RouterInterface, RequestMatcherInterface
 {
     protected RequestContext $context;
     protected RouteCollection $collection;
-    protected ?UrlMatcher $matcher;
-    protected ?UrlGenerator $generator;
+    protected ?UrlMatcher $matcher = null;
+    protected ?UrlGenerator $generator = null;
 
     /**
      * {@inheritdoc}
