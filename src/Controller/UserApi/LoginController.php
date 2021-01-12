@@ -10,8 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class LoginController
 {
-    /** @var AuthService */
-    private $authService;
+    private AuthService $authService;
 
     public function __construct(AuthService $authService)
     {

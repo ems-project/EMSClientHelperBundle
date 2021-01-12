@@ -12,12 +12,9 @@ use Twig\Environment;
 
 class PdfController
 {
-    /** @var Handler */
-    private $handler;
-    /** @var Environment */
-    private $templating;
-    /** @var PdfGenerator */
-    private $pdfGenerator;
+    private Handler $handler;
+    private Environment $templating;
+    private PdfGenerator $pdfGenerator;
 
     public function __construct(Handler $handler, Environment $templating, PdfGenerator $pdfGenerator)
     {

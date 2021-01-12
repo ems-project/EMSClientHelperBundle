@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Controller;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
@@ -9,26 +11,20 @@ use Symfony\Component\HttpFoundation\Response;
 
 class LanguageSelectController extends AbstractController
 {
-    /**
-     * @var ClientRequestManager
-     */
-    private $clientRequestManager;
+    private ClientRequestManager $clientRequestManager;
+    /** @var string[] */
+    private array $locales;
 
     /**
-     * @var array
+     * @param string[] $locales
      */
-    private $locales;
-
     public function __construct(ClientRequestManager $clientRequestManager, array $locales)
     {
         $this->clientRequestManager = $clientRequestManager;
         $this->locales = $locales;
     }
 
-    /**
-     * @return Response
-     */
-    public function view(Request $request, string $template)
+    public function view(Request $request, string $template): Response
     {
         return $this->render($template, [
             'destination' => $request->get('destination', ''),

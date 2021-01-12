@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Controller;
 
 use EMS\ClientHelperBundle\Helper\Api\ApiService;
@@ -10,11 +12,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 class ApiController
 {
-    /** @var ApiService */
-    private $service;
-
-    /** @var HashcashHelper */
-    private $hashcashHelper;
+    private ApiService $service;
+    private HashcashHelper $hashcashHelper;
 
     public function __construct(ApiService $service, HashcashHelper $hashcashHelper)
     {
@@ -22,23 +21,12 @@ class ApiController
         $this->hashcashHelper = $hashcashHelper;
     }
 
-    /**
-     * @param string $apiName
-     *
-     * @return JsonResponse
-     */
-    public function contentTypes($apiName)
+    public function contentTypes(string $apiName): JsonResponse
     {
         return $this->service->getContentTypes($apiName)->getResponse();
     }
 
-    /**
-     * @param string $apiName
-     * @param string $contentType
-     *
-     * @return JsonResponse
-     */
-    public function contentType(Request $request, $apiName, $contentType)
+    public function contentType(Request $request, string $apiName, string $contentType): JsonResponse
     {
         $scrollId = $request->query->get('scroll');
         $size = $request->query->get('size');
@@ -47,19 +35,12 @@ class ApiController
         return $this->service->getContentType($apiName, $contentType, $filter, $size, $scrollId)->getResponse();
     }
 
-    /**
-     * @param string $apiName
-     * @param string $contentType
-     * @param string $ouuid
-     *
-     * @return JsonResponse
-     */
-    public function document($apiName, $contentType, $ouuid)
+    public function document(string $apiName, string $contentType, string $ouuid): JsonResponse
     {
         return $this->service->getDocument($apiName, $contentType, $ouuid)->getResponse();
     }
 
-    public function handleFormPostRequest(Request $request, string $apiName, string $contentType, ?string $ouuid, string $csrfId, string $validationTemplate, int $hashcashLevel, string $hashAlgo, bool $forceCreate = false)
+    public function handleFormPostRequest(Request $request, string $apiName, string $contentType, ?string $ouuid, string $csrfId, string $validationTemplate, int $hashcashLevel, string $hashAlgo, bool $forceCreate = false): JsonResponse
     {
         $this->hashcashHelper->validateHashcash($request, $csrfId, $hashcashLevel, $hashAlgo);
         $data = $this->service->treatFormRequest($request, $apiName, $validationTemplate);
