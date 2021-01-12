@@ -11,7 +11,7 @@ final class ContentTypeCollection
     /** @var array<ContentType> */
     private array $contentTypes = [];
 
-    public static function fromResponse(string $alias, Response $response): ContentTypeCollection
+    public static function fromResponse(string $environmentName, Response $response): ContentTypeCollection
     {
         $collection = new self();
 
@@ -24,7 +24,7 @@ final class ContentTypeCollection
                 continue;
             }
 
-            $contentType = new ContentType($alias, $contentTypeName, $contentTypeBucket->getCount());
+            $contentType = new ContentType($environmentName, $contentTypeName, $contentTypeBucket->getCount());
 
             $contentTypeBucketRaw = $contentTypeBucket->getRaw();
             $lastPublishedValue = $contentTypeBucketRaw[ContentTypeHelper::AGG_LAST_PUBLISHED]['value_as_string'] ?? null;
