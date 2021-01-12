@@ -57,9 +57,9 @@ class HealthCheckCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $io->title('Performing Health Check');
 
-        $this->checkElasticSearch($io, (bool) $input->getOption('green'));
+        $this->checkElasticSearch($io, (true === $input->getOption('green')));
         $this->checkIndexes($io);
-        $this->checkStorage($io, (bool) $input->getOption('skip-storage'));
+        $this->checkStorage($io, (true === $input->getOption('skip-storage')));
 
         $io->success('Health check finished.');
 

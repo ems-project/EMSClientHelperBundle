@@ -33,7 +33,7 @@ final class Route
 
         if (\is_array($path)) {
             foreach ($path as $key => $p) {
-                $locale = \in_array($key, $locales) ? (string) $key : null;
+                $locale = \in_array($key, $locales) ? \strval($key) : null;
                 $route = $this->createRoute($p, $locale);
 
                 $collection->add(\sprintf('%s.%s', $this->name, $key), $route);

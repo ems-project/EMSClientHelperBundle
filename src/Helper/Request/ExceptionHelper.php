@@ -45,7 +45,7 @@ class ExceptionHelper
 
     private function getTemplate(int $code): string
     {
-        $customCodeTemplate = \str_replace('{code}', (string) $code, $this->template);
+        $customCodeTemplate = \str_replace('{code}', \strval($code), $this->template);
 
         if ($this->templateExists($customCodeTemplate)) {
             return $customCodeTemplate;

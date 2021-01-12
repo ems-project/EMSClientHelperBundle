@@ -12,7 +12,7 @@ final class LocaleHelper
 {
     private RouterInterface $router;
     /** @var string[] */
-    private array$locales;
+    private array $locales;
 
     /**
      * @param string[] $locales
