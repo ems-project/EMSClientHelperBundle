@@ -19,18 +19,6 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-                ->arrayNode('log')
-                    ->children()
-                        ->scalarNode('instance_id')->end()
-                        ->booleanNode('by_pass')
-                            ->defaultFalse()
-                        ->end()
-                        ->variableNode('hosts')
-                            ->info('elasticsearch hosts')
-                            ->isRequired()
-                        ->end()
-                    ->end()
-                ->end()
                 ->variableNode('request_environments')->isRequired()->end()
                 ->variableNode('locales')->isRequired()->end()
                 ->booleanNode('bind_locale')->end()
