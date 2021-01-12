@@ -43,6 +43,18 @@ final class ContentTypeHelper
 
     private function makeContentTypeCollection(ClientRequest $clientRequest, Environment $environment): ContentTypeCollection
     {
+        try {
+            $search = $this->createContentTypeSearch($environment);
+            $response = Response::fromResultSet($clientRequest->commonSearch($search));
+
+            return ContentTypeCollection::fromResponse($environment->getName(), $response);
+        } catch (\Exception $e) {
+            return new ContentTypeCollection();
+        }
+    }
+
+    private function createContentTypeSearch(Environment $environment): Search
+    {
         $maxUpdate = new Max(self::AGG_LAST_PUBLISHED);
         $maxUpdate->setField('_published_datetime');
 
@@ -55,8 +67,6 @@ final class ContentTypeHelper
         $search->setSize(0);
         $search->addAggregation($lastUpdate);
 
-        $response = Response::fromResultSet($clientRequest->commonSearch($search));
-
-        return ContentTypeCollection::fromResponse($environment->getName(), $response);
+        return $search;
     }
 }
