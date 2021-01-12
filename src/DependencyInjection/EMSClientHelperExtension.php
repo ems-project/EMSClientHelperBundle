@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\DependencyInjection;
 
 use EMS\ClientHelperBundle\Helper\Api\Client as ApiClient;
@@ -15,9 +17,9 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 class EMSClientHelperExtension extends Extension
 {
     /**
-     * {@inheritdoc}
+     * @param array<string, mixed> $configs
      */
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
@@ -50,7 +52,10 @@ class EMSClientHelperExtension extends Extension
         }
     }
 
-    private function processElasticms(ContainerBuilder $container, XmlFileLoader $loader, array $config)
+    /**
+     * @param array<string, mixed> $config
+     */
+    private function processElasticms(ContainerBuilder $container, XmlFileLoader $loader, array $config): void
     {
         foreach ($config as $name => $options) {
             $this->defineClientRequest($container, $loader, $name, $options);
@@ -61,7 +66,10 @@ class EMSClientHelperExtension extends Extension
         }
     }
 
-    private function processApi(ContainerBuilder $container, array $config)
+    /**
+     * @param array<string, mixed> $config
+     */
+    private function processApi(ContainerBuilder $container, array $config): void
     {
         foreach ($config as $name => $options) {
             $definition = new Definition(ApiClient::class);
@@ -76,9 +84,9 @@ class EMSClientHelperExtension extends Extension
     }
 
     /**
-     * @param string $name
+     * @param array<string, mixed> $options
      */
-    private function defineClientRequest(ContainerBuilder $container, XmlFileLoader $loader, $name, array $options)
+    private function defineClientRequest(ContainerBuilder $container, XmlFileLoader $loader, string $name, array $options): void
     {
         $definition = new Definition(ClientRequest::class);
         $definition->setArguments([
@@ -101,7 +109,7 @@ class EMSClientHelperExtension extends Extension
         $container->setDefinition(\sprintf('emsch.client_request.%s', $name), $definition);
     }
 
-    private function loadClientRequestApi(XmlFileLoader $loader)
+    private function loadClientRequestApi(XmlFileLoader $loader): void
     {
         static $loaded = false;
 
@@ -114,10 +122,9 @@ class EMSClientHelperExtension extends Extension
     }
 
     /**
-     * @param string $name
-     * @param array  $options
+     * @param array<string, mixed> $options
      */
-    private function defineTwigLoader(ContainerBuilder $container, $name, $options)
+    private function defineTwigLoader(ContainerBuilder $container, string $name, array $options): void
     {
         $loader = new Definition(TwigLoader::class);
         $loader->setArguments([
@@ -129,7 +136,10 @@ class EMSClientHelperExtension extends Extension
         $container->setDefinition(\sprintf('emsch.twig.loader.%s', $name), $loader);
     }
 
-    private function processRoutingSelection(ContainerBuilder $container, array $config)
+    /**
+     * @param array<string, mixed> $config
+     */
+    private function processRoutingSelection(ContainerBuilder $container, array $config): void
     {
         if (!$config['enabled']) {
             return;
@@ -142,7 +152,7 @@ class EMSClientHelperExtension extends Extension
     }
 
     /**
-     * @param array<string> $config
+     * @param array<string, mixed> $config
      */
     private function processUserApi(ContainerBuilder $container, array $config): void
     {
