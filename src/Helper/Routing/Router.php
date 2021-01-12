@@ -2,7 +2,6 @@
 
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
-use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
@@ -11,17 +10,22 @@ use Symfony\Component\Routing\RouteCollection;
 
 class Router extends BaseRouter
 {
-    /** @var ClientRequestManager */
-    private $manager;
-    /** @var LoggerInterface */
-    private $logger;
-    /** @var array */
-    private $locales;
-    /** @var array */
-    private $templates;
-    /** @var array */
-    private $routes;
+    private ClientRequestManager $manager;
+    private LoggerInterface $logger;
+    /** @var string[] */
+    private array $locales;
+    /** @var array<mixed> */
+    private array $templates;
+    /** @var array<mixed> */
+    private array $routes;
 
+    private bool $hasBuild = false;
+
+    /**
+     * @param string[]     $locales
+     * @param array<mixed> $templates
+     * @param array<mixed> $routes
+     */
     public function __construct(ClientRequestManager $manager, array $locales, array $templates, array $routes)
     {
         $this->manager = $manager;
@@ -33,7 +37,7 @@ class Router extends BaseRouter
 
     public function getRouteCollection(): RouteCollection
     {
-        if (null === $this->collection) {
+        if (!$this->hasBuild) {
             $this->buildRouteCollection();
         }
 
@@ -49,6 +53,7 @@ class Router extends BaseRouter
         $this->addEnvRoutes($collection);
 
         $this->collection = $collection;
+        $this->hasBuild = true;
     }
 
     private function addEnvRoutes(RouteCollection $collection): void
@@ -105,6 +110,9 @@ class Router extends BaseRouter
         }
     }
 
+    /**
+     * @return Route[]
+     */
     private function getRoutes(ClientRequest $clientRequest): array
     {
         if ($clientRequest->isBind()) {
@@ -140,7 +148,7 @@ class Router extends BaseRouter
             $clientRequest->cacheContentType($contentType);
 
             return $routes;
-        } catch (EnvironmentNotFoundException $e) {
+        } catch (\Exception $e) {
             return [];
         }
     }

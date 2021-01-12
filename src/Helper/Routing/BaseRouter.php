@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -12,30 +14,15 @@ use Symfony\Component\Routing\RouterInterface;
 
 abstract class BaseRouter implements RouterInterface, RequestMatcherInterface
 {
-    /**
-     * @var RequestContext
-     */
-    protected $context;
-
-    /**
-     * @var RouteCollection
-     */
-    protected $collection;
-
-    /**
-     * @var UrlMatcher
-     */
-    protected $matcher;
-
-    /**
-     * @var UrlGenerator
-     */
-    protected $generator;
+    protected RequestContext $context;
+    protected RouteCollection $collection;
+    protected ?UrlMatcher $matcher;
+    protected ?UrlGenerator $generator;
 
     /**
      * {@inheritdoc}
      */
-    public function getContext()
+    public function getContext(): RequestContext
     {
         return $this->context;
     }
@@ -43,23 +30,23 @@ abstract class BaseRouter implements RouterInterface, RequestMatcherInterface
     /**
      * {@inheritdoc}
      */
-    public function setContext(RequestContext $context)
+    public function setContext(RequestContext $context): void
     {
         $this->context = $context;
     }
 
     /**
-     * {@inheritdoc}
+     * @return array<mixed>
      */
-    public function match($pathInfo)
+    public function match($pathInfo): array
     {
         return $this->getMatcher()->match($pathInfo);
     }
 
     /**
-     * {@inheritdoc}
+     * @return array<mixed>
      */
-    public function matchRequest(Request $request)
+    public function matchRequest(Request $request): array
     {
         return $this->getMatcher()->matchRequest($request);
     }
@@ -67,7 +54,7 @@ abstract class BaseRouter implements RouterInterface, RequestMatcherInterface
     /**
      * {@inheritdoc}
      */
-    public function generate($name, $parameters = [], $referenceType = self::ABSOLUTE_PATH)
+    public function generate($name, $parameters = [], $referenceType = self::ABSOLUTE_PATH): string
     {
         return $this->getGenerator()->generate($name, $parameters, $referenceType);
     }

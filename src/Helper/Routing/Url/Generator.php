@@ -1,33 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Routing\Url;
 
 use EMS\CommonBundle\Common\EMSLink;
 use Symfony\Component\Routing\RouterInterface;
 
-class Generator
+final class Generator
 {
-    /**
-     * @var string
-     */
-    private $baseUrl = '';
-
-    /**
-     * @var string
-     */
-    private $phpApp = '';
-
-    /**
-     * @var array
-     */
-    private $relativePaths;
+    private string $baseUrl = '';
+    private string $phpApp = '';
+    /** @var array<int, array{regex: string, path: string}> */
+    private array $relativePaths;
 
     /**
      * Regex for getting the base URL without the phpApp
      * So we can relative link to other applications.
      */
-    const REGEX_BASE_URL = '/^(?P<baseUrl>\/.*?)(?:(?P<phpApp>\/[\-_A-Za-z0-9]*.php)|\/|)$/i';
+    private const REGEX_BASE_URL = '/^(?P<baseUrl>\/.*?)(?:(?P<phpApp>\/[\-_A-Za-z0-9]*.php)|\/|)$/i';
 
+    /**
+     * @param array<int, array{regex: string, path: string}> $relativePaths
+     */
     public function __construct(RouterInterface $router, array $relativePaths = [])
     {
         \preg_match(self::REGEX_BASE_URL, $router->getContext()->getBaseUrl(), $match);
@@ -43,23 +38,12 @@ class Generator
         $this->relativePaths = $relativePaths;
     }
 
-    /**
-     * @param string $relativePath
-     * @param string $path
-     *
-     * @return string
-     */
-    public function createUrl($relativePath, $path)
+    public function createUrl(string $relativePath, string $path): string
     {
         return $this->baseUrl.$relativePath.$this->phpApp.$path;
     }
 
-    /**
-     * @param string $url
-     *
-     * @return string
-     */
-    public function prependBaseUrl(EMSLink $emsLink, $url)
+    public function prependBaseUrl(EMSLink $emsLink, string $url): string
     {
         $url = \trim($url);
         $path = $this->getRelativePath($emsLink->getContentType());
@@ -72,12 +56,7 @@ class Generator
         return $baseUrl.$url;
     }
 
-    /**
-     * @param string $contentType
-     *
-     * @return string
-     */
-    private function getRelativePath($contentType)
+    private function getRelativePath(string $contentType): string
     {
         foreach ($this->relativePaths as $value) {
             if (\preg_match($value['regex'], $contentType)) {
