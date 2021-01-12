@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Translation;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
@@ -10,13 +12,14 @@ use Symfony\Component\Translation\TranslatorBagInterface;
 
 class TranslationHelper
 {
-    /** @var ClientRequestManager */
-    private $manager;
-    /** @var TranslatorBagInterface */
-    private $translator;
-    /** @var array */
-    private $locales;
+    private ClientRequestManager $manager;
+    private TranslatorBagInterface $translator;
+    /** @var string[] */
+    private array $locales;
 
+    /**
+     * @param string[] $locales
+     */
     public function __construct(ClientRequestManager $manager, Translator $translator, array $locales)
     {
         $this->manager = $manager;
@@ -51,6 +54,9 @@ class TranslationHelper
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function getMessages(ClientRequest $clientRequest): array
     {
         if (null === $contentType = $clientRequest->getTranslationContentType()) {
@@ -68,6 +74,9 @@ class TranslationHelper
         return $messages;
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function createMessages(ClientRequest $clientRequest, string $type): array
     {
         $messages = [];
