@@ -29,7 +29,7 @@ class ApiController
     public function contentType(Request $request, string $apiName, string $contentType): JsonResponse
     {
         $scrollId = $request->query->get('scroll');
-        $size = $request->query->get('size');
+        $size = (int) $request->query->get('size');
         $filter = $request->query->get('filter', []);
 
         return $this->service->getContentType($apiName, $contentType, $filter, $size, $scrollId)->getResponse();

@@ -1,21 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Api;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class Response
 {
-    /**
-     * @var array
-     */
-    private $data;
+    /** @var array<mixed> */
+    private array $data;
 
     /**
-     * @param string $name
-     * @param mixed  $data
+     * @param mixed $data
      */
-    public function addData($name, $data)
+    public function addData(string $name, $data): void
     {
         if (!\is_array($data)) {
             $this->data[$name] = $data;
@@ -30,23 +29,15 @@ class Response
         $this->data[$name][] = $data;
     }
 
-    /**
-     * @return JsonResponse
-     */
-    public function getResponse()
+    public function getResponse(): JsonResponse
     {
         return new JsonResponse($this->data);
     }
 
     /**
-     * @param string $name
-     * @param string $href
-     * @param string $rel
-     * @param string $type
-     *
-     * @return array
+     * @return array<string, array{href: string, rel: string, type: string}>
      */
-    public static function createLink($name, $href, $rel, $type = 'GET')
+    public static function createLink(string $name, string $href, string $rel, string $type = 'GET'): array
     {
         return [
             $name => [
