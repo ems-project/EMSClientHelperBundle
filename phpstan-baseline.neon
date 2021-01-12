@@ -1,36 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Hashcash\\\\HashcashHelper\\:\\:validateHashcash\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: src/Helper/Hashcash/HashcashHelper.php
-
-		-
-			message: "#^Property EMS\\\\ClientHelperBundle\\\\Helper\\\\Request\\\\ExceptionHelper\\:\\:\\$template \\(string\\) does not accept string\\|null\\.$#"
-			count: 1
-			path: src/Helper/Request/ExceptionHelper.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Request\\\\Handler\\:\\:handle\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Helper/Request/Handler.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Request\\\\Handler\\:\\:getTemplate\\(\\) has parameter \\$document with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Helper/Request/Handler.php
-
-		-
-			message: "#^Property EMS\\\\ClientHelperBundle\\\\Helper\\\\Request\\\\LocaleHelper\\:\\:\\$locales type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Helper/Request/LocaleHelper.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Request\\\\LocaleHelper\\:\\:__construct\\(\\) has parameter \\$locales with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Helper/Request/LocaleHelper.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Routing\\\\BaseRouter\\:\\:setContext\\(\\) has no return typehint specified\\.$#"
 			count: 1
 			path: src/Helper/Routing/BaseRouter.php

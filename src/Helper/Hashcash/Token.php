@@ -1,19 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Hashcash;
 
-class Token
+final class Token
 {
-    /** @var string */
-    private $level;
+    private string $level;
+    private string $csrf;
+    private string $random;
 
-    /** @var string */
-    private $csrf;
-
-    /** @var string */
-    private $random;
-
-    const DELIMITER = '|';
+    private const DELIMITER = '|';
 
     public function __construct(string $hashcash)
     {
