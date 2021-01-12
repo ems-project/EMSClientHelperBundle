@@ -51,7 +51,7 @@ final class ContentTypeHelper
         $lastUpdate->setSize(100);
         $lastUpdate->addAggregation($maxUpdate);
 
-        $search = new Search([$environment->getName()]);
+        $search = new Search([$environment->getAlias()]);
         $search->setSize(0);
         $search->addAggregation($lastUpdate);
 

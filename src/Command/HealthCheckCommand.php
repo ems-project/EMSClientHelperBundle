@@ -102,9 +102,9 @@ class HealthCheckCommand extends Command
         foreach ($this->environmentHelper->getEnvironments() as $environment) {
             ++$countAliases;
             try {
-                $countIndices += \count($this->elasticaService->getIndicesFromAlias($environment->getName()));
+                $countIndices += \count($this->elasticaService->getIndicesFromAlias($environment->getAlias()));
             } catch (\Throwable $e) {
-                $io->error(\sprintf('Alias %s not found with error: %s', $environment->getName(), $e->getMessage()));
+                $io->error(\sprintf('Alias %s not found with error: %s', $environment->getAlias(), $e->getMessage()));
                 throw new IndexNotFoundException();
             }
         }
