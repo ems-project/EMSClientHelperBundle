@@ -1,46 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Command\\\\HealthCheckCommand\\:\\:__construct\\(\\) has parameter \\$clientRequests with no value type specified in iterable type iterable\\.$#"
-			count: 1
-			path: src/Command/HealthCheckCommand.php
-
-		-
-			message: "#^Property EMS\\\\ClientHelperBundle\\\\Command\\\\HealthCheckCommand\\:\\:\\$clientRequests \\(array\\<EMS\\\\ClientHelperBundle\\\\Helper\\\\Elasticsearch\\\\ClientRequest\\>\\) does not accept iterable\\.$#"
-			count: 1
-			path: src/Command/HealthCheckCommand.php
-
-		-
-			message: "#^Property EMS\\\\ClientHelperBundle\\\\Command\\\\HealthCheckCommand\\:\\:\\$storageManager \\(EMS\\\\CommonBundle\\\\Storage\\\\StorageManager\\) does not accept EMS\\\\CommonBundle\\\\Storage\\\\StorageManager\\|null\\.$#"
-			count: 1
-			path: src/Command/HealthCheckCommand.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Command\\\\HealthCheckCommand\\:\\:configure\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: src/Command/HealthCheckCommand.php
-
-		-
-			message: "#^Parameter \\#2 \\$green of method EMS\\\\ClientHelperBundle\\\\Command\\\\HealthCheckCommand\\:\\:checkElasticSearch\\(\\) expects bool, array\\<string\\>\\|bool\\|string\\|null given\\.$#"
-			count: 1
-			path: src/Command/HealthCheckCommand.php
-
-		-
-			message: "#^Parameter \\#2 \\$skip of method EMS\\\\ClientHelperBundle\\\\Command\\\\HealthCheckCommand\\:\\:checkStorage\\(\\) expects bool, array\\<string\\>\\|bool\\|string\\|null given\\.$#"
-			count: 1
-			path: src/Command/HealthCheckCommand.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Command\\\\HealthCheckCommand\\:\\:checkElasticSearch\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: src/Command/HealthCheckCommand.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Command\\\\HealthCheckCommand\\:\\:checkIndexes\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: src/Command/HealthCheckCommand.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Controller\\\\ApiController\\:\\:handleFormPostRequest\\(\\) has no return typehint specified\\.$#"
 			count: 1
 			path: src/Controller/ApiController.php
