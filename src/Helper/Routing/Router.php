@@ -162,7 +162,7 @@ class Router extends BaseRouter
                     'unmapped_type' => 'long',
                 ],
             ],
-        ], 0, 1000, [], null, $environment->getName());
+        ], 0, 1000, [], null, $environment->getAlias());
 
         $total = $search['hits']['total']['value'] ?? $search['hits']['total'];
         if ($total > 1000) {

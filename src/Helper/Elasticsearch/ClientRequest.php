@@ -5,7 +5,6 @@ namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 use Elastica\Aggregation\Terms;
 use Elastica\Query\AbstractQuery;
 use Elastica\ResultSet;
-use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
@@ -589,12 +588,7 @@ class ClientRequest
 
     public function getAlias(): string
     {
-        $name = $this->environmentHelper->getBindEnvironmentName();
-        if (null === $name) {
-            throw new EnvironmentNotFoundException();
-        }
-
-        return $name;
+        return $this->environmentHelper->getCurrentEnvironment()->getAlias();
     }
 
     /**
