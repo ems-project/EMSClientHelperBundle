@@ -1,21 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\EMSClientHelperBundle\\:\\:build\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: src/EMSClientHelperBundle.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\EventListener\\\\RedirectListener\\:\\:getSubscribedEvents\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/EventListener/RedirectListener.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\EventListener\\\\RedirectListener\\:\\:forwardNotFound\\(\\) has no return typehint specified\\.$#"
-			count: 1
-			path: src/EventListener/RedirectListener.php
-
-		-
 			message: "#^Property EMS\\\\ClientHelperBundle\\\\Exception\\\\MissingTranslationException\\:\\:\\$AVAILABLE_LANGUAGES has no typehint specified\\.$#"
 			count: 1
 			path: src/Exception/MissingTranslationException.php
