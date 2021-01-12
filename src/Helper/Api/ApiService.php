@@ -28,7 +28,7 @@ class ApiService
 
     /**
      * @param ClientRequest[] $clientRequests
-     * @param Client[] $apiClients
+     * @param Client[]        $apiClients
      */
     public function __construct(LoggerInterface $logger, Environment $twig, UrlGeneratorInterface $urlGenerator, iterable $clientRequests = [], iterable $apiClients = [])
     {

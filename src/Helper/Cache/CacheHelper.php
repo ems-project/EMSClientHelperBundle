@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Cache;
 
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;

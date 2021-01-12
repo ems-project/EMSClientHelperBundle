@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
 use Elastica\Aggregation\Terms;
@@ -612,7 +614,7 @@ class ClientRequest
 
         /** @var Response $response */
         $response = $cachedHierarchy->get();
-        if (!$cachedHierarchy->isHit() || $response->getLastModified() != $lastUpdate) {
+        if (!$cachedHierarchy->isHit() || $response->getLastModified() !== $lastUpdate) {
             $response = $function();
             $response->setLastModified($lastUpdate);
             $this->cache->save($cachedHierarchy->set($response));
