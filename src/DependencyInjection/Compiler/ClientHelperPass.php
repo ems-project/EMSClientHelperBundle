@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -7,7 +9,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class ClientHelperPass implements CompilerPassInterface
 {
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         //override the default symfony router, with the chain router
         $container->setAlias('router', 'emsch.routing.chain_router');
@@ -16,7 +18,7 @@ class ClientHelperPass implements CompilerPassInterface
         $this->processRouting($container);
     }
 
-    public function processRouting(ContainerBuilder $container)
+    public function processRouting(ContainerBuilder $container): void
     {
         if (!$container->hasParameter('emsch.routing.client_request')) {
             return;

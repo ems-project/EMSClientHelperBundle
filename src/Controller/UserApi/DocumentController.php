@@ -10,8 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class DocumentController
 {
-    /** @var DocumentService */
-    private $documentService;
+    private DocumentService $documentService;
 
     public function __construct(DocumentService $documentService)
     {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
@@ -9,29 +11,15 @@ use Symfony\Component\HttpFoundation\Request;
 
 class RedirectHelper
 {
-    /**
-     * @var ClientRequest
-     */
-    protected $clientRequest;
+    private ClientRequest $clientRequest;
+    private Transformer $transformer;
+    private string $redirectType;
 
-    /**
-     * @var Transformer
-     */
-    private $transformer;
-
-    /**
-     * @var string
-     */
-    private $redirectType;
-
-    /**
-     * @param string $redirectType
-     */
-    public function __construct(ClientRequest $clientRequest, Transformer $transformer, $redirectType)
+    public function __construct(ClientRequest $clientRequest, Transformer $transformer, ?string $redirectType = null)
     {
         $this->clientRequest = $clientRequest;
         $this->transformer = $transformer;
-        $this->redirectType = $redirectType ?: 'redirect';
+        $this->redirectType = $redirectType ?? 'redirect';
     }
 
     /**
@@ -56,12 +44,9 @@ class RedirectHelper
     }
 
     /**
-     * @param string $uri
-     * @param string $locale
-     *
-     * @return array
+     * @return array<mixed>
      */
-    private function getRedirectDocument($uri, $locale)
+    private function getRedirectDocument(string $uri, string $locale): array
     {
         return $this->clientRequest->searchOne($this->redirectType, [
             'query' => [

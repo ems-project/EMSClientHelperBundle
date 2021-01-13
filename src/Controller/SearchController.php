@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Controller;
 
 use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
@@ -8,21 +10,21 @@ use EMS\ClientHelperBundle\Helper\Search\Manager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Twig\Environment;
 
 class SearchController extends AbstractController
 {
-    /** @var Manager */
-    private $manager;
-    /** @var Handler */
-    private $handler;
-    /** @var \Twig_Environment */
-    private $templating;
-    /** @var array */
-    private $locales;
-    /** @var CacheHelper */
-    private $cacheHelper;
+    private Manager $manager;
+    private Handler $handler;
+    private Environment $templating;
+    /** @var string[] */
+    private array $locales;
+    private CacheHelper $cacheHelper;
 
-    public function __construct(Manager $manager, Handler $handler, \Twig_Environment $templating, CacheHelper $cacheHelper, array $locales)
+    /**
+     * @param string[] $locales
+     */
+    public function __construct(Manager $manager, Handler $handler, Environment $templating, CacheHelper $cacheHelper, array $locales)
     {
         $this->manager = $manager;
         $this->handler = $handler;

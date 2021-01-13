@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
@@ -8,10 +10,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder();
         /* @var $rootNode ArrayNodeDefinition */
@@ -49,7 +48,7 @@ class Configuration implements ConfigurationInterface
         return $treeBuilder;
     }
 
-    private function addElasticmsSection(ArrayNodeDefinition $rootNode)
+    private function addElasticmsSection(ArrayNodeDefinition $rootNode): void
     {
         $rootNode
             ->children()
@@ -131,7 +130,7 @@ class Configuration implements ConfigurationInterface
         ;
     }
 
-    private function addApiSection(ArrayNodeDefinition $rootNode)
+    private function addApiSection(ArrayNodeDefinition $rootNode): void
     {
         $rootNode
             ->children()
@@ -154,7 +153,7 @@ class Configuration implements ConfigurationInterface
         ;
     }
 
-    private function addTwigListSection(ArrayNodeDefinition $rootNode)
+    private function addTwigListSection(ArrayNodeDefinition $rootNode): void
     {
         $rootNode
             ->children()
@@ -177,7 +176,7 @@ class Configuration implements ConfigurationInterface
         ;
     }
 
-    private function addRoutingSelection(ArrayNodeDefinition $rootNode)
+    private function addRoutingSelection(ArrayNodeDefinition $rootNode): void
     {
         $rootNode
             ->children()
@@ -213,7 +212,7 @@ class Configuration implements ConfigurationInterface
         ;
     }
 
-    private function addUserApiSection(ArrayNodeDefinition $rootNode)
+    private function addUserApiSection(ArrayNodeDefinition $rootNode): void
     {
         $rootNode
             ->children()

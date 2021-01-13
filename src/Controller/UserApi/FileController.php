@@ -10,8 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class FileController
 {
-    /** @var FileService */
-    private $fileService;
+    private FileService $fileService;
 
     public function __construct(FileService $fileService)
     {

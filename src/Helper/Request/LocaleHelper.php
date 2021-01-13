@@ -1,33 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Request;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
 
-class LocaleHelper
+final class LocaleHelper
 {
-    /**
-     * @var RouterInterface
-     */
-    private $router;
+    private RouterInterface $router;
+    /** @var string[] */
+    private array $locales;
 
     /**
-     * @var array
+     * @param string[] $locales
      */
-    private $locales;
-
     public function __construct(RouterInterface $router, array $locales)
     {
         $this->router = $router;
         $this->locales = $locales;
     }
 
-    /**
-     * @return RedirectResponse
-     */
-    public function redirectMissingLocale(Request $request)
+    public function redirectMissingLocale(Request $request): RedirectResponse
     {
         $destination = $request->getPathInfo();
 
@@ -69,11 +65,9 @@ class LocaleHelper
     }
 
     /**
-     * @param string $uri
-     *
      * @return string|false
      */
-    private function getLocaleFromUri($uri)
+    private function getLocaleFromUri(string $uri)
     {
         $regex = \sprintf('/^\/(?P<locale>%s).*$/', \implode('|', $this->locales));
         \preg_match($regex, $uri, $matches);

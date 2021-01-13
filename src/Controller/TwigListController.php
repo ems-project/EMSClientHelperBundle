@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,26 +13,20 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 class TwigListController extends AbstractController
 {
-    /**
-     * @var KernelInterface
-     */
-    private $kernel;
+    private KernelInterface $kernel;
+    /** @var array<int, array{path: string, namespace: string}> */
+    private array $locations;
 
     /**
-     * @var array
+     * @param array<int, array{path: string, namespace: string}> $templates
      */
-    private $locations;
-
     public function __construct(KernelInterface $kernel, array $templates = [])
     {
         $this->kernel = $kernel;
         $this->locations = $templates;
     }
 
-    /**
-     * @return Response
-     */
-    public function list()
+    public function list(): Response
     {
         $list = [];
 
@@ -62,10 +58,7 @@ class TwigListController extends AbstractController
         ]);
     }
 
-    /**
-     * @return Response
-     */
-    public function template(Request $request)
+    public function template(Request $request): Response
     {
         $view = $request->get('view');
 

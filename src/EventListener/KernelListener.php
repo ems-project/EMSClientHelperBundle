@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\EventListener;
 
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
@@ -18,20 +20,11 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 class KernelListener implements EventSubscriberInterface
 {
-    /** @var EnvironmentHelper */
-    private $environmentHelper;
-
-    /** @var TranslationHelper */
-    private $translationHelper;
-
-    /** @var LocaleHelper */
-    private $localeHelper;
-
-    /** @var ExceptionHelper */
-    private $exceptionHelper;
-
-    /** @var bool */
-    private $bindLocale;
+    private EnvironmentHelper $environmentHelper;
+    private TranslationHelper $translationHelper;
+    private LocaleHelper $localeHelper;
+    private ExceptionHelper $exceptionHelper;
+    private bool $bindLocale;
 
     public function __construct(
         EnvironmentHelper $environmentHelper,

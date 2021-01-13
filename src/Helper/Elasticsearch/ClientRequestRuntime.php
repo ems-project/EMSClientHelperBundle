@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
-use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Helper\Search\Search;
 use EMS\CommonBundle\Common\Document;
 use EMS\CommonBundle\Common\EMSLink;
@@ -11,15 +12,8 @@ use Twig\Extension\RuntimeExtensionInterface;
 
 class ClientRequestRuntime implements RuntimeExtensionInterface
 {
-    /**
-     * @var ClientRequestManager
-     */
-    private $manager;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private ClientRequestManager $manager;
+    private LoggerInterface $logger;
 
     /** @var Document[] */
     private $documents = [];
@@ -32,13 +26,13 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
     }
 
     /**
-     * @param string $type
-     * @param int    $from
-     * @param int    $size
+     * @param string|string[]|null $type
+     * @param array<mixed>         $body
+     * @param string[]             $sourceExclude
      *
-     * @return array
+     * @return array<mixed>
      */
-    public function search($type, array $body, $from = 0, $size = 10, array $sourceExclude = [], ?string $regex = null)
+    public function search($type, array $body, int $from = 0, int $size = 10, array $sourceExclude = [], ?string $regex = null): array
     {
         $client = $this->manager->getDefault();
 
@@ -51,9 +45,7 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
     }
 
     /**
-     * @return array|false|null false when multiple results
-     *
-     * @throws EnvironmentNotFoundException
+     * @return mixed
      */
     public function data(string $input)
     {
@@ -86,9 +78,6 @@ class ClientRequestRuntime implements RuntimeExtensionInterface
         return ($total > 1) ? false : null;
     }
 
-    /**
-     * @throws EnvironmentNotFoundException
-     */
     public function get(string $input): ?Document
     {
         $emsLink = EMSLink::fromText($input);
