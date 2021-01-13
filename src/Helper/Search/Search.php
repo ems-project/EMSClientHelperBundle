@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Search;
 
 use Elastica\Query\AbstractQuery;
@@ -7,7 +9,7 @@ use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\CommonBundle\Elasticsearch\Response\Response;
 use Symfony\Component\HttpFoundation\Request;
 
-class Search
+final class Search
 {
     /** @var string[] */
     private $types;

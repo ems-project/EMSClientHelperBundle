@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Twig\Environment;
 
-class PdfController
+final class PdfController
 {
     private Handler $handler;
     private Environment $templating;

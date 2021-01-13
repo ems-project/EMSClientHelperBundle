@@ -10,7 +10,7 @@ use EMS\CommonBundle\Twig\AssetRuntime;
 use Symfony\Component\Filesystem\Filesystem;
 use Twig\Extension\RuntimeExtensionInterface;
 
-class AssetHelperRuntime implements RuntimeExtensionInterface
+final class AssetHelperRuntime implements RuntimeExtensionInterface
 {
     private StorageManager $storageManager;
     private ClientRequestManager $manager;

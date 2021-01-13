@@ -14,7 +14,7 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RouterInterface;
 
-class RedirectListener implements EventSubscriberInterface
+final class RedirectListener implements EventSubscriberInterface
 {
     private RedirectHelper $redirectHelper;
     private HttpKernelInterface $kernel;

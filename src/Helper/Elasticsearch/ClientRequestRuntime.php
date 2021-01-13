@@ -11,7 +11,7 @@ use EMS\CommonBundle\Elasticsearch\Response\Response;
 use Psr\Log\LoggerInterface;
 use Twig\Extension\RuntimeExtensionInterface;
 
-class ClientRequestRuntime implements RuntimeExtensionInterface
+final class ClientRequestRuntime implements RuntimeExtensionInterface
 {
     private ClientRequestManager $manager;
     private LoggerInterface $logger;

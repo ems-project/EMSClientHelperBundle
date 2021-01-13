@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Twig;
 
 use EMS\ClientHelperBundle\Helper\Asset\AssetHelperRuntime;
@@ -9,7 +11,7 @@ use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
-class HelperExtension extends AbstractExtension
+final class HelperExtension extends AbstractExtension
 {
     /**
      * {@inheritdoc}

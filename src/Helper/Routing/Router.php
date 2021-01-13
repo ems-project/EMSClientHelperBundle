@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
@@ -8,7 +10,7 @@ use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\RouteCollection;
 
-class Router extends BaseRouter
+final class Router extends BaseRouter
 {
     private ClientRequestManager $manager;
     private LoggerInterface $logger;

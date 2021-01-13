@@ -9,7 +9,7 @@ use EMS\ClientHelperBundle\Helper\Routing\Url\Transformer;
 use EMS\ClientHelperBundle\Helper\Twig\TwigException;
 use Symfony\Component\HttpFoundation\Request;
 
-class RedirectHelper
+final class RedirectHelper
 {
     private ClientRequest $clientRequest;
     private Transformer $transformer;

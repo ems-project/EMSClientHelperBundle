@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-class ApiController
+final class ApiController
 {
     private ApiService $service;
     private HashcashHelper $hashcashHelper;

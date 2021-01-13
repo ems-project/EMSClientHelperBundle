@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Search;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
@@ -7,7 +9,7 @@ use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\CommonBundle\Elasticsearch\Response\Response;
 use Symfony\Component\HttpFoundation\Request;
 
-class Manager
+final class Manager
 {
     /** @var ClientRequest */
     private $clientRequest;

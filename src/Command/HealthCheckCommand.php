@@ -17,7 +17,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class HealthCheckCommand extends Command
+final class HealthCheckCommand extends Command
 {
     /** @var ClientRequest[] */
     private iterable $clientRequests;
@@ -38,8 +38,6 @@ class HealthCheckCommand extends Command
         $this->elasticaService = $elasticaService;
         $this->clientRequests = $clientRequests ?? [];
         $this->storageManager = $storageManager;
-
-        parent::__construct();
     }
 
     protected function configure(): void

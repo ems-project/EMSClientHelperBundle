@@ -6,7 +6,7 @@ namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
 use Psr\Log\LoggerInterface;
 
-class ClientRequestManager
+final class ClientRequestManager
 {
     /** @var array<string, ClientRequest> */
     private array $clientRequests = [];

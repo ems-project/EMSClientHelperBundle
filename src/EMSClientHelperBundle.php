@@ -9,7 +9,7 @@ use Symfony\Cmf\Component\Routing\DependencyInjection\Compiler\RegisterRoutersPa
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class EMSClientHelperBundle extends Bundle
+final class EMSClientHelperBundle extends Bundle
 {
     public function build(ContainerBuilder $container): void
     {

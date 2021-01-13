@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Search;
 
 use Elastica\Aggregation\AbstractAggregation;
@@ -15,7 +17,7 @@ use Elastica\Suggest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\CommonBundle\Search\Search as CommonSearch;
 
-class QueryBuilder
+final class QueryBuilder
 {
     /** @var ClientRequest */
     private $clientRequest;

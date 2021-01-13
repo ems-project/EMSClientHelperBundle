@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Search;
 
 use Elastica\Aggregation\Nested;
@@ -13,7 +15,7 @@ use Elastica\Query\Terms;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use Symfony\Component\HttpFoundation\Request;
 
-class Filter
+final class Filter
 {
     /** @var ClientRequest */
     private $clientRequest;
