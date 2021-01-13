@@ -8,8 +8,7 @@ use GuzzleHttp\Client;
 
 final class ClientFactory
 {
-    /** @var string */
-    private $baseUrl;
+    private string $baseUrl;
 
     public function __construct(string $baseUrl)
     {

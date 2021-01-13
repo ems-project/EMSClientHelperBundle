@@ -9,8 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class AuthService
 {
-    /** @var ClientFactory */
-    private $client;
+    private ClientFactory $client;
 
     public function __construct(ClientFactory $client)
     {
