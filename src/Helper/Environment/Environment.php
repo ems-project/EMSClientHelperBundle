@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Environment;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
-class Environment
+final class Environment
 {
     const ENVIRONMENT_ATTRIBUTE = '_environment';
     const BACKEND_ATTRIBUTE = '_backend';

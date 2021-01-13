@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
-class EMSClientHelperExtension extends Extension
+final class EMSClientHelperExtension extends Extension
 {
     /**
      * @param array<string, mixed> $configs

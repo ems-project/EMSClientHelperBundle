@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Request;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
@@ -8,7 +10,7 @@ use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Environment;
 
-class ExceptionHelper
+final class ExceptionHelper
 {
     private Environment $twig;
     private ClientRequestManager $manager;
@@ -60,7 +62,7 @@ class ExceptionHelper
         throw new TwigException(\sprintf('template "%s" does not exists', $errorTemplate));
     }
 
-    protected function templateExists(string $template): bool
+    private function templateExists(string $template): bool
     {
         try {
             $loader = $this->twig->getLoader();

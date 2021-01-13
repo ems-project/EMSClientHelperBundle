@@ -10,7 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Translation\Translator;
 use Symfony\Component\Translation\MessageCatalogue;
 use Symfony\Component\Translation\TranslatorBagInterface;
 
-class TranslationHelper
+final class TranslationHelper
 {
     private ClientRequestManager $manager;
     private TranslatorBagInterface $translator;

@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Environment;
 
 use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class EnvironmentHelper
+final class EnvironmentHelper
 {
     /** @var Environment[] */
     private array $environments = [];

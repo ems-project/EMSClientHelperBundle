@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Environment;
 
-class SearchController extends AbstractController
+final class SearchController extends AbstractController
 {
     private Manager $manager;
     private Handler $handler;

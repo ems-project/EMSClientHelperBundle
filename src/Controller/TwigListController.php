@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 
-class TwigListController extends AbstractController
+final class TwigListController extends AbstractController
 {
     private KernelInterface $kernel;
     /** @var array<int, array{path: string, namespace: string}> */

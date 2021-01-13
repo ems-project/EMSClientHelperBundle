@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Controller;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
@@ -7,7 +9,7 @@ use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 
-class EmbedController extends AbstractController
+final class EmbedController extends AbstractController
 {
     private ClientRequest $clientRequest;
 

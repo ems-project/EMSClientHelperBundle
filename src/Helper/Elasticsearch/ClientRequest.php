@@ -23,7 +23,7 @@ use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
-class ClientRequest
+final class ClientRequest
 {
     private const CONTENT_TYPE_LIMIT = 500;
     private EnvironmentHelper $environmentHelper;

@@ -10,7 +10,7 @@ use EMS\CommonBundle\Common\EMSLink;
 use Psr\Log\LoggerInterface;
 use Twig\Extension\RuntimeExtensionInterface;
 
-class ClientRequestRuntime implements RuntimeExtensionInterface
+final class ClientRequestRuntime implements RuntimeExtensionInterface
 {
     private ClientRequestManager $manager;
     private LoggerInterface $logger;

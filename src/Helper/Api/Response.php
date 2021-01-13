@@ -6,7 +6,7 @@ namespace EMS\ClientHelperBundle\Helper\Api;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-class Response
+final class Response
 {
     /** @var array<mixed> */
     private array $data;

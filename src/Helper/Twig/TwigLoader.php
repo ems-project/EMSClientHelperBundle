@@ -13,7 +13,7 @@ use Twig\Source;
  *
  * @see EMSClientHelperExtension::defineTwigLoader()
  */
-class TwigLoader implements LoaderInterface
+final class TwigLoader implements LoaderInterface
 {
     private ClientRequest $client;
     /** @var array<mixed> */

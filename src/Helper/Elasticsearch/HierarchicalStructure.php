@@ -6,7 +6,7 @@ namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
 use EMS\CommonBundle\Common\EMSLink;
 
-class HierarchicalStructure
+final class HierarchicalStructure
 {
     /** @var array<mixed> */
     private array $children;

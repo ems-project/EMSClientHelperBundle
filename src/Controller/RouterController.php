@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Environment;
 
-class RouterController
+final class RouterController
 {
     private Handler $handler;
     private Environment $templating;

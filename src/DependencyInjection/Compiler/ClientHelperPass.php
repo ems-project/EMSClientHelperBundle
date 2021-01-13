@@ -7,7 +7,7 @@ namespace EMS\ClientHelperBundle\DependencyInjection\Compiler;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-class ClientHelperPass implements CompilerPassInterface
+final class ClientHelperPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container): void
     {

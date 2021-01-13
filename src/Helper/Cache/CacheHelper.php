@@ -11,7 +11,7 @@ use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class CacheHelper
+final class CacheHelper
 {
     private AdapterInterface $cache;
     private LoggerInterface $logger;

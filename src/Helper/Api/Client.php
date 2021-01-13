@@ -8,7 +8,7 @@ use EMS\CommonBundle\Common\HttpClientFactory;
 use GuzzleHttp\Client as HttpClient;
 use Psr\Log\LoggerInterface;
 
-class Client
+final class Client
 {
     private HttpClient $client;
     private string $key;
