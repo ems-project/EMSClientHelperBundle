@@ -121,10 +121,7 @@ class EMSClientHelperExtension extends Extension
         $loaded = true;
     }
 
-    /**
-     * @param array<string, mixed> $options
-     */
-    private function defineTwigLoader(ContainerBuilder $container, string $name, array $options): void
+    private function defineTwigLoader(ContainerBuilder $container, string $name, string $options): void
     {
         $loader = new Definition(TwigLoader::class);
         $loader->setArguments([
