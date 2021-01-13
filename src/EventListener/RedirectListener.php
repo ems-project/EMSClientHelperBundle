@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\EventListener;
 
 use EMS\ClientHelperBundle\Helper\Routing\RedirectHelper;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -14,20 +16,9 @@ use Symfony\Component\Routing\RouterInterface;
 
 class RedirectListener implements EventSubscriberInterface
 {
-    /**
-     * @var RedirectHelper
-     */
-    private $redirectHelper;
-
-    /**
-     * @var HttpKernelInterface
-     */
-    private $kernel;
-
-    /**
-     * @var RouterInterface
-     */
-    private $router;
+    private RedirectHelper $redirectHelper;
+    private HttpKernelInterface $kernel;
+    private RouterInterface $router;
 
     public function __construct(
         RedirectHelper $redirectHelper,
@@ -39,17 +30,14 @@ class RedirectListener implements EventSubscriberInterface
         $this->router = $router;
     }
 
-    /**
-     * @return void
-     */
-    public function onKernelException(GetResponseForExceptionEvent $event)
+    public function onKernelException(ExceptionEvent $event): void
     {
         if (!$event->isMasterRequest()) {
             // don't do anything if it's not the master request
             return;
         }
 
-        $exception = $event->getException();
+        $exception = $event->getThrowable();
 
         if ($exception instanceof NotFoundHttpException) {
             $this->handleNotFoundException($event);
@@ -59,19 +47,16 @@ class RedirectListener implements EventSubscriberInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @return array<string, array<int, array<int, int|string>>>
      */
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             KernelEvents::EXCEPTION => [['onKernelException', 15]],
         ];
     }
 
-    /**
-     * @return void
-     */
-    private function handleNotFoundException(GetResponseForExceptionEvent $event)
+    private function handleNotFoundException(ExceptionEvent $event): void
     {
         $request = $event->getRequest();
 
@@ -82,7 +67,7 @@ class RedirectListener implements EventSubscriberInterface
         }
     }
 
-    public function forwardNotFound(GetResponseForExceptionEvent $event, string $uri)
+    public function forwardNotFound(ExceptionEvent $event, string $uri): void
     {
         try {
             $this->router->match($uri);
@@ -107,12 +92,7 @@ class RedirectListener implements EventSubscriberInterface
         $event->allowCustomResponseCode();
     }
 
-    /**
-     * @param string $uri
-     *
-     * @return string
-     */
-    private function getHeaderLink(Request $request, $uri)
+    private function getHeaderLink(Request $request, string $uri): string
     {
         $url = \vsprintf('%s://%s%s', [
             $request->getScheme(),

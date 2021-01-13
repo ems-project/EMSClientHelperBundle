@@ -2,7 +2,6 @@
 
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
-use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
@@ -11,17 +10,22 @@ use Symfony\Component\Routing\RouteCollection;
 
 class Router extends BaseRouter
 {
-    /** @var ClientRequestManager */
-    private $manager;
-    /** @var LoggerInterface */
-    private $logger;
-    /** @var array */
-    private $locales;
-    /** @var array */
-    private $templates;
-    /** @var array */
-    private $routes;
+    private ClientRequestManager $manager;
+    private LoggerInterface $logger;
+    /** @var string[] */
+    private array $locales;
+    /** @var array<mixed> */
+    private array $templates;
+    /** @var array<mixed> */
+    private array $routes;
 
+    private bool $hasBuild = false;
+
+    /**
+     * @param string[]     $locales
+     * @param array<mixed> $templates
+     * @param array<mixed> $routes
+     */
     public function __construct(ClientRequestManager $manager, array $locales, array $templates, array $routes)
     {
         $this->manager = $manager;
@@ -33,7 +37,7 @@ class Router extends BaseRouter
 
     public function getRouteCollection(): RouteCollection
     {
-        if (null === $this->collection) {
+        if (!$this->hasBuild) {
             $this->buildRouteCollection();
         }
 
@@ -49,6 +53,7 @@ class Router extends BaseRouter
         $this->addEnvRoutes($collection);
 
         $this->collection = $collection;
+        $this->hasBuild = true;
     }
 
     private function addEnvRoutes(RouteCollection $collection): void
@@ -99,12 +104,14 @@ class Router extends BaseRouter
             $routes = $this->getRoutes($clientRequest);
 
             foreach ($routes as $route) {
-                /* @var $route Route */
                 $route->addToCollection($collection, $this->locales);
             }
         }
     }
 
+    /**
+     * @return Route[]
+     */
     private function getRoutes(ClientRequest $clientRequest): array
     {
         if ($clientRequest->isBind()) {
@@ -140,7 +147,7 @@ class Router extends BaseRouter
             $clientRequest->cacheContentType($contentType);
 
             return $routes;
-        } catch (EnvironmentNotFoundException $e) {
+        } catch (\Throwable $e) {
             return [];
         }
     }
@@ -191,7 +198,7 @@ class Router extends BaseRouter
                 }
 
                 $routes[] = new Route($name, $options);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $this->logger->error('Router failed to create ems route {name} : {error}', ['name' => $name, 'error' => $e->getMessage()]);
             }
         }
@@ -207,8 +214,8 @@ class Router extends BaseRouter
     private function prependBaseUrl($path, string $baseUrl)
     {
         if (\is_array($path)) {
-            foreach ($path as $locale => $subpath) {
-                $path[$locale] = \sprintf('%s/%s', $baseUrl, '/' === \substr($subpath, 0, 1) ? \substr($subpath, 1) : $subpath);
+            foreach ($path as $locale => $subPath) {
+                $path[$locale] = \sprintf('%s/%s', $baseUrl, '/' === \substr($subPath, 0, 1) ? \substr($subPath, 1) : $subPath);
             }
         } elseif (\is_string($path)) {
             $path = \sprintf('%s/%s', $baseUrl, '/' === \substr($path, 0, 1) ? \substr($path, 1) : $path);

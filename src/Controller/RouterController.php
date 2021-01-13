@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Controller;
 
 use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
@@ -12,14 +14,10 @@ use Twig\Environment;
 
 class RouterController
 {
-    /** @var Handler */
-    private $handler;
-    /** @var Environment */
-    private $templating;
-    /** @var Processor */
-    private $processor;
-    /** @var CacheHelper */
-    private $cacheHelper;
+    private Handler $handler;
+    private Environment $templating;
+    private Processor $processor;
+    private CacheHelper $cacheHelper;
 
     public function __construct(Handler $handler, Environment $templating, Processor $processor, CacheHelper $cacheHelper)
     {
@@ -39,7 +37,7 @@ class RouterController
         return $response;
     }
 
-    public function redirect(Request $request)
+    public function redirect(Request $request): RedirectResponse
     {
         $result = $this->handler->handle($request);
         $json = $this->templating->render($result['template'], $result['context']);

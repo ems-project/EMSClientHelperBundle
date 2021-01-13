@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Routing\Url;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
@@ -7,42 +9,20 @@ use EMS\ClientHelperBundle\Helper\Twig\TwigException;
 use EMS\CommonBundle\Common\EMSLink;
 use EMS\CommonBundle\Elasticsearch\Document\EMSSource;
 use Psr\Log\LoggerInterface;
+use Twig\Environment;
+use Twig\Error\Error;
 
-class Transformer
+final class Transformer
 {
-    /**
-     * @var ClientRequest
-     */
-    private $clientRequest;
+    private ClientRequest $clientRequest;
+    private Generator $generator;
+    private Environment $twig;
+    private LoggerInterface $logger;
+    private ?string $template;
+    /** @var array<mixed> */
+    private array $documents;
 
-    /**
-     * @var Generator
-     */
-    private $generator;
-
-    /**
-     * @var \Twig_Environment
-     */
-    private $twig;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * @var string
-     */
-    private $template;
-
-    /** @var array */
-    private $documents = [];
-
-    /**
-     * @param ClientRequest $clientRequest injected by compiler pass
-     * @param string        $template
-     */
-    public function __construct(ClientRequest $clientRequest, Generator $generator, \Twig_Environment $twig, LoggerInterface $logger, ?string $template)
+    public function __construct(ClientRequest $clientRequest, Generator $generator, Environment $twig, LoggerInterface $logger, ?string $template)
     {
         $this->clientRequest = $clientRequest;
         $this->generator = $generator;
@@ -52,21 +32,17 @@ class Transformer
         $this->documents = [];
     }
 
-    /**
-     * @return Generator
-     */
-    public function getGenerator()
+    public function getGenerator(): Generator
     {
         return $this->generator;
     }
 
     /**
-     * @param array  $match  [link_type, content_type, ouuid, query]
-     * @param string $locale
+     * @param array{ouuid?: string, link_type?: string, content_type?: string, query?: string} $match
      *
      * @return false|string
      */
-    public function generate(array $match, $locale = null)
+    public function generate(array $match, ?string $locale = null)
     {
         try {
             $emsLink = EMSLink::fromMatch($match);
@@ -80,10 +56,11 @@ class Transformer
             }
 
             $document = $this->getDocument($emsLink);
-            $template = $this->renderTemplate($emsLink, $document, $locale);
-            $url = $this->generator->prependBaseUrl($emsLink, $template);
+            if (null === $template = $this->renderTemplate($emsLink, $document, $locale)) {
+                throw new \Exception('missing template');
+            }
 
-            return $url;
+            return $this->generator->prependBaseUrl($emsLink, $template);
         } catch (\Exception $ex) {
             $this->logger->error(\sprintf('%s match (%s)', $ex->getMessage(), \json_encode($match)));
 
@@ -92,17 +69,19 @@ class Transformer
     }
 
     /**
-     * @param string $content
-     * @param string $locale
-     * @param string $baseUrl
-     *
      * @return string|string[]|null
      */
-    public function transform($content, $locale = null, $baseUrl = null)
+    public function transform(string $content, ?string $locale = null, ?string $baseUrl = null)
     {
         return \preg_replace_callback(EMSLink::PATTERN, function ($match) use ($locale, $baseUrl) {
             //array filter to remove empty capture groups
-            $generation = $this->generate(\array_filter($match), $locale);
+            $cleanMatch = \array_filter($match);
+
+            if (null === $cleanMatch) {
+                return $match[0];
+            }
+
+            $generation = $this->generate($cleanMatch, $locale);
             $route = $generation ? $generation : $match[0];
 
             return $baseUrl.$route;
@@ -110,11 +89,9 @@ class Transformer
     }
 
     /**
-     * @param string $locale
-     *
-     * @return string
+     * @param array<mixed> $document
      */
-    private function renderTemplate(EMSLink $emsLink, array $document, $locale = null)
+    private function renderTemplate(EMSLink $emsLink, array $document, ?string $locale = null): ?string
     {
         $context = [
             'id' => $document['_id'],
@@ -135,13 +112,16 @@ class Transformer
         return $this->twigRender('@EMSCH/routing/'.$contentType, $context);
     }
 
+    /**
+     * @param array<mixed> $context
+     */
     private function twigRender(string $template, array $context): ?string
     {
         try {
             return $this->twig->render($template, $context);
         } catch (TwigException $ex) {
             $this->logger->warning($ex->getMessage());
-        } catch (\Twig_Error $ex) {
+        } catch (Error $ex) {
             $this->logger->error($ex->getMessage());
         }
 
@@ -149,11 +129,9 @@ class Transformer
     }
 
     /**
-     * @return array|false
-     *
-     * @throw \Exception
+     * @return array<mixed>
      */
-    private function getDocument(EMSLink $emsLink)
+    private function getDocument(EMSLink $emsLink): array
     {
         if (isset($this->documents[$emsLink->__toString()])) {
             return $this->documents[$emsLink->__toString()];

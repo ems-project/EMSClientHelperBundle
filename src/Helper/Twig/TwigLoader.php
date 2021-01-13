@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Twig;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use Twig\Loader\LoaderInterface;
+use Twig\Source;
 
 /**
  * Defined for each elasticms config with the option 'templates'.
@@ -12,18 +15,15 @@ use Twig\Loader\LoaderInterface;
  */
 class TwigLoader implements LoaderInterface
 {
-    /**
-     * @var ClientRequest
-     */
-    private $client;
+    private ClientRequest $client;
+    /** @var array<mixed> */
+    private array $config;
+
+    public const PREFIX = '@EMSCH';
 
     /**
-     * @var array
+     * @param array<mixed> $config
      */
-    private $config;
-
-    const PREFIX = '@EMSCH';
-
     public function __construct(ClientRequest $client, array $config)
     {
         $this->client = $client;
@@ -33,25 +33,15 @@ class TwigLoader implements LoaderInterface
     /**
      * {@inheritdoc}
      */
-    public function getSourceContext($name)
+    public function getSourceContext($name): Source
     {
-        return new \Twig_Source($this->getTemplateCode($name), $name);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @deprecated used for php < 7
-     */
-    public function getSource($name)
-    {
-        return $this->getTemplateCode($name);
+        return new Source($this->getTemplateCode($name), $name);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getCacheKey($name)
+    public function getCacheKey($name): string
     {
         return $this->client->getCacheKey('twig_').$name;
     }
@@ -59,7 +49,7 @@ class TwigLoader implements LoaderInterface
     /**
      * {@inheritdoc}
      */
-    public function isFresh($name, $time)
+    public function isFresh($name, $time): bool
     {
         $matches = $this->match($name);
         $contentTypeName = \array_shift($matches);
@@ -95,7 +85,7 @@ class TwigLoader implements LoaderInterface
     }
 
     /**
-     * @return array[string, string, string]
+     * @return array<mixed>
      */
     private function match(string $name): array
     {

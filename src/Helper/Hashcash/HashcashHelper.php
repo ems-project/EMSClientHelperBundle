@@ -1,22 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Hashcash;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
 
-class HashcashHelper
+final class HashcashHelper
 {
-    /** @var CsrfTokenManager */
-    private $csrfTokenManager;
+    private CsrfTokenManager $csrfTokenManager;
 
     public function __construct(CsrfTokenManager $csrfTokenManager)
     {
         $this->csrfTokenManager = $csrfTokenManager;
     }
 
-    public function validateHashcash(Request $request, string $csrfId, int $hashcashLevel = 4, string $hashAlgo = 'sha256')
+    public function validateHashcash(Request $request, string $csrfId, int $hashcashLevel = 4, string $hashAlgo = 'sha256'): void
     {
         $hashcash = $request->headers->get('X-Hashcash');
         if (null === $hashcash) {

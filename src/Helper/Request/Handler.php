@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Request;
 
 use EMS\ClientHelperBundle\Exception\SingleResultException;
@@ -13,12 +15,10 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Route as SymfonyRoute;
 use Symfony\Component\Routing\RouterInterface;
 
-class Handler
+final class Handler
 {
-    /** @var ClientRequest */
-    private $clientRequest;
-    /** @var RouterInterface */
-    private $router;
+    private ClientRequest $clientRequest;
+    private RouterInterface $router;
 
     public function __construct(ClientRequestManager $manager, RouterInterface $router)
     {
@@ -26,6 +26,9 @@ class Handler
         $this->router = $router;
     }
 
+    /**
+     * @return array{template: string, context: array<mixed>}
+     */
     public function handle(Request $request): array
     {
         $route = $this->getRoute($request);
@@ -86,6 +89,9 @@ class Handler
         }
     }
 
+    /**
+     * @param ?array<mixed> $document
+     */
     private function getTemplate(Request $request, SymfonyRoute $route, array $document = null): string
     {
         $template = $route->getOption('template');

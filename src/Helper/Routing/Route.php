@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
 use Symfony\Component\OptionsResolver\Options;
@@ -7,26 +9,31 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\Route as SymfonyRoute;
 use Symfony\Component\Routing\RouteCollection;
 
-class Route
+final class Route
 {
-    /** @var string */
-    private $name;
-    /** @var array */
-    private $options;
+    private string $name;
+    /** @var array<mixed> */
+    private array $options;
 
+    /**
+     * @param array<mixed> $options
+     */
     public function __construct(string $name, array $options)
     {
         $this->name = $name;
         $this->options = $this->resolveOptions($options);
     }
 
+    /**
+     * @param string[] $locales
+     */
     public function addToCollection(RouteCollection $collection, array $locales = []): void
     {
         $path = $this->options['path'];
 
         if (\is_array($path)) {
             foreach ($path as $key => $p) {
-                $locale = \in_array($key, $locales) ? $key : null;
+                $locale = \in_array($key, $locales) ? \strval($key) : null;
                 $route = $this->createRoute($p, $locale);
 
                 $collection->add(\sprintf('%s.%s', $this->name, $key), $route);
@@ -56,6 +63,11 @@ class Route
         );
     }
 
+    /**
+     * @param array<mixed> $options
+     *
+     * @return array<mixed>
+     */
     private function resolveOptions(array $options): array
     {
         $resolver = new OptionsResolver();
