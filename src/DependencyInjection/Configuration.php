@@ -39,7 +39,6 @@ final class Configuration implements ConfigurationInterface
 
         $this->addElasticmsSection($rootNode);
         $this->addApiSection($rootNode);
-        $this->addRoutingSelection($rootNode);
         $this->addUserApiSection($rootNode);
 
         return $treeBuilder;
@@ -131,37 +130,6 @@ final class Configuration implements ConfigurationInterface
                             ->scalarNode('key')
                                 ->info('api key')
                                 ->isRequired()
-                            ->end()
-                        ->end()
-                    ->end()
-                ->end()
-            ->end()
-        ;
-    }
-
-    private function addRoutingSelection(ArrayNodeDefinition $rootNode): void
-    {
-        $rootNode
-            ->children()
-                ->arrayNode('routing')
-                ->canBeEnabled()
-                ->children()
-                    ->scalarNode('client_request')
-                        ->isRequired()
-                        ->beforeNormalization()
-                            ->always(function ($v) {
-                                return 'emsch.client_request.'.$v;
-                            })
-                        ->end()
-                    ->end()
-                    ->arrayNode('relative_paths')
-                        ->prototype('array')
-                            ->children()
-                                ->scalarNode('regex')
-                                    ->info('regex for matching the content_type')
-                                    ->isRequired()
-                                ->end()
-                                ->scalarNode('path')->cannotBeEmpty()->end()
                             ->end()
                         ->end()
                     ->end()

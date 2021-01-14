@@ -42,7 +42,6 @@ final class EMSClientHelperExtension extends Extension
 
         $this->processElasticms($container, $loader, $config['elasticms']);
         $this->processApi($container, $config['api']);
-        $this->processRoutingSelection($container, $config['routing']);
         $this->processUserApi($container, $config['user_api']);
     }
 
@@ -125,19 +124,6 @@ final class EMSClientHelperExtension extends Extension
         $loader->addTag('twig.loader', ['alias' => $name, 'priority' => 1]);
 
         $container->setDefinition(\sprintf('emsch.twig.loader.%s', $name), $loader);
-    }
-
-    /**
-     * @param array<string, mixed> $config
-     */
-    private function processRoutingSelection(ContainerBuilder $container, array $config): void
-    {
-        if (!$config['enabled']) {
-            return;
-        }
-
-        $container->setParameter('emsch.routing.client_request', $config['client_request']);
-        $container->setParameter('emsch.routing.relative_paths', $config['relative_paths']);
     }
 
     /**
