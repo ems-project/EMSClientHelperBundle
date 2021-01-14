@@ -8,7 +8,7 @@ use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\ClientHelperBundle\Helper\Request\ExceptionHelper;
 use EMS\ClientHelperBundle\Helper\Request\LocaleHelper;
-use EMS\ClientHelperBundle\Helper\Translation\TranslationHelper;
+use EMS\ClientHelperBundle\Helper\Translation\Translator;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -21,14 +21,14 @@ use Symfony\Component\HttpKernel\KernelEvents;
 final class KernelListener implements EventSubscriberInterface
 {
     private EnvironmentHelper $environmentHelper;
-    private TranslationHelper $translationHelper;
+    private Translator $translationHelper;
     private LocaleHelper $localeHelper;
     private ExceptionHelper $exceptionHelper;
     private bool $bindLocale;
 
     public function __construct(
         EnvironmentHelper $environmentHelper,
-        TranslationHelper $translationHelper,
+        Translator $translationHelper,
         LocaleHelper $localeHelper,
         ExceptionHelper $exceptionHelper,
         bool $bindLocale
