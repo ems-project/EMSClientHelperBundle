@@ -273,12 +273,6 @@ final class Search
             return $clientRequest->getOption('[search_config]');
         }
 
-        if ($clientRequest->hasOption('search')) {
-            @\trigger_error('Deprecated search option please use search_config!', E_USER_DEPRECATED);
-
-            return $clientRequest->getOption('[search]');
-        }
-
         throw new \LogicException('no search defined!');
     }
 
