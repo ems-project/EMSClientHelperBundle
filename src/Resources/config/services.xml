@@ -89,11 +89,6 @@
         </service>
 
         <!-- controllers -->
-        <service id="emsch.controller.language_select" class="EMS\ClientHelperBundle\Controller\LanguageSelectController" public="true">
-            <argument type="service" id="emsch.manager.client_request" />
-            <argument type="string">%emsch.locales%</argument>
-            <argument></argument>
-        </service>
         <service id="emsch.controller.search" class="EMS\ClientHelperBundle\Controller\SearchController" public="true">
             <argument type="service" id="emsch.search.manager" />
             <argument type="service" id="emsch.routing.handler" />
