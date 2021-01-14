@@ -4,6 +4,7 @@ namespace EMS\ClientHelperBundle\Helper\Search;
 
 use Elastica\Query\AbstractQuery;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
+use EMS\CommonBundle\Elasticsearch\Response\Response;
 use Symfony\Component\HttpFoundation\Request;
 
 class Search
@@ -92,14 +93,11 @@ class Search
         }
     }
 
-    /**
-     * @param array<mixed> $aggregations
-     */
-    public function bindAggregations(array $aggregations, ?AbstractQuery $queryFilters): void
+    public function bindAggregations(Response $response, ?AbstractQuery $queryFilters): void
     {
-        foreach ($aggregations as $name => $aggregation) {
-            if ($this->hasFilter($name)) {
-                $this->getFilter($name)->handleAggregation($aggregation, $this->getTypes(), $queryFilters);
+        foreach ($response->getAggregations() as $aggregation) {
+            if ($this->hasFilter($aggregation->getName())) {
+                $this->getFilter($aggregation->getName())->handleAggregation($aggregation->getRaw(), $this->getTypes(), $queryFilters);
             }
         }
     }
