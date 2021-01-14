@@ -143,7 +143,6 @@ final class EMSClientHelperExtension extends Extension
 
         $container->setParameter('emsch.routing.client_request', $config['client_request']);
         $container->setParameter('emsch.routing.routes', $config['routes']);
-        $container->setParameter('emsch.routing.redirect_type', $config['redirect_type']);
         $container->setParameter('emsch.routing.relative_paths', $config['relative_paths']);
     }
 

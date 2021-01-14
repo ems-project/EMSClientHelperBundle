@@ -30,9 +30,5 @@ final class ClientHelperPass implements CompilerPassInterface
         if ($container->hasDefinition('emsch.routing.url.transformer')) {
             $container->getDefinition('emsch.routing.url.transformer')->setArgument(0, $clientRequest);
         }
-
-        if ($container->hasDefinition('emsch.routing.redirect_helper')) {
-            $container->getDefinition('emsch.routing.redirect_helper')->setArgument(0, $clientRequest);
-        }
     }
 }
