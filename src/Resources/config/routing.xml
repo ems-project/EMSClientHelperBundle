@@ -45,14 +45,13 @@
 
         <service id="emsch.routing.url.generator" class="EMS\ClientHelperBundle\Helper\Routing\Url\Generator">
             <argument type="service" id="Symfony\Component\Routing\RouterInterface" />
-            <argument>%emsch.routing.relative_paths%</argument>
         </service>
         <service id="emsch.routing.url.transformer" class="EMS\ClientHelperBundle\Helper\Routing\Url\Transformer">
-            <argument><!-- clientRequest injected --></argument>
+            <argument type="service" id="emsch.manager.client_request"/>
             <argument type="service" id="emsch.routing.url.generator" />
             <argument type="service" id="twig" />
             <argument type="service" id="logger" />
-            <argument></argument>
+            <argument><!-- template regex injected --></argument>
             <tag name="monolog.logger" channel="emsch_routing"/>
         </service>
 

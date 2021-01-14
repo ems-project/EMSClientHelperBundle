@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Routing\Url;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\ClientHelperBundle\Helper\Twig\TwigException;
 use EMS\CommonBundle\Common\EMSLink;
 use EMS\CommonBundle\Elasticsearch\Document\EMSSource;
@@ -22,9 +23,9 @@ final class Transformer
     /** @var array<mixed> */
     private array $documents;
 
-    public function __construct(ClientRequest $clientRequest, Generator $generator, Environment $twig, LoggerInterface $logger, ?string $template)
+    public function __construct(ClientRequestManager $clientRequestManager, Generator $generator, Environment $twig, LoggerInterface $logger, ?string $template)
     {
-        $this->clientRequest = $clientRequest;
+        $this->clientRequest = $clientRequestManager->getDefault();
         $this->generator = $generator;
         $this->twig = $twig;
         $this->logger = $logger;
@@ -60,7 +61,7 @@ final class Transformer
                 throw new \Exception('missing template');
             }
 
-            return $this->generator->prependBaseUrl($emsLink, $template);
+            return $this->generator->prependBaseUrl($template);
         } catch (\Exception $ex) {
             $this->logger->error(\sprintf('%s match (%s)', $ex->getMessage(), \json_encode($match)));
 
