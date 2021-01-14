@@ -39,7 +39,6 @@ final class Configuration implements ConfigurationInterface
 
         $this->addElasticmsSection($rootNode);
         $this->addApiSection($rootNode);
-        $this->addTwigListSection($rootNode);
         $this->addRoutingSelection($rootNode);
         $this->addUserApiSection($rootNode);
 
@@ -132,29 +131,6 @@ final class Configuration implements ConfigurationInterface
                             ->scalarNode('key')
                                 ->info('api key')
                                 ->isRequired()
-                            ->end()
-                        ->end()
-                    ->end()
-                ->end()
-            ->end()
-        ;
-    }
-
-    private function addTwigListSection(ArrayNodeDefinition $rootNode): void
-    {
-        $rootNode
-            ->children()
-                ->arrayNode('twig_list')
-                    ->children()
-                        ->arrayNode('templates')
-                            ->defaultValue([
-                                ['path' => '@EMSBackendBridgeBundle/Resources/views/TwigList', 'namespace' => '@EMSBackendBridgeBundle/TwigList'],
-                            ])
-                            ->prototype('array')
-                                ->children()
-                                    ->scalarNode('path')->cannotBeEmpty()->end()
-                                    ->scalarNode('namespace')->defaultNull()->end()
-                                ->end()
                             ->end()
                         ->end()
                     ->end()

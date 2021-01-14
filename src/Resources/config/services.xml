@@ -96,10 +96,6 @@
             <argument type="service" id="emsch.helper_cache"/>
             <argument type="string">%emsch.locales%</argument>
         </service>
-        <service id="emsch.controller.twig_list" class="EMS\ClientHelperBundle\Controller\TwigListController" public="true">
-            <argument type="service" id="kernel" />
-            <argument/>
-        </service>
         <service id="emsch.controller.embed" class="EMS\ClientHelperBundle\Controller\EmbedController" public="true">
             <argument type="service" id="emsch.manager.client_request" />
             <tag name="controller.service_arguments"/>

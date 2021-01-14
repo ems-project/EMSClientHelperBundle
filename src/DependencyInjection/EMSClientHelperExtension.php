@@ -44,11 +44,6 @@ final class EMSClientHelperExtension extends Extension
         $this->processApi($container, $config['api']);
         $this->processRoutingSelection($container, $config['routing']);
         $this->processUserApi($container, $config['user_api']);
-
-        if (isset($config['twig_list'])) {
-            $definition = $container->getDefinition('emsch.controller.twig_list');
-            $definition->replaceArgument(1, $config['twig_list']['templates']);
-        }
     }
 
     /**
