@@ -57,19 +57,6 @@
             <tag name="monolog.logger" channel="emsch_routing"/>
         </service>
 
-        <service id="emsch.routing.redirect_helper" class="EMS\ClientHelperBundle\Helper\Routing\RedirectHelper">
-            <argument><!-- clientRequest injected --></argument>
-            <argument type="service" id="emsch.routing.url.transformer" />
-            <argument type="string">%emsch.routing.redirect_type%</argument>
-        </service>
-
-        <service id="emsch.redirect_listener" class="EMS\ClientHelperBundle\EventListener\RedirectListener">
-            <argument type="service" id="emsch.routing.redirect_helper"/>
-            <argument type="service" id="http_kernel"/>
-            <argument type="service" id="Symfony\Component\Routing\RouterInterface"/>
-            <tag name="kernel.event_subscriber"/>
-        </service>
-
         <service id="emsch.twig.runtime.routing" class="EMS\ClientHelperBundle\Twig\RoutingRuntime">
             <argument type="service" id="emsch.routing.url.transformer" />
             <tag name="twig.runtime" />
