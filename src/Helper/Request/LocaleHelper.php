@@ -36,7 +36,7 @@ final class LocaleHelper
         } elseif (1 === \count($this->locales)) {
             $url = $request->getUriForPath('/'.$this->locales[0].$destination);
         } else {
-            $url = $this->router->generate('emsch_language_selection', ['destination' => $destination]);
+            $url = $request->getUriForPath('/'.$destination);
         }
 
         return new RedirectResponse($url);

@@ -17,23 +17,19 @@ final class Router extends BaseRouter
     /** @var string[] */
     private array $locales;
     /** @var array<mixed> */
-    private array $templates;
-    /** @var array<mixed> */
     private array $routes;
 
     private bool $hasBuild = false;
 
     /**
      * @param string[]     $locales
-     * @param array<mixed> $templates
      * @param array<mixed> $routes
      */
-    public function __construct(ClientRequestManager $manager, array $locales, array $templates, array $routes)
+    public function __construct(ClientRequestManager $manager, array $locales, array $routes)
     {
         $this->manager = $manager;
         $this->logger = $manager->getLogger();
         $this->locales = $locales;
-        $this->templates = $templates;
         $this->routes = $routes;
     }
 
@@ -49,8 +45,6 @@ final class Router extends BaseRouter
     public function buildRouteCollection(): void
     {
         $collection = new RouteCollection();
-        $this->addSearchResultRoute($collection);
-        $this->addLanguageSelectionRoute($collection);
         $this->addEMSRoutes($collection);
         $this->addEnvRoutes($collection);
 
@@ -63,32 +57,6 @@ final class Router extends BaseRouter
         foreach ($this->routes as $name => $options) {
             $route = new Route('ems_'.$name, $options);
             $route->addToCollection($collection, $this->locales);
-        }
-    }
-
-    private function addLanguageSelectionRoute(RouteCollection $collection): void
-    {
-        if (isset($this->templates['language']) && \count($this->locales) > 1) {
-            $langSelectRoute = new Route('emsch_language_selection', [
-                'path' => '/language-selection',
-                'controller' => 'emsch.controller.language_select::view',
-                'defaults' => ['template' => $this->templates['language']],
-            ]);
-            $langSelectRoute->addToCollection($collection);
-        }
-    }
-
-    private function addSearchResultRoute(RouteCollection $collection): void
-    {
-        if (isset($this->templates['search'])) {
-            @\trigger_error('Deprecated search template use routing content type!', E_USER_DEPRECATED);
-
-            $searchRoute = new Route('emsch_search', [
-                'path' => '/{_locale}/search',
-                'controller' => 'emsch.controller.search::results',
-                'defaults' => ['template' => $this->templates['search']],
-            ]);
-            $searchRoute->addToCollection($collection);
         }
     }
 

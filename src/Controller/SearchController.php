@@ -45,24 +45,4 @@ final class SearchController extends AbstractController
 
         return $response;
     }
-
-    /**
-     * @deprecated
-     */
-    public function results(Request $request, string $template): Response
-    {
-        @\trigger_error('Deprecated use routing content type and use controller emsch.controller.search::handle', E_USER_DEPRECATED);
-
-        $search = $this->manager->search($request);
-
-        $routes = [];
-        foreach ($this->locales as $locale) {
-            $routes[$locale] = $this->generateUrl('emsch_search', \array_merge(['_locale' => $locale], $request->query->all()));
-        }
-
-        return $this->render($template, \array_merge([
-            'trans_default_domain' => $this->manager->getClientRequest()->getCacheKey(),
-            'language_routes' => $routes,
-        ], $search));
-    }
 }
