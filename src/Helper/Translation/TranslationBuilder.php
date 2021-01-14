@@ -4,65 +4,66 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Translation;
 
+use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
-use Symfony\Bundle\FrameworkBundle\Translation\Translator;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\MessageCatalogue;
-use Symfony\Component\Translation\TranslatorBagInterface;
 
-final class TranslationHelper
+final class TranslationBuilder
 {
-    private ClientRequestManager $manager;
-    private TranslatorBagInterface $translator;
     /** @var string[] */
     private array $locales;
+    private LoggerInterface $logger;
+    private ClientRequestManager $manager;
 
     /**
      * @param string[] $locales
      */
-    public function __construct(ClientRequestManager $manager, Translator $translator, array $locales)
+    public function __construct(ClientRequestManager $manager, array $locales)
     {
+        $this->locales = $locales;
+        $this->logger = $manager->getLogger();
         $this->manager = $manager;
-        $this->translator = $translator;
         $this->locales = $locales;
     }
 
-    public function addCatalogues(): void
+    /**
+     * @return string[]
+     */
+    public function getLocales(): array
+    {
+        return $this->locales;
+    }
+
+    /**
+     * @return \Generator|MessageCatalogue[]
+     */
+    public function buildMessageCatalogues(): \Generator
     {
         foreach ($this->manager->all() as $clientRequest) {
-            if (!$clientRequest->hasOption('translation_type')) {
+            if (null === $contentType = $clientRequest->getTranslationContentType()) {
                 continue;
             }
 
-            if (!$clientRequest->mustBeBind() && !$clientRequest->isBind()) {
+            if (!$clientRequest->mustBeBind() && !$clientRequest->hasEnvironments()) {
                 continue;
             }
 
-            $messages = $this->getMessages($clientRequest);
+            foreach ($this->getMessages($clientRequest, $contentType) as $locale => $messages) {
+                $messageCatalogue = new MessageCatalogue($locale);
+                $messageCatalogue->add($messages, $clientRequest->getCacheKey());
 
-            foreach ($this->locales as $locale) {
-                if (!isset($messages[$locale])) {
-                    continue;
-                }
-
-                $clientCatalog = new MessageCatalogue($locale);
-                $clientCatalog->add($messages[$locale], $clientRequest->getCacheKey());
-
-                $catalogue = $this->translator->getCatalogue($locale);
-                $catalogue->addCatalogue($clientCatalog);
+                yield $messageCatalogue;
             }
         }
     }
 
     /**
-     * @return array<mixed>
+     * @return array<string, array<int|string, mixed>>
      */
-    private function getMessages(ClientRequest $clientRequest): array
+    private function getMessages(ClientRequest $clientRequest, ContentType $contentType): array
     {
-        if (null === $contentType = $clientRequest->getTranslationContentType()) {
-            return [];
-        }
-
         if (null !== $cache = $contentType->getCache()) {
             return $cache;
         }
@@ -75,7 +76,7 @@ final class TranslationHelper
     }
 
     /**
-     * @return array<mixed>
+     * @return array<string, array<int|string, mixed>>
      */
     private function createMessages(ClientRequest $clientRequest, string $type): array
     {
@@ -95,18 +96,5 @@ final class TranslationHelper
         }
 
         return $messages;
-    }
-
-    public function isOptional(): bool
-    {
-        return false;
-    }
-
-    public function warmUp(): void
-    {
-        try {
-            $this->addCatalogues();
-        } catch (\Throwable $e) {
-        }
     }
 }
