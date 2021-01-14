@@ -86,7 +86,7 @@ final class Search
 
         $this->page = (int) $request->get('p', $this->page);
 
-        $this->setSize($request->get('l', $this->size));
+        $this->setSize(\intval($request->get('l', $this->size)));
         $this->setSortBy($request->get('s'));
         $this->setSortOrder($request->get('o', $this->sortOrder));
 
@@ -373,7 +373,7 @@ final class Search
         $this->sortOrder = ('asc' === $o || 'desc' === $o) ? $o : 'asc';
     }
 
-    private function setSize(string $l): void
+    private function setSize(int $l): void
     {
         if (null == $this->sizes) {
             @\trigger_error('Define allow sizes with the search option "sizes"', \E_USER_DEPRECATED);
