@@ -29,8 +29,6 @@ final class Configuration implements ConfigurationInterface
                 ->end()
                 ->arrayNode('templates')
                     ->children()
-                        ->scalarNode('language')->end()
-                        ->scalarNode('search')->end()
                         ->scalarNode('error')->end()
                         ->scalarNode('ems_link')->end()
                     ->end()

@@ -20,7 +20,6 @@
         <service id="emsch.router" class="EMS\ClientHelperBundle\Helper\Routing\Router">
             <argument type="service" id="emsch.manager.client_request" />
             <argument type="string">%emsch.locales%</argument>
-            <argument type="string">%emsch.templates%</argument>
             <argument type="string">%emsch.routing.routes%</argument>
             <tag name="emsch.router" priority="100" /> <!-- before symfony router -->
         </service>

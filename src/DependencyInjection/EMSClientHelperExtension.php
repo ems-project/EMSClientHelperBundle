@@ -37,7 +37,6 @@ final class EMSClientHelperExtension extends Extension
         $container->setParameter('emsch.request_environments', $config['request_environments']);
 
         $templates = $config['templates'];
-        $container->setParameter('emsch.templates', $config['templates']);
         $container->getDefinition('emsch.helper_exception')->replaceArgument(3, $templates['error']);
         $container->getDefinition('emsch.routing.url.transformer')->replaceArgument(4, $templates['ems_link']);
 
