@@ -16,21 +16,17 @@ final class Router extends BaseRouter
     private LoggerInterface $logger;
     /** @var string[] */
     private array $locales;
-    /** @var array<mixed> */
-    private array $routes;
 
     private bool $hasBuild = false;
 
     /**
-     * @param string[]     $locales
-     * @param array<mixed> $routes
+     * @param string[] $locales
      */
-    public function __construct(ClientRequestManager $manager, array $locales, array $routes)
+    public function __construct(ClientRequestManager $manager, array $locales)
     {
         $this->manager = $manager;
         $this->logger = $manager->getLogger();
         $this->locales = $locales;
-        $this->routes = $routes;
     }
 
     public function getRouteCollection(): RouteCollection
@@ -46,18 +42,9 @@ final class Router extends BaseRouter
     {
         $collection = new RouteCollection();
         $this->addEMSRoutes($collection);
-        $this->addEnvRoutes($collection);
 
         $this->collection = $collection;
         $this->hasBuild = true;
-    }
-
-    private function addEnvRoutes(RouteCollection $collection): void
-    {
-        foreach ($this->routes as $name => $options) {
-            $route = new Route('ems_'.$name, $options);
-            $route->addToCollection($collection, $this->locales);
-        }
     }
 
     private function addEMSRoutes(RouteCollection $collection): void
