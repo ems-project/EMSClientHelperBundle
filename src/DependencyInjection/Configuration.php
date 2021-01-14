@@ -200,7 +200,6 @@ final class Configuration implements ConfigurationInterface
                             ->end()
                         ->end()
                     ->end()
-                    ->variableNode('routes')->end()
                 ->end()
             ->end()
         ;
