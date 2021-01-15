@@ -9,7 +9,6 @@
 
     <services>
         <defaults public="false" />
-        <service id="emsch.query_builder.service" class="EMS\ClientHelperBundle\Service\QueryBuilderService"/>
 
         <service id="emsch.manager.client_request" class="EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager">
             <argument type="tagged" tag="emsch.client_request"/>
