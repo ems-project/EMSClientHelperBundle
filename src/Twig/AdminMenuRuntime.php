@@ -10,10 +10,7 @@ use Twig\Extension\RuntimeExtensionInterface;
 
 final class AdminMenuRuntime implements RuntimeExtensionInterface
 {
-    /**
-     * @var EnvironmentHelper
-     */
-    private $environmentHelper;
+    private EnvironmentHelper $environmentHelper;
 
     public function __construct(EnvironmentHelper $environmentHelper)
     {
