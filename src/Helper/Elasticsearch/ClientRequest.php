@@ -19,7 +19,7 @@ use EMS\CommonBundle\Elasticsearch\Exception\NotFoundException;
 use EMS\CommonBundle\Search\Search;
 use EMS\CommonBundle\Service\ElasticaService;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Cache\Adapter\AdapterInterface;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -30,7 +30,7 @@ final class ClientRequest
     private CacheHelper $cacheHelper;
     private ContentTypeHelper $contentTypeHelper;
     private LoggerInterface $logger;
-    private AdapterInterface $cache;
+    private CacheItemPoolInterface $cache;
     /** @var array<string, mixed> */
     private array $options;
     /** @var array<string, \DateTime> */
@@ -47,7 +47,7 @@ final class ClientRequest
         CacheHelper $cacheHelper,
         ContentTypeHelper $contentTypeHelper,
         LoggerInterface $logger,
-        AdapterInterface $cache,
+        CacheItemPoolInterface $cache,
         string $name,
         array $options = []
     ) {

@@ -88,7 +88,7 @@ final class EMSClientHelperExtension extends Extension
             new Reference('emsch.helper_cache'),
             new Reference('emsch.helper_content_type'),
             new Reference('logger'),
-            new Reference('cache.app'),
+            new Reference('Psr\Cache\CacheItemPoolInterface'),
             $name,
             $options,
         ]);

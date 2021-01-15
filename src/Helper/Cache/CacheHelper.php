@@ -7,17 +7,17 @@ namespace EMS\ClientHelperBundle\Helper\Cache;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use Psr\Cache\CacheItemInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Cache\Adapter\AdapterInterface;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 final class CacheHelper
 {
-    private AdapterInterface $cache;
+    private CacheItemPoolInterface $cache;
     private LoggerInterface $logger;
     private string $hashAlgo;
 
-    public function __construct(AdapterInterface $cache, LoggerInterface $logger, string $hashAlgo)
+    public function __construct(CacheItemPoolInterface $cache, LoggerInterface $logger, string $hashAlgo)
     {
         $this->cache = $cache;
         $this->logger = $logger;
