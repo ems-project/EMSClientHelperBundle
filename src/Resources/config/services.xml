@@ -37,7 +37,7 @@
         </service>
 
         <service id="emsch.helper_cache" class="EMS\ClientHelperBundle\Helper\Cache\CacheHelper">
-            <argument type="service" id="cache.app" />
+            <argument type="service" id="Psr\Cache\CacheItemPoolInterface" />
             <argument type="service" id="logger" />
             <argument type="string">%emsch.etag_hash_algo%</argument>
         </service>
