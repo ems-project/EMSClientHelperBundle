@@ -16,15 +16,11 @@ use Elastica\Query\QueryString;
  */
 final class TextValue
 {
-    /** @var string */
-    private $text;
-    /** @var string */
-    private $field;
-    /** @var string */
-    private $analyzer;
-
+    private string $text;
+    private string $field;
+    private string $analyzer;
     /** @var AbstractQuery[] */
-    private $synonyms;
+    private array $synonyms;
 
     public function __construct(string $text, string $field, string $analyzer)
     {
