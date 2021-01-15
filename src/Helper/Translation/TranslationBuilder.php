@@ -12,19 +12,18 @@ use Symfony\Component\Translation\MessageCatalogue;
 
 final class TranslationBuilder
 {
+    private ClientRequest $clientRequest;
+    private LoggerInterface $logger;
     /** @var string[] */
     private array $locales;
-    private LoggerInterface $logger;
-    private ClientRequestManager $manager;
 
     /**
      * @param string[] $locales
      */
-    public function __construct(ClientRequestManager $manager, array $locales)
+    public function __construct(ClientRequestManager $manager, LoggerInterface $logger, array $locales)
     {
-        $this->locales = $locales;
-        $this->logger = $manager->getLogger();
-        $this->manager = $manager;
+        $this->clientRequest = $manager->getDefault();
+        $this->logger = $logger;
         $this->locales = $locales;
     }
 
@@ -41,36 +40,34 @@ final class TranslationBuilder
      */
     public function buildMessageCatalogues(): \Generator
     {
-        foreach ($this->manager->all() as $clientRequest) {
-            if (null === $contentType = $clientRequest->getTranslationContentType()) {
-                continue;
-            }
+        if (null === $contentType = $this->clientRequest->getTranslationContentType()) {
+            return;
+        }
 
-            if (!$clientRequest->mustBeBind() && !$clientRequest->hasEnvironments()) {
-                continue;
-            }
+        if (!$this->clientRequest->mustBeBind() && !$this->clientRequest->hasEnvironments()) {
+            return;
+        }
 
-            foreach ($this->getMessages($clientRequest, $contentType) as $locale => $messages) {
-                $messageCatalogue = new MessageCatalogue($locale);
-                $messageCatalogue->add($messages, $clientRequest->getCacheKey());
+        foreach ($this->getMessages($contentType) as $locale => $messages) {
+            $messageCatalogue = new MessageCatalogue($locale);
+            $messageCatalogue->add($messages, $this->clientRequest->getCacheKey());
 
-                yield $messageCatalogue;
-            }
+            yield $messageCatalogue;
         }
     }
 
     /**
      * @return array<string, array<int|string, mixed>>
      */
-    private function getMessages(ClientRequest $clientRequest, ContentType $contentType): array
+    private function getMessages( ContentType $contentType): array
     {
         if (null !== $cache = $contentType->getCache()) {
             return $cache;
         }
 
-        $messages = $this->createMessages($clientRequest, $contentType->getName());
+        $messages = $this->createMessages($contentType->getName());
         $contentType->setCache($messages);
-        $clientRequest->cacheContentType($contentType);
+        $this->clientRequest->cacheContentType($contentType);
 
         return $messages;
     }
@@ -78,10 +75,10 @@ final class TranslationBuilder
     /**
      * @return array<string, array<int|string, mixed>>
      */
-    private function createMessages(ClientRequest $clientRequest, string $type): array
+    private function createMessages(string $type): array
     {
         $messages = [];
-        $scroll = $clientRequest->scrollAll([
+        $scroll = $this->clientRequest->scrollAll([
             'size' => 100,
             'type' => $type,
             'sort' => ['_doc'],
