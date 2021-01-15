@@ -15,15 +15,13 @@ final class ClientRequestRuntime implements RuntimeExtensionInterface
 {
     private ClientRequestManager $manager;
     private LoggerInterface $logger;
-
     /** @var Document[] */
-    private $documents = [];
+    private array $documents = [];
 
     public function __construct(ClientRequestManager $manager, LoggerInterface $logger)
     {
         $this->manager = $manager;
         $this->logger = $logger;
-        $this->documents = [];
     }
 
     /**
