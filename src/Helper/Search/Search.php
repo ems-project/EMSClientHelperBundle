@@ -12,41 +12,36 @@ use Symfony\Component\HttpFoundation\Request;
 final class Search
 {
     /** @var string[] */
-    private $types;
+    private array $types;
     /** @var array<string, int> [facet_name => size], used for aggregation */
-    private $facets;
+    private array $facets;
     /** @var Synonym[] */
-    private $synonyms = [];
+    private array $synonyms = [];
     /** @var string[] */
-    private $fields = [];
+    private array $fields = [];
     /** @var string[] */
-    private $suggestFields = [];
+    private array $suggestFields = [];
     /** @var Filter[] */
-    private $filters = [];
+    private array $filters = [];
     /** @var int[] */
-    private $sizes;
+    private array $sizes;
     /** @var array<mixed> */
-    private $defaultSorts;
+    private array $defaultSorts;
     /** @var array<mixed> */
-    private $sorts;
+    private array $sorts;
     /** @var array<mixed> */
-    private $highlight = [];
+    private array $highlight = [];
 
     /** @var string|null free text search */
-    private $queryString;
+    private ?string $queryString = null;
     /** @var array<string, mixed> */
-    private $queryFacets = [];
+    private array $queryFacets = [];
 
-    /** @var int */
-    private $page = 0;
-    /** @var int */
-    private $size = 100;
-    /** @var string|null */
-    private $sortBy;
-    /** @var string */
-    private $analyzer;
-    /** @var string */
-    private $sortOrder = 'asc';
+    private int $page = 0;
+    private int $size = 100;
+    private ?string $sortBy = null;
+    private string $analyzer;
+    private string $sortOrder = 'asc';
 
     public function __construct(ClientRequest $clientRequest)
     {
@@ -82,7 +77,11 @@ final class Search
     public function bindRequest(Request $request): void
     {
         $this->queryString = $request->get('q', $this->queryString);
-        $this->queryFacets = $request->get('f', $this->queryFacets);
+        $requestF = $request->get('f', null);
+
+        if (null !== $requestF && is_array($requestF)) {
+            $this->queryFacets = $requestF;
+        }
 
         $this->page = (int) $request->get('p', $this->page);
 

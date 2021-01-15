@@ -19,10 +19,8 @@ use EMS\CommonBundle\Search\Search as CommonSearch;
 
 final class QueryBuilder
 {
-    /** @var ClientRequest */
-    private $clientRequest;
-    /** @var Search */
-    private $search;
+    private ClientRequest $clientRequest;
+    private Search $search;
 
     public function __construct(ClientRequest $clientRequest, Search $search)
     {
