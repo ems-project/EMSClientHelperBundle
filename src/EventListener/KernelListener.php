@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\EventListener;
 
-use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\ClientHelperBundle\Helper\Request\ExceptionHelper;
 use EMS\ClientHelperBundle\Helper\Request\LocaleHelper;
@@ -67,7 +66,7 @@ final class KernelListener implements EventSubscriberInterface
         $request = $event->getRequest();
 
         foreach ($this->environmentHelper->getEnvironments() as $env) {
-            /** @var $env Environment */
+
             if ($env->matchRequest($request)) {
                 $env->modifyRequest($request);
                 break;
