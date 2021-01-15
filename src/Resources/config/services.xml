@@ -33,7 +33,7 @@
             <argument type="service" id="twig" />
             <argument type="service" id="emsch.manager.client_request" />
             <argument>%kernel.debug%</argument>
-            <argument></argument>
+            <argument><!-- template injection --></argument>
         </service>
 
         <service id="emsch.helper_cache" class="EMS\ClientHelperBundle\Helper\Cache\CacheHelper">
