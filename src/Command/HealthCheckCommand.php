@@ -34,6 +34,7 @@ final class HealthCheckCommand extends Command
         iterable $clientRequests = null,
         StorageManager $storageManager = null
     ) {
+        parent::__construct();
         $this->environmentHelper = $environmentHelper;
         $this->elasticaService = $elasticaService;
         $this->clientRequests = $clientRequests ?? [];
