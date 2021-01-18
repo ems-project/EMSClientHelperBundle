@@ -51,9 +51,6 @@ final class ClientRequest
         string $name,
         array $options = []
     ) {
-        if (!isset($options['index_prefix'])) {
-            throw new \RuntimeException('Client request index_prefix is deprecated and must be removed now: Environment name === Elasticsearch alias name');
-        }
         $this->environmentHelper = $environmentHelper;
         $this->cacheHelper = $cacheHelper;
         $this->contentTypeHelper = $contentTypeHelper;
