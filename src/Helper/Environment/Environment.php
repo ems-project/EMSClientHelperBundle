@@ -44,7 +44,7 @@ final class Environment
         $this->regex = $config[self::REGEX_CONFIG] ?? null;
         $this->baseUrl = $config[self::BASE_URL_CONFIG] ?? '';
         $this->routePrefix = $config[self::ROUTE_PREFIX_CONFIG] ?? '';
-        $this->backend = $config[self::BACKEND_CONFIG] ?? false;
+        $this->backend = $config[self::BACKEND_CONFIG] ?? null;
         $this->request = $config[self::REQUEST_CONFIG] ?? [];
         $this->options = $config;
     }
