@@ -79,7 +79,7 @@ final class Search
         $this->queryString = $request->get('q', $this->queryString);
         $requestF = $request->get('f', null);
 
-        if (null !== $requestF && is_array($requestF)) {
+        if (null !== $requestF && \is_array($requestF)) {
             $this->queryFacets = $requestF;
         }
 
