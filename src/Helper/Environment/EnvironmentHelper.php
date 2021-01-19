@@ -56,28 +56,6 @@ final class EnvironmentHelper
         return null !== $current ? $current->get(Environment::BACKEND_ATTRIBUTE) : null;
     }
 
-    /**
-     * Important for twig loader on kernel terminate we don't have a current request.
-     * So this function remembers it's environment and can still return it.
-     */
-    public function getBindEnvironmentName(): ?string
-    {
-        static $name = null;
-
-        if (null !== $name) {
-            return $name;
-        }
-
-        $current = $this->requestStack->getCurrentRequest();
-        if (null !== $current) {
-            $name = $current->get(Environment::ENVIRONMENT_ATTRIBUTE, null);
-        } elseif ('cli' === PHP_SAPI) {
-            $name = $this->emschEnv;
-        }
-
-        return $name;
-    }
-
     public function getLocale(): string
     {
         $current = $this->requestStack->getCurrentRequest();
@@ -90,8 +68,16 @@ final class EnvironmentHelper
 
     public function getCurrentEnvironment(): ?Environment
     {
-        $name = $this->getBindEnvironmentName();
+        if ('cli' === PHP_SAPI) {
+            return $this->environments[$this->emschEnv] ?? null;
+        }
 
-        return $this->environments[$name] ?? null;
+        foreach ($this->environments as $environment) {
+            if ($environment->isActive()) {
+                return $environment;
+            }
+        }
+
+        return null;
     }
 }

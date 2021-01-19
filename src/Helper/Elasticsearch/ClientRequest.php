@@ -556,11 +556,15 @@ final class ClientRequest
 
     public function getCacheKey(string $prefix = '', string $environment = null): string
     {
-        if (null === $environment) {
-            $environment = $this->environmentHelper->getBindEnvironmentName();
+        if ($environment) {
+            return $prefix.$environment;
         }
 
-        return $prefix.$environment;
+        if (null === $currentEnvironment = $this->getCurrentEnvironment()) {
+            throw new \RuntimeException('No active environment');
+        }
+
+        return $currentEnvironment->getName();
     }
 
     public function getAlias(): string
