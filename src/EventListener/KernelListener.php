@@ -97,7 +97,9 @@ final class KernelListener implements EventSubscriberInterface
             return;
         }
 
-        if (\preg_match('/(emsch_api_).*/', $request->attributes->get('_route'))) {
+        $route = $request->attributes->get('_route', null);
+
+        if (null === $route || \preg_match('/(emsch_api_).*/', \strval($route))) {
             return;
         }
 

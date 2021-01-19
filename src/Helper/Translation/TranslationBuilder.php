@@ -59,7 +59,7 @@ final class TranslationBuilder
     /**
      * @return array<string, array<int|string, mixed>>
      */
-    private function getMessages( ContentType $contentType): array
+    private function getMessages(ContentType $contentType): array
     {
         if (null !== $cache = $contentType->getCache()) {
             return $cache;

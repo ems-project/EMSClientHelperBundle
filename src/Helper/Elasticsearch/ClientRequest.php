@@ -18,8 +18,8 @@ use EMS\CommonBundle\Elasticsearch\Document\EMSSource;
 use EMS\CommonBundle\Elasticsearch\Exception\NotFoundException;
 use EMS\CommonBundle\Search\Search;
 use EMS\CommonBundle\Service\ElasticaService;
-use Psr\Log\LoggerInterface;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -275,6 +275,11 @@ final class ClientRequest
     public function getEnvironments(): array
     {
         return $this->environmentHelper->getEnvironments();
+    }
+
+    public function hasCurrentEnvironment(): bool
+    {
+        return $this->environmentHelper->hasCurrentEnvironment();
     }
 
     public function getCurrentEnvironment(): Environment

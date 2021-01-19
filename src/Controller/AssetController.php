@@ -75,7 +75,7 @@ final class AssetController extends AbstractController
             throw new \RuntimeException('Unexpected unparsable referer');
         }
 
-        if ($request->getHost() !== ($referer['host'] ?? null)) {
+        if (($referer['host'] ?? null) !== $request->getHost()) {
             throw new BadRequestHttpException('Host and referer\'s host does not match');
         }
 
