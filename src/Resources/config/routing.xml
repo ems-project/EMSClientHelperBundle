@@ -17,10 +17,17 @@
             </call>
         </service>
 
-        <service id="emsch.router" class="EMS\ClientHelperBundle\Helper\Routing\Router">
-            <argument type="service" id="emsch.manager.client_request" />
-            <argument type="string">%emsch.locales%</argument>
+        <service id="emsch.helper.router" class="EMS\ClientHelperBundle\Helper\Routing\Router">
+            <argument type="service" id="emsch.helper.routing.builder" />
             <tag name="emsch.router" priority="100" /> <!-- before symfony router -->
+        </service>
+        <service id="emsch.helper.routing.builder" class="EMS\ClientHelperBundle\Helper\Routing\RoutingBuilder">
+            <argument type="service" id="emsch.manager.client_request" />
+            <argument type="service" id="emsch.helper.routing.route_factory" />
+            <argument type="service" id="logger" />
+        </service>
+        <service id="emsch.helper.routing.route_factory" class="EMS\ClientHelperBundle\Helper\Routing\RouteFactory">
+            <argument type="service" id="logger" />
         </service>
 
         <service id="emsch.routing.handler" class="EMS\ClientHelperBundle\Helper\Request\Handler">
