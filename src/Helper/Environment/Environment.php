@@ -13,18 +13,19 @@ final class Environment
     const BACKEND_ATTRIBUTE = '_backend';
     const LOCALE_ATTRIBUTE = '_locale';
     const REGEX_CONFIG = 'regex';
-    const BASE_URL = 'base_url';
+    const ROUTE_PREFIX = 'route_prefix';
     const BACKEND_CONFIG = 'backend';
     const REQUEST_CONFIG = 'request';
     const ALIAS_CONFIG = 'alias';
+
     private string $name;
     private string $alias;
     private ?string $regex;
+    private ?string $routePrefix;
     private ?string $backend;
 
     /** @var array<string, mixed> */
     private array $request = [];
-    private string $baseUrl;
     /** @var array<mixed> */
     private array $options;
 
@@ -36,15 +37,15 @@ final class Environment
         $this->name = $name;
         $this->alias = $config[self::ALIAS_CONFIG] ?? $name;
         $this->regex = $config[self::REGEX_CONFIG] ?? null;
-        $this->baseUrl = $config[self::BASE_URL] ?? '';
+        $this->routePrefix = $config[self::ROUTE_PREFIX] ?? null;
         $this->backend = $config[self::BACKEND_CONFIG] ?? null;
         $this->request = $config[self::REQUEST_CONFIG] ?? [];
         $this->options = $config;
     }
 
-    public function getBaseUrl(): string
+    public function getRoutePrefix(): ?string
     {
-        return $this->baseUrl;
+        return $this->routePrefix;
     }
 
     public function getName(): string
