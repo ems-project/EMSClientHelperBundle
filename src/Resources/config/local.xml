@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services
+        http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <defaults public="false" />
+        <service id="emsch.command.local.pull" class="EMS\ClientHelperBundle\Command\Local\PullCommand">
+            <argument type="service" id="emsch.helper.local.pull" />
+            <argument type="service" id="emsch.helper_environment" />
+
+            <tag name="console.command" />
+        </service>
+
+        <service id="emsch.helper.local.pull" class="EMS\ClientHelperBundle\Helper\Local\PullHelper">
+            <argument type="service" id="emsch.helper.translation.builder" />
+            <argument>%kernel.project_dir%</argument>
+        </service>
+    </services>
+</container>
