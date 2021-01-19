@@ -47,6 +47,17 @@ final class EnvironmentHelper
         return null !== $current ? $current->get(Environment::BACKEND_ATTRIBUTE) : null;
     }
 
+    public function hasCurrentEnvironment(): bool
+    {
+        try {
+            $this->getCurrentEnvironment();
+
+            return true;
+        } catch (EnvironmentNotFoundException $e) {
+            return false;
+        }
+    }
+
     /**
      * Important for twig loader on kernel terminate we don't have a current request.
      * So this function remembers it's environment and can still return it.

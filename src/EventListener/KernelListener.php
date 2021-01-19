@@ -66,7 +66,6 @@ final class KernelListener implements EventSubscriberInterface
         $request = $event->getRequest();
 
         foreach ($this->environmentHelper->getEnvironments() as $env) {
-
             if ($env->matchRequest($request)) {
                 $env->modifyRequest($request);
                 break;
@@ -76,7 +75,7 @@ final class KernelListener implements EventSubscriberInterface
 
     public function loadTranslations(KernelEvent $event): void
     {
-        if ($event->isMasterRequest()) {
+        if ($event->isMasterRequest() && $this->environmentHelper->hasCurrentEnvironment()) {
             $this->translationHelper->addCatalogues();
         }
     }
