@@ -13,8 +13,7 @@ final class Environment
     const BACKEND_ATTRIBUTE = '_backend';
     const LOCALE_ATTRIBUTE = '_locale';
     const REGEX_CONFIG = 'regex';
-    const BASE_URL_CONFIG = 'base_url';
-    const ROUTE_PREFIX_CONFIG = 'route_prefix';
+    const BASE_URL = 'base_url';
     const BACKEND_CONFIG = 'backend';
     const REQUEST_CONFIG = 'request';
     const ALIAS_CONFIG = 'alias';
@@ -26,7 +25,6 @@ final class Environment
     /** @var array<string, mixed> */
     private array $request = [];
     private string $baseUrl;
-    private string $routePrefix;
     /** @var array<mixed> */
     private array $options;
 
@@ -35,15 +33,10 @@ final class Environment
      */
     public function __construct(string $name, array $config)
     {
-        if (isset($config['index'])) {
-            throw new \RuntimeException('Index environment attribute has been deprecated and must be removed: Environment name === Elasticsearch alias name');
-        }
         $this->name = $name;
-
         $this->alias = $config[self::ALIAS_CONFIG] ?? $name;
         $this->regex = $config[self::REGEX_CONFIG] ?? null;
-        $this->baseUrl = $config[self::BASE_URL_CONFIG] ?? '';
-        $this->routePrefix = $config[self::ROUTE_PREFIX_CONFIG] ?? '';
+        $this->baseUrl = $config[self::BASE_URL] ?? '';
         $this->backend = $config[self::BACKEND_CONFIG] ?? null;
         $this->request = $config[self::REQUEST_CONFIG] ?? [];
         $this->options = $config;
@@ -52,11 +45,6 @@ final class Environment
     public function getBaseUrl(): string
     {
         return $this->baseUrl;
-    }
-
-    public function getRoutePrefix(): string
-    {
-        return $this->routePrefix;
     }
 
     public function getName(): string
