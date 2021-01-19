@@ -31,6 +31,10 @@ final class Router extends BaseRouter
 
     public function getRouteCollection(): RouteCollection
     {
+        if (!$this->clientRequest->hasCurrentEnvironment()) {
+            return new RouteCollection();
+        }
+
         if (!$this->hasBuild) {
             $this->buildRouteCollection();
         }
