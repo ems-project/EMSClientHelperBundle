@@ -35,7 +35,6 @@ final class Route
             foreach ($path as $key => $p) {
                 $locale = \in_array($key, $locales) ? \strval($key) : null;
                 $route = $this->createRoute($p, $locale);
-
                 $collection->add(\sprintf('%s.%s', $this->name, $key), $route);
             }
         } else {
