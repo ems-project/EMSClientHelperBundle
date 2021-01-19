@@ -73,25 +73,8 @@ final class Router extends BaseRouter
      */
     private function getRoutes(): array
     {
-        if ($this->clientRequest->isBind()) {
-            return $this->getRoutesByEnvironment($this->clientRequest->getCurrentEnvironment());
-        }
+        $environment = $this->clientRequest->getCurrentEnvironment();
 
-        $routes = [];
-        foreach ($this->clientRequest->getEnvironments() as $environment) {
-            if (\strlen($environment->getRoutePrefix()) > 0) {
-                $routes = \array_merge($routes, $this->getRoutesByEnvironment($environment));
-            }
-        }
-
-        return $routes;
-    }
-
-    /**
-     * @return Route[]
-     */
-    private function getRoutesByEnvironment(Environment $environment): array
-    {
         if (null === $contentType = $this->clientRequest->getRouteContentType($environment)) {
             return [];
         }
@@ -117,7 +100,6 @@ final class Router extends BaseRouter
     private function createRoutes(Environment $environment, string $type): array
     {
         $baseUrl = $environment->getBaseUrl();
-        $routePrefix = $environment->getRoutePrefix();
         $routes = [];
 
         $search = $this->clientRequest->search($type, [
@@ -137,7 +119,7 @@ final class Router extends BaseRouter
 
         foreach ($search['hits']['hits'] as $hit) {
             $source = $hit['_source'];
-            $name = $routePrefix.$source['name'];
+            $name = $source['name'];
 
             try {
                 $options = \json_decode($source['config'], true);

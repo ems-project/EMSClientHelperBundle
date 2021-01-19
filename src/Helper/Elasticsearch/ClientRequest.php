@@ -264,11 +264,6 @@ final class ClientRequest
         return \count($this->getEnvironments()) > 0;
     }
 
-    public function isBind(): bool
-    {
-        return $this->hasEnvironments() && null !== $this->environmentHelper->getBindEnvironmentName();
-    }
-
     /**
      * @return Environment[]
      */
