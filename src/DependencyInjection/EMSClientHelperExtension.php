@@ -43,6 +43,10 @@ final class EMSClientHelperExtension extends Extension
         $this->processElasticms($container, $loader, $config['elasticms']);
         $this->processApi($container, $config['api']);
         $this->processUserApi($container, $config['user_api']);
+
+        if ($config['local']) {
+            $loader->load('local.xml');
+        }
     }
 
     /**

@@ -33,7 +33,7 @@ final class Configuration implements ConfigurationInterface
                         ->scalarNode('ems_link')->end()
                     ->end()
                 ->end()
-
+                ->booleanNode('local')->defaultFalse()->end()
             ->end()
         ;
 

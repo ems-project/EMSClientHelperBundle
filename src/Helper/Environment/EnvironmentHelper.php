@@ -22,13 +22,23 @@ final class EnvironmentHelper
         $this->emschEnv = $emschEnv;
 
         foreach ($environments as $name => $config) {
-            $this->environments[] = new Environment($name, $config);
+            $this->environments[$name] = new Environment($name, $config);
         }
     }
 
     public function addEnvironment(Environment $environment): void
     {
         $this->environments[] = $environment;
+    }
+
+    public function getEmschEnv(): string
+    {
+        return $this->emschEnv;
+    }
+
+    public function getEnvironment(string $name): ?Environment
+    {
+        return $this->environments[$name] ?? null;
     }
 
     /**
@@ -82,12 +92,6 @@ final class EnvironmentHelper
     {
         $name = $this->getBindEnvironmentName();
 
-        foreach ($this->environments as $environment) {
-            if ($environment->getName() === $name) {
-                return $environment;
-            }
-        }
-
-        return null;
+        return $this->environments[$name] ?? null;
     }
 }
