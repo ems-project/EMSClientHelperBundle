@@ -17,8 +17,6 @@ final class Router extends BaseRouter
     /** @var string[] */
     private array $locales;
 
-    private bool $hasBuild = false;
-
     /**
      * @param string[] $locales
      */
@@ -31,72 +29,43 @@ final class Router extends BaseRouter
 
     public function getRouteCollection(): RouteCollection
     {
+        $routeCollection = new RouteCollection();
+
         if (null === $contentType = $this->clientRequest->getRouteContentType()) {
-            return new RouteCollection();
+            return $routeCollection;
         }
 
-        if (!$this->hasBuild) {
-            $this->buildRouteCollection();
+        foreach ($this->getRoutes($contentType) as $route) {
+            $route->addToCollection($routeCollection);
         }
 
-        return $this->collection;
-    }
-
-    public function buildRouteCollection(): void
-    {
-        $collection = new RouteCollection();
-        $this->addEMSRoutes($collection);
-
-        $this->collection = $collection;
-        $this->hasBuild = true;
-    }
-
-    private function addEMSRoutes(RouteCollection $collection): void
-    {
-        if (!$this->clientRequest->hasOption('route_type')) {
-            return;
-        }
-
-        $routes = $this->getRoutes();
-
-        foreach ($routes as $route) {
-            $route->addToCollection($collection, $this->locales);
-        }
+        return $routeCollection;
     }
 
     /**
      * @return Route[]
      */
-    private function getRoutes(): array
+    private function getRoutes(ContentType $contentType): array
     {
-        if (null === $contentType = $this->clientRequest->getRouteContentType()) {
-            return [];
-        }
-
         if (null !== $cache = $contentType->getCache()) {
             return $cache;
         }
 
-        try {
-            $routes = $this->createRoutes($contentType);
-            $contentType->setCache($routes);
-            $this->clientRequest->cacheContentType($contentType);
+        $routes = $this->createRoutes($contentType->getName());
+        $contentType->setCache($routes);
+        $this->clientRequest->cacheContentType($contentType);
 
-            return $routes;
-        } catch (\Throwable $e) {
-            return [];
-        }
+        return $routes;
     }
 
     /**
      * @return Route[]
      */
-    private function createRoutes(ContentType $contentType): array
+    private function createRoutes(string $name): array
     {
-        $baseUrl = $contentType->getEnvironment()->getBaseUrl();
         $routes = [];
 
-        $search = $this->clientRequest->search($contentType->getName(), [
+        $search = $this->clientRequest->search($name, [
             'sort' => [
                 'order' => [
                     'order' => 'asc',
@@ -128,10 +97,6 @@ final class Router extends BaseRouter
                 $options['template'] = $source['template_source'] ?? $staticTemplate;
                 $options['index_regex'] = $source['index_regex'] ?? null;
 
-                if (\strlen($baseUrl) > 0) {
-                    $options['path'] = $this->prependBaseUrl($options['path'] ?? null, $baseUrl);
-                }
-
                 $routes[] = new Route($name, $options);
             } catch (\Throwable $e) {
                 $this->logger->error('Router failed to create ems route {name} : {error}', ['name' => $name, 'error' => $e->getMessage()]);
@@ -139,25 +104,5 @@ final class Router extends BaseRouter
         }
 
         return $routes;
-    }
-
-    /**
-     * @param array<string, string>|string|null $path
-     *
-     * @return array<string, string>|string
-     */
-    private function prependBaseUrl($path, string $baseUrl)
-    {
-        if (\is_array($path)) {
-            foreach ($path as $locale => $subPath) {
-                $path[$locale] = \sprintf('%s/%s', $baseUrl, '/' === \substr($subPath, 0, 1) ? \substr($subPath, 1) : $subPath);
-            }
-        } elseif (\is_string($path)) {
-            $path = \sprintf('%s/%s', $baseUrl, '/' === \substr($path, 0, 1) ? \substr($path, 1) : $path);
-        } else {
-            throw new \RuntimeException('Unexpected path type');
-        }
-
-        return $path;
     }
 }
