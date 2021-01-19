@@ -26,7 +26,7 @@ final class ContentTypeHelper
         $this->logger = $logger;
     }
 
-    public function get(ClientRequest $clientRequest, string $contentTypeName, Environment $environment): ?ContentType
+    public function get(ClientRequest $clientRequest, Environment $environment, string $contentTypeName): ?ContentType
     {
         return $this->getContentTypeCollection($clientRequest, $environment)->getByName($contentTypeName);
     }
@@ -47,7 +47,7 @@ final class ContentTypeHelper
             $search = $this->createContentTypeSearch($environment);
             $response = Response::fromResultSet($clientRequest->commonSearch($search));
 
-            return ContentTypeCollection::fromResponse($environment->getName(), $response);
+            return ContentTypeCollection::fromResponse($environment, $response);
         } catch (\Exception $e) {
             return new ContentTypeCollection();
         }

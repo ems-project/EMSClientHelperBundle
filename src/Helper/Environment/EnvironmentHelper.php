@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Environment;
 
-use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 final class EnvironmentHelper
@@ -47,17 +46,6 @@ final class EnvironmentHelper
         return null !== $current ? $current->get(Environment::BACKEND_ATTRIBUTE) : null;
     }
 
-    public function hasCurrentEnvironment(): bool
-    {
-        try {
-            $this->getCurrentEnvironment();
-
-            return true;
-        } catch (EnvironmentNotFoundException $e) {
-            return false;
-        }
-    }
-
     /**
      * Important for twig loader on kernel terminate we don't have a current request.
      * So this function remembers it's environment and can still return it.
@@ -90,7 +78,7 @@ final class EnvironmentHelper
         return $current->getLocale();
     }
 
-    public function getCurrentEnvironment(): Environment
+    public function getCurrentEnvironment(): ?Environment
     {
         $name = $this->getBindEnvironmentName();
 
@@ -100,6 +88,6 @@ final class EnvironmentHelper
             }
         }
 
-        throw new EnvironmentNotFoundException();
+        return null;
     }
 }
