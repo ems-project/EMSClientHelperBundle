@@ -12,7 +12,7 @@ use Symfony\Component\Routing\RouteCollection;
 
 final class Router extends BaseRouter
 {
-    private ClientRequestManager $manager;
+    private ClientRequest $clientRequest;
     private LoggerInterface $logger;
     /** @var string[] */
     private array $locales;
@@ -24,7 +24,7 @@ final class Router extends BaseRouter
      */
     public function __construct(ClientRequestManager $manager, array $locales)
     {
-        $this->manager = $manager;
+        $this->clientRequest = $manager->getDefault();
         $this->logger = $manager->getLogger();
         $this->locales = $locales;
     }
@@ -49,36 +49,34 @@ final class Router extends BaseRouter
 
     private function addEMSRoutes(RouteCollection $collection): void
     {
-        foreach ($this->manager->all() as $clientRequest) {
-            if (!$clientRequest->hasOption('route_type')) {
-                continue;
-            }
+        if (!$this->clientRequest->hasOption('route_type')) {
+            return;
+        }
 
-            if (!$clientRequest->mustBeBind() && !$clientRequest->hasEnvironments()) {
-                continue;
-            }
+        if (!$this->clientRequest->mustBeBind() && !$this->clientRequest->hasEnvironments()) {
+            return;
+        }
 
-            $routes = $this->getRoutes($clientRequest);
+        $routes = $this->getRoutes();
 
-            foreach ($routes as $route) {
-                $route->addToCollection($collection, $this->locales);
-            }
+        foreach ($routes as $route) {
+            $route->addToCollection($collection, $this->locales);
         }
     }
 
     /**
      * @return Route[]
      */
-    private function getRoutes(ClientRequest $clientRequest): array
+    private function getRoutes(): array
     {
-        if ($clientRequest->isBind()) {
-            return $this->getRoutesByEnvironment($clientRequest, $clientRequest->getCurrentEnvironment());
+        if ($this->clientRequest->isBind()) {
+            return $this->getRoutesByEnvironment($this->clientRequest->getCurrentEnvironment());
         }
 
         $routes = [];
-        foreach ($clientRequest->getEnvironments() as $environment) {
+        foreach ($this->clientRequest->getEnvironments() as $environment) {
             if (\strlen($environment->getRoutePrefix()) > 0) {
-                $routes = \array_merge($routes, $this->getRoutesByEnvironment($clientRequest, $environment));
+                $routes = \array_merge($routes, $this->getRoutesByEnvironment($environment));
             }
         }
 
@@ -88,9 +86,9 @@ final class Router extends BaseRouter
     /**
      * @return Route[]
      */
-    private function getRoutesByEnvironment(ClientRequest $clientRequest, Environment $environment): array
+    private function getRoutesByEnvironment(Environment $environment): array
     {
-        if (null === $contentType = $clientRequest->getRouteContentType($environment)) {
+        if (null === $contentType = $this->clientRequest->getRouteContentType($environment)) {
             return [];
         }
 
@@ -99,9 +97,9 @@ final class Router extends BaseRouter
         }
 
         try {
-            $routes = $this->createRoutes($clientRequest, $environment, $contentType->getName());
+            $routes = $this->createRoutes($environment, $contentType->getName());
             $contentType->setCache($routes);
-            $clientRequest->cacheContentType($contentType);
+            $this->clientRequest->cacheContentType($contentType);
 
             return $routes;
         } catch (\Throwable $e) {
@@ -112,13 +110,13 @@ final class Router extends BaseRouter
     /**
      * @return Route[]
      */
-    private function createRoutes(ClientRequest $clientRequest, Environment $environment, string $type): array
+    private function createRoutes(Environment $environment, string $type): array
     {
         $baseUrl = $environment->getBaseUrl();
         $routePrefix = $environment->getRoutePrefix();
         $routes = [];
 
-        $search = $clientRequest->search($type, [
+        $search = $this->clientRequest->search($type, [
             'sort' => [
                 'order' => [
                     'order' => 'asc',
