@@ -39,6 +39,10 @@ final class Router extends BaseRouter
             $route->addToCollection($routeCollection);
         }
 
+        if (null !== $routePrefix = $contentType->getEnvironment()->getRoutePrefix()) {
+            $routeCollection->addPrefix($routePrefix);
+        }
+
         return $routeCollection;
     }
 
