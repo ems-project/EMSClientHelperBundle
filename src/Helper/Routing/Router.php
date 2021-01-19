@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
+use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
-use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -31,7 +31,7 @@ final class Router extends BaseRouter
 
     public function getRouteCollection(): RouteCollection
     {
-        if (!$this->clientRequest->hasCurrentEnvironment()) {
+        if (null === $contentType = $this->clientRequest->getRouteContentType()) {
             return new RouteCollection();
         }
 
@@ -57,10 +57,6 @@ final class Router extends BaseRouter
             return;
         }
 
-        if (!$this->clientRequest->mustBeBind() && !$this->clientRequest->hasEnvironments()) {
-            return;
-        }
-
         $routes = $this->getRoutes();
 
         foreach ($routes as $route) {
@@ -73,9 +69,7 @@ final class Router extends BaseRouter
      */
     private function getRoutes(): array
     {
-        $environment = $this->clientRequest->getCurrentEnvironment();
-
-        if (null === $contentType = $this->clientRequest->getRouteContentType($environment)) {
+        if (null === $contentType = $this->clientRequest->getRouteContentType()) {
             return [];
         }
 
@@ -84,7 +78,7 @@ final class Router extends BaseRouter
         }
 
         try {
-            $routes = $this->createRoutes($environment, $contentType->getName());
+            $routes = $this->createRoutes($contentType);
             $contentType->setCache($routes);
             $this->clientRequest->cacheContentType($contentType);
 
@@ -97,12 +91,12 @@ final class Router extends BaseRouter
     /**
      * @return Route[]
      */
-    private function createRoutes(Environment $environment, string $type): array
+    private function createRoutes(ContentType $contentType): array
     {
-        $baseUrl = $environment->getBaseUrl();
+        $baseUrl = $contentType->getEnvironment()->getBaseUrl();
         $routes = [];
 
-        $search = $this->clientRequest->search($type, [
+        $search = $this->clientRequest->search($contentType->getName(), [
             'sort' => [
                 'order' => [
                     'order' => 'asc',
@@ -110,7 +104,7 @@ final class Router extends BaseRouter
                     'unmapped_type' => 'long',
                 ],
             ],
-        ], 0, 1000, [], null, $environment->getAlias());
+        ], 0, 1000);
 
         $total = $search['hits']['total']['value'] ?? $search['hits']['total'];
         if ($total > 1000) {

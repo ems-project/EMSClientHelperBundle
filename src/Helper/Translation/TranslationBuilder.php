@@ -44,10 +44,6 @@ final class TranslationBuilder
             return;
         }
 
-        if (!$this->clientRequest->mustBeBind() && !$this->clientRequest->hasEnvironments()) {
-            return;
-        }
-
         foreach ($this->getMessages($contentType) as $locale => $messages) {
             $messageCatalogue = new MessageCatalogue($locale);
             $messageCatalogue->add($messages, $this->clientRequest->getCacheKey());
