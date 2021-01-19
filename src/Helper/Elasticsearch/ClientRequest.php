@@ -254,14 +254,6 @@ final class ClientRequest
         return $out;
     }
 
-    /**
-     * @return Environment[]
-     */
-    public function getEnvironments(): array
-    {
-        return $this->environmentHelper->getEnvironments();
-    }
-
     public function getCurrentEnvironment(): ?Environment
     {
         return $this->environmentHelper->getCurrentEnvironment();

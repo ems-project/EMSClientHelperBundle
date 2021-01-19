@@ -28,14 +28,6 @@ final class TranslationBuilder
     }
 
     /**
-     * @return string[]
-     */
-    public function getLocales(): array
-    {
-        return $this->locales;
-    }
-
-    /**
      * @return \Generator|MessageCatalogue[]
      */
     public function buildMessageCatalogues(): \Generator
