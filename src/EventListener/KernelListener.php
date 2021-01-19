@@ -65,9 +65,10 @@ final class KernelListener implements EventSubscriberInterface
     {
         $request = $event->getRequest();
 
-        foreach ($this->environmentHelper->getEnvironments() as $env) {
-            if ($env->matchRequest($request)) {
-                $env->modifyRequest($request);
+        foreach ($this->environmentHelper->getEnvironments() as $environment) {
+            if ($environment->matchRequest($request)) {
+                $environment->makeActive();
+                $environment->modifyRequest($request);
                 break;
             }
         }
