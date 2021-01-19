@@ -254,16 +254,6 @@ final class ClientRequest
         return $out;
     }
 
-    public function mustBeBind(): bool
-    {
-        return $this->options['must_be_bind'] ?? true;
-    }
-
-    public function hasEnvironments(): bool
-    {
-        return \count($this->getEnvironments()) > 0;
-    }
-
     /**
      * @return Environment[]
      */
@@ -272,12 +262,7 @@ final class ClientRequest
         return $this->environmentHelper->getEnvironments();
     }
 
-    public function hasCurrentEnvironment(): bool
-    {
-        return $this->environmentHelper->hasCurrentEnvironment();
-    }
-
-    public function getCurrentEnvironment(): Environment
+    public function getCurrentEnvironment(): ?Environment
     {
         return $this->environmentHelper->getCurrentEnvironment();
     }
@@ -287,9 +272,9 @@ final class ClientRequest
         $this->cacheHelper->saveContentType($contentType);
     }
 
-    public function getRouteContentType(Environment $environment): ?ContentType
+    public function getRouteContentType(): ?ContentType
     {
-        return $this->getContentType($this->getOption('[route_type]'), $environment);
+        return $this->getContentType($this->getOption('[route_type]'));
     }
 
     public function getTranslationContentType(): ?ContentType
@@ -297,12 +282,13 @@ final class ClientRequest
         return $this->getContentType($this->getOption('[translation_type]'));
     }
 
-    public function getContentType(string $name, ?Environment $environment = null): ?ContentType
+    public function getContentType(string $name): ?ContentType
     {
-        if (null === $environment) {
-            $environment = $this->environmentHelper->getCurrentEnvironment();
+        if (null === $environment = $this->environmentHelper->getCurrentEnvironment()) {
+            return null;
         }
-        if (null === $contentType = $this->contentTypeHelper->get($this, $name, $environment)) {
+
+        if (null === $contentType = $this->contentTypeHelper->get($this, $environment, $name)) {
             return null;
         }
 
@@ -587,7 +573,11 @@ final class ClientRequest
 
     public function getAlias(): string
     {
-        return $this->environmentHelper->getCurrentEnvironment()->getAlias();
+        if (null === $currentEnvironment = $this->getCurrentEnvironment()) {
+            throw new \RuntimeException('No current environment found!');
+        }
+
+        return $currentEnvironment->getAlias();
     }
 
     /**
