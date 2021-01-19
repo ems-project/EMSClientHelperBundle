@@ -19,6 +19,7 @@ final class Environment
     const ALIAS_CONFIG = 'alias';
 
     private string $name;
+    private bool $active = false;
     private string $alias;
     private ?string $regex;
     private ?string $routePrefix;
@@ -56,6 +57,16 @@ final class Environment
     public function getAlias(): string
     {
         return $this->alias;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->active;
+    }
+
+    public function makeActive(): void
+    {
+        $this->active = true;
     }
 
     public function matchRequest(Request $request): bool
