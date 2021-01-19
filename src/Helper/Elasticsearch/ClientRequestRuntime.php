@@ -7,6 +7,7 @@ namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 use EMS\ClientHelperBundle\Helper\Search\Search;
 use EMS\CommonBundle\Common\Document;
 use EMS\CommonBundle\Common\EMSLink;
+use EMS\CommonBundle\Elasticsearch\Response\Response;
 use Psr\Log\LoggerInterface;
 use Twig\Extension\RuntimeExtensionInterface;
 
@@ -66,14 +67,14 @@ final class ClientRequestRuntime implements RuntimeExtensionInterface
             ];
         }
 
-        $result = $this->manager->getDefault()->searchArgs(['body' => $body]);
-        $total = $result['hits']['total'];
+        $results = $this->manager->getDefault()->searchArgs(['body' => $body]);
+        $response = Response::fromArray($results);
 
-        if (1 === $total) {
-            return $result['hits']['hits'];
+        if (1 === $response->getTotal()) {
+            return $results['hits']['hits'];
         }
 
-        return ($total > 1) ? false : null;
+        return ($response->getTotal() > 1) ? false : null;
     }
 
     public function get(string $input): ?Document
