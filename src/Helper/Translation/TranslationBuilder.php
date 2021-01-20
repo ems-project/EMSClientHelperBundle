@@ -4,17 +4,15 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Translation;
 
+use EMS\ClientHelperBundle\Helper\Builder\AbstractBuilder;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
-use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\MessageCatalogue;
 
-final class TranslationBuilder
+final class TranslationBuilder extends AbstractBuilder
 {
-    private ClientRequest $clientRequest;
-    private LoggerInterface $logger;
     /** @var string[] */
     private array $locales;
 
@@ -23,8 +21,7 @@ final class TranslationBuilder
      */
     public function __construct(ClientRequestManager $manager, LoggerInterface $logger, array $locales)
     {
-        $this->clientRequest = $manager->getDefault();
-        $this->logger = $logger;
+        parent::__construct($manager, $logger);
         $this->locales = $locales;
     }
 
