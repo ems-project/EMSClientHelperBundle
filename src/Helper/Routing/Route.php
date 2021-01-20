@@ -50,6 +50,14 @@ final class Route
             $defaults['_locale'] = $locale;
         }
 
+        if (null !== $this->options['prefix']) {
+            if ('/' !== \substr($path, 0, 1)) {
+                $path = $this->options['prefix'].'/'.$path;
+            } else {
+                $path = $this->options['prefix'].$path;
+            }
+        }
+
         return new SymfonyRoute(
             $path,
             $defaults,
@@ -80,6 +88,7 @@ final class Route
                 'options' => [],
                 'host' => null,
                 'schemes' => null,
+                'prefix' => null,
                 'type' => null,
                 'query' => null,
                 'template' => null,
@@ -95,13 +104,7 @@ final class Route
             })
             ->setNormalizer('options', function (Options $options, $value) {
                 if (null !== $options['query']) {
-                    $query = \json_decode($options['query']);
-
-                    if (JSON_ERROR_NONE !== \json_last_error()) {
-                        throw new \LogicException('invalid json for query!');
-                    }
-
-                    $value['query'] = \json_encode($query);
+                    $value['query'] = \json_encode($options['query']);
                 }
 
                 $value['type'] = $options['type'];
