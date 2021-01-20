@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Routing\Url;
 
+use EMS\ClientHelperBundle\Exception\TemplatingException;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
-use EMS\ClientHelperBundle\Helper\Twig\TwigException;
 use EMS\CommonBundle\Common\EMSLink;
 use EMS\CommonBundle\Elasticsearch\Document\EMSSource;
 use Psr\Log\LoggerInterface;
@@ -120,7 +120,7 @@ final class Transformer
     {
         try {
             return $this->twig->render($template, $context);
-        } catch (TwigException $ex) {
+        } catch (TemplatingException $ex) {
             $this->logger->warning($ex->getMessage());
         } catch (Error $ex) {
             $this->logger->error($ex->getMessage());
