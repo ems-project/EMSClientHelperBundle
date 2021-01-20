@@ -25,9 +25,9 @@ final class TemplateLoader implements LoaderInterface
 
     public function getSourceContext($name): Source
     {
-        $code = $this->templateBuilder->buildTemplate($this->getEnvironment(), new Template($name));
+        $template = $this->templateBuilder->buildTemplate($this->getEnvironment(), new TemplateName($name));
 
-        return new Source($code, $name);
+        return new Source($template->getCode(), $name);
     }
 
     public function getCacheKey($name)
@@ -37,7 +37,7 @@ final class TemplateLoader implements LoaderInterface
 
     public function isFresh($name, $time)
     {
-        return $this->templateBuilder->isFresh($this->getEnvironment(), new Template($name), $time);
+        return $this->templateBuilder->isFresh($this->getEnvironment(), new TemplateName($name), $time);
     }
 
     public function exists($name): bool
@@ -46,7 +46,7 @@ final class TemplateLoader implements LoaderInterface
             return false;
         }
 
-        return Template::validate($name);
+        return TemplateName::validate($name);
     }
 
     private function getEnvironment(): Environment
