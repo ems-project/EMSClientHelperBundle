@@ -4,68 +4,39 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Templating;
 
-use EMS\ClientHelperBundle\Exception\TemplatingException;
-
 final class Template
 {
-    private string $name;
-    private string $contentType;
-    private string $searchValue;
-    private ?string $searchField;
+    public string $name;
+    public string $code;
 
     public const PREFIX = '@EMSCH';
-    private const REGEX_MATCH_OUUID = '/^@EMSCH\/(?<content_type>[a-z][a-z0-9\-_]*):(?<search_val>.*)$/';
-    private const REGEX_MATCH_NAME = '/^@EMSCH\/(?<content_type>[a-z][a-z0-9\-_]*)\/(?<search_val>.*)$/';
 
-    public function __construct(string $name)
+    public function __construct(string $name, string $code)
     {
         $this->name = $name;
-
-        $match = $this->match($name);
-        list($contentType, $searchValue, $searchField) = $match;
-
-        $this->contentType = $contentType;
-        $this->searchValue = $searchValue;
-        $this->searchField = $searchField;
-    }
-
-    public static function validate(string $name): bool
-    {
-        return self::PREFIX === \substr($name, 0, 6);
-    }
-
-    public function getContentType(): string
-    {
-        return $this->contentType;
-    }
-
-    public function getSearchValue(): string
-    {
-        return $this->searchValue;
-    }
-
-    public function getSearchField(): ?string
-    {
-        return $this->searchField;
+        $this->code = $code;
     }
 
     /**
-     * @return array{string, string, string|null}
+     * @param array<mixed> $hit
+     * @param array<mixed> $mapping
      */
-    private function match(string $name): array
+    public static function fromHit(array $hit, array $mapping): self
     {
-        \preg_match(self::REGEX_MATCH_OUUID, $name, $matchOuuid);
+        $nameProperty = $mapping['name'];
+        $codeProperty = $mapping['code'];
+        $source = $hit['_source'];
 
-        if ($matchOuuid) {
-            return [$matchOuuid['content_type'], $matchOuuid['search_val'], '_id'];
-        }
+        return new self($source[$nameProperty], $source[$codeProperty] ?? '');
+    }
 
-        \preg_match(self::REGEX_MATCH_NAME, $name, $matchName);
+    public function getName(): string
+    {
+        return $this->name;
+    }
 
-        if ($matchName) {
-            return [$matchName['content_type'], $matchName['search_val'], null];
-        }
-
-        throw new TemplatingException(\sprintf('Invalid template name: %s', $name));
+    public function getCode(): string
+    {
+        return $this->code;
     }
 }

@@ -10,6 +10,7 @@ use EMS\CommonBundle\Command\CommandInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -42,6 +43,8 @@ final class PullCommand extends Command implements CommandInterface
         if (null === $input->getOption(self::OPTION_EMSCH_ENV)) {
             $input->setOption(self::OPTION_EMSCH_ENV, $this->environmentHelper->getEmschEnv());
         }
+
+        $this->pullHelper->setLogger(new ConsoleLogger($output));
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -54,8 +57,17 @@ final class PullCommand extends Command implements CommandInterface
             throw new \RuntimeException(\sprintf('Environment with the name "%s" not found!', $environmentName));
         }
 
+        $this->style->section('Pulling translations');
         $this->pullHelper->pullTranslations($environment);
+        $this->style->newLine();
+
+        $this->style->section('Pulling templates');
+        $this->pullHelper->pullTemplates($environment);
+        $this->style->newLine();
+
+        $this->style->section('Pulling routes');
         $this->pullHelper->pullRoutes($environment);
+        $this->style->newLine();
 
         return 1;
     }

@@ -22,34 +22,56 @@ final class TemplateBuilder
         $this->logger = $logger;
     }
 
-    public function isFresh(Environment $environment, Template $template, int $time): bool
+    public function isFresh(Environment $environment, TemplateName $templateName, int $time): bool
     {
-        return $this->getContentType($environment, $template)->isLastPublishedAfterTime($time);
+        return $this->getContentType($environment, $templateName)->isLastPublishedAfterTime($time);
     }
 
-    public function buildTemplate(Environment $environment, Template $template): string
+    public function buildTemplate(Environment $environment, TemplateName $templateName): Template
     {
-        $mapping = $this->getMappingConfig($template);
-        $contentType = $this->getContentType($environment, $template);
+        $mapping = $this->getMappingConfig($templateName);
+        $contentType = $this->getContentType($environment, $templateName);
 
-        $nameField = $template->getSearchField();
-        $codeField = $mapping['code'];
-
-        $document = $this->clientRequest->searchOne($contentType->getName(), [
+        $searchField = $templateName->getSearchField();
+        $hit = $this->clientRequest->searchOne($contentType->getName(), [
             'query' => [
                 'term' => [
-                    ($nameField ?? $mapping['name']) => $template->getSearchValue(),
+                    ($searchField ?? $mapping['name']) => $templateName->getSearchValue(),
                 ],
             ],
-            '_source' => [$codeField],
+            '_source' => [$mapping['name'], $mapping['code']],
         ]);
 
-        return $document['_source'][$codeField] ?? '';
+        return Template::fromHit($hit, $mapping);
     }
 
-    private function getContentType(Environment $environment, Template $template): ContentType
+    /**
+     * @return \Generator|Template[]
+     */
+    public function buildTemplates(Environment $environment): \Generator
     {
-        $contentTypeName = $template->getContentType();
+        $config = $this->getTemplatesConfig();
+
+        foreach ($config as $name => $mapping) {
+            if (null === $contentType = $this->clientRequest->getContentType($name, $environment)) {
+                continue;
+            }
+
+            $scroll = $this->clientRequest->scrollAll([
+                'size' => 100,
+                'type' => $contentType->getName(),
+                'sort' => ['_doc'],
+            ], '5s', $contentType->getEnvironment()->getAlias());
+
+            foreach ($scroll as $hit) {
+                yield Template::fromHit($hit, $mapping);
+            }
+        }
+    }
+
+    private function getContentType(Environment $environment, TemplateName $templateName): ContentType
+    {
+        $contentTypeName = $templateName->getContentType();
 
         if (null === $contentType = $this->clientRequest->getContentType($contentTypeName, $environment)) {
             throw new TemplatingException(\sprintf('Invalid contentType %s', $contentTypeName));
@@ -61,10 +83,18 @@ final class TemplateBuilder
     /**
      * @return array<mixed>
      */
-    private function getMappingConfig(Template $template): array
+    private function getTemplatesConfig(): array
     {
-        $configTemplates = $this->clientRequest->getOption('[templates]');
-        $config = $configTemplates[$template->getContentType()] ?? null;
+        return $this->clientRequest->getOption('[templates]');
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function getMappingConfig(TemplateName $templateName): array
+    {
+        $configTemplates = $this->getTemplatesConfig();
+        $config = $configTemplates[$templateName->getContentType()] ?? null;
 
         if (null === $config) {
             throw new TemplatingException('Missing config EMSCH_TEMPLATES');
