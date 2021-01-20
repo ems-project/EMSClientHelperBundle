@@ -6,7 +6,7 @@ namespace EMS\ClientHelperBundle\DependencyInjection;
 
 use EMS\ClientHelperBundle\Helper\Api\Client as ApiClient;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
-use EMS\ClientHelperBundle\Helper\Twig\TwigLoader;
+use EMS\ClientHelperBundle\Helper\Templating\TemplateLoader;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -58,7 +58,7 @@ final class EMSClientHelperExtension extends Extension
             $this->defineClientRequest($container, $loader, $name, $options);
 
             if (isset($options['templates'])) {
-                $this->defineTwigLoader($container, $name, $options['templates']);
+                $this->defineTwigLoader($container, $name);
             }
         }
     }
@@ -118,12 +118,12 @@ final class EMSClientHelperExtension extends Extension
         $loaded = true;
     }
 
-    private function defineTwigLoader(ContainerBuilder $container, string $name, string $options): void
+    private function defineTwigLoader(ContainerBuilder $container, string $name): void
     {
-        $loader = new Definition(TwigLoader::class);
+        $loader = new Definition(TemplateLoader::class);
         $loader->setArguments([
-            new Reference(\sprintf('emsch.client_request.%s', $name)),
-            $options,
+            new Reference('emsch.helper_environment'),
+            new Reference('emsch.helper.templating.builder'),
         ]);
         $loader->addTag('twig.loader', ['alias' => $name, 'priority' => 1]);
 

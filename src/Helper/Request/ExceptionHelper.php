@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Request;
 
+use EMS\ClientHelperBundle\Exception\TemplatingException;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
-use EMS\ClientHelperBundle\Helper\Twig\TwigException;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Environment;
@@ -59,7 +59,7 @@ final class ExceptionHelper
             return $errorTemplate;
         }
 
-        throw new TwigException(\sprintf('template "%s" does not exists', $errorTemplate));
+        throw new TemplatingException(\sprintf('template "%s" does not exists', $errorTemplate));
     }
 
     private function templateExists(string $template): bool
