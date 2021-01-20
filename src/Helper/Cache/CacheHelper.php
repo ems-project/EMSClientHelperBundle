@@ -38,6 +38,10 @@ final class CacheHelper
             return null;
         }
 
+        if ($cachedContentType->getEnvironment() !== $contentType->getEnvironment()) {
+            return null; //update on environment
+        }
+
         if ($cachedContentType->getCacheValidityTag() !== $contentType->getCacheValidityTag()) {
             $this->cache->deleteItem($contentType->getCacheKey());
 
