@@ -7,6 +7,7 @@ namespace EMS\ClientHelperBundle\Helper\Routing;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
+use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -23,11 +24,11 @@ final class RoutingBuilder
         $this->routeFactory = $routeFactory;
     }
 
-    public function buildRouteCollection(): RouteCollection
+    public function buildRouteCollection(Environment $environment): RouteCollection
     {
         $routeCollection = new RouteCollection();
 
-        if (null === $contentType = $this->clientRequest->getRouteContentType()) {
+        if (null === $contentType = $this->clientRequest->getRouteContentType($environment)) {
             return $routeCollection;
         }
 
@@ -51,7 +52,7 @@ final class RoutingBuilder
             return $cache;
         }
 
-        $routes = $this->createRoutes($contentType->getName());
+        $routes = $this->createRoutes($contentType);
         $contentType->setCache($routes);
         $this->clientRequest->cacheContentType($contentType);
 
@@ -61,11 +62,11 @@ final class RoutingBuilder
     /**
      * @return Route[]
      */
-    private function createRoutes(string $type): array
+    private function createRoutes(ContentType $contentType): array
     {
         $routes = [];
 
-        $search = $this->clientRequest->search($type, [
+        $search = $this->clientRequest->search($contentType->getName(), [
             'sort' => [
                 'order' => [
                     'order' => 'asc',
@@ -73,7 +74,7 @@ final class RoutingBuilder
                     'unmapped_type' => 'long',
                 ],
             ],
-        ], 0, 1000);
+        ], 0, 1000, [], $contentType->getEnvironment()->getAlias());
 
         $total = $search['hits']['total']['value'] ?? $search['hits']['total'];
 

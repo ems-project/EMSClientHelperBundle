@@ -7,6 +7,7 @@ namespace EMS\ClientHelperBundle\Helper\Translation;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
+use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\MessageCatalogue;
 
@@ -30,9 +31,9 @@ final class TranslationBuilder
     /**
      * @return \Generator|MessageCatalogue[]
      */
-    public function buildMessageCatalogues(): \Generator
+    public function buildMessageCatalogues(Environment $environment): \Generator
     {
-        if (null === $contentType = $this->clientRequest->getTranslationContentType()) {
+        if (null === $contentType = $this->clientRequest->getTranslationContentType($environment)) {
             return;
         }
 
@@ -53,7 +54,7 @@ final class TranslationBuilder
             return $cache;
         }
 
-        $messages = $this->createMessages($contentType->getName());
+        $messages = $this->createMessages($contentType);
         $contentType->setCache($messages);
         $this->clientRequest->cacheContentType($contentType);
 
@@ -63,14 +64,14 @@ final class TranslationBuilder
     /**
      * @return array<string, array<int|string, mixed>>
      */
-    private function createMessages(string $type): array
+    private function createMessages(ContentType $contentType): array
     {
         $messages = [];
         $scroll = $this->clientRequest->scrollAll([
             'size' => 100,
-            'type' => $type,
+            'type' => $contentType->getName(),
             'sort' => ['_doc'],
-        ], '5s');
+        ], '5s', $contentType->getEnvironment()->getAlias());
 
         foreach ($scroll as $hit) {
             foreach ($this->locales as $locale) {

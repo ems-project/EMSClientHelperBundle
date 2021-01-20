@@ -43,6 +43,7 @@
         </service>
 
         <service id="emsch.helper.translator" class="EMS\ClientHelperBundle\Helper\Translation\Translator">
+            <argument type="service" id="emsch.helper_environment" />
             <argument type="service" id="emsch.helper.translation.builder" />
             <argument type="service" id="translator.default" />
             <tag name="kernel.cache_warmer" />

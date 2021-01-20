@@ -18,6 +18,7 @@
         </service>
 
         <service id="emsch.helper.router" class="EMS\ClientHelperBundle\Helper\Routing\Router">
+            <argument type="service" id="emsch.helper_environment" />
             <argument type="service" id="emsch.helper.routing.builder" />
             <tag name="emsch.router" priority="100" /> <!-- before symfony router -->
         </service>

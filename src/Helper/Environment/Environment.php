@@ -71,8 +71,15 @@ final class Environment
 
     public function matchRequest(Request $request): bool
     {
+        if (null !== $this->routePrefix) {
+            $requestPrefix = \substr($request->getPathInfo(), 0, \strlen($this->routePrefix));
+            if ($requestPrefix === $this->routePrefix) {
+                return true;
+            }
+        }
+
         if (null === $this->regex) {
-            return true;
+            return false;
         }
 
         $url = \vsprintf('%s://%s%s', [$request->getScheme(), $request->getHttpHost(), $request->getBasePath()]);
