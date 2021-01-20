@@ -24,7 +24,7 @@ final class PullHelper
         $dumper = new YamlFileDumper('yaml');
         $path = $this->getPath($environment, 'translations');
 
-        foreach ($this->translationBuilder->buildMessageCatalogues() as $messageCatalogue) {
+        foreach ($this->translationBuilder->buildMessageCatalogues($environment) as $messageCatalogue) {
             $dumper->dump($messageCatalogue, ['path' => $path, 'as_tree' => true, 'inline' => 5]);
         }
     }

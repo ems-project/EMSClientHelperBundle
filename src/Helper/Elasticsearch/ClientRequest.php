@@ -264,20 +264,31 @@ final class ClientRequest
         $this->cacheHelper->saveContentType($contentType);
     }
 
-    public function getRouteContentType(): ?ContentType
+    public function getRouteContentType(Environment $environment): ?ContentType
     {
-        return $this->getContentType($this->getOption('[route_type]'));
-    }
-
-    public function getTranslationContentType(): ?ContentType
-    {
-        return $this->getContentType($this->getOption('[translation_type]'));
-    }
-
-    public function getContentType(string $name): ?ContentType
-    {
-        if (null === $environment = $this->environmentHelper->getCurrentEnvironment()) {
+        if (null === $routeType = $this->getOption('[route_type]')) {
             return null;
+        }
+
+        return $this->getContentType($routeType, $environment);
+    }
+
+    public function getTranslationContentType(Environment $environment): ?ContentType
+    {
+        if (null === $translationType = $this->getOption('[translation_type]')) {
+            return null;
+        }
+
+        return $this->getContentType($translationType, $environment);
+    }
+
+    public function getContentType(string $name, ?Environment $environment = null): ?ContentType
+    {
+        if (null === $environment) {
+            if (null === $currentEnvironment = $this->getCurrentEnvironment()) {
+                return null;
+            }
+            $environment = $currentEnvironment;
         }
 
         if (null === $contentType = $this->contentTypeHelper->get($this, $environment, $name)) {
