@@ -24,10 +24,6 @@
         </service>
         <service id="emsch.helper.routing.builder" class="EMS\ClientHelperBundle\Helper\Routing\RoutingBuilder">
             <argument type="service" id="emsch.manager.client_request" />
-            <argument type="service" id="emsch.helper.routing.route_factory" />
-            <argument type="service" id="logger" />
-        </service>
-        <service id="emsch.helper.routing.route_factory" class="EMS\ClientHelperBundle\Helper\Routing\RouteFactory">
             <argument type="service" id="logger" />
         </service>
 
