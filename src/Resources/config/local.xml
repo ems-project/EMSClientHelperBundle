@@ -15,6 +15,7 @@
 
         <service id="emsch.helper.local.pull" class="EMS\ClientHelperBundle\Helper\Local\PullHelper">
             <argument type="service" id="emsch.helper.translation.builder" />
+            <argument type="service" id="emsch.helper.routing.builder" />
             <argument>%kernel.project_dir%</argument>
         </service>
     </services>

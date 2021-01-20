@@ -55,6 +55,7 @@ final class PullCommand extends Command implements CommandInterface
         }
 
         $this->pullHelper->pullTranslations($environment);
+        $this->pullHelper->pullRoutes($environment);
 
         return 1;
     }

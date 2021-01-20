@@ -15,13 +15,11 @@ final class RoutingBuilder
 {
     private ClientRequest $clientRequest;
     private LoggerInterface $logger;
-    private RouteFactory $routeFactory;
 
-    public function __construct(ClientRequestManager $manager, RouteFactory $routeFactory, LoggerInterface $logger)
+    public function __construct(ClientRequestManager $manager, LoggerInterface $logger)
     {
         $this->clientRequest = $manager->getDefault();
         $this->logger = $logger;
-        $this->routeFactory = $routeFactory;
     }
 
     public function buildRouteCollection(Environment $environment): RouteCollection
@@ -36,11 +34,26 @@ final class RoutingBuilder
             $route->addToCollection($routeCollection);
         }
 
-        if (null !== $routePrefix = $contentType->getEnvironment()->getRoutePrefix()) {
-            $routeCollection->addPrefix($routePrefix);
+        return $routeCollection;
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    public function buildRouteConfigs(Environment $environment): array
+    {
+        if (null === $contentType = $this->clientRequest->getRouteContentType($environment)) {
+            return [];
         }
 
-        return $routeCollection;
+        $routeConfigs = [];
+
+        foreach ($this->searchRoutes($contentType) as $hit) {
+            $routeConfig = RouteConfig::fromHit($hit);
+            $routeConfigs[$routeConfig->getName()] = $routeConfig->toArray();
+        }
+
+        return $routeConfigs;
     }
 
     /**
@@ -65,7 +78,28 @@ final class RoutingBuilder
     private function createRoutes(ContentType $contentType): array
     {
         $routes = [];
+        $environmentOptions = [];
 
+        if (null !== $routePrefix = $contentType->getEnvironment()->getRoutePrefix()) {
+            $environmentOptions['prefix'] = $routePrefix;
+        }
+
+        $hits = $this->searchRoutes($contentType);
+
+        foreach ($hits as $hit) {
+            $routeConfig = RouteConfig::fromHit($hit);
+            $options = \array_merge($routeConfig->getOptions(), $environmentOptions);
+            $routes[] = new Route($routeConfig->getName(), $options);
+        }
+
+        return $routes;
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function searchRoutes(ContentType $contentType): array
+    {
         $search = $this->clientRequest->search($contentType->getName(), [
             'sort' => [
                 'order' => [
@@ -82,12 +116,6 @@ final class RoutingBuilder
             $this->logger->error('Only the first 1000 routes have been loaded on a total of {total}', ['total' => $total]);
         }
 
-        foreach ($search['hits']['hits'] as $hit) {
-            if (null !== $route = $this->routeFactory->fromHit($hit)) {
-                $routes[] = $route;
-            }
-        }
-
-        return $routes;
+        return $search['hits']['hits'];
     }
 }
