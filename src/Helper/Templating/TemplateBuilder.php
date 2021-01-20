@@ -5,23 +5,12 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Templating;
 
 use EMS\ClientHelperBundle\Exception\TemplatingException;
+use EMS\ClientHelperBundle\Helper\Builder\AbstractBuilder;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
-use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
-use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
-use Psr\Log\LoggerInterface;
 
-final class TemplateBuilder
+final class TemplateBuilder extends AbstractBuilder
 {
-    private ClientRequest $clientRequest;
-    private LoggerInterface $logger;
-
-    public function __construct(ClientRequestManager $manager, LoggerInterface $logger)
-    {
-        $this->clientRequest = $manager->getDefault();
-        $this->logger = $logger;
-    }
-
     public function isFresh(Environment $environment, TemplateName $templateName, int $time): bool
     {
         return $this->getContentType($environment, $templateName)->isLastPublishedAfterTime($time);
