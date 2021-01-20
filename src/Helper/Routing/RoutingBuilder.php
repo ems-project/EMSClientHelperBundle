@@ -4,24 +4,13 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
+use EMS\ClientHelperBundle\Helper\Builder\AbstractBuilder;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
-use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
-use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\RouteCollection;
 
-final class RoutingBuilder
+final class RoutingBuilder extends AbstractBuilder
 {
-    private ClientRequest $clientRequest;
-    private LoggerInterface $logger;
-
-    public function __construct(ClientRequestManager $manager, LoggerInterface $logger)
-    {
-        $this->clientRequest = $manager->getDefault();
-        $this->logger = $logger;
-    }
-
     public function buildRouteCollection(Environment $environment): RouteCollection
     {
         $routeCollection = new RouteCollection();
