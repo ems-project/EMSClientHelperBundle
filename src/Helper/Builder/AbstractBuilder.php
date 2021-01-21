@@ -6,6 +6,7 @@ namespace EMS\ClientHelperBundle\Helper\Builder;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
+use EMS\ClientHelperBundle\Helper\Local\LocalHelper;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -19,10 +20,16 @@ abstract class AbstractBuilder
 {
     protected ClientRequest $clientRequest;
     protected LoggerInterface $logger;
+    private ?LocalHelper $localHelper = null;
 
     public function __construct(ClientRequestManager $manager, LoggerInterface $logger)
     {
         $this->clientRequest = $manager->getDefault();
         $this->logger = $logger;
+    }
+
+    public function setLocalHelper(?LocalHelper $localHelper): void
+    {
+        $this->localHelper = $localHelper;
     }
 }

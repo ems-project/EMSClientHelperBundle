@@ -49,7 +49,7 @@ final class PullCommand extends Command implements CommandInterface
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->style->title('Sync - pull');
+        $this->style->title('Local development - pull');
 
         $environmentName = \strval($input->getOption(self::OPTION_EMSCH_ENV));
 
@@ -57,17 +57,8 @@ final class PullCommand extends Command implements CommandInterface
             throw new \RuntimeException(\sprintf('Environment with the name "%s" not found!', $environmentName));
         }
 
-        $this->style->section('Pulling translations');
-        $this->pullHelper->pullTranslations($environment);
-        $this->style->newLine();
-
-        $this->style->section('Pulling templates');
-        $this->pullHelper->pullTemplates($environment);
-        $this->style->newLine();
-
-        $this->style->section('Pulling routes');
-        $this->pullHelper->pullRoutes($environment);
-        $this->style->newLine();
+        $this->style->section(\sprintf('Pulling for environment %s (%s)', $environment->getName(), $environment->getAlias()));
+        $this->pullHelper->pull($environment);
 
         return 1;
     }
