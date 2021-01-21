@@ -27,7 +27,7 @@ final class RoutingBuilder extends AbstractBuilder
     }
 
     /**
-     * @return array<mixed>
+     * @return RouteConfig[]
      */
     public function buildRouteConfigs(Environment $environment): array
     {
@@ -35,14 +35,7 @@ final class RoutingBuilder extends AbstractBuilder
             return [];
         }
 
-        $routeConfigs = [];
-
-        foreach ($this->searchRoutes($contentType) as $hit) {
-            $routeConfig = RouteConfig::fromHit($hit);
-            $routeConfigs[$routeConfig->getName()] = $routeConfig->toArray();
-        }
-
-        return $routeConfigs;
+        return \array_map(fn (array $hit) => RouteConfig::fromHit($hit), $this->searchRoutes($contentType));
     }
 
     /**
