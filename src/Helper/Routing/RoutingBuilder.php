@@ -82,7 +82,7 @@ final class RoutingBuilder extends AbstractBuilder
      */
     private function searchRoutes(ContentType $contentType): array
     {
-        $search = $this->clientRequest->search($contentType->getName(), [
+        return $this->search($contentType, [
             'sort' => [
                 'order' => [
                     'order' => 'asc',
@@ -90,14 +90,6 @@ final class RoutingBuilder extends AbstractBuilder
                     'unmapped_type' => 'long',
                 ],
             ],
-        ], 0, 1000, [], $contentType->getEnvironment()->getAlias());
-
-        $total = $search['hits']['total']['value'] ?? $search['hits']['total'];
-
-        if ($total > 1000) {
-            $this->logger->error('Only the first 1000 routes have been loaded on a total of {total}', ['total' => $total]);
-        }
-
-        return $search['hits']['hits'];
+        ]);
     }
 }
