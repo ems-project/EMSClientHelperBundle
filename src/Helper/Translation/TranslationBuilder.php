@@ -64,13 +64,10 @@ final class TranslationBuilder extends AbstractBuilder
     private function createMessages(ContentType $contentType): array
     {
         $messages = [];
-        $scroll = $this->clientRequest->scrollAll([
-            'size' => 100,
-            'type' => $contentType->getName(),
-            'sort' => ['_doc'],
-        ], '5s', $contentType->getEnvironment()->getAlias());
 
-        foreach ($scroll as $hit) {
+        $hits = $this->searchMessages($contentType);
+
+        foreach ($hits as $hit) {
             foreach ($this->locales as $locale) {
                 if (isset($hit['_source']['label_'.$locale])) {
                     $messages[$locale][$hit['_source']['key']] = $hit['_source']['label_'.$locale];
@@ -79,5 +76,21 @@ final class TranslationBuilder extends AbstractBuilder
         }
 
         return $messages;
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function searchMessages(ContentType $contentType): array
+    {
+        return $this->search($contentType, [
+            'sort' => [
+                'key' => [
+                    'order' => 'asc',
+                    'missing' => '_last',
+                    'unmapped_type' => 'text',
+                ],
+            ],
+        ]);
     }
 }

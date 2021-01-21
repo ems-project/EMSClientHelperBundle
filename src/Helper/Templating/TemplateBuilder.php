@@ -23,13 +23,13 @@ final class TemplateBuilder extends AbstractBuilder
 
         $searchField = $templateName->getSearchField();
         $hit = $this->clientRequest->searchOne($contentType->getName(), [
+            '_source' => [$mapping['name'], $mapping['code']],
             'query' => [
                 'term' => [
                     ($searchField ?? $mapping['name']) => $templateName->getSearchValue(),
                 ],
             ],
-            '_source' => [$mapping['name'], $mapping['code']],
-        ]);
+        ], $contentType->getEnvironment()->getAlias());
 
         return Template::fromHit($hit, $mapping);
     }
@@ -46,13 +46,7 @@ final class TemplateBuilder extends AbstractBuilder
                 continue;
             }
 
-            $scroll = $this->clientRequest->scrollAll([
-                'size' => 100,
-                'type' => $contentType->getName(),
-                'sort' => ['_doc'],
-            ], '5s', $contentType->getEnvironment()->getAlias());
-
-            foreach ($scroll as $hit) {
+            foreach ($this->search($contentType) as $hit) {
                 yield Template::fromHit($hit, $mapping);
             }
         }

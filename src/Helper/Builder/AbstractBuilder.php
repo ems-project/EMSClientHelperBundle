@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Builder;
 
+use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\ClientHelperBundle\Helper\Local\LocalHelper;
@@ -31,5 +32,30 @@ abstract class AbstractBuilder
     public function setLocalHelper(?LocalHelper $localHelper): void
     {
         $this->localHelper = $localHelper;
+    }
+
+    /**
+     * @param array<mixed> $body
+     *
+     * @return array<mixed>
+     */
+    protected function search(ContentType $contentType, array $body = []): array
+    {
+        $limit = 1000;
+        $type = $contentType->getName();
+        $alias = $contentType->getEnvironment()->getAlias();
+
+        $search = $this->clientRequest->search($type, $body, 0, $limit, [], $alias);
+        $total = $search['hits']['total']['value'] ?? $search['hits']['total'];
+
+        if ($total > $limit) {
+            $this->logger->error('Only the first {limit} {type}s have been loaded on a total of {total}', [
+                'limit' => $limit,
+                'type' => $type,
+                'total' => $total
+            ]);
+        }
+
+        return $search['hits']['hits'];
     }
 }
