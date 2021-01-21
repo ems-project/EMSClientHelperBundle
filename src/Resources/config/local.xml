@@ -13,6 +13,7 @@
             <tag name="console.command" />
         </service>
 
+        <service id="emsch.helper.local" class="EMS\ClientHelperBundle\Helper\Local\LocalHelper" />
         <service id="emsch.helper.local.pull" class="EMS\ClientHelperBundle\Helper\Local\PullHelper">
             <argument type="service" id="emsch.helper.templating.builder" />
             <argument type="service" id="emsch.helper.translation.builder" />

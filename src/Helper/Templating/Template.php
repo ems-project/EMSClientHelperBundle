@@ -6,13 +6,17 @@ namespace EMS\ClientHelperBundle\Helper\Templating;
 
 final class Template
 {
-    public string $name;
-    public string $code;
+    private string $id;
+    private string $contentType;
+    private string $name;
+    private string $code;
 
     public const PREFIX = '@EMSCH';
 
-    public function __construct(string $name, string $code)
+    public function __construct(string $id, string $contentType, string $name, string $code)
     {
+        $this->id = $id;
+        $this->contentType = $contentType;
         $this->name = $name;
         $this->code = $code;
     }
@@ -25,9 +29,18 @@ final class Template
     {
         $nameProperty = $mapping['name'];
         $codeProperty = $mapping['code'];
-        $source = $hit['_source'];
 
-        return new self($source[$nameProperty], $source[$codeProperty] ?? '');
+        $id = $hit['_id'];
+        $contentType = $hit['_source']['_contenttype'];
+        $name = $hit['_source'][$nameProperty];
+        $code = $hit['_source'][$codeProperty] ?? '';
+
+        return new self($id, $contentType, $name, $code);
+    }
+
+    public function getEmschNameId(): string
+    {
+        return \sprintf('%s/%s:%s', self::PREFIX, $this->contentType, $this->id);
     }
 
     public function getName(): string

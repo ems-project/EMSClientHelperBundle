@@ -8,6 +8,9 @@
         <service id="emsch.helper.builder" class="EMS\ClientHelperBundle\Helper\Builder\AbstractBuilder" abstract="true" public="false" >
             <argument type="service" id="emsch.manager.client_request" />
             <argument type="service" id="logger" />
+            <call method="setLocalHelper">
+                <argument type="service" id="emsch.helper.local" on-invalid="null"/>
+            </call>
         </service>
 
         <service id="emsch.helper.routing.builder" class="EMS\ClientHelperBundle\Helper\Routing\RoutingBuilder" parent="emsch.helper.builder" />
