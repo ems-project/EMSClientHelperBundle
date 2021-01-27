@@ -48,7 +48,7 @@ final class TranslationBuilder extends AbstractBuilder
      */
     public function getLocalTranslationFiles(Environment $environment): ?array
     {
-        if (null === $localHelper = $this->getLocalHelper()) {
+        if (null === $localHelper = $this->getLocalHelper($environment)) {
             return null;
         }
 
