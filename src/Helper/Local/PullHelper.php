@@ -14,26 +14,26 @@ use Symfony\Component\Translation\Dumper\YamlFileDumper;
 
 final class PullHelper
 {
+    private LocalHelper $localHelper;
     private TemplateBuilder $templatingBuilder;
     private TranslationBuilder $translationBuilder;
     private RoutingBuilder $routingBuilder;
     private LoggerInterface $logger;
     private Filesystem $filesystem;
-    private string $projectDir;
 
     public function __construct(
+        LocalHelper $localHelper,
         TemplateBuilder $templatingBuilder,
         TranslationBuilder $translationBuilder,
         RoutingBuilder $routingBuilder,
-        LoggerInterface $logger,
-        string $projectDir
+        LoggerInterface $logger
     ) {
+        $this->localHelper = $localHelper;
         $this->templatingBuilder = $templatingBuilder;
         $this->translationBuilder = $translationBuilder;
         $this->routingBuilder = $routingBuilder;
         $this->logger = $logger;
         $this->filesystem = new Filesystem();
-        $this->projectDir = $projectDir;
     }
 
     public function setLogger(LoggerInterface $logger): void
@@ -53,14 +53,14 @@ final class PullHelper
     private function pullTranslations(Environment $environment): void
     {
         $dumper = new YamlFileDumper('yaml');
-        $path = $this->getFilePath($environment, ['translations']);
+        $directory = $this->localHelper->getDirTranslations($environment);
 
         foreach ($this->translationBuilder->buildMessageCatalogues($environment) as $messageCatalogue) {
-            $dumper->dump($messageCatalogue, ['path' => $path, 'as_tree' => true, 'inline' => 5]);
+            $dumper->dump($messageCatalogue, ['path' => $directory, 'as_tree' => true, 'inline' => 5]);
 
             $this->logger->notice('Dumped translations {locale} in {path}', [
                 'locale' => $messageCatalogue->getLocale(),
-                'path' => $path,
+                'path' => $directory,
             ]);
         }
     }
@@ -71,15 +71,19 @@ final class PullHelper
     private function pullTemplates(Environment $environment): array
     {
         $mapping = [];
+        $directory = $this->localHelper->getDirTemplates($environment);
 
         foreach ($this->templatingBuilder->buildTemplates($environment) as $template) {
-            $filePath = $this->getFilePath($environment, ['templates', $template->getName()]);
+            $filePath = $directory.DIRECTORY_SEPARATOR.$template->getName();
             $this->filesystem->dumpFile($filePath, $template->getCode());
             $mapping[$template->getEmschNameId()] = $template->getName();
         }
 
         \asort($mapping);
-        $this->filesystem->dumpFile($this->getFilePath($environment, ['templates.json']), $this->jsonEncode($mapping));
+
+        $fileTemplates = $this->localHelper->getFileTemplates($environment);
+        $this->filesystem->dumpFile($fileTemplates, $this->jsonEncode($mapping));
+        $this->logger->notice('Dumped templates to {file}', ['file' => $fileTemplates]);
 
         return $mapping;
     }
@@ -102,19 +106,9 @@ final class PullHelper
             $routes[$routeConfig->getName()] = $route;
         }
 
-        $path = $this->getFilePath($environment, ['routes.json']);
-        $this->filesystem->dumpFile($path, $this->jsonEncode($routes));
-        $this->logger->notice('Dumped routes to {path}', ['path' => $path]);
-    }
-
-    /**
-     * @param string[] $append
-     */
-    private function getFilePath(Environment $environment, array $append = []): string
-    {
-        $path = \array_filter([$this->projectDir, 'local', $environment->getAlias()]);
-
-        return \implode(DIRECTORY_SEPARATOR, \array_merge($path, $append));
+        $fileRoutes = $this->localHelper->getFileRoutes($environment);
+        $this->filesystem->dumpFile($fileRoutes, $this->jsonEncode($routes));
+        $this->logger->notice('Dumped routes to {file}', ['file' => $fileRoutes]);
     }
 
     /**
