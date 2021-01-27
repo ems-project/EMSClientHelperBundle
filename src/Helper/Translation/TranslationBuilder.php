@@ -8,6 +8,7 @@ use EMS\ClientHelperBundle\Helper\Builder\AbstractBuilder;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
+use EMS\ClientHelperBundle\Helper\Local\TranslationFile;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\MessageCatalogue;
 
@@ -36,10 +37,22 @@ final class TranslationBuilder extends AbstractBuilder
 
         foreach ($this->getMessages($contentType) as $locale => $messages) {
             $messageCatalogue = new MessageCatalogue($locale);
-            $messageCatalogue->add($messages, $this->clientRequest->getCacheKey());
+            $messageCatalogue->add($messages, $environment->getName());
 
             yield $messageCatalogue;
         }
+    }
+
+    /**
+     * @return TranslationFile[]|null
+     */
+    public function getLocalTranslationFiles(Environment $environment): ?array
+    {
+        if (null === $localHelper = $this->getLocalHelper()) {
+            return null;
+        }
+
+        return $localHelper->getTranslationFiles($environment);
     }
 
     /**
