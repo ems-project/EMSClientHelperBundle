@@ -8,6 +8,7 @@ use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Routing\RoutingBuilder;
 use EMS\ClientHelperBundle\Helper\Templating\TemplateBuilder;
 use EMS\ClientHelperBundle\Helper\Translation\TranslationBuilder;
+use EMS\CommonBundle\Common\Json;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Translation\Dumper\YamlFileDumper;
@@ -76,13 +77,13 @@ final class PullHelper
         foreach ($this->templatingBuilder->buildTemplates($environment) as $template) {
             $filePath = $directory.DIRECTORY_SEPARATOR.$template->getName();
             $this->filesystem->dumpFile($filePath, $template->getCode());
-            $mapping[$template->getEmschNameId()] = $template->getName();
+            $mapping[$template->getEmschNameId()] = $template->getEmschName();
         }
 
         \asort($mapping);
 
         $fileTemplates = $this->localHelper->getFileTemplates($environment);
-        $this->filesystem->dumpFile($fileTemplates, $this->jsonEncode($mapping));
+        $this->filesystem->dumpFile($fileTemplates, Json::encode($mapping, true));
         $this->logger->notice('Dumped templates to {file}', ['file' => $fileTemplates]);
 
         return $mapping;
@@ -107,21 +108,7 @@ final class PullHelper
         }
 
         $fileRoutes = $this->localHelper->getFileRoutes($environment);
-        $this->filesystem->dumpFile($fileRoutes, $this->jsonEncode($routes));
+        $this->filesystem->dumpFile($fileRoutes, Json::encode($routes, true));
         $this->logger->notice('Dumped routes to {file}', ['file' => $fileRoutes]);
-    }
-
-    /**
-     * @param array<mixed> $data
-     */
-    private function jsonEncode(array $data): string
-    {
-        $result = \json_encode($data, JSON_PRETTY_PRINT);
-
-        if (false === $result) {
-            throw new \RuntimeException('failed encoding json');
-        }
-
-        return $result;
     }
 }
