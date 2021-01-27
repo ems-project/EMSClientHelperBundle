@@ -34,6 +34,11 @@ abstract class AbstractBuilder
         $this->localHelper = $localHelper;
     }
 
+    protected function getLocalHelper(): ?LocalHelper
+    {
+        return $this->localHelper;
+    }
+
     /**
      * @param array<mixed> $body
      *
@@ -52,7 +57,7 @@ abstract class AbstractBuilder
             $this->logger->error('Only the first {limit} {type}s have been loaded on a total of {total}', [
                 'limit' => $limit,
                 'type' => $type,
-                'total' => $total
+                'total' => $total,
             ]);
         }
 

@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Translation;
 
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
+use Symfony\Bundle\FrameworkBundle\Translation\Translator as SymfonyTranslator;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
-use Symfony\Component\Translation\TranslatorBagInterface;
 
 final class Translator implements CacheWarmerInterface
 {
     private EnvironmentHelper $environmentHelper;
     private TranslationBuilder $builder;
-    private TranslatorBagInterface $translator;
+    private SymfonyTranslator $translator;
 
     public function __construct(
         EnvironmentHelper $environmentHelper,
         TranslationBuilder $translationBuilder,
-        TranslatorBagInterface $translator
+        SymfonyTranslator $translator
     ) {
         $this->environmentHelper = $environmentHelper;
         $this->builder = $translationBuilder;
@@ -27,6 +27,16 @@ final class Translator implements CacheWarmerInterface
     public function addCatalogues(): void
     {
         if (null === $environment = $this->environmentHelper->getCurrentEnvironment()) {
+            return;
+        }
+
+        $localTranslationFiles = $this->builder->getLocalTranslationFiles($environment);
+
+        if (null !== $localTranslationFiles) {
+            foreach ($localTranslationFiles as $file) {
+                $this->translator->addResource($file->format, $file->resource, $file->locale, $file->domain);
+            }
+
             return;
         }
 
