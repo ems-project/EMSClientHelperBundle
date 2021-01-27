@@ -10,12 +10,12 @@ use Symfony\Component\Routing\RouteCollection;
 final class Router extends BaseRouter
 {
     private EnvironmentHelper $environmentHelper;
-    private RoutingBuilder $routeBuilder;
+    private RoutingBuilder $builder;
 
     public function __construct(EnvironmentHelper $environmentHelper, RoutingBuilder $routeBuilder)
     {
         $this->environmentHelper = $environmentHelper;
-        $this->routeBuilder = $routeBuilder;
+        $this->builder = $routeBuilder;
     }
 
     public function getRouteCollection(): RouteCollection
@@ -24,6 +24,10 @@ final class Router extends BaseRouter
             return new RouteCollection();
         }
 
-        return $this->routeBuilder->buildRouteCollection($environment);
+        if (null !== $localRouteCollection = $this->builder->getLocalRouteCollection($environment)) {
+            return $localRouteCollection;
+        }
+
+        return $this->builder->buildRouteCollection($environment);
     }
 }
