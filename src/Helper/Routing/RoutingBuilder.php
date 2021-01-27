@@ -20,7 +20,7 @@ final class RoutingBuilder extends AbstractBuilder
         }
 
         foreach ($this->getRoutes($contentType) as $route) {
-            $route->addToCollection($routeCollection);
+            $route->addToCollection($routeCollection, $this->locales);
         }
 
         return $routeCollection;
@@ -41,7 +41,7 @@ final class RoutingBuilder extends AbstractBuilder
         $routes = $this->createRoutes($environment, $routeConfigs);
 
         foreach ($routes as $route) {
-            $route->addToCollection($routeCollection);
+            $route->addToCollection($routeCollection, $this->locales);
         }
 
         return $routeCollection;
