@@ -8,6 +8,7 @@ use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
+use EMS\ClientHelperBundle\Helper\Local\LocalEnvironment;
 use EMS\ClientHelperBundle\Helper\Local\LocalHelper;
 use Psr\Log\LoggerInterface;
 
@@ -41,13 +42,15 @@ abstract class AbstractBuilder
         $this->localHelper = $localHelper;
     }
 
-    protected function getLocalHelper(Environment $environment): ?LocalHelper
+    public function getLocalEnvironment(Environment $environment): ?LocalEnvironment
     {
         if (null === $this->localHelper) {
             return null;
         }
 
-        return $this->localHelper->isLocal($environment) ? $this->localHelper : null;
+        $localEnvironment = $this->localHelper->local($environment);
+
+        return $localEnvironment->isPulled() ? $localEnvironment : null;
     }
 
     /**

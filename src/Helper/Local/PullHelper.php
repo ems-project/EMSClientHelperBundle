@@ -8,10 +8,7 @@ use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Routing\RoutingBuilder;
 use EMS\ClientHelperBundle\Helper\Templating\TemplateBuilder;
 use EMS\ClientHelperBundle\Helper\Translation\TranslationBuilder;
-use EMS\CommonBundle\Common\Json;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Translation\Dumper\YamlFileDumper;
 
 final class PullHelper
 {
@@ -20,7 +17,6 @@ final class PullHelper
     private TranslationBuilder $translationBuilder;
     private RoutingBuilder $routingBuilder;
     private LoggerInterface $logger;
-    private Filesystem $filesystem;
 
     public function __construct(
         LocalHelper $localHelper,
@@ -34,7 +30,6 @@ final class PullHelper
         $this->translationBuilder = $translationBuilder;
         $this->routingBuilder = $routingBuilder;
         $this->logger = $logger;
-        $this->filesystem = new Filesystem();
     }
 
     public function setLogger(LoggerInterface $logger): void
@@ -44,47 +39,35 @@ final class PullHelper
 
     public function pull(Environment $environment): void
     {
-        $this->pullTranslations($environment);
+        $localEnvironment = $this->localHelper->local($environment);
+        $localEnvironment->setLogger($this->logger);
 
-        $templateMapping = $this->pullTemplates($environment);
-
-        $this->pullRoutes($environment, $templateMapping);
+        $this->pullTranslations($localEnvironment);
+        $templateMapping = $this->pullTemplates($localEnvironment);
+        $this->pullRoutes($localEnvironment, $templateMapping);
     }
 
-    private function pullTranslations(Environment $environment): void
+    private function pullTranslations(LocalEnvironment $localEnvironment): void
     {
-        $dumper = new YamlFileDumper('yaml');
-        $directory = $this->localHelper->getDirTranslations($environment);
+        $environment = $localEnvironment->getEnvironment();
 
         foreach ($this->translationBuilder->buildMessageCatalogues($environment) as $messageCatalogue) {
-            $dumper->dump($messageCatalogue, ['path' => $directory, 'as_tree' => true, 'inline' => 5]);
-
-            $this->logger->notice('Dumped translations {locale} in {path}', [
-                'locale' => $messageCatalogue->getLocale(),
-                'path' => $directory,
-            ]);
+            $localEnvironment->dumpMessageCatalogue($messageCatalogue);
         }
     }
 
     /**
      * @return array<string, string>
      */
-    private function pullTemplates(Environment $environment): array
+    private function pullTemplates(LocalEnvironment $localEnvironment): array
     {
         $mapping = [];
-        $directory = $this->localHelper->getDirTemplates($environment);
-
-        foreach ($this->templatingBuilder->buildTemplates($environment) as $template) {
-            $filePath = $directory.DIRECTORY_SEPARATOR.$template->getName();
-            $this->filesystem->dumpFile($filePath, $template->getCode());
+        foreach ($this->templatingBuilder->buildTemplates($localEnvironment->getEnvironment()) as $template) {
+            $localEnvironment->dumpTemplate($template);
             $mapping[$template->getEmschNameId()] = $template->getEmschName();
         }
 
-        \asort($mapping);
-
-        $fileTemplates = $this->localHelper->getFileTemplates($environment);
-        $this->filesystem->dumpFile($fileTemplates, Json::encode($mapping, true));
-        $this->logger->notice('Dumped templates to {file}', ['file' => $fileTemplates]);
+        $localEnvironment->dumpJsonTemplates($mapping);
 
         return $mapping;
     }
@@ -92,10 +75,10 @@ final class PullHelper
     /**
      * @param array<string, string> $templateMapping
      */
-    private function pullRoutes(Environment $environment, array $templateMapping): void
+    private function pullRoutes(LocalEnvironment $localEnvironment, array $templateMapping): void
     {
         $routes = [];
-        $routeConfigs = $this->routingBuilder->buildRouteConfigs($environment);
+        $routeConfigs = $this->routingBuilder->buildRouteConfigs($localEnvironment->getEnvironment());
 
         foreach ($routeConfigs as $routeConfig) {
             $route = $routeConfig->toArray();
@@ -107,8 +90,6 @@ final class PullHelper
             $routes[$routeConfig->getName()] = $route;
         }
 
-        $fileRoutes = $this->localHelper->getFileRoutes($environment);
-        $this->filesystem->dumpFile($fileRoutes, Json::encode($routes, true));
-        $this->logger->notice('Dumped routes to {file}', ['file' => $fileRoutes]);
+        $localEnvironment->dumpJsonRoutes($routes);
     }
 }
