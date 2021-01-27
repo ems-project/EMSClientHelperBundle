@@ -28,15 +28,16 @@ final class RoutingBuilder extends AbstractBuilder
 
     public function getLocalRouteCollection(Environment $environment): ?RouteCollection
     {
-        if (null === $localHelper = $this->getLocalHelper()) {
-            return null;
-        }
-
-        if (null === $routeConfigs = $localHelper->getRouteConfigs($environment)) {
+        if (null === $localHelper = $this->getLocalHelper($environment)) {
             return null;
         }
 
         $routeCollection = new RouteCollection();
+
+        if (null === $routeConfigs = $localHelper->getRouteConfigs($environment)) {
+            return $routeCollection;
+        }
+
         $routes = $this->createRoutes($environment, $routeConfigs);
 
         foreach ($routes as $route) {
