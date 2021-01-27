@@ -22,12 +22,18 @@ abstract class AbstractBuilder
 {
     protected ClientRequest $clientRequest;
     protected LoggerInterface $logger;
+    /** @var string[] */
+    protected array $locales;
     private ?LocalHelper $localHelper = null;
 
-    public function __construct(ClientRequestManager $manager, LoggerInterface $logger)
+    /**
+     * @param string[] $locales
+     */
+    public function __construct(ClientRequestManager $manager, LoggerInterface $logger, array $locales)
     {
         $this->clientRequest = $manager->getDefault();
         $this->logger = $logger;
+        $this->locales = $locales;
     }
 
     public function setLocalHelper(?LocalHelper $localHelper): void
