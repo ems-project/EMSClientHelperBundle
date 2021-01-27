@@ -13,6 +13,7 @@
         </service>
 
         <service id="emsch.helper.local" class="EMS\ClientHelperBundle\Helper\Local\LocalHelper">
+            <argument type="service" id="logger" />
             <argument>%kernel.project_dir%</argument>
         </service>
         <service id="emsch.helper.local.pull" class="EMS\ClientHelperBundle\Helper\Local\PullHelper">

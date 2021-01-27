@@ -7,7 +7,6 @@ namespace EMS\ClientHelperBundle\Helper\Translation;
 use EMS\ClientHelperBundle\Helper\Builder\AbstractBuilder;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
-use EMS\ClientHelperBundle\Helper\Local\TranslationFile;
 use Symfony\Component\Translation\MessageCatalogue;
 
 final class TranslationBuilder extends AbstractBuilder
@@ -27,18 +26,6 @@ final class TranslationBuilder extends AbstractBuilder
 
             yield $messageCatalogue;
         }
-    }
-
-    /**
-     * @return TranslationFile[]|null
-     */
-    public function getLocalTranslationFiles(Environment $environment): ?array
-    {
-        if (null === $localHelper = $this->getLocalHelper($environment)) {
-            return null;
-        }
-
-        return $localHelper->getTranslationFiles($environment);
     }
 
     /**
