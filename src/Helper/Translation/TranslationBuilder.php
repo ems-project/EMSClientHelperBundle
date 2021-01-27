@@ -6,26 +6,12 @@ namespace EMS\ClientHelperBundle\Helper\Translation;
 
 use EMS\ClientHelperBundle\Helper\Builder\AbstractBuilder;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
-use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Local\TranslationFile;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\MessageCatalogue;
 
 final class TranslationBuilder extends AbstractBuilder
 {
-    /** @var string[] */
-    private array $locales;
-
-    /**
-     * @param string[] $locales
-     */
-    public function __construct(ClientRequestManager $manager, LoggerInterface $logger, array $locales)
-    {
-        parent::__construct($manager, $logger);
-        $this->locales = $locales;
-    }
-
     /**
      * @return \Generator|MessageCatalogue[]
      */
