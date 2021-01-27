@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace EMS\ClientHelperBundle\Helper\Local;
+namespace EMS\ClientHelperBundle\Helper\Local\File;
 
 use Symfony\Component\Finder\SplFileInfo;
 

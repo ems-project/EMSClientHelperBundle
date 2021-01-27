@@ -30,10 +30,8 @@ final class Translator implements CacheWarmerInterface
             return;
         }
 
-        $localTranslationFiles = $this->builder->getLocalTranslationFiles($environment);
-
-        if (null !== $localTranslationFiles) {
-            foreach ($localTranslationFiles as $file) {
+        if (null !== $localEnvironment = $this->builder->getLocalEnvironment($environment)) {
+            foreach ($localEnvironment->getTranslationFiles() as $file) {
                 $this->translator->addResource($file->format, $file->resource, $file->locale, $file->domain);
             }
 
