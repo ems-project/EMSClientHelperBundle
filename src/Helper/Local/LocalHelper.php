@@ -26,18 +26,23 @@ final class LocalHelper
         $this->filesystem = new Filesystem();
     }
 
+    public function isLocal(Environment $environment): bool
+    {
+        return $this->filesystem->exists($this->getPath($environment));
+    }
+
     /**
      * @return ?RouteConfig[]
      */
     public function getRouteConfigs(Environment $environment): ?array
     {
+        $routeConfigs = [];
         $routingFile = $this->getFileRoutes($environment);
 
         if (!$this->filesystem->exists($routingFile)) {
-            return null;
+            return $routeConfigs;
         }
 
-        $routeConfigs = [];
         $decoded = Json::decode(\file_get_contents($routingFile));
 
         foreach ($decoded as $name => $options) {
@@ -50,13 +55,13 @@ final class LocalHelper
     /**
      * @return TranslationFile[]
      */
-    public function getTranslationFiles(Environment $environment): ?array
+    public function getTranslationFiles(Environment $environment): array
     {
         $files = [];
         $dirTranslations = $this->getDirTranslations($environment);
 
-        if ($this->filesystem->exists($dirTranslations)) {
-            return null;
+        if (!$this->filesystem->exists($dirTranslations)) {
+            return $files;
         }
 
         foreach (Finder::create()->in($dirTranslations)->files()->name('*.yaml') as $file) {
@@ -68,28 +73,28 @@ final class LocalHelper
 
     public function getDirTranslations(Environment $environment): string
     {
-        return $this->getFilePath($environment, ['translations']);
+        return $this->getPath($environment, ['translations']);
     }
 
     public function getDirTemplates(Environment $environment): string
     {
-        return $this->getFilePath($environment, ['templates']);
+        return $this->getPath($environment, ['templates']);
     }
 
     public function getFileTemplates(Environment $environment): string
     {
-        return $this->getFilePath($environment, ['templates.json']);
+        return $this->getPath($environment, ['templates.json']);
     }
 
     public function getFileRoutes(Environment $environment): string
     {
-        return $this->getFilePath($environment, ['routes.json']);
+        return $this->getPath($environment, ['routes.json']);
     }
 
     /**
      * @param string[] $append
      */
-    public function getFilePath(Environment $environment, array $append = []): string
+    public function getPath(Environment $environment, array $append = []): string
     {
         $path = \array_filter([$this->projectDir, self::WORKING_DIR, $environment->getAlias()]);
 

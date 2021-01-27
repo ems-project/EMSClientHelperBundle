@@ -7,6 +7,7 @@ namespace EMS\ClientHelperBundle\Helper\Builder;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
+use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Local\LocalHelper;
 use Psr\Log\LoggerInterface;
 
@@ -34,9 +35,13 @@ abstract class AbstractBuilder
         $this->localHelper = $localHelper;
     }
 
-    protected function getLocalHelper(): ?LocalHelper
+    protected function getLocalHelper(Environment $environment): ?LocalHelper
     {
-        return $this->localHelper;
+        if (null === $this->localHelper) {
+            return null;
+        }
+
+        return $this->localHelper->isLocal($environment) ? $this->localHelper : null;
     }
 
     /**
