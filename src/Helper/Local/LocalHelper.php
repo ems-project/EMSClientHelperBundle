@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Local;
 
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
+use EMS\ClientHelperBundle\Helper\Routing\RouteConfig;
+use EMS\CommonBundle\Common\Json;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
@@ -25,12 +27,37 @@ final class LocalHelper
     }
 
     /**
+     * @return ?RouteConfig[]
+     */
+    public function getRouteConfigs(Environment $environment): ?array
+    {
+        $routingFile = $this->getFileRoutes($environment);
+
+        if (!$this->filesystem->exists($routingFile)) {
+            return null;
+        }
+
+        $routeConfigs = [];
+        $decoded = Json::decode(\file_get_contents($routingFile));
+
+        foreach ($decoded as $name => $options) {
+            $routeConfigs[] = RouteConfig::fromArray($name, $options);
+        }
+
+        return $routeConfigs;
+    }
+
+    /**
      * @return TranslationFile[]
      */
-    public function getTranslationFiles(Environment $environment): array
+    public function getTranslationFiles(Environment $environment): ?array
     {
         $files = [];
         $dirTranslations = $this->getDirTranslations($environment);
+
+        if ($this->filesystem->exists($dirTranslations)) {
+            return null;
+        }
 
         foreach (Finder::create()->in($dirTranslations)->files()->name('*.yaml') as $file) {
             $files[] = new TranslationFile($file);

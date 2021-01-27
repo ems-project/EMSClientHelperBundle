@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
+use EMS\CommonBundle\Common\Json;
+
 final class RouteConfig
 {
     private string $name;
     /** @var array<mixed> */
     private array $config;
-    /** @var array<mixed> */
+    /** @var ?array<mixed> */
     private ?array $query;
     private ?string $templateStatic = null;
     private ?string $templateSource = null;
@@ -26,23 +28,23 @@ final class RouteConfig
     }
 
     /**
-     * @param array<mixed> $hit
+     * @param array{config: string|array, query: string|null|array, template_static: string, template_source: string} $options
      */
-    public static function fromHit(array $hit): self
+    public static function fromArray(string $name, array $options): self
     {
-        $source = $hit['_source'];
-        $name = $source['name'];
+        $config = \is_string($options['config']) ? Json::decode($options['config']) : $options['config'];
 
-        $config = self::decode($source['config']);
-        $query = isset($source['query']) ? self::decode($source['query']) : null;
-
-        $routeConfig = new self($name, $config, $query);
-
-        if (isset($source['template_static'])) {
-            $routeConfig->setTemplateStatic('@EMSCH/'.$source['template_static']);
+        if (isset($options['query'])) {
+            $query = \is_string($options['query']) ? Json::decode($options['query']) : $options['query'];
         }
-        if (isset($source['template_source'])) {
-            $routeConfig->setTemplateSource($source['template_source']);
+
+        $routeConfig = new self($name, $config, ($query ?? null));
+
+        if (isset($options['template_static'])) {
+            $routeConfig->setTemplateStatic('@EMSCH/'.$options['template_static']);
+        }
+        if (isset($options['template_source'])) {
+            $routeConfig->setTemplateSource($options['template_source']);
         }
 
         return $routeConfig;
@@ -98,19 +100,5 @@ final class RouteConfig
     public function setTemplateSource(string $templateSource): void
     {
         $this->templateSource = $templateSource;
-    }
-
-    /**
-     * @return array<mixed>
-     */
-    private static function decode(string $json): array
-    {
-        $result = \json_decode($json, true);
-
-        if (JSON_ERROR_NONE !== \json_last_error()) {
-            throw new \InvalidArgumentException(\sprintf('invalid json %s', $json));
-        }
-
-        return $result;
     }
 }

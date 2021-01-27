@@ -43,6 +43,11 @@ final class Template
         return \sprintf('%s/%s:%s', self::PREFIX, $this->contentType, $this->id);
     }
 
+    public function getEmschName(): string
+    {
+        return \sprintf('%s/%s', $this->contentType, $this->name);
+    }
+
     public function getName(): string
     {
         return $this->name;

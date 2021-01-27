@@ -26,6 +26,26 @@ final class RoutingBuilder extends AbstractBuilder
         return $routeCollection;
     }
 
+    public function getLocalRouteCollection(Environment $environment): ?RouteCollection
+    {
+        if (null === $localHelper = $this->getLocalHelper()) {
+            return null;
+        }
+
+        if (null === $routeConfigs = $localHelper->getRouteConfigs($environment)) {
+            return null;
+        }
+
+        $routeCollection = new RouteCollection();
+        $routes = $this->createRoutes($environment, $routeConfigs);
+
+        foreach ($routes as $route) {
+            $route->addToCollection($routeCollection);
+        }
+
+        return $routeCollection;
+    }
+
     /**
      * @return RouteConfig[]
      */
@@ -35,7 +55,10 @@ final class RoutingBuilder extends AbstractBuilder
             return [];
         }
 
-        return \array_map(fn (array $hit) => RouteConfig::fromHit($hit), $this->searchRoutes($contentType));
+        return \array_map(
+            fn (array $hit) => RouteConfig::fromArray($hit['_source']['name'], $hit['_source']),
+            $this->searchRoutes($contentType)
+        );
     }
 
     /**
@@ -47,7 +70,8 @@ final class RoutingBuilder extends AbstractBuilder
             return $cache;
         }
 
-        $routes = $this->createRoutes($contentType);
+        $routeConfigs = $this->buildRouteConfigs($contentType->getEnvironment());
+        $routes = $this->createRoutes($contentType->getEnvironment(), $routeConfigs);
         $contentType->setCache($routes);
         $this->clientRequest->cacheContentType($contentType);
 
@@ -55,26 +79,22 @@ final class RoutingBuilder extends AbstractBuilder
     }
 
     /**
+     * @param RouteConfig[] $routeConfigs
+     *
      * @return Route[]
      */
-    private function createRoutes(ContentType $contentType): array
+    private function createRoutes(Environment $environment, array $routeConfigs): array
     {
-        $routes = [];
-        $environmentOptions = [];
+        $options = [];
 
-        if (null !== $routePrefix = $contentType->getEnvironment()->getRoutePrefix()) {
-            $environmentOptions['prefix'] = $routePrefix;
+        if (null !== $routePrefix = $environment->getRoutePrefix()) {
+            $options['prefix'] = $routePrefix;
         }
 
-        $hits = $this->searchRoutes($contentType);
-
-        foreach ($hits as $hit) {
-            $routeConfig = RouteConfig::fromHit($hit);
-            $options = \array_merge($routeConfig->getOptions(), $environmentOptions);
-            $routes[] = new Route($routeConfig->getName(), $options);
-        }
-
-        return $routes;
+        return \array_map(
+            fn (RouteConfig $config) => new Route($config->getName(), \array_merge($options, $config->getOptions())),
+            $routeConfigs
+        );
     }
 
     /**
