@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Local;
 
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
+use EMS\ClientHelperBundle\Helper\Local\File\RoutesFile;
+use EMS\ClientHelperBundle\Helper\Local\File\TemplatesFile;
 use EMS\ClientHelperBundle\Helper\Routing\RoutingBuilder;
 use EMS\ClientHelperBundle\Helper\Templating\TemplateBuilder;
 use EMS\ClientHelperBundle\Helper\Translation\TranslationBuilder;
@@ -43,8 +45,8 @@ final class PullHelper
         $localEnvironment->setLogger($this->logger);
 
         $this->pullTranslations($localEnvironment);
-        $templateMapping = $this->pullTemplates($localEnvironment);
-        $this->pullRoutes($localEnvironment, $templateMapping);
+        $templatesFile = $this->pullTemplates($localEnvironment);
+        $this->pullRoutes($localEnvironment, $templatesFile);
     }
 
     private function pullTranslations(LocalEnvironment $localEnvironment): void
@@ -56,40 +58,28 @@ final class PullHelper
         }
     }
 
-    /**
-     * @return array<string, string>
-     */
-    private function pullTemplates(LocalEnvironment $localEnvironment): array
+    private function pullTemplates(LocalEnvironment $localEnvironment): TemplatesFile
     {
-        $mapping = [];
+        $templatesFile = new TemplatesFile();
         foreach ($this->templatingBuilder->buildTemplates($localEnvironment->getEnvironment()) as $template) {
             $localEnvironment->dumpTemplate($template);
-            $mapping[$template->getEmschNameId()] = $template->getEmschName();
+            $templatesFile->addTemplate($template);
         }
 
-        $localEnvironment->dumpJsonTemplates($mapping);
+        $localEnvironment->dumpTemplatesFile($templatesFile);
 
-        return $mapping;
+        return $templatesFile;
     }
 
-    /**
-     * @param array<string, string> $templateMapping
-     */
-    private function pullRoutes(LocalEnvironment $localEnvironment, array $templateMapping): void
+    private function pullRoutes(LocalEnvironment $localEnvironment, TemplatesFile $templatesFile): void
     {
-        $routes = [];
+        $routesFile = new RoutesFile($templatesFile);
         $routeConfigs = $this->routingBuilder->buildRouteConfigs($localEnvironment->getEnvironment());
 
         foreach ($routeConfigs as $routeConfig) {
-            $route = $routeConfig->toArray();
-
-            if (isset($route['template_static'])) {
-                $route['template_static'] = $templateMapping[$route['template_static']] ?? $route['template_static'];
-            }
-
-            $routes[$routeConfig->getName()] = $route;
+            $routesFile->addRouteConfig($routeConfig);
         }
 
-        $localEnvironment->dumpJsonRoutes($routes);
+        $localEnvironment->dumpRoutesFile($routesFile);
     }
 }
