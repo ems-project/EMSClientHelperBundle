@@ -53,6 +53,11 @@ final class Template
         return $this->name;
     }
 
+    public function getContentType(): string
+    {
+        return $this->contentType;
+    }
+
     public function getCode(): string
     {
         return $this->code;
