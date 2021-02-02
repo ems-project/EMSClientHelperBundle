@@ -22,7 +22,7 @@ class ClientHelperPass implements CompilerPassInterface
             return;
         }
 
-        $definitionClientRequest = strval($container->getParameter('emsch.routing.client_request'));
+        $definitionClientRequest = \strval($container->getParameter('emsch.routing.client_request'));
         $clientRequest = $container->findDefinition($definitionClientRequest);
 
         if ($container->hasDefinition('emsch.routing.url.transformer')) {
