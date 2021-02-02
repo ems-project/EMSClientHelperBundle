@@ -4,6 +4,7 @@ namespace EMS\ClientHelperBundle\Helper\Search;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
+use EMS\CommonBundle\Elasticsearch\Response\Response;
 use Symfony\Component\HttpFoundation\Request;
 
 class Manager
@@ -34,43 +35,22 @@ class Manager
         $search->setFrom($requestSearch->getFrom());
         $search->setSize($requestSearch->getSize());
 
-        $results = $this->clientRequest->commonSearch($search)->getResponse()->getData();
+        $commonSearch = $this->clientRequest->commonSearch($search);
+        $results = $commonSearch->getResponse()->getData();
+        $results['hits']['total'] = $response['hits']['total']['value'] ?? $response['hits']['total'] ?? 0;
 
-        if (isset($results['aggregations'])) {
-            $requestSearch->bindAggregations($results['aggregations'], $qbService->getQueryFilters());
-        }
+        $response = Response::fromResultSet($commonSearch);
+        $requestSearch->bindAggregations($response, $qbService->getQueryFilters());
 
         return [
             'results' => $results,
+            'response' => $response,
             'search' => $requestSearch,
             'query' => $requestSearch->getQueryString(),
             'sort' => $requestSearch->getSortBy(),
             'facets' => $requestSearch->getQueryFacets(),
             'page' => $requestSearch->getPage(),
             'size' => $requestSearch->getSize(),
-            'counters' => $this->getCountInfo($results),
         ];
-    }
-
-    /**
-     * @param array<mixed> $results
-     *
-     * @return array<int|string, array>
-     */
-    private function getCountInfo(array $results): array
-    {
-        $counters = [];
-        $aggregations = $results['aggregations'] ?? [];
-
-        foreach ($aggregations as $type => $data) {
-            $counters[$type] = [];
-            $buckets = $data['buckets'] ?? [];
-
-            foreach ($buckets as $bucket) {
-                $counters[$type][$bucket['key']] = $bucket['doc_count'];
-            }
-        }
-
-        return $counters;
     }
 }
