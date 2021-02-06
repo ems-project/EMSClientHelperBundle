@@ -26,7 +26,7 @@ final class TemplateFile
     public function getCode(): string
     {
         if (false === $content = \file_get_contents($this->path)) {
-            throw new \RuntimeException(sprintf('Could not read template code in %s', $this->path));
+            throw new \RuntimeException(\sprintf('Could not read template code in %s', $this->path));
         }
 
         return $content;

@@ -36,11 +36,16 @@ final class Manager
         $search->setFrom($requestSearch->getFrom());
         $search->setSize($requestSearch->getSize());
 
-        $response = Response::fromResultSet($this->clientRequest->commonSearch($search));
+        $commonSearch = $this->clientRequest->commonSearch($search);
+        $results = $commonSearch->getResponse()->getData();
+        $results['hits']['total'] = $response['hits']['total']['value'] ?? $response['hits']['total'] ?? 0;
+
+        $response = Response::fromResultSet($commonSearch);
         $requestSearch->bindAggregations($response, $qbService->getQueryFilters());
 
         return [
-            'results' => $response,
+            'results' => $results,
+            'response' => $response,
             'search' => $requestSearch,
             'query' => $requestSearch->getQueryString(),
             'sort' => $requestSearch->getSortBy(),
