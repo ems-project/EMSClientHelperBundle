@@ -6,6 +6,9 @@ namespace EMS\ClientHelperBundle\Helper\UserApi;
 
 use GuzzleHttp\Client;
 
+/**
+ * @todo use EMS\CommonBundle\Contracts\CoreApi\CoreApiInterface
+ */
 final class ClientFactory
 {
     private string $baseUrl;
