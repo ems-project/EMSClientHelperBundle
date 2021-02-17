@@ -4,33 +4,22 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Local;
 
+use EMS\ClientHelperBundle\Helper\Builder\Builders;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Local\File\RoutesFile;
 use EMS\ClientHelperBundle\Helper\Local\File\TemplatesFile;
-use EMS\ClientHelperBundle\Helper\Routing\RoutingBuilder;
-use EMS\ClientHelperBundle\Helper\Templating\TemplateBuilder;
-use EMS\ClientHelperBundle\Helper\Translation\TranslationBuilder;
 use Psr\Log\LoggerInterface;
 
 final class PullHelper
 {
     private LocalHelper $localHelper;
-    private TemplateBuilder $templatingBuilder;
-    private TranslationBuilder $translationBuilder;
-    private RoutingBuilder $routingBuilder;
+    private Builders $builders;
     private LoggerInterface $logger;
 
-    public function __construct(
-        LocalHelper $localHelper,
-        TemplateBuilder $templatingBuilder,
-        TranslationBuilder $translationBuilder,
-        RoutingBuilder $routingBuilder,
-        LoggerInterface $logger
-    ) {
+    public function __construct(LocalHelper $localHelper, Builders $builders, LoggerInterface $logger)
+    {
         $this->localHelper = $localHelper;
-        $this->templatingBuilder = $templatingBuilder;
-        $this->translationBuilder = $translationBuilder;
-        $this->routingBuilder = $routingBuilder;
+        $this->builders = $builders;
         $this->logger = $logger;
     }
 
@@ -53,7 +42,7 @@ final class PullHelper
     {
         $environment = $localEnvironment->getEnvironment();
 
-        foreach ($this->translationBuilder->buildMessageCatalogues($environment) as $messageCatalogue) {
+        foreach ($this->builders->translation()->buildMessageCatalogues($environment) as $messageCatalogue) {
             $localEnvironment->dumpMessageCatalogue($messageCatalogue);
         }
     }
@@ -61,7 +50,7 @@ final class PullHelper
     private function pullTemplates(LocalEnvironment $localEnvironment): TemplatesFile
     {
         $templatesFile = new TemplatesFile();
-        foreach ($this->templatingBuilder->buildTemplates($localEnvironment->getEnvironment()) as $template) {
+        foreach ($this->builders->templating()->buildTemplates($localEnvironment->getEnvironment()) as $template) {
             $localEnvironment->dumpTemplate($template);
             $templatesFile->addTemplate($template);
         }
@@ -74,7 +63,7 @@ final class PullHelper
     private function pullRoutes(LocalEnvironment $localEnvironment, TemplatesFile $templatesFile): void
     {
         $routesFile = new RoutesFile($templatesFile);
-        $routeConfigs = $this->routingBuilder->buildRouteConfigs($localEnvironment->getEnvironment());
+        $routeConfigs = $this->builders->routing()->buildRouteConfigs($localEnvironment->getEnvironment());
 
         foreach ($routeConfigs as $routeConfig) {
             $routesFile->addRouteConfig($routeConfig);

@@ -12,8 +12,8 @@ final class ContentType
     private string $name;
     private \DateTimeImmutable $lastPublished;
     private int $total;
-    /** @var ?array<mixed> */
-    private ?array $cache = null;
+    /** @var mixed */
+    private $cache = null;
 
     public function __construct(Environment $environment, string $name, int $total)
     {
@@ -55,17 +55,17 @@ final class ContentType
     }
 
     /**
-     * @return ?array<mixed>
+     * @return mixed
      */
-    public function getCache(): ?array
+    public function getCache()
     {
         return $this->cache;
     }
 
     /**
-     * @param ?array<mixed> $cache
+     * @param mixed $cache
      */
-    public function setCache(?array $cache): void
+    public function setCache($cache): void
     {
         $this->cache = $cache;
     }
