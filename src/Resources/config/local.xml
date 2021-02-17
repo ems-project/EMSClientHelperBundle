@@ -6,21 +6,48 @@
 
     <services>
         <defaults public="false" />
-        <service id="emsch.command.local.pull" class="EMS\ClientHelperBundle\Command\Local\PullCommand">
-            <argument type="service" id="emsch.helper.local.pull" />
+
+        <service id="emsch.command.local.login" class="EMS\ClientHelperBundle\Command\Local\LoginCommand">
             <argument type="service" id="emsch.helper_environment" />
-            <tag name="console.command" />
+            <argument type="service" id="emsch.helper.local.login" />
+            <tag name="console.command" command="emsch:local:login"/>
+        </service>
+        <service id="emsch.command.local.pull" class="EMS\ClientHelperBundle\Command\Local\PullCommand">
+            <argument type="service" id="emsch.helper_environment" />
+            <argument type="service" id="emsch.helper.local.pull" />
+            <tag name="console.command" command="emsch:local:pull"/>
+        </service>
+        <service id="emsch.command.local.push" class="EMS\ClientHelperBundle\Command\Local\PushCommand">
+            <argument type="service" id="emsch.helper_environment" />
+            <argument type="service" id="emsch.helper.local.push" />
+            <tag name="console.command" command="emsch:local:push"/>
+        </service>
+        <service id="emsch.command.local.status" class="EMS\ClientHelperBundle\Command\Local\StatusCommand">
+            <argument type="service" id="emsch.helper_environment" />
+            <argument type="service" id="emsch.helper.local.status" />
+            <tag name="console.command" command="emsch:local:status"/>
         </service>
 
         <service id="emsch.helper.local" class="EMS\ClientHelperBundle\Helper\Local\LocalHelper">
             <argument type="service" id="logger" />
             <argument>%kernel.project_dir%</argument>
         </service>
+
+        <service id="emsch.helper.local.login" class="EMS\ClientHelperBundle\Helper\Local\LoginHelper">
+            <argument type="service" id="EMS\CommonBundle\Contracts\CoreApi\CoreApiFactoryInterface" />
+            <argument type="service" id="logger" />
+        </service>
         <service id="emsch.helper.local.pull" class="EMS\ClientHelperBundle\Helper\Local\PullHelper">
             <argument type="service" id="emsch.helper.local" />
-            <argument type="service" id="emsch.helper.templating.builder" />
-            <argument type="service" id="emsch.helper.translation.builder" />
-            <argument type="service" id="emsch.helper.routing.builder" />
+            <argument type="service" id="emsch.helper.builders" />
+            <argument type="service" id="logger" />
+        </service>
+        <service id="emsch.helper.local.push" class="EMS\ClientHelperBundle\Helper\Local\PushHelper">
+            <argument type="service" id="emsch.helper.local" />
+            <argument type="service" id="logger" />
+        </service>
+        <service id="emsch.helper.local.status" class="EMS\ClientHelperBundle\Helper\Local\StatusHelper">
+            <argument type="service" id="emsch.helper.builders" />
             <argument type="service" id="logger" />
         </service>
     </services>

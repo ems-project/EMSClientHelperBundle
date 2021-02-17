@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Translation;
 
 use EMS\ClientHelperBundle\Helper\Builder\AbstractBuilder;
-use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use Symfony\Component\Translation\MessageCatalogue;
 
@@ -14,13 +13,15 @@ final class TranslationBuilder extends AbstractBuilder
     /**
      * @return \Generator|MessageCatalogue[]
      */
-    public function buildMessageCatalogues(Environment $environment): \Generator
+    public function buildMessageCatalogues(Environment $environment)
     {
-        if (null === $contentType = $this->clientRequest->getTranslationContentType($environment)) {
+        if (null === $translations = $this->getTranslations($environment)) {
             return;
         }
 
-        foreach ($this->getMessages($contentType) as $locale => $messages) {
+        foreach ($this->locales as $locale) {
+            $messages = $translations->getMessages($locale);
+
             $messageCatalogue = new MessageCatalogue($locale);
             $messageCatalogue->add($messages, $environment->getName());
 
@@ -28,55 +29,25 @@ final class TranslationBuilder extends AbstractBuilder
         }
     }
 
-    /**
-     * @return array<string, array<int|string, mixed>>
-     */
-    private function getMessages(ContentType $contentType): array
+    public function getTranslations(Environment $environment): ?Translations
     {
-        if (null !== $cache = $contentType->getCache()) {
+        if (null === $contentType = $this->clientRequest->getTranslationContentType($environment)) {
+            return null;
+        }
+
+        $cache = $contentType->getCache();
+        if ($cache instanceof Translations) {
             return $cache;
         }
 
-        $messages = $this->createMessages($contentType);
-        $contentType->setCache($messages);
+        $hits = $this->search($contentType, [
+            'sort' => ['key' => ['order' => 'asc', 'missing' => '_last', 'unmapped_type' => 'text']],
+        ]);
+
+        $translations = Translations::fromHits($hits, $this->locales);
+        $contentType->setCache($translations);
         $this->clientRequest->cacheContentType($contentType);
 
-        return $messages;
-    }
-
-    /**
-     * @return array<string, array<int|string, mixed>>
-     */
-    private function createMessages(ContentType $contentType): array
-    {
-        $messages = [];
-
-        $hits = $this->searchMessages($contentType);
-
-        foreach ($hits as $hit) {
-            foreach ($this->locales as $locale) {
-                if (isset($hit['_source']['label_'.$locale])) {
-                    $messages[$locale][$hit['_source']['key']] = $hit['_source']['label_'.$locale];
-                }
-            }
-        }
-
-        return $messages;
-    }
-
-    /**
-     * @return array<mixed>
-     */
-    private function searchMessages(ContentType $contentType): array
-    {
-        return $this->search($contentType, [
-            'sort' => [
-                'key' => [
-                    'order' => 'asc',
-                    'missing' => '_last',
-                    'unmapped_type' => 'text',
-                ],
-            ],
-        ]);
+        return $translations;
     }
 }

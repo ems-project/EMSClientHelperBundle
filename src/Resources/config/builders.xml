@@ -14,6 +14,12 @@
             </call>
         </service>
 
+        <service id="emsch.helper.builders" class="EMS\ClientHelperBundle\Helper\Builder\Builders">
+            <argument type="service" id="emsch.helper.routing.builder" />
+            <argument type="service" id="emsch.helper.templating.builder" />
+            <argument type="service" id="emsch.helper.translation.builder" />
+        </service>
+
         <service id="emsch.helper.routing.builder" class="EMS\ClientHelperBundle\Helper\Routing\RoutingBuilder" parent="emsch.helper.builder" />
         <service id="emsch.helper.templating.builder" class="EMS\ClientHelperBundle\Helper\Templating\TemplateBuilder" parent="emsch.helper.builder" />
         <service id="emsch.helper.translation.builder" class="EMS\ClientHelperBundle\Helper\Translation\TranslationBuilder" parent="emsch.helper.builder" />

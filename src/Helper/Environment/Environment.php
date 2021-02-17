@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Environment;
 
+use EMS\CommonBundle\Common\Json;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -29,6 +30,7 @@ final class Environment
     private array $request = [];
     /** @var array<mixed> */
     private array $options;
+    private string $hash;
 
     /**
      * @param array<string, mixed> $config
@@ -42,6 +44,17 @@ final class Environment
         $this->backend = $config[self::BACKEND_CONFIG] ?? null;
         $this->request = $config[self::REQUEST_CONFIG] ?? [];
         $this->options = $config;
+        $this->hash = $name.\sha1(Json::encode($config));
+    }
+
+    public function getBackendUrl(): ?string
+    {
+        return $this->options[self::BACKEND_CONFIG] ?? null;
+    }
+
+    public function getHash(): string
+    {
+        return $this->hash;
     }
 
     public function getRoutePrefix(): ?string
