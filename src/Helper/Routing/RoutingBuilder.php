@@ -19,22 +19,12 @@ final class RoutingBuilder extends AbstractBuilder
             return $routeCollection;
         }
 
-        foreach ($this->getRoutes($contentType) as $route) {
-            $route->addToCollection($routeCollection, $this->locales);
+        if ($environment->isLocalPulled()) {
+            $routes = $this->createRoutes($environment, $environment->getLocal()->getRouteConfigs());
+        } else {
+            $routes = $this->getRoutes($contentType);
         }
 
-        return $routeCollection;
-    }
-
-    public function getLocalRouteCollection(Environment $environment): ?RouteCollection
-    {
-        if (null === $localEnvironment = $this->getLocalEnvironment($environment)) {
-            return null;
-        }
-
-        $routes = $this->createRoutes($environment, $localEnvironment->getRouteConfigs());
-
-        $routeCollection = new RouteCollection();
         foreach ($routes as $route) {
             $route->addToCollection($routeCollection, $this->locales);
         }

@@ -7,9 +7,6 @@ namespace EMS\ClientHelperBundle\Helper\Builder;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
-use EMS\ClientHelperBundle\Helper\Environment\Environment;
-use EMS\ClientHelperBundle\Helper\Local\LocalEnvironment;
-use EMS\ClientHelperBundle\Helper\Local\LocalHelper;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -25,7 +22,6 @@ abstract class AbstractBuilder
     protected LoggerInterface $logger;
     /** @var string[] */
     protected array $locales;
-    private ?LocalHelper $localHelper = null;
 
     /**
      * @param string[] $locales
@@ -35,22 +31,6 @@ abstract class AbstractBuilder
         $this->clientRequest = $manager->getDefault();
         $this->logger = $logger;
         $this->locales = $locales;
-    }
-
-    public function setLocalHelper(?LocalHelper $localHelper): void
-    {
-        $this->localHelper = $localHelper;
-    }
-
-    public function getLocalEnvironment(Environment $environment): ?LocalEnvironment
-    {
-        if (null === $this->localHelper) {
-            return null;
-        }
-
-        $localEnvironment = $this->localHelper->local($environment);
-
-        return $localEnvironment->isPulled() ? $localEnvironment : null;
     }
 
     /**

@@ -28,7 +28,7 @@
             <tag name="console.command" command="emsch:local:status"/>
         </service>
 
-        <service id="emsch.helper.local" class="EMS\ClientHelperBundle\Helper\Local\LocalHelper">
+        <service id="emsch.helper.local_environment_factory" class="EMS\ClientHelperBundle\Helper\Local\LocalEnvironmentFactory">
             <argument type="service" id="logger" />
             <argument>%kernel.project_dir%</argument>
         </service>
@@ -38,12 +38,10 @@
             <argument type="service" id="logger" />
         </service>
         <service id="emsch.helper.local.pull" class="EMS\ClientHelperBundle\Helper\Local\PullHelper">
-            <argument type="service" id="emsch.helper.local" />
             <argument type="service" id="emsch.helper.builders" />
             <argument type="service" id="logger" />
         </service>
         <service id="emsch.helper.local.push" class="EMS\ClientHelperBundle\Helper\Local\PushHelper">
-            <argument type="service" id="emsch.helper.local" />
             <argument type="service" id="logger" />
         </service>
         <service id="emsch.helper.local.status" class="EMS\ClientHelperBundle\Helper\Local\StatusHelper">

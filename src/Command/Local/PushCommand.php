@@ -30,7 +30,7 @@ final class PushCommand extends AbstractLocalCommand
         $this->io->title('Local development - push');
         $this->io->section(\sprintf('Pulling for environment %s', $this->environment->getName()));
 
-        $this->pushHelper->push($this->environment);
+        $this->pushHelper->push($this->environment->getLocal());
 
         return 1;
     }

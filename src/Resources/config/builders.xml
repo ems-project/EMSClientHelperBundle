@@ -9,9 +9,6 @@
             <argument type="service" id="emsch.manager.client_request" />
             <argument type="service" id="logger" />
             <argument type="string">%emsch.locales%</argument>
-            <call method="setLocalHelper">
-                <argument type="service" id="emsch.helper.local" on-invalid="null"/>
-            </call>
         </service>
 
         <service id="emsch.helper.builders" class="EMS\ClientHelperBundle\Helper\Builder\Builders">

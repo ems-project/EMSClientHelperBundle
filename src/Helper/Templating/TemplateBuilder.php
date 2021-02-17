@@ -13,6 +13,10 @@ final class TemplateBuilder extends AbstractBuilder
 {
     public function isFresh(Environment $environment, TemplateName $templateName, int $time): bool
     {
+        if ($environment->isLocalPulled()) {
+            return $environment->getLocal()->getTemplateFile($templateName)->isFresh($time);
+        }
+
         return $this->getContentType($environment, $templateName)->isLastPublishedAfterTime($time);
     }
 

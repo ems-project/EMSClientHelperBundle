@@ -8,6 +8,7 @@ final class Translation
 {
     private string $key;
     private ?string $ouuid;
+    /** @var array<string, string> */
     private array $messages = [];
 
     private function __construct(string $key)
@@ -15,7 +16,7 @@ final class Translation
         $this->key = $key;
     }
 
-    public function hasMessage($locale): bool
+    public function hasMessage(string $locale): bool
     {
         return isset($this->messages[$locale]);
     }
@@ -25,11 +26,15 @@ final class Translation
         return $this->key;
     }
 
-    public function getMessage($locale): string
+    public function getMessage(string $locale): string
     {
         return $this->messages[$locale];
     }
 
+    /**
+     * @param array<mixed> $hit
+     * @param string[]     $locales
+     */
     public static function fromHit(array $hit, array $locales): self
     {
         $source = $hit['_source'];

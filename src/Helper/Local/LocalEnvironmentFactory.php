@@ -7,7 +7,7 @@ namespace EMS\ClientHelperBundle\Helper\Local;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use Psr\Log\LoggerInterface;
 
-final class LocalHelper
+final class LocalEnvironmentFactory
 {
     private LoggerInterface $logger;
     private string $path;
@@ -18,7 +18,7 @@ final class LocalHelper
         $this->path = $projectDir.DIRECTORY_SEPARATOR.'local';
     }
 
-    public function local(Environment $environment): LocalEnvironment
+    public function create(Environment $environment): LocalEnvironment
     {
         return new LocalEnvironment($environment, $this->logger, $this->path);
     }

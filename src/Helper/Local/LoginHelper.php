@@ -22,6 +22,11 @@ final class LoginHelper
         $this->logger = $logger;
     }
 
+    public function setLogger(LoggerInterface $logger): void
+    {
+        $this->logger = $logger;
+    }
+
     public function login(Environment $environment, string $username, string $password): ?ProfileInterface
     {
         $coreApi = $this->createCoreApi($environment);
@@ -49,10 +54,5 @@ final class LoginHelper
         $coreApi->setLogger($this->logger);
 
         return $coreApi;
-    }
-
-    public function setLogger(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
     }
 }

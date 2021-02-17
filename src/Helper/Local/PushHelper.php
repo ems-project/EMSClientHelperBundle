@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Local;
 
-use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use Psr\Log\LoggerInterface;
 
 final class PushHelper
 {
-    private LocalHelper $localHelper;
     private LoggerInterface $logger;
 
-    public function __construct(LocalHelper $localHelper, LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger)
     {
-        $this->localHelper = $localHelper;
         $this->logger = $logger;
     }
 
@@ -23,9 +20,8 @@ final class PushHelper
         $this->logger = $logger;
     }
 
-    public function push(Environment $environment): void
+    public function push(LocalEnvironment $localEnvironment): void
     {
-        $localEnvironment = $this->localHelper->local($environment);
         $localEnvironment->setLogger($this->logger);
     }
 }

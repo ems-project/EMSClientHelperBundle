@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Environment;
 
+use EMS\ClientHelperBundle\Helper\Local\LocalEnvironment;
 use EMS\CommonBundle\Common\Json;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -31,6 +32,8 @@ final class Environment
     /** @var array<mixed> */
     private array $options;
     private string $hash;
+
+    private ?LocalEnvironment $local;
 
     /**
      * @param array<string, mixed> $config
@@ -136,5 +139,24 @@ final class Environment
     public function hasOption(string $option): bool
     {
         return isset($this->options[$option]) && null !== $this->options[$option];
+    }
+
+    public function isLocalPulled(): bool
+    {
+        return null !== $this->local ? $this->local->isPulled() : false;
+    }
+
+    public function getLocal(): LocalEnvironment
+    {
+        if (null === $this->local) {
+            throw new \RuntimeException('No local environment found!');
+        }
+
+        return $this->local;
+    }
+
+    public function setLocal(?LocalEnvironment $local): void
+    {
+        $this->local = $local;
     }
 }

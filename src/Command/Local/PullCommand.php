@@ -30,7 +30,7 @@ final class PullCommand extends AbstractLocalCommand
         $this->io->title('Local development - pull');
         $this->io->section(\sprintf('Pulling for environment %s', $this->environment->getName()));
 
-        $this->pullHelper->pull($this->environment);
+        $this->pullHelper->pull($this->environment->getLocal());
 
         return 1;
     }

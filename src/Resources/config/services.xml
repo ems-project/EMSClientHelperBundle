@@ -21,9 +21,15 @@
         </service>
 
         <service id="emsch.helper_environment" class="EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper">
+            <argument type="service" id="emsch.helper.environment_factory" />
             <argument type="service" id="request_stack" />
             <argument type="string">%env(string:EMSCH_ENV)%</argument>
             <argument type="string">%emsch.request_environments%</argument>
+        </service>
+        <service id="emsch.helper.environment_factory" class="EMS\ClientHelperBundle\Helper\Environment\EnvironmentFactory">
+            <call method="setLocalEnvironmentFactory">
+                <argument type="service" id="emsch.helper.local_environment_factory" on-invalid="null"/>
+            </call>
         </service>
 
         <service id="emsch.helper_locale" class="EMS\ClientHelperBundle\Helper\Request\LocaleHelper">

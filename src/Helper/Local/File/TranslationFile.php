@@ -25,11 +25,19 @@ final class TranslationFile
         $this->resource = $file->getPathname();
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function toArray(): array
     {
         return $this->flatten(Yaml::parseFile($this->resource, Yaml::PARSE_CONSTANT));
     }
 
+    /**
+     * @param array<string, array|string> $messages
+     *
+     * @return array<string, string>
+     */
     private function flatten(array $messages): array
     {
         $result = [];

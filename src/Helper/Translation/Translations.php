@@ -21,6 +21,9 @@ final class Translations
         return $translations;
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function getMessages(string $locale): array
     {
         $messages = [];

@@ -5,20 +5,17 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Local;
 
 use EMS\ClientHelperBundle\Helper\Builder\Builders;
-use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Local\File\RoutesFile;
 use EMS\ClientHelperBundle\Helper\Local\File\TemplatesFile;
 use Psr\Log\LoggerInterface;
 
 final class PullHelper
 {
-    private LocalHelper $localHelper;
     private Builders $builders;
     private LoggerInterface $logger;
 
-    public function __construct(LocalHelper $localHelper, Builders $builders, LoggerInterface $logger)
+    public function __construct(Builders $builders, LoggerInterface $logger)
     {
-        $this->localHelper = $localHelper;
         $this->builders = $builders;
         $this->logger = $logger;
     }
@@ -28,9 +25,8 @@ final class PullHelper
         $this->logger = $logger;
     }
 
-    public function pull(Environment $environment): void
+    public function pull(LocalEnvironment $localEnvironment): void
     {
-        $localEnvironment = $this->localHelper->local($environment);
         $localEnvironment->setLogger($this->logger);
 
         $this->pullTranslations($localEnvironment);
