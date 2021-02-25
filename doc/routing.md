@@ -23,3 +23,26 @@ In Twig you can set/override the pdf options with custom meta tags in the head s
     <meta name="pdf:size" content="a4" />
 </head>
 ```
+
+## Route to an asset
+```json
+{
+    "path": "/{_locale}/example-pdf/{filename}",
+    "controller": "emsch.controller.router:asset",
+    "requirements": {
+      "_locale": "fr|nl"
+    }
+}
+```
+
+```json
+{
+  "hash": "aaaaabbbbbcccccdddd111112222",
+  "config": {
+    "_mime_type": "application/pdf",
+    "_disposition": "inline"
+  },
+  "filename": "demo.pdf"
+
+}
+```
