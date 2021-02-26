@@ -47,7 +47,7 @@ class RedirectHelper
             );
             $linkTo = $document['_source']['link_to'];
 
-            return $this->transformer->transform('ems://object:'.$linkTo, $locale);
+            return $this->transformer->transform('ems://object:'.$linkTo, ['locale' => $locale]);
         } catch (TwigException $ex) {
             throw $ex;
         } catch (\Exception $ex) {
