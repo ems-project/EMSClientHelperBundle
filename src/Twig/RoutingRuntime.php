@@ -7,10 +7,7 @@ use Twig\Extension\RuntimeExtensionInterface;
 
 class RoutingRuntime implements RuntimeExtensionInterface
 {
-    /**
-     * @var Transformer
-     */
-    private $transformer;
+    private Transformer $transformer;
 
     public function __construct(Transformer $transformer)
     {
@@ -18,12 +15,9 @@ class RoutingRuntime implements RuntimeExtensionInterface
     }
 
     /**
-     * @param string $relativePath
-     * @param string $path
-     *
-     * @return string
+     * @param array<mixed> $parameters
      */
-    public function createUrl($relativePath, $path, array $parameters = [])
+    public function createUrl(string $relativePath, string $path, array $parameters = []): string
     {
         $url = $this->transformer->getGenerator()->createUrl($relativePath, $path);
 
@@ -34,15 +28,16 @@ class RoutingRuntime implements RuntimeExtensionInterface
         return $url;
     }
 
-    /**
-     * @param string $content
-     * @param string $locale
-     * @param string $baseUrl
-     *
-     * @return string
-     */
-    public function transform($content, $locale = null, $baseUrl = null)
+    public function transform(string $content, ?string $locale = null, ?string $baseUrl = null): string
     {
-        return $this->transformer->transform($content, $locale, $baseUrl);
+        return $this->transformer->transform($content, ['locale' => $locale, 'baseUrl' => $baseUrl]);
+    }
+
+    /**
+     * @param array<mixed> $config
+     */
+    public function transformConfig(string $content, array $config): string
+    {
+        return $this->transformer->transform($content, $config);
     }
 }
