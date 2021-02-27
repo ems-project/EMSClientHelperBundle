@@ -5,68 +5,38 @@ namespace EMS\ClientHelperBundle\Helper\Routing\Url;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Twig\TwigException;
 use EMS\CommonBundle\Common\EMSLink;
-use EMS\CommonBundle\Elasticsearch\Document\EMSSource;
 use Psr\Log\LoggerInterface;
+use Twig\Environment;
 
 class Transformer
 {
-    /**
-     * @var ClientRequest
-     */
-    private $clientRequest;
+    private ClientRequest $clientRequest;
+    private Generator $generator;
+    private Environment $twig;
+    private LoggerInterface $logger;
+    private string $template;
+    private array $documents;
 
-    /**
-     * @var Generator
-     */
-    private $generator;
-
-    /**
-     * @var \Twig_Environment
-     */
-    private $twig;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * @var string
-     */
-    private $template;
-
-    /** @var array */
-    private $documents = [];
-
-    /**
-     * @param ClientRequest $clientRequest injected by compiler pass
-     * @param string        $template
-     */
-    public function __construct(ClientRequest $clientRequest, Generator $generator, \Twig_Environment $twig, LoggerInterface $logger, ?string $template)
+    public function __construct(ClientRequest $clientRequest, Generator $generator, Environment $twig, LoggerInterface $logger, ?string $template)
     {
         $this->clientRequest = $clientRequest;
         $this->generator = $generator;
         $this->twig = $twig;
         $this->logger = $logger;
-        $this->template = $template;
+        $this->template = $template ?? '@EMSCH/template/{type}.ems_link.twig';
         $this->documents = [];
     }
 
-    /**
-     * @return Generator
-     */
-    public function getGenerator()
+    public function getGenerator(): Generator
     {
         return $this->generator;
     }
 
     /**
-     * @param array  $match  [link_type, content_type, ouuid, query]
-     * @param string $locale
-     *
-     * @return false|string
+     * @param array<mixed> $match
+     * @param array<mixed> $config
      */
-    public function generate(array $match, $locale = null)
+    private function generate(array $match, array $config = []): ?string
     {
         try {
             $emsLink = EMSLink::fromMatch($match);
@@ -79,69 +49,49 @@ class Transformer
                 throw new \Exception('missing content type');
             }
 
-            $document = $this->getDocument($emsLink);
-            $template = $this->renderTemplate($emsLink, $document, $locale);
-            $url = $this->generator->prependBaseUrl($emsLink, $template);
+            $context = $this->makeContext($emsLink, $config);
+            $template = \str_replace('{type}', $emsLink->getContentType(), $this->template);
+            $url = $this->twigRender($template, $context);
 
-            return $url;
+            if ($url) {
+                return $this->generator->prependBaseUrl($emsLink, $url);
+            }
+
+            return null;
         } catch (\Exception $ex) {
             $this->logger->error(\sprintf('%s match (%s)', $ex->getMessage(), \json_encode($match)));
 
-            return false;
+            return null;
         }
     }
 
     /**
-     * @param string $content
-     * @param string $locale
-     * @param string $baseUrl
-     *
-     * @return string|string[]|null
+     * @param array<mixed> $config
      */
-    public function transform($content, $locale = null, $baseUrl = null)
+    public function transform(string $content, array $config = []): string
     {
-        return \preg_replace_callback(EMSLink::PATTERN, function ($match) use ($locale, $baseUrl) {
+        $transform = \preg_replace_callback(EMSLink::PATTERN, function ($match) use ($config) {
             //array filter to remove empty capture groups
-            $generation = $this->generate(\array_filter($match), $locale);
-            $route = $generation ? $generation : $match[0];
+            $generation = $this->generate(\array_filter($match), $config);
+            $route = (null !== $generation ? $generation : $match[0]);
+            $baseUrl = $config['baseUrl'] ?? '';
 
             return $baseUrl.$route;
         }, $content);
+
+        return \is_string($transform) ? $transform : $content;
     }
 
     /**
-     * @param string $locale
-     *
-     * @return string
+     * @param array<mixed> $context
      */
-    private function renderTemplate(EMSLink $emsLink, array $document, $locale = null)
-    {
-        $context = [
-            'id' => $document['_id'],
-            'source' => $document['_source'],
-            'locale' => ($locale ? $locale : $this->clientRequest->getLocale()),
-            'url' => $emsLink,
-        ];
-
-        $contentType = $document['_source'][EMSSource::FIELD_CONTENT_TYPE] ?? $document['_type'];
-        if ($this->template) {
-            $template = \str_replace('{type}', $contentType, $this->template);
-
-            if ($result = $this->twigRender($template, $context)) {
-                return $result;
-            }
-        }
-
-        return $this->twigRender('@EMSCH/routing/'.$contentType, $context);
-    }
-
     private function twigRender(string $template, array $context): ?string
     {
         try {
             return $this->twig->render($template, $context);
         } catch (TwigException $ex) {
             $this->logger->warning($ex->getMessage());
-        } catch (\Twig_Error $ex) {
+        } catch (\Throwable $ex) {
             $this->logger->error($ex->getMessage());
         }
 
@@ -149,11 +99,34 @@ class Transformer
     }
 
     /**
-     * @return array|false
+     * @param array<mixed> $config
      *
-     * @throw \Exception
+     * @return array<mixed>
      */
-    private function getDocument(EMSLink $emsLink)
+    private function makeContext(EMSLink $emsLink, array $config): array
+    {
+        $context = $config['context'] ?? [];
+        $context['url'] = $emsLink;
+
+        $dynamicTypes = $config['dynamic_types'] ?? [];
+        if (!\in_array($emsLink->getContentType(), $dynamicTypes)) {
+            if ($document = $this->getDocument($emsLink)) {
+                $context['id'] = $document['_id'];
+                $context['source'] = $document['_source'];
+            }
+        }
+
+        if (!isset($context['locale'])) {
+            $context['locale'] = $this->clientRequest->getLocale();
+        }
+
+        return $context;
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function getDocument(EMSLink $emsLink): ?array
     {
         if (isset($this->documents[$emsLink->__toString()])) {
             return $this->documents[$emsLink->__toString()];

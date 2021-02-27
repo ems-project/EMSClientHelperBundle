@@ -25,6 +25,8 @@ In Twig you can set/override the pdf options with custom meta tags in the head s
 ```
 
 ## Route to an asset
+
+A route may also directly returns an asset:
 ```json
 {
     "path": "/{_locale}/example-pdf/{filename}",
@@ -35,6 +37,8 @@ In Twig you can set/override the pdf options with custom meta tags in the head s
 }
 ```
 
+The template must returns a json like this one:
+
 ```json
 {
   "hash": "aaaaabbbbbcccccdddd111112222",
@@ -44,5 +48,23 @@ In Twig you can set/override the pdf options with custom meta tags in the head s
   },
   "filename": "demo.pdf"
 
+}
+```
+
+ - `hash`: Asset's hash
+ - `config`: Config's hash or config array (see common's processor config)
+ - `filename`: File name
+
+This json may also contain an optional `immutable` boolean option [default value = false]:
+
+```json
+{
+  "hash": "aaaaabbbbbcccccdddd111112222",
+  "config": {
+    "_mime_type": "application/pdf",
+    "_disposition": "inline"
+  },
+  "filename": "demo.pdf",
+  "immutable": true
 }
 ```

@@ -581,41 +581,6 @@ parameters:
 			path: src/Helper/Routing/Url/Transformer.php
 
 		-
-			message: "#^Property EMS\\\\ClientHelperBundle\\\\Helper\\\\Routing\\\\Url\\\\Transformer\\:\\:\\$template \\(string\\) does not accept string\\|null\\.$#"
-			count: 1
-			path: src/Helper/Routing/Url/Transformer.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Routing\\\\Url\\\\Transformer\\:\\:generate\\(\\) has parameter \\$match with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Helper/Routing/Url/Transformer.php
-
-		-
-			message: "#^Parameter \\#2 \\$document of method EMS\\\\ClientHelperBundle\\\\Helper\\\\Routing\\\\Url\\\\Transformer\\:\\:renderTemplate\\(\\) expects array, array\\|false given\\.$#"
-			count: 1
-			path: src/Helper/Routing/Url/Transformer.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Routing\\\\Url\\\\Transformer\\:\\:renderTemplate\\(\\) has parameter \\$document with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Helper/Routing/Url/Transformer.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Routing\\\\Url\\\\Transformer\\:\\:renderTemplate\\(\\) should return string but returns string\\|null\\.$#"
-			count: 1
-			path: src/Helper/Routing/Url/Transformer.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Routing\\\\Url\\\\Transformer\\:\\:twigRender\\(\\) has parameter \\$context with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Helper/Routing/Url/Transformer.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Routing\\\\Url\\\\Transformer\\:\\:getDocument\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Helper/Routing/Url/Transformer.php
-
-		-
 			message: "#^Property EMS\\\\ClientHelperBundle\\\\Helper\\\\Translation\\\\TranslationHelper\\:\\:\\$locales type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: src/Helper/Translation/TranslationHelper.php
@@ -659,14 +624,4 @@ parameters:
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Twig\\\\TwigLoader\\:\\:match\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: src/Helper/Twig/TwigLoader.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Twig\\\\RoutingRuntime\\:\\:createUrl\\(\\) has parameter \\$parameters with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Twig/RoutingRuntime.php
-
-		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Twig\\\\RoutingRuntime\\:\\:transform\\(\\) should return string but returns array\\<string\\>\\|string\\|null\\.$#"
-			count: 1
-			path: src/Twig/RoutingRuntime.php
 
