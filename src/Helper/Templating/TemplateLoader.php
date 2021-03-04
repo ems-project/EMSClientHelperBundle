@@ -29,9 +29,8 @@ final class TemplateLoader implements LoaderInterface
         $templateName = new TemplateName($name);
 
         if ($environment->isLocalPulled()) {
-            $localTemplateFile = $environment->getLocal()->getTemplateFile($templateName);
-
-            return new Source($localTemplateFile->getCode(), $name, $localTemplateFile->getPath());
+            $template = $this->getEnvironment()->getLocal()->getTemplates()->getByTemplateName($templateName);
+            return new Source($template->getCode(), $name, $template->getPath());
         }
 
         $template = $this->builder->buildTemplate($environment, $templateName);

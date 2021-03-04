@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace EMS\ClientHelperBundle\Helper\Local\File;
+namespace EMS\ClientHelperBundle\Helper\Translation;
 
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Yaml\Yaml;
 
-final class TranslationFile
+final class TranslationFile implements \Countable
 {
     public string $resource;
     public string $format;
@@ -23,6 +23,16 @@ final class TranslationFile
         $this->locale = \array_pop($fileNameParts);
         $this->domain = \implode('.', $fileNameParts);
         $this->resource = $file->getPathname();
+    }
+
+    public function __toString(): string
+    {
+        return $this->resource;
+    }
+
+    public function count(): int
+    {
+        return \count($this->toArray());
     }
 
     /**

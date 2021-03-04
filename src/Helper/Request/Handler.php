@@ -7,7 +7,7 @@ namespace EMS\ClientHelperBundle\Helper\Request;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
-use EMS\ClientHelperBundle\Helper\Templating\Template;
+use EMS\ClientHelperBundle\Helper\Templating\TemplateDocument;
 use EMS\CommonBundle\Common\EMSLink;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -101,12 +101,12 @@ final class Handler
             return $request->get($match['parameter'], $match[0]);
         }, $template);
 
-        if (null === $document || Template::PREFIX === \substr($template, 0, 6)) {
+        if (null === $document || TemplateDocument::PREFIX === \substr($template, 0, 6)) {
             return $template;
         }
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
 
-        return Template::PREFIX.'/'.$propertyAccessor->getValue($document, '[_source]'.$template);
+        return TemplateDocument::PREFIX.'/'.$propertyAccessor->getValue($document, '[_source]'.$template);
     }
 }

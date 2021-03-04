@@ -6,6 +6,7 @@ namespace EMS\ClientHelperBundle\Helper\Templating;
 
 use EMS\ClientHelperBundle\Exception\TemplatingException;
 use EMS\ClientHelperBundle\Helper\Builder\AbstractBuilder;
+use EMS\ClientHelperBundle\Helper\Builder\BuilderDocumentInterface;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 
@@ -14,15 +15,15 @@ final class TemplateBuilder extends AbstractBuilder
     public function isFresh(Environment $environment, TemplateName $templateName, int $time): bool
     {
         if ($environment->isLocalPulled()) {
-            return $environment->getLocal()->getTemplateFile($templateName)->isFresh($time);
+            return $environment->getLocal()->getTemplates()->getByTemplateName($templateName)->isFresh($time);
         }
 
         return $this->getContentType($environment, $templateName)->isLastPublishedAfterTime($time);
     }
 
-    public function buildTemplate(Environment $environment, TemplateName $templateName): Template
+    public function buildTemplate(Environment $environment, TemplateName $templateName): TemplateDocument
     {
-        $mapping = $this->getMappingConfig($templateName);
+        $mapping = $this->getMappingConfig($templateName->getContentType());
         $contentType = $this->getContentType($environment, $templateName);
 
         $searchField = $templateName->getSearchField();
@@ -35,13 +36,21 @@ final class TemplateBuilder extends AbstractBuilder
             ],
         ], $contentType->getEnvironment()->getAlias());
 
-        return Template::fromHit($hit, $mapping);
+        return new TemplateDocument($hit['_id'], $hit['_source'], $mapping);
+    }
+
+    public function buildFiles(Environment $environment, string $directory): TemplateFiles
+    {
+        $contentTypes = \array_keys($this->getTemplatesConfig());
+        $documents = $this->getDocuments($environment);
+
+        return TemplateFiles::build($directory, $contentTypes, $documents);
     }
 
     /**
-     * @return \Generator|Template[]
+     * @return \Generator|BuilderDocumentInterface[]|TemplateDocument[]
      */
-    public function buildTemplates(Environment $environment): \Generator
+    public function getDocuments(Environment $environment): \Generator
     {
         $config = $this->getTemplatesConfig();
 
@@ -50,10 +59,18 @@ final class TemplateBuilder extends AbstractBuilder
                 continue;
             }
 
-            foreach ($this->search($contentType) as $hit) {
-                yield Template::fromHit($hit, $mapping);
+            foreach ($this->search($contentType)->getDocuments() as $doc) {
+                yield new TemplateDocument($doc->getId(), $doc->getSource(), $mapping);
             }
         }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function getTemplatesConfig(): array
+    {
+        return $this->clientRequest->getOption('[templates]');
     }
 
     private function getContentType(Environment $environment, TemplateName $templateName): ContentType
@@ -70,18 +87,10 @@ final class TemplateBuilder extends AbstractBuilder
     /**
      * @return array<mixed>
      */
-    private function getTemplatesConfig(): array
-    {
-        return $this->clientRequest->getOption('[templates]');
-    }
-
-    /**
-     * @return array<mixed>
-     */
-    private function getMappingConfig(TemplateName $templateName): array
+    public function getMappingConfig(string $contentType): array
     {
         $configTemplates = $this->getTemplatesConfig();
-        $config = $configTemplates[$templateName->getContentType()] ?? null;
+        $config = $configTemplates[$contentType] ?? null;
 
         if (null === $config) {
             throw new TemplatingException('Missing config EMSCH_TEMPLATES');

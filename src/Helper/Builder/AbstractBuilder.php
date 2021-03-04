@@ -7,6 +7,9 @@ namespace EMS\ClientHelperBundle\Helper\Builder;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
+use EMS\CommonBundle\Elasticsearch\Response\Response;
+use EMS\CommonBundle\Elasticsearch\Response\ResponseInterface;
+use EMS\CommonBundle\Search\Search;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -23,6 +26,8 @@ abstract class AbstractBuilder
     /** @var string[] */
     protected array $locales;
 
+    private const SEARCH_LIMIT = 1000;
+
     /**
      * @param string[] $locales
      */
@@ -33,28 +38,29 @@ abstract class AbstractBuilder
         $this->locales = $locales;
     }
 
+    protected function modifySearch(Search $search): void {}
+
     /**
-     * @param array<mixed> $body
-     *
-     * @return array<mixed>
+     * @param array<mixed> $sort
      */
-    protected function search(ContentType $contentType, array $body = []): array
+    protected function search(ContentType $contentType): ResponseInterface
     {
-        $limit = 1000;
-        $type = $contentType->getName();
-        $alias = $contentType->getEnvironment()->getAlias();
+        $search = new Search([$contentType->getEnvironment()->getAlias()]);
+        $search->setContentTypes([$contentType->getName()]);
+        $search->setSize(self::SEARCH_LIMIT);
 
-        $search = $this->clientRequest->search($type, $body, 0, $limit, [], $alias);
-        $total = $search['hits']['total']['value'] ?? $search['hits']['total'];
+        $this->modifySearch($search);
 
-        if ($total > $limit) {
+        $response = Response::fromResultSet($this->clientRequest->commonSearch($search));
+
+        if ($response->getTotal() > self::SEARCH_LIMIT) {
             $this->logger->error('Only the first {limit} {type}s have been loaded on a total of {total}', [
-                'limit' => $limit,
-                'type' => $type,
-                'total' => $total,
+                'limit' => self::SEARCH_LIMIT,
+                'type' => $contentType->getName(),
+                'total' => $response->getTotal(),
             ]);
         }
 
-        return $search['hits']['hits'];
+        return $response;
     }
 }

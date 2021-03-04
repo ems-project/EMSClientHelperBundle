@@ -30,7 +30,7 @@ final class TemplateName
 
     public static function validate(string $name): bool
     {
-        return Template::PREFIX === \substr($name, 0, 6);
+        return TemplateDocument::PREFIX === \substr($name, 0, 6);
     }
 
     public function getContentType(): string

@@ -22,6 +22,5 @@ final class PushHelper
 
     public function push(LocalEnvironment $localEnvironment): void
     {
-        $localEnvironment->setLogger($this->logger);
     }
 }

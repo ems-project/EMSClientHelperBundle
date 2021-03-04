@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
+use EMS\ClientHelperBundle\Helper\Templating\TemplateDocument;
+use EMS\ClientHelperBundle\Helper\Templating\TemplateFile;
+use EMS\CommonBundle\Common\Json;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\Route as SymfonyRoute;
@@ -18,18 +21,38 @@ final class Route
     /**
      * @param array<mixed> $options
      */
-    public function __construct(string $name, array $options)
+    private function __construct(string $name, array $options)
     {
         $this->name = $name;
         $this->options = $this->resolveOptions($options);
     }
 
+    public static function fromData(string $name, array $data): self
+    {
+        $config = isset($data['config']) ? Json::decode($data['config']) : [];
+
+        if (isset($data['template_static'])) {
+            $template = TemplateDocument::PREFIX . '/' .  $data['template_static'];
+        } else {
+            $template = $data['template_source'] ?? null;
+        }
+
+        return new self($name, \array_filter(\array_merge($config, [
+            'query' => isset($data['query']) ? Json::decode($data['query']) : null,
+            'template' => $template,
+        ])));
+    }
+
     /**
      * @param string[] $locales
      */
-    public function addToCollection(RouteCollection $collection, array $locales = []): void
+    public function addToCollection(RouteCollection $collection, array $locales = [], ?string $prefix = null): void
     {
         $path = $this->options['path'];
+
+        if (null !== $prefix) {
+            $this->options['prefix'] = $prefix;
+        }
 
         if (\is_array($path)) {
             foreach ($path as $key => $p) {
@@ -91,7 +114,7 @@ final class Route
                 'prefix' => null,
                 'type' => null,
                 'query' => null,
-                'template' => null,
+                'template' => '[template]',
                 'index_regex' => null,
                 'condition' => null,
             ])

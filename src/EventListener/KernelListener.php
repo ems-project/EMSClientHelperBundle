@@ -69,6 +69,7 @@ final class KernelListener implements EventSubscriberInterface
             if ($environment->matchRequest($request)) {
                 $environment->makeActive();
                 $environment->modifyRequest($request);
+
                 break;
             }
         }

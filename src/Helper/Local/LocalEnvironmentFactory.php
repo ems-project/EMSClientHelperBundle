@@ -5,21 +5,18 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Local;
 
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
-use Psr\Log\LoggerInterface;
 
 final class LocalEnvironmentFactory
 {
-    private LoggerInterface $logger;
     private string $path;
 
-    public function __construct(LoggerInterface $logger, string $projectDir)
+    public function __construct(string $projectDir)
     {
-        $this->logger = $logger;
         $this->path = $projectDir.DIRECTORY_SEPARATOR.'local';
     }
 
     public function create(Environment $environment): LocalEnvironment
     {
-        return new LocalEnvironment($environment, $this->logger, $this->path);
+        return new LocalEnvironment($environment, $this->path);
     }
 }
