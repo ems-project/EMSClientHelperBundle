@@ -8,10 +8,8 @@ use EMS\ClientHelperBundle\Exception\TemplatingException;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\CommonBundle\Common\EMSLink;
-use EMS\CommonBundle\Elasticsearch\Document\EMSSource;
 use Psr\Log\LoggerInterface;
 use Twig\Environment;
-use Twig\Error\Error;
 
 final class Transformer
 {
@@ -19,8 +17,7 @@ final class Transformer
     private Generator $generator;
     private Environment $twig;
     private LoggerInterface $logger;
-    private ?string $template;
-    /** @var array<mixed> */
+    private string $template;
     private array $documents;
 
     public function __construct(ClientRequestManager $clientRequestManager, Generator $generator, Environment $twig, LoggerInterface $logger, ?string $template)
@@ -29,7 +26,7 @@ final class Transformer
         $this->generator = $generator;
         $this->twig = $twig;
         $this->logger = $logger;
-        $this->template = $template;
+        $this->template = $template ?? '@EMSCH/template/{type}.ems_link.twig';
         $this->documents = [];
     }
 
@@ -39,11 +36,10 @@ final class Transformer
     }
 
     /**
-     * @param array{ouuid?: string, link_type?: string, content_type?: string, query?: string} $match
-     *
-     * @return false|string
+     * @param array<mixed> $match
+     * @param array<mixed> $config
      */
-    public function generate(array $match, ?string $locale = null)
+    private function generate(array $match, array $config = []): ?string
     {
         try {
             $emsLink = EMSLink::fromMatch($match);
@@ -56,25 +52,28 @@ final class Transformer
                 throw new \Exception('missing content type');
             }
 
-            $document = $this->getDocument($emsLink);
-            if (null === $template = $this->renderTemplate($emsLink, $document, $locale)) {
-                throw new \Exception('missing template');
+            $context = $this->makeContext($emsLink, $config);
+            $template = \str_replace('{type}', $emsLink->getContentType(), $this->template);
+            $url = $this->twigRender($template, $context);
+
+            if ($url) {
+                return $this->generator->prependBaseUrl($emsLink, $url);
             }
 
-            return $this->generator->prependBaseUrl($template);
+            return null;
         } catch (\Exception $ex) {
             $this->logger->error(\sprintf('%s match (%s)', $ex->getMessage(), \json_encode($match)));
 
-            return false;
+            return null;
         }
     }
 
     /**
-     * @return string|string[]|null
+     * @param array<mixed> $config
      */
-    public function transform(string $content, ?string $locale = null, ?string $baseUrl = null)
+    public function transform(string $content, array $config = []): string
     {
-        return \preg_replace_callback(EMSLink::PATTERN, function ($match) use ($locale, $baseUrl) {
+        $transform = \preg_replace_callback(EMSLink::PATTERN, function ($match) use ($config) {
             //array filter to remove empty capture groups
             $cleanMatch = \array_filter($match);
 
@@ -82,35 +81,14 @@ final class Transformer
                 return $match[0];
             }
 
-            $generation = $this->generate($cleanMatch, $locale);
-            $route = $generation ? $generation : $match[0];
+            $generation = $this->generate($cleanMatch, $config);
+            $route = (null !== $generation ? $generation : $match[0]);
+            $baseUrl = $config['baseUrl'] ?? '';
 
             return $baseUrl.$route;
         }, $content);
-    }
 
-    /**
-     * @param array<mixed> $document
-     */
-    private function renderTemplate(EMSLink $emsLink, array $document, ?string $locale = null): ?string
-    {
-        $context = [
-            'id' => $document['_id'],
-            'source' => $document['_source'],
-            'locale' => ($locale ? $locale : $this->clientRequest->getLocale()),
-            'url' => $emsLink,
-        ];
-
-        $contentType = $document['_source'][EMSSource::FIELD_CONTENT_TYPE] ?? $document['_type'];
-        if ($this->template) {
-            $template = \str_replace('{type}', $contentType, $this->template);
-
-            if ($result = $this->twigRender($template, $context)) {
-                return $result;
-            }
-        }
-
-        return $this->twigRender('@EMSCH/routing/'.$contentType, $context);
+        return \is_string($transform) ? $transform : $content;
     }
 
     /**
@@ -122,7 +100,7 @@ final class Transformer
             return $this->twig->render($template, $context);
         } catch (TemplatingException $ex) {
             $this->logger->warning($ex->getMessage());
-        } catch (Error $ex) {
+        } catch (\Throwable $ex) {
             $this->logger->error($ex->getMessage());
         }
 
@@ -130,9 +108,34 @@ final class Transformer
     }
 
     /**
+     * @param array<mixed> $config
+     *
      * @return array<mixed>
      */
-    private function getDocument(EMSLink $emsLink): array
+    private function makeContext(EMSLink $emsLink, array $config): array
+    {
+        $context = $config['context'] ?? [];
+        $context['url'] = $emsLink;
+
+        $dynamicTypes = $config['dynamic_types'] ?? [];
+        if (!\in_array($emsLink->getContentType(), $dynamicTypes)) {
+            if ($document = $this->getDocument($emsLink)) {
+                $context['id'] = $document['_id'];
+                $context['source'] = $document['_source'];
+            }
+        }
+
+        if (!isset($context['locale'])) {
+            $context['locale'] = $this->clientRequest->getLocale();
+        }
+
+        return $context;
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function getDocument(EMSLink $emsLink): ?array
     {
         if (isset($this->documents[$emsLink->__toString()])) {
             return $this->documents[$emsLink->__toString()];

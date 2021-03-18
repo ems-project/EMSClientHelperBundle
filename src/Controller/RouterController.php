@@ -54,7 +54,13 @@ final class RouterController
 
         $data = \json_decode($json, true);
 
-        return $this->processor->getResponse($request, $data['hash'], $data['config'], $data['filename']);
+        if (\is_string($data['config'] ?? false)) {
+            return $this->processor->getResponse($request, $data['hash'], $data['config'], $data['filename'], $data['immutable'] ?? false);
+        }
+
+        $config = $this->processor->configFactory($data['hash'], $data['config'] ?? []);
+
+        return $this->processor->getStreamedResponse($request, $config, $data['filename'], $data['immutable'] ?? false);
     }
 
     public function makeResponse(Request $request): Response
