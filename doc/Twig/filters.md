@@ -29,7 +29,7 @@ Ut aliquam enim <a href="ems://object:page:AXY5brhavwK7S-Z8saw1">page2</a> dui d
 Works like [emsch_routing](#emsch_routing) but only accepts 1 optional parameter called config.
 
 Possible config properties:
-> - **locale**: is forwarded to the render template (add to context)
+> - **locale**: is forwarded to the render template (will be added to the context array)
 > - **baseUrl**: the result of the rendering will be prefix with this baseUrl
 > - **dynamic_types**: allow emsLinks with these types and do NOT fetch the document
 > - **context**: an array for extending the context passed to the templates
