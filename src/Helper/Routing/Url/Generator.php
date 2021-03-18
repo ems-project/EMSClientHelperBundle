@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Routing\Url;
 
+use EMS\CommonBundle\Common\EMSLink;
 use Symfony\Component\Routing\RouterInterface;
 
 final class Generator

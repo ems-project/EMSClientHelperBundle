@@ -18,6 +18,7 @@ final class Transformer
     private Environment $twig;
     private LoggerInterface $logger;
     private string $template;
+    /** @var array<string, mixed> */
     private array $documents;
 
     public function __construct(ClientRequestManager $clientRequestManager, Generator $generator, Environment $twig, LoggerInterface $logger, ?string $template)
@@ -57,7 +58,7 @@ final class Transformer
             $url = $this->twigRender($template, $context);
 
             if ($url) {
-                return $this->generator->prependBaseUrl($emsLink, $url);
+                return $this->generator->prependBaseUrl($url);
             }
 
             return null;
