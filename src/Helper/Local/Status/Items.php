@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Local\Status;
 
+/**
+ * @implements \IteratorAggregate<Item>
+ */
 final class Items implements \IteratorAggregate, \Countable
 {
     /** @var Item[] */
@@ -27,14 +30,14 @@ final class Items implements \IteratorAggregate, \Countable
     }
 
     /**
-     * @return \ArrayIterator|Item[]
+     * @return \ArrayIterator<int, Item>|Item[]
      */
-    public function getIterator()
+    public function getIterator(): \ArrayIterator
     {
         return new \ArrayIterator($this->items);
     }
 
-    public function count()
+    public function count(): int
     {
         return \count($this->items);
     }

@@ -8,6 +8,9 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
 
+/**
+ * @implements \IteratorAggregate<TemplateFile>
+ */
 final class TemplateFiles implements \IteratorAggregate, \Countable
 {
     /** @var TemplateFile[] */
@@ -18,7 +21,8 @@ final class TemplateFiles implements \IteratorAggregate, \Countable
     public function __construct(string $directory)
     {
         $file = $directory.\DIRECTORY_SEPARATOR.self::FILE_NAME;
-        $mapping = \file_exists($file) ? Yaml::parse(\file_get_contents($file)) : [];
+        $content = \file_exists($file) ? (\file_get_contents($file) ?: '') : '';
+        $mapping = Yaml::parse($content);
 
         foreach ($mapping as $contentType => $templates) {
             foreach (Finder::create()->in($directory.\DIRECTORY_SEPARATOR.$contentType)->files() as $file) {
@@ -63,9 +67,9 @@ final class TemplateFiles implements \IteratorAggregate, \Countable
     }
 
     /**
-     * @return \ArrayIterator|TemplateFile[]
+     * @return \ArrayIterator<int, TemplateFile>
      */
-    public function getIterator()
+    public function getIterator(): \ArrayIterator
     {
         return new \ArrayIterator($this->templateFiles);
     }

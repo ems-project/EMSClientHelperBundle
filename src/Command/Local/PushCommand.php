@@ -47,30 +47,39 @@ final class PushCommand extends AbstractLocalCommand
             $draft = $data->create($item->getDataLocal());
             $ouuid = $data->finalize($draft->getRevisionId());
             $item->setId($ouuid);
-            $pushes[] = ['Created' => $this->getUrl($item)];
+            $this->writeItem('<fg=green>Created</>', $item);
         }
 
         foreach ($status->itemsUpdated() as $item) {
+            if (null === $id = $item->getId()) {
+                continue;
+            }
+
             $data = $this->coreApi->data($item->getContentType());
-            $draft = $data->update($item->getId(), $item->getDataLocal());
+            $draft = $data->update($id, $item->getDataLocal());
             $data->finalize($draft->getRevisionId());
-            $pushes[] = ['Updated' => $this->getUrl($item)];
+            $this->writeItem('<fg=blue>Updated</>', $item);
         }
 
         foreach ($status->itemsDeleted() as $item) {
-            $data = $this->coreApi->data($item->getContentType());
-            $data->delete($item->getId());
-            $pushes[] = ['Deleted' => $this->getUrl($item)];
+            if (null === $id = $item->getId()) {
+                continue;
+            }
+
+            $this->coreApi->data($item->getContentType())->delete($id);
+            $this->writeItem('<fg=red>Deleted</>', $item);
         }
     }
 
-    private function getUrl(Item $item): string
+    private function writeItem(string $type, Item $item): void
     {
-        return \vsprintf('%s (%s/data/revisions/%s:%s)', [
+        $url = \vsprintf('%s (%s/data/revisions/%s:%s)', [
             $item->getKey(),
             $this->coreApi->getBaseUrl(),
             $item->getContentType(),
             $item->getId(),
         ]);
+
+        $this->io->write(sprintf('%s %s', $type, $url));
     }
 }

@@ -15,6 +15,9 @@ final class TranslationDocument implements BuilderDocumentInterface
     /** @var string[] */
     private array $locales;
 
+    /**
+     * @param string[] $locales
+     */
     public function __construct(DocumentInterface $document, array $locales)
     {
         $this->id = $document->getId();
@@ -37,6 +40,9 @@ final class TranslationDocument implements BuilderDocumentInterface
         return $this->source['key'];
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getDataSource(): array
     {
         $source = ['key' => $this->source['key']];

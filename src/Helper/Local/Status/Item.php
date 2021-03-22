@@ -9,7 +9,9 @@ final class Item
     private string $key;
     private ?string $id = null;
     private string $contentType;
+    /** @var array<mixed> */
     private array $dataLocal = [];
+    /** @var array<mixed> */
     private array $dataOrigin = [];
 
     private function __construct(string $key, string $contentType)
@@ -53,11 +55,17 @@ final class Item
         return $this->contentType;
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getDataLocal(): array
     {
         return $this->dataLocal;
     }
 
+    /**
+     * @param array<mixed> $data
+     */
     public static function fromLocal(string $key, string $contentType, array $data): self
     {
         $item = new self($key, $contentType);
@@ -66,6 +74,9 @@ final class Item
         return $item;
     }
 
+    /**
+     * @param array<mixed> $data
+     */
     public static function fromOrigin(string $key, string $contentType, string $ouuid, array $data): self
     {
         $item = new self($key, $contentType);
@@ -75,6 +86,9 @@ final class Item
         return $item;
     }
 
+    /**
+     * @param array<mixed> $dataLocal
+     */
     public function setDataLocal(array $dataLocal): void
     {
         \ksort($dataLocal);
@@ -82,6 +96,9 @@ final class Item
         $this->dataLocal = $dataLocal;
     }
 
+    /**
+     * @param array<mixed> $dataOrigin
+     */
     public function setDataOrigin(array $dataOrigin): void
     {
         \ksort($dataOrigin);

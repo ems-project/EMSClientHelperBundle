@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Templating;
 
 use EMS\ClientHelperBundle\Helper\Builder\AbstractBuilder;
-use EMS\ClientHelperBundle\Helper\Builder\BuilderDocumentInterface;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 
@@ -42,7 +41,7 @@ final class TemplateBuilder extends AbstractBuilder
     }
 
     /**
-     * @return \Generator|BuilderDocumentInterface[]|TemplateDocument[]
+     * @return \Generator|TemplateDocument[]
      */
     public function getDocuments(Environment $environment): \Generator
     {

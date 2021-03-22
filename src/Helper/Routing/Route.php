@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
 use EMS\ClientHelperBundle\Helper\Templating\TemplateDocument;
-use EMS\CommonBundle\Common\Json;
+use EMS\CommonBundle\Common\Standard\Json;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\Route as SymfonyRoute;
@@ -26,6 +26,9 @@ final class Route
         $this->options = $this->resolveOptions($options);
     }
 
+    /**
+     * @param array<mixed> $data
+     */
     public static function fromData(string $name, array $data): self
     {
         $config = isset($data['config']) ? Json::decode($data['config']) : [];

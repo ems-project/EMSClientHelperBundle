@@ -76,7 +76,7 @@ final class LocalHelper
         $this->buildVersion($environment);
     }
 
-    public function buildVersion(Environment $environment, bool $clearContentTypes = false)
+    public function buildVersion(Environment $environment, bool $clearContentTypes = false): void
     {
         if ($clearContentTypes) {
             $this->contentTypeHelper->clear();

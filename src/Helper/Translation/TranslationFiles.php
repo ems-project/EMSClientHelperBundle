@@ -8,6 +8,9 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\Translation\Dumper\YamlFileDumper;
 use Symfony\Component\Translation\MessageCatalogue;
 
+/**
+ * @implements \IteratorAggregate<TranslationFile>
+ */
 final class TranslationFiles implements \IteratorAggregate
 {
     /** @var TranslationFile[] */
@@ -42,13 +45,16 @@ final class TranslationFiles implements \IteratorAggregate
     }
 
     /**
-     * @return \ArrayIterator|TranslationFile[]
+     * @return \ArrayIterator<int, TranslationFile>
      */
-    public function getIterator()
+    public function getIterator(): \ArrayIterator
     {
         return new \ArrayIterator($this->files);
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getData(): array
     {
         $result = [];

@@ -40,7 +40,7 @@ final class Status
     /**
      * @param BuilderDocumentInterface[] $documents
      */
-    public function addBuilderDocuments(iterable $documents)
+    public function addBuilderDocuments(iterable $documents): void
     {
         foreach ($documents as $document) {
             $this->addItemOrigin(
@@ -52,6 +52,9 @@ final class Status
         }
     }
 
+    /**
+     * @param array<mixed> $dataLocal
+     */
     public function addItemLocal(string $key, string $contentType, array $dataLocal): void
     {
         if ($this->items->hasItem($key)) {
@@ -61,6 +64,9 @@ final class Status
         }
     }
 
+    /**
+     * @param array<mixed> $dataOrigin
+     */
     private function addItemOrigin(string $key, string $contentType, string $id, array $dataOrigin): void
     {
         if ($this->items->hasItem($key)) {

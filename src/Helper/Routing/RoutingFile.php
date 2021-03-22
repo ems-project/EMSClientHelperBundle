@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
 use EMS\ClientHelperBundle\Helper\Templating\TemplateFiles;
-use EMS\CommonBundle\Common\Json;
+use EMS\CommonBundle\Common\Standard\Json;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Yaml;
 
@@ -20,7 +20,8 @@ final class RoutingFile implements \Countable
     public function __construct(string $directory)
     {
         $file = $directory.\DIRECTORY_SEPARATOR.self::FILE_NAME;
-        $routes = \file_exists($file) ? Yaml::parse(\file_get_contents($file)) : [];
+        $content = \file_exists($file) ? (\file_get_contents($file) ?: ''): '';
+        $routes = \file_exists($file) ? Yaml::parse($content) : [];
 
         $this->templateFiles = new TemplateFiles($directory);
 
@@ -63,6 +64,9 @@ final class RoutingFile implements \Countable
         return new self($directory);
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getData(): array
     {
         $data = [];
@@ -87,14 +91,14 @@ final class RoutingFile implements \Countable
     }
 
     /**
-     * @return Route[]
+     * @return \Generator|Route[]
      */
     public function createRoutes(): \Generator
     {
         foreach ($this->routes as $name => $data) {
-//            if (isset($data['template_static'])) {
-//                $data['template_static'] = $this->templateFiles->getByName($data['template_static'])->getPathName();
-//            }
+            if (isset($data['template_static'])) {
+                $data['template_static'] = $this->templateFiles->getByName($data['template_static'])->getPathName();
+            }
 
             yield Route::fromData($name, $data);
         }

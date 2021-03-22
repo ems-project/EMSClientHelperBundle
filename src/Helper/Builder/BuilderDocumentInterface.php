@@ -12,5 +12,8 @@ interface BuilderDocumentInterface
 
     public function getContentType(): string;
 
+    /**
+     * @return array<mixed>
+     */
     public function getDataSource(): array;
 }

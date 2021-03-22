@@ -46,7 +46,7 @@ final class RoutingBuilder extends AbstractBuilder
     }
 
     /**
-     * @return BuilderDocumentInterface[]|RoutingDocument[]
+     * @return RoutingDocument[]
      */
     public function getDocuments(Environment $environment): array
     {

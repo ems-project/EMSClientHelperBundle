@@ -16,6 +16,10 @@ final class TemplateDocument implements BuilderDocumentInterface
 
     public const PREFIX = '@EMSCH';
 
+    /**
+     * @param array<mixed> $source
+     * @param array<mixed> $mapping
+     */
     public function __construct(string $id, array $source, array $mapping)
     {
         $this->id = $id;
@@ -43,6 +47,9 @@ final class TemplateDocument implements BuilderDocumentInterface
         return $this->source[$this->mapping['code']] ?? '';
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getDataSource(): array
     {
         return [

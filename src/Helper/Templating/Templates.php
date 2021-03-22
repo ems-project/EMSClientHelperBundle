@@ -11,6 +11,7 @@ use EMS\ClientHelperBundle\Helper\Environment\Environment;
 
 final class Templates
 {
+    /** @var array<mixed> */
     private array $templates = [];
 
     public function __construct(ClientRequest $clientRequest, Environment $environment)
@@ -30,6 +31,9 @@ final class Templates
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getMapping(string $contentTypeName): array
     {
         $mapping = $this->templates[$contentTypeName]['mapping'] ?? false;

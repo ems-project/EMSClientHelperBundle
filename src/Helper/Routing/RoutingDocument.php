@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
 use EMS\ClientHelperBundle\Helper\Builder\BuilderDocumentInterface;
-use EMS\CommonBundle\Common\Json;
+use EMS\CommonBundle\Common\Standard\Json;
 use EMS\CommonBundle\Elasticsearch\Document\DocumentInterface;
 
 final class RoutingDocument implements BuilderDocumentInterface
@@ -43,6 +43,9 @@ final class RoutingDocument implements BuilderDocumentInterface
         return $this->source['_contenttype'];
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getDataSource(): array
     {
         return \array_filter([
@@ -55,6 +58,9 @@ final class RoutingDocument implements BuilderDocumentInterface
         ]);
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getRouteData(): array
     {
         return \array_filter([

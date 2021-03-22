@@ -42,9 +42,6 @@ abstract class AbstractBuilder implements BuilderInterface
     {
     }
 
-    /**
-     * @param array<mixed> $sort
-     */
     protected function search(ContentType $contentType): ResponseInterface
     {
         $search = new Search([$contentType->getEnvironment()->getAlias()]);
