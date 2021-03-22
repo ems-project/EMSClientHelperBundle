@@ -116,6 +116,9 @@ class Transformer
             }
         }
 
+        if (isset($config['locale'])) {
+            $context['locale'] = $config['locale'];
+        }
         if (!isset($context['locale'])) {
             $context['locale'] = $this->clientRequest->getLocale();
         }
