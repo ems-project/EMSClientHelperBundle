@@ -19,7 +19,7 @@ use Psr\Log\LoggerInterface;
  * @see \EMS\ClientHelperBundle\Helper\Templating\TemplateBuilder
  * @see \EMS\ClientHelperBundle\Helper\Translation\TranslationBuilder
  */
-abstract class AbstractBuilder
+abstract class AbstractBuilder implements BuilderInterface
 {
     protected ClientRequest $clientRequest;
     protected LoggerInterface $logger;
@@ -38,7 +38,9 @@ abstract class AbstractBuilder
         $this->locales = $locales;
     }
 
-    protected function modifySearch(Search $search): void {}
+    protected function modifySearch(Search $search): void
+    {
+    }
 
     /**
      * @param array<mixed> $sort

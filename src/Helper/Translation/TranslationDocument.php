@@ -39,7 +39,7 @@ final class TranslationDocument implements BuilderDocumentInterface
 
     public function getDataSource(): array
     {
-        $source = [];
+        $source = ['key' => $this->source['key']];
 
         foreach ($this->locales as $locale) {
             if (isset($this->source['label_'.$locale])) {
@@ -51,7 +51,7 @@ final class TranslationDocument implements BuilderDocumentInterface
     }
 
     /**
-     * @return array<string, null|string>
+     * @return array<string, string|null>
      */
     public function getMessages(): array
     {

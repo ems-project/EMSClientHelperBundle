@@ -19,8 +19,8 @@ final class TemplateFile
         $this->contentType = $contentType;
 
         $pathName = $file->getRelativePathname();
-        if ("/" !== \DIRECTORY_SEPARATOR) {
-            $pathName = str_replace(\DIRECTORY_SEPARATOR, "/", $pathName);
+        if ('/' !== \DIRECTORY_SEPARATOR) {
+            $pathName = \str_replace(\DIRECTORY_SEPARATOR, '/', $pathName);
         }
 
         $this->name = $pathName;
@@ -28,7 +28,7 @@ final class TemplateFile
 
     public function hasOuuid(): bool
     {
-        return $this->ouuid !== null;
+        return null !== $this->ouuid;
     }
 
     public function getCode(): string
@@ -52,12 +52,12 @@ final class TemplateFile
 
     public function getPathName(): string
     {
-        return $this->contentType . '/' . $this->name;
+        return $this->contentType.'/'.$this->name;
     }
 
     public function getPathOuuid(): string
     {
-        return $this->contentType . ':' . $this->ouuid;
+        return $this->contentType.':'.$this->ouuid;
     }
 
     public function getPath(): string

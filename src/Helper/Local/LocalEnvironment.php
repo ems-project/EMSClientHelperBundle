@@ -23,7 +23,7 @@ final class LocalEnvironment
     public function __construct(Environment $environment, string $path)
     {
         $this->environment = $environment;
-        $this->directory = $path . \DIRECTORY_SEPARATOR . $environment->getName();
+        $this->directory = $path.\DIRECTORY_SEPARATOR.$environment->getName();
         $this->fileSystem = new Filesystem();
     }
 
@@ -64,12 +64,17 @@ final class LocalEnvironment
         return $this->translationFiles;
     }
 
+    public function getVersionFile(): VersionFile
+    {
+        return new VersionFile($this->directory);
+    }
+
     public function isPulled(): bool
     {
         return $this->fileSystem->exists($this->getDirectory());
     }
 
-    public function loadFiles(): void
+    public function refresh(): void
     {
         $this->routingFile = new RoutingFile($this->directory);
         $this->templatesFiles = new TemplateFiles($this->directory);

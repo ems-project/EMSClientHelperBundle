@@ -26,6 +26,11 @@ final class ContentTypeHelper
         $this->logger = $logger;
     }
 
+    public function clear(): void
+    {
+        $this->contentTypeCollections = [];
+    }
+
     public function get(ClientRequest $clientRequest, Environment $environment, string $contentTypeName): ?ContentType
     {
         return $this->getContentTypeCollection($clientRequest, $environment)->getByName($contentTypeName);

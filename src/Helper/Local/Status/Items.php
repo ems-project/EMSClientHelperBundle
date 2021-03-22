@@ -44,7 +44,7 @@ final class Items implements \IteratorAggregate, \Countable
         $items = $this->items;
         $items[$item->getKey()] = $item;
 
-        ksort($items);
+        \ksort($items);
 
         $this->items = $items;
     }
@@ -57,7 +57,7 @@ final class Items implements \IteratorAggregate, \Countable
     public function getItem(string $key): Item
     {
         if (!isset($this->items[$key])) {
-            throw new \RuntimeException(sprintf('Could not found item with key %s', $key));
+            throw new \RuntimeException(\sprintf('Could not found item with key %s', $key));
         }
 
         return $this->items[$key];

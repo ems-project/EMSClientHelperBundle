@@ -6,7 +6,10 @@ namespace EMS\ClientHelperBundle\Command\Local;
 
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
+use EMS\ClientHelperBundle\Helper\Local\LocalEnvironment;
+use EMS\ClientHelperBundle\Helper\Local\LocalHelper;
 use EMS\CommonBundle\Command\CommandInterface;
+use EMS\CommonBundle\Contracts\CoreApi\CoreApiInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -17,17 +20,21 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 abstract class AbstractLocalCommand extends Command implements CommandInterface
 {
+    protected CoreApiInterface $coreApi;
     protected Environment $environment;
     protected EnvironmentHelper $environmentHelper;
+    protected LocalHelper $localHelper;
+    protected LocalEnvironment $localEnvironment;
     protected LoggerInterface $logger;
     protected SymfonyStyle $io;
 
     private const OPTION_EMSCH_ENV = 'emsch_env';
 
-    public function __construct(EnvironmentHelper $environmentHelper)
+    public function __construct(EnvironmentHelper $environmentHelper, LocalHelper $localHelper)
     {
         parent::__construct();
         $this->environmentHelper = $environmentHelper;
+        $this->localHelper = $localHelper;
     }
 
     protected function configure(): void
@@ -52,5 +59,8 @@ abstract class AbstractLocalCommand extends Command implements CommandInterface
         }
 
         $this->environment = $environment;
+        $this->localEnvironment = $environment->getLocal();
+        $this->localHelper->setLogger($this->logger);
+        $this->coreApi = $this->localHelper->api($this->environment);
     }
 }

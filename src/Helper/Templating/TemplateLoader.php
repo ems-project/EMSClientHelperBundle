@@ -30,6 +30,7 @@ final class TemplateLoader implements LoaderInterface
 
         if ($environment->isLocalPulled()) {
             $template = $this->getEnvironment()->getLocal()->getTemplates()->getByTemplateName($templateName);
+
             return new Source($template->getCode(), $name, $template->getPath());
         }
 

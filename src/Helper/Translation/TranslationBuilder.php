@@ -30,11 +30,11 @@ final class TranslationBuilder extends AbstractBuilder
         }
     }
 
-    public function buildFiles(Environment $environment, string $directory): TranslationFiles
+    public function buildFiles(Environment $environment, string $directory): void
     {
         $messageCatalogues = $this->buildMessageCatalogues($environment);
 
-        return TranslationFiles::build($directory, $messageCatalogues);
+        TranslationFiles::build($directory, $messageCatalogues);
     }
 
     public function getContentType(Environment $environment): ?ContentType

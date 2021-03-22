@@ -45,7 +45,7 @@ final class RoutingDocument implements BuilderDocumentInterface
 
     public function getDataSource(): array
     {
-        return array_filter([
+        return \array_filter([
             'name' => $this->source['name'],
             'config' => $this->source['config'] ?? null,
             'query' => $this->source['query'] ?? null,
@@ -57,11 +57,11 @@ final class RoutingDocument implements BuilderDocumentInterface
 
     public function getRouteData(): array
     {
-        return array_filter([
+        return \array_filter([
             'config' => $this->source['config'] ?? null,
-            'query' => $this->source['query'] ??  null,
-            'template_static' => (isset($this->source['template_static']) ? strval($this->source['template_static']) : null),
-            'template_source' => (isset($this->source['template_source']) ? strval($this->source['template_source']) : null)
+            'query' => $this->source['query'] ?? null,
+            'template_static' => (isset($this->source['template_static']) ? \strval($this->source['template_static']) : null),
+            'template_source' => (isset($this->source['template_source']) ? \strval($this->source['template_source']) : null),
         ]);
     }
 }

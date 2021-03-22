@@ -20,7 +20,7 @@ final class Item
 
     public function hasId(): bool
     {
-        return $this->id === null;
+        return null === $this->id;
     }
 
     public function hasAllData(): bool
@@ -35,12 +35,27 @@ final class Item
 
     public function dataIsEqual(): bool
     {
-        return $this->dataLocal === $this->dataOrigin;;
+        return $this->dataLocal === $this->dataOrigin;
+    }
+
+    public function getId(): ?string
+    {
+        return $this->id;
     }
 
     public function getKey(): string
     {
         return $this->key;
+    }
+
+    public function getContentType(): string
+    {
+        return $this->contentType;
+    }
+
+    public function getDataLocal(): array
+    {
+        return $this->dataLocal;
     }
 
     public static function fromLocal(string $key, string $contentType, array $data): self

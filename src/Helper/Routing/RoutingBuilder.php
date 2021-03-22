@@ -35,9 +35,9 @@ final class RoutingBuilder extends AbstractBuilder
         return $routeCollection;
     }
 
-    public function buildFiles(Environment $environment, string $directory): RoutingFile
+    public function buildFiles(Environment $environment, string $directory): void
     {
-        return RoutingFile::build($directory, $this->getDocuments($environment));
+        RoutingFile::build($directory, $this->getDocuments($environment));
     }
 
     public function getContentType(Environment $environment): ?ContentType

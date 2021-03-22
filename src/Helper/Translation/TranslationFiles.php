@@ -17,7 +17,7 @@ final class TranslationFiles implements \IteratorAggregate
 
     public function __construct(string $directory)
     {
-        $path = $directory . \DIRECTORY_SEPARATOR . self::DIRECTORY;
+        $path = $directory.\DIRECTORY_SEPARATOR.self::DIRECTORY;
 
         if (\file_exists($path)) {
             foreach (Finder::create()->in($path)->files()->name('*.yaml') as $file) {
@@ -31,7 +31,7 @@ final class TranslationFiles implements \IteratorAggregate
      */
     public static function build(string $directory, iterable $messageCatalogues): self
     {
-        $path = $directory . \DIRECTORY_SEPARATOR . self::DIRECTORY;
+        $path = $directory.\DIRECTORY_SEPARATOR.self::DIRECTORY;
         $dumper = new YamlFileDumper('yaml');
 
         foreach ($messageCatalogues as $messageCatalogue) {
@@ -55,6 +55,7 @@ final class TranslationFiles implements \IteratorAggregate
 
         foreach ($this->files as $file) {
             foreach ($file->toArray() as $key => $label) {
+                $result[$key]['key'] = $key;
                 $result[$key]['label_'.$file->locale] = $label;
             }
         }

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
 use EMS\ClientHelperBundle\Helper\Templating\TemplateDocument;
-use EMS\ClientHelperBundle\Helper\Templating\TemplateFile;
 use EMS\CommonBundle\Common\Json;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -32,7 +31,7 @@ final class Route
         $config = isset($data['config']) ? Json::decode($data['config']) : [];
 
         if (isset($data['template_static'])) {
-            $template = TemplateDocument::PREFIX . '/' .  $data['template_static'];
+            $template = TemplateDocument::PREFIX.'/'.$data['template_static'];
         } else {
             $template = $data['template_source'] ?? null;
         }

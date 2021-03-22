@@ -34,6 +34,7 @@ final class Translator implements CacheWarmerInterface
             foreach ($environment->getLocal()->getTranslations() as $file) {
                 $this->translator->addResource($file->format, $file->resource, $file->locale, $file->domain);
             }
+
             return;
         }
 

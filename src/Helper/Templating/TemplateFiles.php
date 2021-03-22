@@ -17,16 +17,16 @@ final class TemplateFiles implements \IteratorAggregate, \Countable
 
     public function __construct(string $directory)
     {
-        $file = $directory . \DIRECTORY_SEPARATOR . self::FILE_NAME;
-        $mapping = \file_exists($file) ? Yaml::parse(file_get_contents($file)) : [];
+        $file = $directory.\DIRECTORY_SEPARATOR.self::FILE_NAME;
+        $mapping = \file_exists($file) ? Yaml::parse(\file_get_contents($file)) : [];
 
         foreach ($mapping as $contentType => $templates) {
-            foreach (Finder::create()->in($directory . \DIRECTORY_SEPARATOR . $contentType)->files() as $file) {
+            foreach (Finder::create()->in($directory.\DIRECTORY_SEPARATOR.$contentType)->files() as $file) {
                 $this->templateFiles[] = new TemplateFile($file, $contentType);
             }
 
             foreach ($templates as $ouuid => $name) {
-                $this->getByName($contentType . '/' . $name)->setOuuid($ouuid);
+                $this->getByName($contentType.'/'.$name)->setOuuid($ouuid);
             }
         }
     }
@@ -48,11 +48,11 @@ final class TemplateFiles implements \IteratorAggregate, \Countable
         }
 
         foreach ($mapping as $contentType => &$docs) {
-            asort($docs);
+            \asort($docs);
         }
 
         $jsonMapping = Yaml::dump($mapping);
-        $filesystem->dumpFile($directory . \DIRECTORY_SEPARATOR . self::FILE_NAME, $jsonMapping);
+        $filesystem->dumpFile($directory.\DIRECTORY_SEPARATOR.self::FILE_NAME, $jsonMapping);
 
         return new self($directory);
     }
@@ -72,7 +72,7 @@ final class TemplateFiles implements \IteratorAggregate, \Countable
 
     public function getByTemplateName(TemplateName $templateName): TemplateFile
     {
-        return $this->getByName($templateName->getContentType() . '/' . $templateName->getSearchValue());
+        return $this->getByName($templateName->getContentType().'/'.$templateName->getSearchValue());
     }
 
     public function getByName(string $name): TemplateFile
@@ -83,7 +83,7 @@ final class TemplateFiles implements \IteratorAggregate, \Countable
             }
         }
 
-        throw new \RuntimeException(sprintf('Could not find template "%s"', $name));
+        throw new \RuntimeException(\sprintf('Could not find template "%s"', $name));
     }
 
     public function getByEmsName(string $emsName): TemplateFile
@@ -94,6 +94,6 @@ final class TemplateFiles implements \IteratorAggregate, \Countable
             }
         }
 
-        throw new \RuntimeException(sprintf('Could not find template "%s"', $emsName));
+        throw new \RuntimeException(\sprintf('Could not find template "%s"', $emsName));
     }
 }
