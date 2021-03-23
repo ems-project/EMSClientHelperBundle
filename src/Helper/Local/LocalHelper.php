@@ -6,6 +6,8 @@ namespace EMS\ClientHelperBundle\Helper\Local;
 
 use EMS\ClientHelperBundle\Helper\Builder\Builders;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentTypeHelper;
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentApi;
 use EMS\ClientHelperBundle\Helper\Local\Status\Status;
@@ -17,6 +19,7 @@ use Psr\Log\LoggerInterface;
 final class LocalHelper
 {
     private CacheItemPoolInterface $cache;
+    private ClientRequest $clientRequest;
     private ContentTypeHelper $contentTypeHelper;
     private Builders $builders;
     private EnvironmentApi $environmentApi;
@@ -24,12 +27,14 @@ final class LocalHelper
 
     public function __construct(
         CacheItemPoolInterface $cache,
+        ClientRequestManager $clientRequestManager,
         ContentTypeHelper $contentTypeHelper,
         Builders $builders,
         EnvironmentApi $environmentApi,
         LoggerInterface $logger
     ) {
         $this->cache = $cache;
+        $this->clientRequest = $clientRequestManager->getDefault();
         $this->contentTypeHelper = $contentTypeHelper;
         $this->builders = $builders;
         $this->environmentApi = $environmentApi;
@@ -76,9 +81,12 @@ final class LocalHelper
         $this->buildVersion($environment);
     }
 
-    public function buildVersion(Environment $environment, bool $clearContentTypes = false): void
+    public function buildVersion(Environment $environment, bool $refresh = false): void
     {
-        if ($clearContentTypes) {
+        if ($refresh) {
+            if ('green' === $this->clientRequest->healthStatus('green')) {
+                $this->clientRequest->refresh();
+            }
             $this->contentTypeHelper->clear();
         }
 

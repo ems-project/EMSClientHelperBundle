@@ -11,11 +11,15 @@ use EMS\ClientHelperBundle\Helper\Environment\Environment;
 
 final class Templates
 {
+    private Environment $environment;
+    private ClientRequest $clientRequest;
     /** @var array<mixed> */
-    private array $templates = [];
+    private array $config = [];
 
     public function __construct(ClientRequest $clientRequest, Environment $environment)
     {
+        $this->environment = $environment;
+        $this->clientRequest = $clientRequest;
         $config = $clientRequest->getOption('[templates]');
 
         if (null === $config) {
@@ -23,11 +27,11 @@ final class Templates
         }
 
         foreach ($config as $contentTypeName => $mapping) {
-            if (null === $contentType = $clientRequest->getContentType($contentTypeName, $environment)) {
+            if (null === $clientRequest->getContentType($contentTypeName, $environment)) {
                 throw new TemplatingException(\sprintf('Invalid contentType %s', $contentTypeName));
             }
 
-            $this->templates[$contentTypeName] = ['contentType' => $contentType, 'mapping' => $mapping];
+            $this->config[$contentTypeName] = ['mapping' => $mapping];
         }
     }
 
@@ -36,21 +40,21 @@ final class Templates
      */
     public function getMapping(string $contentTypeName): array
     {
-        $mapping = $this->templates[$contentTypeName]['mapping'] ?? false;
-
-        if (!$mapping) {
+        if (!isset($this->config[$contentTypeName]['mapping'])) {
             throw new TemplatingException('Missing config EMSCH_TEMPLATES');
         }
 
-        return $mapping;
+        return $this->config[$contentTypeName]['mapping'];
     }
 
     public function getContentType(string $contentTypeName): ContentType
     {
-        $contentType = $this->templates[$contentTypeName]['contentType'] ?? false;
-
-        if (!$contentType) {
+        if (!isset($this->config[$contentTypeName])) {
             throw new TemplatingException('Missing config EMSCH_TEMPLATES');
+        }
+
+        if (null === $contentType = $this->clientRequest->getContentType($contentTypeName, $this->environment)) {
+            throw new TemplatingException(\sprintf('Invalid contentType %s', $contentTypeName));
         }
 
         return $contentType;
@@ -61,6 +65,15 @@ final class Templates
      */
     public function getContentTypes(): array
     {
-        return \array_values(\array_map(fn (array $template) => $template['contentType'], $this->templates));
+        $contentTypeNames = \array_keys($this->config);
+        $contentTypes = [];
+
+        foreach ($contentTypeNames as $contentTypeName) {
+            if (null !== $contentType = $this->clientRequest->getContentType($contentTypeName, $this->environment)) {
+                $contentTypes[] = $contentType;
+            }
+        }
+
+        return $contentTypes;
     }
 }

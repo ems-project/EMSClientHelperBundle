@@ -32,7 +32,6 @@ final class PushCommand extends AbstractLocalCommand
             $this->pushStatus($status);
         }
 
-        \sleep(3); //otherwise we may get an incorrect up to date
         $this->localHelper->buildVersion($this->environment, true);
 
         return 1;
@@ -73,13 +72,13 @@ final class PushCommand extends AbstractLocalCommand
 
     private function writeItem(string $type, Item $item): void
     {
-        $url = \vsprintf('%s (%s/data/revisions/%s:%s)', [
+        $url = \vsprintf('%s - %s/data/revisions/%s:%s', [
             $item->getKey(),
             $this->coreApi->getBaseUrl(),
             $item->getContentType(),
             $item->getId(),
         ]);
 
-        $this->io->write(\sprintf('%s %s', $type, $url));
+        $this->io->writeln(\sprintf('%s %s', $type, $url));
     }
 }

@@ -336,6 +336,16 @@ final class ClientRequest implements ClientRequestInterface
         return isset($this->options[$option]) && null != $this->options[$option];
     }
 
+    public function refresh(): bool
+    {
+        return $this->elasticaService->refresh($this->getAlias());
+    }
+
+    public function healthStatus(string $status): string
+    {
+        return $this->elasticaService->getHealthStatus($status, '10s', $this->getAlias());
+    }
+
     /**
      * @param mixed $default
      *
