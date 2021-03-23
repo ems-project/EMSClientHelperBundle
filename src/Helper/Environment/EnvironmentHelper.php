@@ -2,10 +2,11 @@
 
 namespace EMS\ClientHelperBundle\Helper\Environment;
 
+use EMS\ClientHelperBundle\Contracts\Environment\EnvironmentHelperInterface;
 use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class EnvironmentHelper
+class EnvironmentHelper implements EnvironmentHelperInterface
 {
     /** @var Environment[] */
     private array $environments = [];
@@ -25,9 +26,12 @@ class EnvironmentHelper
         }
     }
 
-    public function addEnvironment(Environment $environment): void
+    /**
+     * {@inheritDoc}
+     */
+    public function addEnvironment(string $name, array $config): void
     {
-        $this->environments[] = $environment;
+        $this->environments[] = new Environment($name, $config);
     }
 
     /**

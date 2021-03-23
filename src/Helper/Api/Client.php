@@ -2,11 +2,12 @@
 
 namespace EMS\ClientHelperBundle\Helper\Api;
 
+use EMS\ClientHelperBundle\Contracts\Api\ApiClientInterface;
 use EMS\CommonBundle\Common\HttpClientFactory;
 use GuzzleHttp\Client as HttpClient;
 use Psr\Log\LoggerInterface;
 
-class Client
+class Client implements ApiClientInterface
 {
     /**
      * @var HttpClient

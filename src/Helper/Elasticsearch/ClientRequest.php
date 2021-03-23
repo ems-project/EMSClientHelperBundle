@@ -5,6 +5,7 @@ namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 use Elastica\Aggregation\Terms;
 use Elastica\Query\AbstractQuery;
 use Elastica\ResultSet;
+use EMS\ClientHelperBundle\Contracts\Elasticsearch\ClientRequestInterface;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
@@ -21,7 +22,7 @@ use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
-class ClientRequest
+class ClientRequest implements ClientRequestInterface
 {
     private const CONTENT_TYPE_LIMIT = 500;
     private EnvironmentHelper $environmentHelper;
