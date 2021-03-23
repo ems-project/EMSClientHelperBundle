@@ -7,6 +7,7 @@ namespace EMS\ClientHelperBundle\Helper\Routing;
 use EMS\ClientHelperBundle\Helper\Builder\AbstractBuilder;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
+use EMS\CommonBundle\Search\Search;
 use Symfony\Component\Routing\RouteCollection;
 
 final class RoutingBuilder extends AbstractBuilder
@@ -15,59 +16,65 @@ final class RoutingBuilder extends AbstractBuilder
     {
         $routeCollection = new RouteCollection();
 
-        if (null === $contentType = $this->clientRequest->getRouteContentType($environment)) {
+        if (null === $contentType = $this->getContentType($environment)) {
             return $routeCollection;
         }
 
-        foreach ($this->getRoutes($contentType) as $route) {
-            $route->addToCollection($routeCollection, $this->locales);
+        if ($environment->isLocalPulled()) {
+            $routes = $environment->getLocal()->getRouting()->createRoutes();
+        } else {
+            $routes = $this->createRoutes($contentType);
+        }
+
+        $routePrefix = $contentType->getEnvironment()->getRoutePrefix();
+        foreach ($routes as $route) {
+            $route->addToCollection($routeCollection, $this->locales, $routePrefix);
         }
 
         return $routeCollection;
     }
 
-    public function getLocalRouteCollection(Environment $environment): ?RouteCollection
+    public function buildFiles(Environment $environment, string $directory): void
     {
-        if (null === $localEnvironment = $this->getLocalEnvironment($environment)) {
-            return null;
-        }
+        RoutingFile::build($directory, $this->getDocuments($environment));
+    }
 
-        $routes = $this->createRoutes($environment, $localEnvironment->getRouteConfigs());
-
-        $routeCollection = new RouteCollection();
-        foreach ($routes as $route) {
-            $route->addToCollection($routeCollection, $this->locales);
-        }
-
-        return $routeCollection;
+    public function getContentType(Environment $environment): ?ContentType
+    {
+        return $this->clientRequest->getRouteContentType($environment);
     }
 
     /**
-     * @return RouteConfig[]
+     * @return RoutingDocument[]
      */
-    public function buildRouteConfigs(Environment $environment): array
+    public function getDocuments(Environment $environment): array
     {
-        if (null === $contentType = $this->clientRequest->getRouteContentType($environment)) {
+        if (null === $contentType = $this->getContentType($environment)) {
             return [];
         }
 
-        return \array_map(
-            fn (array $hit) => RouteConfig::fromArray($hit['_source']['name'], $hit['_source']),
-            $this->searchRoutes($contentType)
-        );
+        return $this->searchDocuments($contentType);
+    }
+
+    protected function modifySearch(Search $search): void
+    {
+        $search->setSort(['order' => ['order' => 'asc', 'missing' => '_last', 'unmapped_type' => 'long']]);
     }
 
     /**
      * @return Route[]
      */
-    private function getRoutes(ContentType $contentType): array
+    private function createRoutes(ContentType $contentType): array
     {
         if (null !== $cache = $contentType->getCache()) {
             return $cache;
         }
 
-        $routeConfigs = $this->buildRouteConfigs($contentType->getEnvironment());
-        $routes = $this->createRoutes($contentType->getEnvironment(), $routeConfigs);
+        $routes = [];
+        foreach ($this->searchDocuments($contentType) as $document) {
+            $routes[] = Route::fromData($document->getName(), $document->getRouteData());
+        }
+
         $contentType->setCache($routes);
         $this->clientRequest->cacheContentType($contentType);
 
@@ -75,37 +82,16 @@ final class RoutingBuilder extends AbstractBuilder
     }
 
     /**
-     * @param RouteConfig[] $routeConfigs
-     *
-     * @return Route[]
+     * @return RoutingDocument[]
      */
-    private function createRoutes(Environment $environment, array $routeConfigs): array
+    private function searchDocuments(ContentType $contentType): array
     {
-        $options = [];
+        $documents = [];
 
-        if (null !== $routePrefix = $environment->getRoutePrefix()) {
-            $options['prefix'] = $routePrefix;
+        foreach ($this->search($contentType)->getDocuments() as $document) {
+            $documents[] = new RoutingDocument($document);
         }
 
-        return \array_map(
-            fn (RouteConfig $config) => new Route($config->getName(), \array_merge($options, $config->getOptions())),
-            $routeConfigs
-        );
-    }
-
-    /**
-     * @return array<mixed>
-     */
-    private function searchRoutes(ContentType $contentType): array
-    {
-        return $this->search($contentType, [
-            'sort' => [
-                'order' => [
-                    'order' => 'asc',
-                    'missing' => '_last',
-                    'unmapped_type' => 'long',
-                ],
-            ],
-        ]);
+        return $documents;
     }
 }

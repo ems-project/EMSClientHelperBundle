@@ -4,22 +4,17 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Templating;
 
-use EMS\ClientHelperBundle\Exception\TemplatingException;
 use EMS\ClientHelperBundle\Helper\Builder\AbstractBuilder;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 
 final class TemplateBuilder extends AbstractBuilder
 {
-    public function isFresh(Environment $environment, TemplateName $templateName, int $time): bool
+    public function buildTemplate(Environment $environment, TemplateName $templateName): TemplateDocument
     {
-        return $this->getContentType($environment, $templateName)->isLastPublishedAfterTime($time);
-    }
-
-    public function buildTemplate(Environment $environment, TemplateName $templateName): Template
-    {
-        $mapping = $this->getMappingConfig($templateName);
-        $contentType = $this->getContentType($environment, $templateName);
+        $templates = $this->getTemplates($environment);
+        $contentType = $templates->getContentType($templateName->getContentType());
+        $mapping = $templates->getMapping($templateName->getContentType());
 
         $searchField = $templateName->getSearchField();
         $hit = $this->clientRequest->searchOne($contentType->getName(), [
@@ -31,58 +26,55 @@ final class TemplateBuilder extends AbstractBuilder
             ],
         ], $contentType->getEnvironment()->getAlias());
 
-        return Template::fromHit($hit, $mapping);
+        return new TemplateDocument($hit['_id'], $hit['_source'], $mapping);
+    }
+
+    public function buildFiles(Environment $environment, string $directory): void
+    {
+        $templates = $this->getTemplates($environment);
+        $contentTypes = $templates->getContentTypes();
+
+        $contentTypeNames = \array_map(fn (ContentType $contentType) => $contentType->getName(), $contentTypes);
+        $documents = $this->getDocuments($environment);
+
+        TemplateFiles::build($directory, $contentTypeNames, $documents);
     }
 
     /**
-     * @return \Generator|Template[]
+     * @return \Generator|TemplateDocument[]
      */
-    public function buildTemplates(Environment $environment): \Generator
+    public function getDocuments(Environment $environment): \Generator
     {
-        $config = $this->getTemplatesConfig();
+        $templates = $this->getTemplates($environment);
 
-        foreach ($config as $name => $mapping) {
-            if (null === $contentType = $this->clientRequest->getContentType($name, $environment)) {
-                continue;
+        foreach ($templates->getContentTypes() as $contentType) {
+            $mapping = $templates->getMapping($contentType->getName());
+
+            foreach ($this->search($contentType)->getDocuments() as $doc) {
+                yield new TemplateDocument($doc->getId(), $doc->getSource(), $mapping);
             }
-
-            foreach ($this->search($contentType) as $hit) {
-                yield Template::fromHit($hit, $mapping);
-            }
         }
     }
 
-    private function getContentType(Environment $environment, TemplateName $templateName): ContentType
+    public function getTemplates(Environment $environment): Templates
     {
-        $contentTypeName = $templateName->getContentType();
+        static $templates = null;
 
-        if (null === $contentType = $this->clientRequest->getContentType($contentTypeName, $environment)) {
-            throw new TemplatingException(\sprintf('Invalid contentType %s', $contentTypeName));
+        if (null === $templates) {
+            $templates = new Templates($this->clientRequest, $environment);
         }
 
-        return $contentType;
+        return $templates;
     }
 
-    /**
-     * @return array<mixed>
-     */
-    private function getTemplatesConfig(): array
+    public function isFresh(Environment $environment, TemplateName $templateName, int $time): bool
     {
-        return $this->clientRequest->getOption('[templates]');
-    }
-
-    /**
-     * @return array<mixed>
-     */
-    private function getMappingConfig(TemplateName $templateName): array
-    {
-        $configTemplates = $this->getTemplatesConfig();
-        $config = $configTemplates[$templateName->getContentType()] ?? null;
-
-        if (null === $config) {
-            throw new TemplatingException('Missing config EMSCH_TEMPLATES');
+        if ($environment->isLocalPulled()) {
+            return $environment->getLocal()->getTemplates()->getByTemplateName($templateName)->isFresh($time);
         }
 
-        return $config;
+        $templates = $this->getTemplates($environment);
+
+        return $templates->getContentType($templateName->getContentType())->isLastPublishedAfterTime($time);
     }
 }

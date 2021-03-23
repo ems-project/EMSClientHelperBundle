@@ -5,23 +5,34 @@
         http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
-        <defaults public="false" />
-        <service id="emsch.command.local.pull" class="EMS\ClientHelperBundle\Command\Local\PullCommand">
-            <argument type="service" id="emsch.helper.local.pull" />
-            <argument type="service" id="emsch.helper_environment" />
-            <tag name="console.command" />
-        </service>
-
-        <service id="emsch.helper.local" class="EMS\ClientHelperBundle\Helper\Local\LocalHelper">
-            <argument type="service" id="logger" />
+        <service id="emsch.helper.local_environment_factory" class="EMS\ClientHelperBundle\Helper\Local\LocalEnvironmentFactory">
             <argument>%kernel.project_dir%</argument>
         </service>
-        <service id="emsch.helper.local.pull" class="EMS\ClientHelperBundle\Helper\Local\PullHelper">
-            <argument type="service" id="emsch.helper.local" />
-            <argument type="service" id="emsch.helper.templating.builder" />
-            <argument type="service" id="emsch.helper.translation.builder" />
-            <argument type="service" id="emsch.helper.routing.builder" />
+        <service id="emsch.helper.local" class="EMS\ClientHelperBundle\Helper\Local\LocalHelper">
+            <argument type="service" id="Psr\Cache\CacheItemPoolInterface" />
+            <argument type="service" id="emsch.manager.client_request" />
+            <argument type="service" id="emsch.helper_content_type" />
+            <argument type="service" id="emsch.helper.builders" />
+            <argument type="service" id="emsch.helper.environment.api"/>
             <argument type="service" id="logger" />
+        </service>
+
+        <service id="emsch.command.local" class="EMS\ClientHelperBundle\Command\Local\AbstractLocalCommand" abstract="true" public="false">
+            <argument type="service" id="emsch.helper_environment" />
+            <argument type="service" id="emsch.helper.local" />
+        </service>
+
+        <service id="emsch.command.local.login" class="EMS\ClientHelperBundle\Command\Local\LoginCommand" parent="emsch.command.local">
+            <tag name="console.command" command="emsch:local:login"/>
+        </service>
+        <service id="emsch.command.local.pull" class="EMS\ClientHelperBundle\Command\Local\PullCommand" parent="emsch.command.local">
+            <tag name="console.command" command="emsch:local:pull"/>
+        </service>
+        <service id="emsch.command.local.push" class="EMS\ClientHelperBundle\Command\Local\PushCommand" parent="emsch.command.local">
+            <tag name="console.command" command="emsch:local:push"/>
+        </service>
+        <service id="emsch.command.local.status" class="EMS\ClientHelperBundle\Command\Local\StatusCommand" parent="emsch.command.local">
+            <tag name="console.command" command="emsch:local:status"/>
         </service>
     </services>
 </container>

@@ -17,13 +17,17 @@ final class EnvironmentHelper implements EnvironmentHelperInterface
     /**
      * @param array<string, array> $environments
      */
-    public function __construct(RequestStack $requestStack, string $emschEnv, array $environments)
-    {
+    public function __construct(
+        EnvironmentFactory $environmentFactory,
+        RequestStack $requestStack,
+        string $emschEnv,
+        array $environments
+    ) {
         $this->requestStack = $requestStack;
         $this->emschEnv = $emschEnv;
 
         foreach ($environments as $name => $config) {
-            $this->environments[$name] = new Environment($name, $config);
+            $this->environments[$name] = $environmentFactory->create($name, $config);
         }
     }
 

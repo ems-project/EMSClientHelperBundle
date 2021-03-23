@@ -6,7 +6,6 @@ namespace EMS\ClientHelperBundle\Helper\Templating;
 
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
-use EMS\ClientHelperBundle\Helper\Local\LocalEnvironment;
 use Twig\Loader\LoaderInterface;
 use Twig\Source;
 
@@ -26,33 +25,35 @@ final class TemplateLoader implements LoaderInterface
 
     public function getSourceContext($name): Source
     {
+        $environment = $this->getEnvironment();
         $templateName = new TemplateName($name);
 
-        if (null !== $localEnvironment = $this->getLocalEnvironment()) {
-            $localTemplate = $localEnvironment->getTemplateFile($templateName);
+        if ($environment->isLocalPulled()) {
+            $template = $this->getEnvironment()->getLocal()->getTemplates()->getByTemplateName($templateName);
 
-            return new Source($localTemplate->getCode(), $name, $localTemplate->getPath());
+            return new Source($template->getCode(), $name, $template->getPath());
         }
 
-        $template = $this->builder->buildTemplate($this->getEnvironment(), $templateName);
+        $template = $this->builder->buildTemplate($environment, $templateName);
 
         return new Source($template->getCode(), $name);
     }
 
     public function getCacheKey($name)
     {
-        return \implode('_', ['twig', $this->getEnvironment()->getAlias(), $name]);
+        $environment = $this->getEnvironment();
+        $key = ['twig', $environment->getAlias(), $name];
+
+        if ($environment->isLocalPulled()) {
+            $key[] = 'local';
+        }
+
+        return \implode('_', $key);
     }
 
     public function isFresh($name, $time)
     {
-        $templateName = new TemplateName($name);
-
-        if (null !== $localEnvironment = $this->getLocalEnvironment()) {
-            return $localEnvironment->getTemplateFile($templateName)->isFresh($time);
-        }
-
-        return $this->builder->isFresh($this->getEnvironment(), $templateName, $time);
+        return $this->builder->isFresh($this->getEnvironment(), new TemplateName($name), $time);
     }
 
     public function exists($name): bool
@@ -71,10 +72,5 @@ final class TemplateLoader implements LoaderInterface
         }
 
         return $environment;
-    }
-
-    private function getLocalEnvironment(): ?LocalEnvironment
-    {
-        return $this->builder->getLocalEnvironment($this->getEnvironment());
     }
 }

@@ -25,13 +25,14 @@
 		"ext-json": "*",
 		"composer/ca-bundle": "^1.1",
 		"elasticms/common-bundle": "~1.8.0",
+		"symfony-cmf/routing": "^2.1.0",
 		"symfony/config": "^4.4",
-		"symfony/framework-bundle" : "^4.4",
+		"symfony/framework-bundle": "^4.4",
 		"symfony/options-resolver": "^4.4",
 		"symfony/property-access": "^4.4",
 		"symfony/translation": "^4.4",
-		"symfony-cmf/routing": "^2.1.0",
-		"twig/twig" : "^2.14"
+		"symfony/yaml": "^4.4",
+		"twig/twig": "^2.14"
 	},
 	"require-dev" : {
 		"friendsofphp/php-cs-fixer" : "^2.16",
@@ -55,7 +56,8 @@
 		}
 	},
 	"config": {
-		"lock": false
+		"lock": false,
+		"sort-packages": true
 	},
 	"extra" : {
 		"branch-alias" : {

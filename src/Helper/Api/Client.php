@@ -9,6 +9,9 @@ use EMS\CommonBundle\Common\HttpClientFactory;
 use GuzzleHttp\Client as HttpClient;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @todo use EMS\CommonBundle\Contracts\CoreApi\CoreApiInterface
+ */
 final class Client implements ApiClientInterface
 {
     private HttpClient $client;

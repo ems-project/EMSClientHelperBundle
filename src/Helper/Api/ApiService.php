@@ -15,6 +15,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
+/**
+ * @todo use EMS\CommonBundle\Contracts\CoreApi\CoreApiInterface
+ */
 final class ApiService implements ApiServiceInterface
 {
     private const EMS_AJAX_MESSAGE_LEVELS = ['error', 'warning'];

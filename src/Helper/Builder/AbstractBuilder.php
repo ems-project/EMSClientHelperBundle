@@ -7,9 +7,9 @@ namespace EMS\ClientHelperBundle\Helper\Builder;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
-use EMS\ClientHelperBundle\Helper\Environment\Environment;
-use EMS\ClientHelperBundle\Helper\Local\LocalEnvironment;
-use EMS\ClientHelperBundle\Helper\Local\LocalHelper;
+use EMS\CommonBundle\Elasticsearch\Response\Response;
+use EMS\CommonBundle\Elasticsearch\Response\ResponseInterface;
+use EMS\CommonBundle\Search\Search;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -19,13 +19,14 @@ use Psr\Log\LoggerInterface;
  * @see \EMS\ClientHelperBundle\Helper\Templating\TemplateBuilder
  * @see \EMS\ClientHelperBundle\Helper\Translation\TranslationBuilder
  */
-abstract class AbstractBuilder
+abstract class AbstractBuilder implements BuilderInterface
 {
     protected ClientRequest $clientRequest;
     protected LoggerInterface $logger;
     /** @var string[] */
     protected array $locales;
-    private ?LocalHelper $localHelper = null;
+
+    private const SEARCH_LIMIT = 1000;
 
     /**
      * @param string[] $locales
@@ -37,44 +38,28 @@ abstract class AbstractBuilder
         $this->locales = $locales;
     }
 
-    public function setLocalHelper(?LocalHelper $localHelper): void
+    protected function modifySearch(Search $search): void
     {
-        $this->localHelper = $localHelper;
     }
 
-    public function getLocalEnvironment(Environment $environment): ?LocalEnvironment
+    protected function search(ContentType $contentType): ResponseInterface
     {
-        if (null === $this->localHelper) {
-            return null;
-        }
+        $search = new Search([$contentType->getEnvironment()->getAlias()]);
+        $search->setContentTypes([$contentType->getName()]);
+        $search->setSize(self::SEARCH_LIMIT);
 
-        $localEnvironment = $this->localHelper->local($environment);
+        $this->modifySearch($search);
 
-        return $localEnvironment->isPulled() ? $localEnvironment : null;
-    }
+        $response = Response::fromResultSet($this->clientRequest->commonSearch($search));
 
-    /**
-     * @param array<mixed> $body
-     *
-     * @return array<mixed>
-     */
-    protected function search(ContentType $contentType, array $body = []): array
-    {
-        $limit = 1000;
-        $type = $contentType->getName();
-        $alias = $contentType->getEnvironment()->getAlias();
-
-        $search = $this->clientRequest->search($type, $body, 0, $limit, [], $alias);
-        $total = $search['hits']['total']['value'] ?? $search['hits']['total'];
-
-        if ($total > $limit) {
+        if ($response->getTotal() > self::SEARCH_LIMIT) {
             $this->logger->error('Only the first {limit} {type}s have been loaded on a total of {total}', [
-                'limit' => $limit,
-                'type' => $type,
-                'total' => $total,
+                'limit' => self::SEARCH_LIMIT,
+                'type' => $contentType->getName(),
+                'total' => $response->getTotal(),
             ]);
         }
 
-        return $search['hits']['hits'];
+        return $response;
     }
 }

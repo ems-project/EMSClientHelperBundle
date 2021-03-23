@@ -24,10 +24,6 @@ final class Router extends BaseRouter
             return new RouteCollection();
         }
 
-        if (null !== $localRouteCollection = $this->builder->getLocalRouteCollection($environment)) {
-            return $localRouteCollection;
-        }
-
         return $this->builder->buildRouteCollection($environment);
     }
 }
