@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
-use EMS\CommonBundle\Common\Json;
+use EMS\CommonBundle\Common\Standard\Json;
 
 final class RouteConfig
 {

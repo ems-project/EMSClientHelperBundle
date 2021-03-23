@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Local\File;
 
 use EMS\ClientHelperBundle\Helper\Templating\Template;
-use EMS\CommonBundle\Common\Json;
+use EMS\CommonBundle\Common\Standard\Json;
 
 final class TemplatesFile
 {
@@ -15,7 +15,8 @@ final class TemplatesFile
     public static function fromJson(string $filePath): self
     {
         $templatesFile = new self();
-        $templatesFile->templates = Json::decode(\file_get_contents($filePath));
+        $content = \file_exists($filePath) ? (\file_get_contents($filePath) ?: '') : '';
+        $templatesFile->templates = Json::decode($content);
 
         return $templatesFile;
     }

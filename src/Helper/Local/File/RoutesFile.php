@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Local\File;
 
 use EMS\ClientHelperBundle\Helper\Routing\RouteConfig;
-use EMS\CommonBundle\Common\Json;
+use EMS\CommonBundle\Common\Standard\Json;
 
 final class RoutesFile
 {
@@ -21,8 +21,8 @@ final class RoutesFile
     public static function fromJson(TemplatesFile $templatesFile, string $filePath): self
     {
         $routesFile = new self($templatesFile);
-
-        $decoded = Json::decode(\file_get_contents($filePath));
+        $content = \file_exists($filePath) ? (\file_get_contents($filePath) ?: '') : '';
+        $decoded = Json::decode($content);
         foreach ($decoded as $name => $options) {
             $routesFile->addRouteConfig(RouteConfig::fromArray($name, $options));
         }

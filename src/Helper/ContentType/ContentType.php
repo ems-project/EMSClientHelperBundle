@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\ContentType;
 
-use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Contracts\ContentType\ContentTypeInterface;
+use EMS\ClientHelperBundle\Helper\Environment\Environment;
 
 final class ContentType implements ContentTypeInterface
 {
