@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Helper\Twig;
 
+use EMS\ClientHelperBundle\Contracts\Templating\TemplatingInterface;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use Twig\Loader\LoaderInterface;
 
@@ -10,7 +11,7 @@ use Twig\Loader\LoaderInterface;
  *
  * @see EMSClientHelperExtension::defineTwigLoader()
  */
-class TwigLoader implements LoaderInterface
+class TwigLoader implements LoaderInterface, TemplatingInterface
 {
     /**
      * @var ClientRequest
@@ -21,8 +22,6 @@ class TwigLoader implements LoaderInterface
      * @var array
      */
     private $config;
-
-    const PREFIX = '@EMSCH';
 
     public function __construct(ClientRequest $client, array $config)
     {

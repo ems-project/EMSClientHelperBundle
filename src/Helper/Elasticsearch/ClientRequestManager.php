@@ -2,9 +2,10 @@
 
 namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
+use EMS\ClientHelperBundle\Contracts\Elasticsearch\ClientRequestManagerInterface;
 use Psr\Log\LoggerInterface;
 
-class ClientRequestManager
+class ClientRequestManager implements ClientRequestManagerInterface
 {
     /**
      * @var ClientRequest[]

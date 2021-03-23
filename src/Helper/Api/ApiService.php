@@ -2,6 +2,7 @@
 
 namespace EMS\ClientHelperBundle\Helper\Api;
 
+use EMS\ClientHelperBundle\Contracts\Api\ApiServiceInterface;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\CommonBundle\Helper\EmsFields;
 use Psr\Log\LoggerInterface;
@@ -11,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-class ApiService
+class ApiService implements ApiServiceInterface
 {
     const EMS_AJAX_MESSAGE_LEVELS = ['error', 'warning'];
 
@@ -295,6 +296,9 @@ class ApiService
         throw new NotFoundHttpException();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function getApiClient(string $clientName): Client
     {
         foreach ($this->apiClients as $apiClient) {

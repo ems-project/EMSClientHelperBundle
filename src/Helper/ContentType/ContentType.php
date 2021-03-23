@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\ContentType;
 
-final class ContentType
+use EMS\ClientHelperBundle\Contracts\ContentType\ContentTypeInterface;
+
+final class ContentType implements ContentTypeInterface
 {
     private string $alias;
     private string $name;
@@ -32,10 +34,7 @@ final class ContentType
     }
 
     /**
-     * Used by the cacheHelper, if the cache contentType has the same cache compare it will be used.
-     * Total needs to be included, for deleted documents on a contentType.
-     *
-     * Also used in the formBundle for invalidating formConfig cache.
+     * {@inheritDoc}
      */
     public function getCacheValidityTag(): string
     {
