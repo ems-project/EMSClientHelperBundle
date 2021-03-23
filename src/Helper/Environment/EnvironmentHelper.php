@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Environment;
 
+use EMS\ClientHelperBundle\Contracts\Environment\EnvironmentHelperInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-final class EnvironmentHelper
+final class EnvironmentHelper implements EnvironmentHelperInterface
 {
     /** @var Environment[] */
     private array $environments = [];
@@ -26,9 +27,12 @@ final class EnvironmentHelper
         }
     }
 
-    public function addEnvironment(Environment $environment): void
+    /**
+     * {@inheritDoc}
+     */
+    public function addEnvironment(string $name, array $config): void
     {
-        $this->environments[] = $environment;
+        $this->environments[] = new Environment($name, $config);
     }
 
     public function getEmschEnv(): string

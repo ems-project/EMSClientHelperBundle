@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Api;
 
+use EMS\ClientHelperBundle\Contracts\Api\ApiClientInterface;
 use EMS\CommonBundle\Common\HttpClientFactory;
 use GuzzleHttp\Client as HttpClient;
 use Psr\Log\LoggerInterface;
 
-final class Client
+final class Client implements ApiClientInterface
 {
     private HttpClient $client;
     private string $key;

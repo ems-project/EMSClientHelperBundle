@@ -7,6 +7,7 @@
     <services>
         <defaults public="false" />
 
+        <service id="EMS\ClientHelperBundle\Contracts\Api\ApiServiceInterface" alias="emsch.api" />
         <service id="emsch.api" class="EMS\ClientHelperBundle\Helper\Api\ApiService">
             <argument type="service" id="logger" />
             <argument type="service" id="twig" />
