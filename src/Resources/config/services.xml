@@ -21,6 +21,7 @@
             <argument type="service" id="logger" />
         </service>
 
+        <service id="EMS\ClientHelperBundle\Contracts\Environment\EnvironmentHelperInterface" alias="emsch.helper_environment" />
         <service id="emsch.helper_environment" class="EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper">
             <argument type="service" id="request_stack" />
             <argument type="string">%env(string:EMSCH_ENV)%</argument>
