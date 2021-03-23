@@ -20,7 +20,7 @@ final class RoutingFile implements \Countable
     public function __construct(string $directory)
     {
         $file = $directory.\DIRECTORY_SEPARATOR.self::FILE_NAME;
-        $content = \file_exists($file) ? (\file_get_contents($file) ?: ''): '';
+        $content = \file_exists($file) ? (\file_get_contents($file) ?: '') : '';
         $routes = \file_exists($file) ? Yaml::parse($content) : [];
 
         $this->templateFiles = new TemplateFiles($directory);

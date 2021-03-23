@@ -80,6 +80,6 @@ final class PushCommand extends AbstractLocalCommand
             $item->getId(),
         ]);
 
-        $this->io->write(sprintf('%s %s', $type, $url));
+        $this->io->write(\sprintf('%s %s', $type, $url));
     }
 }

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
 use EMS\ClientHelperBundle\Helper\Builder\AbstractBuilder;
-use EMS\ClientHelperBundle\Helper\Builder\BuilderDocumentInterface;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\CommonBundle\Search\Search;
