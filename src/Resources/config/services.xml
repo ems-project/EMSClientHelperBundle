@@ -10,6 +10,7 @@
     <services>
         <defaults public="false" />
 
+        <service id="EMS\ClientHelperBundle\Contracts\Elasticsearch\ClientRequestManagerInterface" alias="emsch.manager.client_request" />
         <service id="emsch.manager.client_request" class="EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager">
             <argument type="tagged" tag="emsch.client_request"/>
             <argument type="service" id="logger" />
@@ -20,6 +21,7 @@
             <argument type="service" id="logger" />
         </service>
 
+        <service id="EMS\ClientHelperBundle\Contracts\Environment\EnvironmentHelperInterface" alias="emsch.helper_environment" />
         <service id="emsch.helper_environment" class="EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper">
             <argument type="service" id="emsch.helper.environment_factory" />
             <argument type="service" id="request_stack" />

@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
+use EMS\ClientHelperBundle\Contracts\Elasticsearch\ClientRequestManagerInterface;
 use Psr\Log\LoggerInterface;
 
-final class ClientRequestManager
+final class ClientRequestManager implements ClientRequestManagerInterface
 {
     /** @var array<string, ClientRequest> */
     private array $clientRequests = [];

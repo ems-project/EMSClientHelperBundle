@@ -11,7 +11,7 @@
 Transforms emsLinks (ems://object:type:id) inside a string by defined templates. 
 These templates normally follow the following naming convention: **{type}.ems_link.twig**
 
-The filter accepts two optional paramaters:
+The filter accepts two optional parameters:
 > - **locale**: is forwarded to the render template
 > - **baseUrl**: the result of the rendering will be prefix with this baseUrl
 
@@ -29,10 +29,10 @@ Ut aliquam enim <a href="ems://object:page:AXY5brhavwK7S-Z8saw1">page2</a> dui d
 Works like [emsch_routing](#emsch_routing) but only accepts 1 optional parameter called config.
 
 Possible config properties:
-> - **locale**: is forwarded to the render template
+> - **locale**: is forwarded to the render template (will be added to the context array)
 > - **baseUrl**: the result of the rendering will be prefix with this baseUrl
 > - **dynamic_types**: allow emsLinks with these types and do NOT fetch the document
-> - **context**: a array for extending the context passed to the templates
+> - **context**: an array for extending the context passed to the templates
 
 ```twig
 {% set content %}
@@ -41,7 +41,14 @@ Etiam quis ex sed velit fermentum blandit id <a href="ems://object:my_type:AXY5b
 Ut aliquam <a href="ems://object:page:AXY5brhavwK7S-Z8saw1">page</a> ac dui dignissim tincidunt. Praesent efficitur ipsum ac eros lobortis, at mollis nulla placerat.
 {% endset %}
 
-{{ content|emsch_routing_config({  }) }}
+{{ content|emsch_routing_config({ 
+    'locale': 'de', 
+    'baseUrl': '/test/',
+    'dynamic_types': ['my_type'],
+    'context': {
+        'extraParam': 'test'
+    }
+}) }}
 ```
 
 ## emsch_data

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Api;
 
+use EMS\ClientHelperBundle\Contracts\Api\ApiServiceInterface;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\CommonBundle\Helper\EmsFields;
 use Psr\Log\LoggerInterface;
@@ -17,7 +18,7 @@ use Twig\Environment;
 /**
  * @todo use EMS\CommonBundle\Contracts\CoreApi\CoreApiInterface
  */
-final class ApiService
+final class ApiService implements ApiServiceInterface
 {
     private const EMS_AJAX_MESSAGE_LEVELS = ['error', 'warning'];
 
@@ -276,6 +277,9 @@ final class ApiService
         throw new NotFoundHttpException();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function getApiClient(string $clientName): Client
     {
         foreach ($this->apiClients as $apiClient) {
