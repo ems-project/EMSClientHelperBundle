@@ -33,7 +33,7 @@ final class Environment
     private array $options;
     private string $hash;
 
-    private ?LocalEnvironment $local;
+    private ?LocalEnvironment $local = null;
 
     /**
      * @param array<string, mixed> $config
