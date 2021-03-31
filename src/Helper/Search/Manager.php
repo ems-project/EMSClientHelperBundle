@@ -37,7 +37,7 @@ class Manager
 
         $commonSearch = $this->clientRequest->commonSearch($search);
         $results = $commonSearch->getResponse()->getData();
-        $results['hits']['total'] = $response['hits']['total']['value'] ?? $response['hits']['total'] ?? 0;
+        $results['hits']['total'] = $results['hits']['total']['value'] ?? $results['hits']['total'] ?? 0;
 
         $response = Response::fromResultSet($commonSearch);
         $requestSearch->bindAggregations($response, $qbService->getQueryFilters());
