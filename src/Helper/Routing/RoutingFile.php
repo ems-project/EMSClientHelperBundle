@@ -46,7 +46,9 @@ final class RoutingFile implements \Countable
         foreach ($documents as $document) {
             $data = $document->getDataSource();
             if (isset($data['template_static'])) {
-                $data['template_static'] = $templatesFile->getByEmsName($data['template_static'])->getPathName();
+                $templateFile = $templatesFile->findStatic($data['template_static']);
+
+                $data['template_static'] = $templateFile ? $templateFile->getPathName() : $data['template_static'];
             }
 
             if (isset($data['config'])) {

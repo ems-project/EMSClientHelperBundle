@@ -90,14 +90,14 @@ final class TemplateFiles implements \IteratorAggregate, \Countable
         throw new \RuntimeException(\sprintf('Could not find template "%s"', $name));
     }
 
-    public function getByEmsName(string $emsName): TemplateFile
+    public function findStatic(string $search): ?TemplateFile
     {
         foreach ($this->templateFiles as $templateFile) {
-            if ($emsName === $templateFile->getPathOuuid()) {
+            if ($search === $templateFile->getPathOuuid() || $search === $templateFile->getPathName()) {
                 return $templateFile;
             }
         }
 
-        throw new \RuntimeException(\sprintf('Could not find template "%s"', $emsName));
+        return null;
     }
 }
