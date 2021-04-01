@@ -15,7 +15,7 @@ final class TranslationBuilder extends AbstractBuilder
     /**
      * @return \Generator|MessageCatalogue[]
      */
-    public function buildMessageCatalogues(Environment $environment): \Generator
+    public function buildMessageCatalogues(Environment $environment, string $domain = null): \Generator
     {
         if (null === $contentType = $this->getContentType($environment)) {
             return [];
@@ -23,7 +23,7 @@ final class TranslationBuilder extends AbstractBuilder
 
         foreach ($this->getMessages($contentType) as $locale => $messages) {
             $messageCatalogue = new MessageCatalogue($locale);
-            $messageCatalogue->add($messages, $environment->getName());
+            $messageCatalogue->add($messages, $domain ?? $environment->getName());
 
             yield $messageCatalogue;
         }
@@ -31,7 +31,7 @@ final class TranslationBuilder extends AbstractBuilder
 
     public function buildFiles(Environment $environment, string $directory): void
     {
-        $messageCatalogues = $this->buildMessageCatalogues($environment);
+        $messageCatalogues = $this->buildMessageCatalogues($environment, 'messages');
 
         TranslationFiles::build($directory, $messageCatalogues);
     }
