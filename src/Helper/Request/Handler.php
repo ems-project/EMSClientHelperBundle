@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Request;
 
+use EMS\ClientHelperBundle\Contracts\Request\HandlerInterface;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
@@ -15,7 +16,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Route as SymfonyRoute;
 use Symfony\Component\Routing\RouterInterface;
 
-final class Handler
+final class Handler implements HandlerInterface
 {
     private ClientRequest $clientRequest;
     private RouterInterface $router;
