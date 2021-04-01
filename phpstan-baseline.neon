@@ -461,11 +461,6 @@ parameters:
 			path: src/Helper/Request/ExceptionHelper.php
 
 		-
-			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Request\\\\Handler\\:\\:handle\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Helper/Request/Handler.php
-
-		-
 			message: "#^Method EMS\\\\ClientHelperBundle\\\\Helper\\\\Request\\\\Handler\\:\\:getTemplate\\(\\) has parameter \\$document with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: src/Helper/Request/Handler.php

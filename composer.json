@@ -55,7 +55,8 @@
 		}
 	},
 	"config": {
-		"lock": false
+		"lock": false,
+		"sort-packages": true
 	},
 	"extra" : {
 		"branch-alias" : {
