@@ -23,7 +23,7 @@ final class LocalEnvironment
     public function __construct(Environment $environment, string $path)
     {
         $this->environment = $environment;
-        $this->directory = $path.\DIRECTORY_SEPARATOR.$environment->getName();
+        $this->directory = $path.\DIRECTORY_SEPARATOR.$environment->getAlias();
         $this->fileSystem = new Filesystem();
     }
 

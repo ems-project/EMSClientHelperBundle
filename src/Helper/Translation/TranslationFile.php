@@ -12,7 +12,6 @@ final class TranslationFile implements \Countable
     public string $resource;
     public string $format;
     public string $locale;
-    public string $domain;
 
     public function __construct(SplFileInfo $file)
     {
@@ -21,7 +20,6 @@ final class TranslationFile implements \Countable
 
         $this->format = \array_pop($fileNameParts);
         $this->locale = \array_pop($fileNameParts);
-        $this->domain = \implode('.', $fileNameParts);
         $this->resource = $file->getPathname();
     }
 
