@@ -110,6 +110,10 @@ final class KernelListener implements EventSubscriberInterface
 
     public function customErrorTemplate(ExceptionEvent $event): void
     {
+        if (!$this->exceptionHelper->isEnabled()) {
+            return;
+        }
+
         $flattenException = FlattenException::createFromThrowable($event->getThrowable());
 
         if ($template = $this->exceptionHelper->renderError($flattenException)) {

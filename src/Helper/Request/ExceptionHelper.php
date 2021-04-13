@@ -15,14 +15,26 @@ final class ExceptionHelper
     private Environment $twig;
     private ClientRequestManager $manager;
     private string $template;
+    private bool $enabled;
     private bool $debug;
 
-    public function __construct(Environment $twig, ClientRequestManager $manager, bool $debug, string $template = '')
-    {
+    public function __construct(
+        Environment $twig,
+        ClientRequestManager $manager,
+        bool $enabled,
+        bool $debug,
+        string $template = ''
+    ) {
         $this->twig = $twig;
         $this->manager = $manager;
+        $this->enabled = $enabled;
         $this->debug = $debug;
         $this->template = $template;
+    }
+
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
     }
 
     /**
