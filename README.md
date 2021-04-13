@@ -22,12 +22,12 @@ vendor/bin/phpstan analyse --generate-baseline
 Documentation
 -------------
 
-- [Routing](../master/Resources/doc/routing.md)
-- [Search](../master/Resources/doc/search.md)
-- [Twig documentation](../master/Resources/doc/twig.md)
+- [Routing](../master/doc/routing.md)
+- [Search](../master/doc/search.md)
+- [Twig documentation](../master/doc/twig.md)
 
 ### CommonBundle
 
 The ClientHelperBundle has a strong dependency on CommonBundle.
  
-[Twig documentation for CommonBundle](https://github.comhttps://github.com/ems-project/EMSClientHelperBundle/blob/master/Resources/doc/twig.md)
+[Twig documentation for CommonBundle](https://github.com/ems-project/EMSCommonBundle/blob/master/doc/twig.md)
