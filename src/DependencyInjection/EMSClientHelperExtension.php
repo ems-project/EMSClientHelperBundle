@@ -33,12 +33,13 @@ final class EMSClientHelperExtension extends Extension
 
         $container->setParameter('emsch.locales', $config['locales']);
         $container->setParameter('emsch.bind_locale', $config['bind_locale'] ?? true);
+        $container->setParameter('emsch.handle_exceptions', $config['handle_exceptions'] ?? true);
         $container->setParameter('emsch.etag_hash_algo', $config['etag_hash_algo'] ?? 'sha1');
         $container->setParameter('emsch.assets.enabled', $config['dump_assets']);
         $container->setParameter('emsch.request_environments', $config['request_environments']);
 
         $templates = $config['templates'];
-        $container->getDefinition('emsch.helper_exception')->replaceArgument(3, $templates['error']);
+        $container->getDefinition('emsch.helper_exception')->replaceArgument(4, $templates['error']);
         $container->getDefinition('emsch.routing.url.transformer')->replaceArgument(4, $templates['ems_link']);
 
         $this->processElasticms($container, $loader, $config['elasticms']);
