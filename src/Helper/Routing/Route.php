@@ -41,6 +41,7 @@ final class Route
 
         return new self($name, \array_filter(\array_merge($config, [
             'query' => isset($data['query']) ? Json::decode($data['query']) : null,
+            'index_regex' => $data['index_regex'] ?? null,
             'template' => $template,
         ])));
     }

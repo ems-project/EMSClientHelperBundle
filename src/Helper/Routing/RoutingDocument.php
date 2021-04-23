@@ -52,6 +52,7 @@ final class RoutingDocument implements BuilderDocumentInterface
             'name' => $this->source['name'],
             'config' => $this->source['config'] ?? null,
             'query' => $this->source['query'] ?? null,
+            'index_regex' => $this->source['index_regex'] ?? null,
             'template_static' => $this->source['template_static'] ?? null,
             'template_source' => $this->source['template_source'] ?? null,
             'order' => $this->source['order'],
@@ -66,6 +67,7 @@ final class RoutingDocument implements BuilderDocumentInterface
         return \array_filter([
             'config' => $this->source['config'] ?? null,
             'query' => $this->source['query'] ?? null,
+            'index_regex' => $this->source['index_regex'] ?? null,
             'template_static' => (isset($this->source['template_static']) ? \strval($this->source['template_static']) : null),
             'template_source' => (isset($this->source['template_source']) ? \strval($this->source['template_source']) : null),
         ]);
