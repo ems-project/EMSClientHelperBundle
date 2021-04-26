@@ -30,7 +30,7 @@ final class TemplateFiles implements \IteratorAggregate, \Countable
             }
 
             foreach ($templates as $ouuid => $name) {
-                $this->getByName($contentType.'/'.$name)->setOuuid($ouuid);
+                $this->get($contentType.'/'.$name)->setOuuid($ouuid);
             }
         }
     }
@@ -74,23 +74,21 @@ final class TemplateFiles implements \IteratorAggregate, \Countable
         return new \ArrayIterator($this->templateFiles);
     }
 
-    public function getByTemplateName(TemplateName $templateName): TemplateFile
+    public function get(string $search): TemplateFile
     {
-        return $this->getByName($templateName->getContentType().'/'.$templateName->getSearchValue());
-    }
-
-    public function getByName(string $name): TemplateFile
-    {
-        foreach ($this->templateFiles as $templateFile) {
-            if ($name === $templateFile->getPathName()) {
-                return $templateFile;
-            }
+        if (null === $template = $this->find($search)) {
+            throw new \RuntimeException(\sprintf('Could not find template "%s"', $search));
         }
 
-        throw new \RuntimeException(\sprintf('Could not find template "%s"', $name));
+        return $template;
     }
 
-    public function findStatic(string $search): ?TemplateFile
+    public function getByTemplateName(TemplateName $templateName): TemplateFile
+    {
+        return $this->get($templateName->getSearchName());
+    }
+
+    public function find(string $search): ?TemplateFile
     {
         foreach ($this->templateFiles as $templateFile) {
             if ($search === $templateFile->getPathOuuid() || $search === $templateFile->getPathName()) {

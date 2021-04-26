@@ -33,6 +33,13 @@ final class TemplateName
         return TemplateDocument::PREFIX === \substr($name, 0, 6);
     }
 
+    public function getSearchName(): string
+    {
+        $separator = '_id' === $this->searchField ? ':' : '/';
+
+        return \implode('', [$this->contentType, $separator, $this->searchValue]);
+    }
+
     public function getContentType(): string
     {
         return $this->contentType;

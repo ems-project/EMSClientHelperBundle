@@ -46,7 +46,7 @@ final class RoutingFile implements \Countable
         foreach ($documents as $document) {
             $data = $document->getDataSource();
             if (isset($data['template_static'])) {
-                $templateFile = $templatesFile->findStatic($data['template_static']);
+                $templateFile = $templatesFile->find($data['template_static']);
                 $data['template_static'] = $templateFile ? $templateFile->getPathName() : $data['template_static'];
             }
 
@@ -74,7 +74,7 @@ final class RoutingFile implements \Countable
 
         foreach ($this->routes as $name => $route) {
             if (isset($route['template_static'])) {
-                $template = $this->templateFiles->findStatic($route['template_static']);
+                $template = $this->templateFiles->find($route['template_static']);
                 if ($template && $template->hasOuuid()) {
                     $route['template_static'] = $template->getPathOuuid();
                 }
@@ -98,7 +98,7 @@ final class RoutingFile implements \Countable
     {
         foreach ($this->routes as $name => $data) {
             if (isset($data['template_static'])) {
-                $template = $this->templateFiles->findStatic($data['template_static']);
+                $template = $this->templateFiles->find($data['template_static']);
                 $data['template_static'] = $template ? $template->getPathName() : $data['template_static'];
             }
 
