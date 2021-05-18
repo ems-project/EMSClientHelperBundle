@@ -6,11 +6,13 @@ namespace EMS\ClientHelperBundle\Helper\Search;
 
 use Elastica\Query\AbstractQuery;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Request\RequestHelper;
 use EMS\CommonBundle\Elasticsearch\Response\Response;
 use Symfony\Component\HttpFoundation\Request;
 
 final class Search
 {
+    private ?string $indexRegex;
     /** @var string[] */
     private array $types;
     /** @var array<string, int> [facet_name => size], used for aggregation */
@@ -51,6 +53,7 @@ final class Search
             @\trigger_error('Deprecated facets, please use filters setting', E_USER_DEPRECATED);
         }
 
+        $this->indexRegex = $options['index_regex'] ?? null;
         $this->types = $options['types']; //required
         $this->facets = $options['facets'] ?? [];
         $this->sizes = $options['sizes'] ?? [];
@@ -89,6 +92,10 @@ final class Search
         $this->setSortBy($request->get('s'));
         $this->setSortOrder($request->get('o', $this->sortOrder));
 
+        if (null !== $this->indexRegex) {
+            $this->indexRegex = RequestHelper::replace($request, $this->indexRegex);
+        }
+
         foreach ($this->filters as $filter) {
             $filter->handleRequest($request);
         }
@@ -101,6 +108,11 @@ final class Search
                 $this->getFilter($aggregation->getName())->handleAggregation($aggregation->getRaw(), $this->getTypes(), $queryFilters);
             }
         }
+    }
+
+    public function getIndexRegex(): ?string
+    {
+        return $this->indexRegex;
     }
 
     /**

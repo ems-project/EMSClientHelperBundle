@@ -35,6 +35,7 @@ final class Manager
         $search = $qbService->buildSearch($requestSearch->getTypes());
         $search->setFrom($requestSearch->getFrom());
         $search->setSize($requestSearch->getSize());
+        $search->setRegex($requestSearch->getIndexRegex());
 
         $commonSearch = $this->clientRequest->commonSearch($search);
         $results = $commonSearch->getResponse()->getData();

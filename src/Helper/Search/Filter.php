@@ -13,6 +13,7 @@ use Elastica\Query\Range;
 use Elastica\Query\Term;
 use Elastica\Query\Terms;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Request\RequestHelper;
 use Symfony\Component\HttpFoundation\Request;
 
 final class Filter
@@ -166,7 +167,10 @@ final class Filter
     public function handleRequest(Request $request): void
     {
         if (null !== $this->field) {
-            $this->field = \str_replace('%locale%', $request->getLocale(), $this->field);
+            $this->field = RequestHelper::replace($request, $this->field);
+        }
+        if (null !== $this->value) {
+            $this->value = RequestHelper::replace($request, $this->value);
         }
         $requestValue = $request->get($this->name);
 
