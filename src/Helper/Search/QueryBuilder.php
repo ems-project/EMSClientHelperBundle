@@ -85,7 +85,9 @@ final class QueryBuilder
             foreach ($textValues as $textValue) {
                 $textMust->addMust($textValue->makeShould());
             }
-            $query->addShould($textMust);
+            $query
+                ->setMinimumShouldMatch(1)
+                ->addShould($textMust);
         }
 
         if (0 === $query->count()) {

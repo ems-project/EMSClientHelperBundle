@@ -70,17 +70,11 @@ final class Handler implements HandlerInterface
             return null;
         }
 
-        $pattern = '/%(?<parameter>(_|)[[:alnum:]]*)%/m';
-        $json = \preg_replace_callback($pattern, function ($match) use ($request) {
-            return $request->get($match['parameter'], $match[0]);
-        }, $query);
+        $json = RequestHelper::replace($request, $query);
 
         $indexRegex = $route->getOption('index_regex');
         if (null !== $indexRegex) {
-            $pattern = '/%(?<parameter>(_|)[[:alnum:]]*)%/m';
-            $indexRegex = \preg_replace_callback($pattern, function ($match) use ($request) {
-                return $request->get($match['parameter'], $match[0]);
-            }, $indexRegex);
+            $indexRegex = RequestHelper::replace($request, $indexRegex);
         }
 
         try {
@@ -96,11 +90,7 @@ final class Handler implements HandlerInterface
     private function getTemplate(Request $request, SymfonyRoute $route, array $document = null): string
     {
         $template = $route->getOption('template');
-
-        $pattern = '/%(?<parameter>(_|)[[:alnum:]]*)%/m';
-        $template = \preg_replace_callback($pattern, function ($match) use ($request) {
-            return $request->get($match['parameter'], $match[0]);
-        }, $template);
+        $template = RequestHelper::replace($request, $template ?? '');
 
         if (null === $document || TemplateDocument::PREFIX === \substr($template, 0, 6)) {
             return $template;
