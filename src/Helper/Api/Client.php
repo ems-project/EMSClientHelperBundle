@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Api;
 
 use EMS\ClientHelperBundle\Contracts\Api\ApiClientInterface;
@@ -7,32 +9,17 @@ use EMS\CommonBundle\Common\HttpClientFactory;
 use GuzzleHttp\Client as HttpClient;
 use Psr\Log\LoggerInterface;
 
-class Client implements ApiClientInterface
+/**
+ * @todo use EMS\CommonBundle\Contracts\CoreApi\CoreApiInterface
+ */
+final class Client implements ApiClientInterface
 {
-    /**
-     * @var HttpClient
-     */
-    private $client;
+    private HttpClient $client;
+    private string $key;
+    private string $name;
+    private LoggerInterface $logger;
 
-    /**
-     * @var string
-     */
-    private $key;
-
-    /**
-     * @var string
-     */
-    private $name;
-
-    /** @var LoggerInterface */
-    private $logger;
-
-    /**
-     * @param string $name
-     * @param string $baseUrl
-     * @param string $key
-     */
-    public function __construct($name, $baseUrl, $key, LoggerInterface $logger)
+    public function __construct(string $name, string $baseUrl, string $key, LoggerInterface $logger)
     {
         $this->name = $name;
         $this->key = $key;
@@ -40,7 +27,7 @@ class Client implements ApiClientInterface
         $this->logger = $logger;
     }
 
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -48,13 +35,11 @@ class Client implements ApiClientInterface
     /**
      * @deprecated
      *
-     * @param string  $type
-     * @param array   $body
-     * @param ?string $ouuid
+     * @param array<mixed> $body
      *
-     * @return array [acknowledged, revision_id, ouuid, success]
+     * @return array<mixed>
      */
-    public function createDraft($type, $body, $ouuid = null)
+    public function createDraft(string $type, array $body, ?string $ouuid = null): array
     {
         @\trigger_error('Deprecated use the initNewDocument or initNewDraftRevision functions', E_USER_DEPRECATED);
 
@@ -62,13 +47,11 @@ class Client implements ApiClientInterface
     }
 
     /**
-     * @param string  $type
-     * @param array   $body
-     * @param ?string $ouuid
+     * @param array<mixed> $body
      *
-     * @return array [acknowledged, revision_id, ouuid, success]
+     * @return array<mixed>
      */
-    public function initNewDocument($type, $body, $ouuid = null)
+    public function initNewDocument(string $type, array $body, ?string $ouuid = null): array
     {
         if (null === $ouuid) {
             $url = \sprintf('api/data/%s/draft', $type);
@@ -85,13 +68,11 @@ class Client implements ApiClientInterface
     }
 
     /**
-     * @param string  $type
-     * @param array   $body
-     * @param ?string $ouuid
+     * @param array<mixed> $body
      *
-     * @return array [acknowledged, revision_id, ouuid, success]
+     * @return array<mixed>
      */
-    public function updateDocument($type, $ouuid, $body)
+    public function updateDocument(string $type, ?string $ouuid, array $body): array
     {
         $response = $this->client->post(
             \sprintf('/api/data/%s/replace/%s', $type, $ouuid),
@@ -102,14 +83,9 @@ class Client implements ApiClientInterface
     }
 
     /**
-     * Call createDraft for a new revisionId.
-     *
-     * @param string $type
-     * @param string $revisionId
-     *
-     * @return array [acknowledged, ouuid, success]
+     * @return array<mixed>
      */
-    public function finalize($type, $revisionId)
+    public function finalize(string $type, string $revisionId): array
     {
         $response = $this->client->post(
             \sprintf('api/data/%s/finalize/%d', $type, $revisionId)
@@ -119,14 +95,9 @@ class Client implements ApiClientInterface
     }
 
     /**
-     * Call discardDraft for a revisionId.
-     *
-     * @param string $type
-     * @param string $revisionId
-     *
-     * @return array [acknowledged, ouuid, success]
+     * @return array<mixed>
      */
-    public function discardDraft($type, $revisionId)
+    public function discardDraft(string $type, string $revisionId)
     {
         $response = $this->client->post(
             \sprintf('api/data/%s/discard/%d', $type, $revisionId)
@@ -136,7 +107,7 @@ class Client implements ApiClientInterface
     }
 
     /**
-     * @return array [uploaded, fileName, url]
+     * @return array<mixed>
      */
     public function postFile(\SplFileInfo $file, ?string $forcedFilename = null): array
     {

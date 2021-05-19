@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Search;
 
 use Elastica\Query\AbstractQuery;
@@ -12,17 +14,13 @@ use Elastica\Query\QueryString;
  * If we search for 'foo bar'
  * the SearchManager will create two SearchValue instances.
  */
-class TextValue
+final class TextValue
 {
-    /** @var string */
-    private $text;
-    /** @var string */
-    private $field;
-    /** @var string */
-    private $analyzer;
-
+    private string $text;
+    private string $field;
+    private string $analyzer;
     /** @var AbstractQuery[] */
-    private $synonyms;
+    private array $synonyms;
 
     public function __construct(string $text, string $field, string $analyzer)
     {

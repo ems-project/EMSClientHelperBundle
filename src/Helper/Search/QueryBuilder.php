@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Search;
 
 use Elastica\Aggregation\AbstractAggregation;
@@ -15,12 +17,10 @@ use Elastica\Suggest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\CommonBundle\Search\Search as CommonSearch;
 
-class QueryBuilder
+final class QueryBuilder
 {
-    /** @var ClientRequest */
-    private $clientRequest;
-    /** @var Search */
-    private $search;
+    private ClientRequest $clientRequest;
+    private Search $search;
 
     public function __construct(ClientRequest $clientRequest, Search $search)
     {
@@ -85,7 +85,9 @@ class QueryBuilder
             foreach ($textValues as $textValue) {
                 $textMust->addMust($textValue->makeShould());
             }
-            $query->addShould($textMust);
+            $query
+                ->setMinimumShouldMatch(1)
+                ->addShould($textMust);
         }
 
         if (0 === $query->count()) {

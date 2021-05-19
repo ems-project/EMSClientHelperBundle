@@ -10,14 +10,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Twig\Environment;
 
-class PdfController
+final class PdfController
 {
-    /** @var Handler */
-    private $handler;
-    /** @var Environment */
-    private $templating;
-    /** @var PdfGenerator */
-    private $pdfGenerator;
+    private Handler $handler;
+    private Environment $templating;
+    private PdfGenerator $pdfGenerator;
 
     public function __construct(Handler $handler, Environment $templating, PdfGenerator $pdfGenerator)
     {

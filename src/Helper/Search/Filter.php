@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Search;
 
 use Elastica\Aggregation\Nested;
@@ -11,59 +13,48 @@ use Elastica\Query\Range;
 use Elastica\Query\Term;
 use Elastica\Query\Terms;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
+use EMS\ClientHelperBundle\Helper\Request\RequestHelper;
 use Symfony\Component\HttpFoundation\Request;
 
-class Filter
+final class Filter
 {
-    /** @var ClientRequest */
-    private $clientRequest;
-    /** @var string */
-    private $name;
-    /** @var string */
-    private $type;
-    /** @var string */
-    private $field;
-    /** @var string */
-    private $secondaryField;
-    /** @var string|null */
-    private $nestedPath;
+    private ClientRequest $clientRequest;
+    private string $name;
+    private string $type;
+    private string $field;
+    private ?string $secondaryField = null;
+    private ?string $nestedPath = null;
 
-    /** @var ?string */
-    private $sortField;
-    /** @var string */
-    private $sortOrder;
-    /** @var bool */
-    private $reversedNested;
+    private ?string $sortField = null;
+    private string $sortOrder;
+    private bool $reversedNested = false;
 
-    /** @var int|null */
-    private $aggSize;
-    /** @var bool default true for terms, when value passed default false */
-    private $postFilter;
-    /** @var bool only public filters will handle a request. */
-    private $public;
-    /** @var bool if not all doc contain the filter */
-    private $optional;
-    /** @var AbstractQuery|null */
-    private $queryFilters = null;
+    private ?int $aggSize = null;
+    /** default true for terms, when value passed default false */
+    private bool $postFilter = true;
+    /** only public filters will handle a request. */
+    private bool $public = false;
+    /** if not all doc contain the filter */
+    private bool $optional = false;
+    private ?AbstractQuery $queryFilters = null;
     /** @var string[] */
-    private $queryTypes = [];
+    private array $queryTypes = [];
 
-    /** @var AbstractQuery|null */
-    private $query = null;
+    private ?AbstractQuery $query = null;
 
     /** @var mixed|null */
     private $value;
     /** @var array<mixed> */
-    private $choices = [];
+    private array $choices = [];
     /** @var bool|string */
     private $dateFormat;
 
-    const TYPE_TERM = 'term';
-    const TYPE_TERMS = 'terms';
-    const TYPE_DATE_RANGE = 'date_range';
-    const TYPE_DATE_VERSION = 'date_version';
+    private const TYPE_TERM = 'term';
+    private const TYPE_TERMS = 'terms';
+    private const TYPE_DATE_RANGE = 'date_range';
+    private const TYPE_DATE_VERSION = 'date_version';
 
-    const TYPES = [
+    private const TYPES = [
         self::TYPE_TERM,
         self::TYPE_TERMS,
         self::TYPE_DATE_RANGE,
@@ -176,7 +167,10 @@ class Filter
     public function handleRequest(Request $request): void
     {
         if (null !== $this->field) {
-            $this->field = \str_replace('%locale%', $request->getLocale(), $this->field);
+            $this->field = RequestHelper::replace($request, $this->field);
+        }
+        if (null !== $this->value) {
+            $this->value = RequestHelper::replace($request, $this->value);
         }
         $requestValue = $request->get($this->name);
 

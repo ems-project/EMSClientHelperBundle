@@ -1,43 +1,40 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Request;
 
+use EMS\ClientHelperBundle\Exception\TemplatingException;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
-use EMS\ClientHelperBundle\Helper\Twig\TwigException;
-use Symfony\Component\Debug\Exception\FlattenException;
+use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\HttpFoundation\Response;
+use Twig\Environment;
 
-class ExceptionHelper
+final class ExceptionHelper
 {
-    /**
-     * @var \Twig\Environment
-     */
-    private $twig;
+    private Environment $twig;
+    private ClientRequestManager $manager;
+    private string $template;
+    private bool $enabled;
+    private bool $debug;
 
-    /**
-     * @var ClientRequestManager
-     */
-    private $manager;
-
-    /**
-     * @var string
-     */
-    private $template;
-
-    /**
-     * @var bool
-     */
-    private $debug;
-
-    /**
-     * @param string $template
-     */
-    public function __construct(\Twig\Environment $twig, ClientRequestManager $manager, bool $debug, string $template = null)
-    {
+    public function __construct(
+        Environment $twig,
+        ClientRequestManager $manager,
+        bool $enabled,
+        bool $debug,
+        string $template = ''
+    ) {
         $this->twig = $twig;
         $this->manager = $manager;
+        $this->enabled = $enabled;
         $this->debug = $debug;
         $this->template = $template;
+    }
+
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
     }
 
     /**
@@ -45,7 +42,7 @@ class ExceptionHelper
      */
     public function renderError(FlattenException $exception)
     {
-        if (null === $this->template || $this->debug) {
+        if ('' === $this->template || $this->debug) {
             return false;
         }
 
@@ -60,12 +57,9 @@ class ExceptionHelper
         ]));
     }
 
-    /**
-     * @return string
-     */
-    private function getTemplate(string $code)
+    private function getTemplate(int $code): string
     {
-        $customCodeTemplate = \str_replace('{code}', $code, $this->template);
+        $customCodeTemplate = \str_replace('{code}', \strval($code), $this->template);
 
         if ($this->templateExists($customCodeTemplate)) {
             return $customCodeTemplate;
@@ -77,13 +71,10 @@ class ExceptionHelper
             return $errorTemplate;
         }
 
-        throw new TwigException(\sprintf('template "%s" does not exists', $errorTemplate));
+        throw new TemplatingException(\sprintf('template "%s" does not exists', $errorTemplate));
     }
 
-    /**
-     * @return bool
-     */
-    protected function templateExists(string $template)
+    private function templateExists(string $template): bool
     {
         try {
             $loader = $this->twig->getLoader();

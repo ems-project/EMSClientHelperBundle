@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Environment;
 
 use EMS\ClientHelperBundle\Contracts\Environment\EnvironmentHelperInterface;
-use EMS\ClientHelperBundle\Exception\EnvironmentNotFoundException;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class EnvironmentHelper implements EnvironmentHelperInterface
+final class EnvironmentHelper implements EnvironmentHelperInterface
 {
     /** @var Environment[] */
     private array $environments = [];
@@ -16,13 +17,17 @@ class EnvironmentHelper implements EnvironmentHelperInterface
     /**
      * @param array<string, array> $environments
      */
-    public function __construct(RequestStack $requestStack, string $emschEnv, array $environments)
-    {
+    public function __construct(
+        EnvironmentFactory $environmentFactory,
+        RequestStack $requestStack,
+        string $emschEnv,
+        array $environments
+    ) {
         $this->requestStack = $requestStack;
         $this->emschEnv = $emschEnv;
 
         foreach ($environments as $name => $config) {
-            $this->environments[] = new Environment($name, $config);
+            $this->environments[$name] = $environmentFactory->create($name, $config);
         }
     }
 
@@ -32,6 +37,16 @@ class EnvironmentHelper implements EnvironmentHelperInterface
     public function addEnvironment(string $name, array $config): void
     {
         $this->environments[] = new Environment($name, $config);
+    }
+
+    public function getEmschEnv(): string
+    {
+        return $this->emschEnv;
+    }
+
+    public function getEnvironment(string $name): ?Environment
+    {
+        return $this->environments[$name] ?? null;
     }
 
     /**
@@ -49,28 +64,6 @@ class EnvironmentHelper implements EnvironmentHelperInterface
         return null !== $current ? $current->get(Environment::BACKEND_ATTRIBUTE) : null;
     }
 
-    /**
-     * Important for twig loader on kernel terminate we don't have a current request.
-     * So this function remembers it's environment and can still return it.
-     */
-    public function getBindEnvironmentName(): ?string
-    {
-        static $name = null;
-
-        if (null !== $name) {
-            return $name;
-        }
-
-        $current = $this->requestStack->getCurrentRequest();
-        if (null !== $current) {
-            $name = $current->get(Environment::ENVIRONMENT_ATTRIBUTE, null);
-        } elseif ('cli' === PHP_SAPI) {
-            $name = $this->emschEnv;
-        }
-
-        return $name;
-    }
-
     public function getLocale(): string
     {
         $current = $this->requestStack->getCurrentRequest();
@@ -81,16 +74,18 @@ class EnvironmentHelper implements EnvironmentHelperInterface
         return $current->getLocale();
     }
 
-    public function getCurrentEnvironment(): Environment
+    public function getCurrentEnvironment(): ?Environment
     {
-        $name = $this->getBindEnvironmentName();
+        if ('cli' === PHP_SAPI) {
+            return $this->environments[$this->emschEnv] ?? null;
+        }
 
         foreach ($this->environments as $environment) {
-            if ($environment->getName() === $name) {
+            if ($environment->isActive()) {
                 return $environment;
             }
         }
 
-        throw new EnvironmentNotFoundException();
+        return null;
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Asset;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
@@ -8,16 +10,12 @@ use EMS\CommonBundle\Twig\AssetRuntime;
 use Symfony\Component\Filesystem\Filesystem;
 use Twig\Extension\RuntimeExtensionInterface;
 
-class AssetHelperRuntime implements RuntimeExtensionInterface
+final class AssetHelperRuntime implements RuntimeExtensionInterface
 {
-    /** @var StorageManager */
-    private $storageManager;
-    /** @var ClientRequestManager */
-    private $manager;
-    /** @var string */
-    private $publicDir;
-    /** @var Filesystem */
-    private $filesystem;
+    private StorageManager $storageManager;
+    private ClientRequestManager $manager;
+    private string $publicDir;
+    private Filesystem $filesystem;
 
     public function __construct(StorageManager $storageManager, ClientRequestManager $manager, string $projectDir)
     {

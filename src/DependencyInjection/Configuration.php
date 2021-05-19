@@ -1,39 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
-class Configuration implements ConfigurationInterface
+final class Configuration implements ConfigurationInterface
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder();
+        $treeBuilder = new TreeBuilder('ems_client_helper');
         /* @var $rootNode ArrayNodeDefinition */
-        $rootNode = $treeBuilder->root('ems_client_helper');
+        $rootNode = $treeBuilder->getRootNode();
 
         $rootNode
             ->children()
-                ->arrayNode('log')
-                    ->children()
-                        ->scalarNode('instance_id')->end()
-                        ->booleanNode('by_pass')
-                            ->defaultFalse()
-                        ->end()
-                        ->variableNode('hosts')
-                            ->info('elasticsearch hosts')
-                            ->isRequired()
-                        ->end()
-                    ->end()
-                ->end()
                 ->variableNode('request_environments')->isRequired()->end()
                 ->variableNode('locales')->isRequired()->end()
                 ->booleanNode('bind_locale')->end()
+                ->booleanNode('handle_exceptions')->defaultTrue()->end()
                 ->scalarNode('etag_hash_algo')->end()
                 ->booleanNode('dump_assets')
                     ->setDeprecated('The ems_client_helper "%node%" option is deprecated. Will be removed!')
@@ -42,26 +30,22 @@ class Configuration implements ConfigurationInterface
                 ->end()
                 ->arrayNode('templates')
                     ->children()
-                        ->scalarNode('language')->end()
-                        ->scalarNode('search')->end()
                         ->scalarNode('error')->end()
                         ->scalarNode('ems_link')->end()
                     ->end()
                 ->end()
-
+                ->booleanNode('local')->defaultFalse()->end()
             ->end()
         ;
 
         $this->addElasticmsSection($rootNode);
         $this->addApiSection($rootNode);
-        $this->addTwigListSection($rootNode);
-        $this->addRoutingSelection($rootNode);
         $this->addUserApiSection($rootNode);
 
         return $treeBuilder;
     }
 
-    private function addElasticmsSection(ArrayNodeDefinition $rootNode)
+    private function addElasticmsSection(ArrayNodeDefinition $rootNode): void
     {
         $rootNode
             ->children()
@@ -101,12 +85,7 @@ class Configuration implements ConfigurationInterface
                                 ->info('elasticsearch hosts')
                                 ->isRequired()
                             ->end()
-                            ->scalarNode('index_prefix')
-                                ->info("example: 'test_'")
-                                ->defaultValue(null)
-                            ->end()
                             ->booleanNode('default')->end()
-                            ->booleanNode('must_be_bind')->defaultValue(true)->end()
                             ->scalarNode('translation_type')
                                 ->info("example: 'test_i18n'")
                                 ->defaultValue(null)
@@ -125,17 +104,6 @@ class Configuration implements ConfigurationInterface
                                 ->example('{"enable": true, "name": "api"}')
                             ->end()
                             ->variableNode('search_config')->end()
-                            ->arrayNode('search')
-                                ->setDeprecated('The ems_client_helper "%node%" option is deprecated. Please use search_config!')
-                                ->children()
-                                    ->variableNode('types')->end()
-                                    ->variableNode('facets')->end()
-                                    ->variableNode('synonyms')->end()
-                                    ->variableNode('fields')->end()
-                                    ->variableNode('analyzer')->end()
-                                    ->variableNode('suggestFields')->end()
-                                ->end()
-                            ->end()
                         ->end()
                     ->end()
                 ->end()
@@ -143,7 +111,7 @@ class Configuration implements ConfigurationInterface
         ;
     }
 
-    private function addApiSection(ArrayNodeDefinition $rootNode)
+    private function addApiSection(ArrayNodeDefinition $rootNode): void
     {
         $rootNode
             ->children()
@@ -166,66 +134,7 @@ class Configuration implements ConfigurationInterface
         ;
     }
 
-    private function addTwigListSection(ArrayNodeDefinition $rootNode)
-    {
-        $rootNode
-            ->children()
-                ->arrayNode('twig_list')
-                    ->children()
-                        ->arrayNode('templates')
-                            ->defaultValue([
-                                ['path' => '@EMSBackendBridgeBundle/Resources/views/TwigList', 'namespace' => '@EMSBackendBridgeBundle/TwigList'],
-                            ])
-                            ->prototype('array')
-                                ->children()
-                                    ->scalarNode('path')->cannotBeEmpty()->end()
-                                    ->scalarNode('namespace')->defaultNull()->end()
-                                ->end()
-                            ->end()
-                        ->end()
-                    ->end()
-                ->end()
-            ->end()
-        ;
-    }
-
-    private function addRoutingSelection(ArrayNodeDefinition $rootNode)
-    {
-        $rootNode
-            ->children()
-                ->arrayNode('routing')
-                ->canBeEnabled()
-                ->children()
-                    ->scalarNode('client_request')
-                        ->isRequired()
-                        ->beforeNormalization()
-                            ->always(function ($v) {
-                                return 'emsch.client_request.'.$v;
-                            })
-                        ->end()
-                    ->end()
-                    ->scalarNode('redirect_type')
-                        ->isRequired()
-                        ->info('content type used to define redirection')
-                    ->end()
-                    ->arrayNode('relative_paths')
-                        ->prototype('array')
-                            ->children()
-                                ->scalarNode('regex')
-                                    ->info('regex for matching the content_type')
-                                    ->isRequired()
-                                ->end()
-                                ->scalarNode('path')->cannotBeEmpty()->end()
-                            ->end()
-                        ->end()
-                    ->end()
-                    ->variableNode('routes')->end()
-                ->end()
-            ->end()
-        ;
-    }
-
-    private function addUserApiSection(ArrayNodeDefinition $rootNode)
+    private function addUserApiSection(ArrayNodeDefinition $rootNode): void
     {
         $rootNode
             ->children()

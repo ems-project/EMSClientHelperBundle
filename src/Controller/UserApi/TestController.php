@@ -10,8 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class TestController
 {
-    /** @var TestService */
-    private $testService;
+    private TestService $testService;
 
     public function __construct(TestService $testService)
     {

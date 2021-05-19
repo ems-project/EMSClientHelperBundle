@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Search;
 
 use Elastica\Query\AbstractQuery;
@@ -7,7 +9,7 @@ use Elastica\Query\BoolQuery;
 use Elastica\Query\Terms;
 use EMS\CommonBundle\Elasticsearch\Document\EMSSource;
 
-class Synonym
+final class Synonym
 {
     /** @var string[] */
     private $types;
