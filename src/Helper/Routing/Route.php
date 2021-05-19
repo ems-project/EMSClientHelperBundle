@@ -1,34 +1,66 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Routing;
 
+use EMS\ClientHelperBundle\Helper\Templating\TemplateDocument;
+use EMS\CommonBundle\Common\Standard\Json;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\Route as SymfonyRoute;
 use Symfony\Component\Routing\RouteCollection;
 
-class Route
+final class Route
 {
-    /** @var string */
-    private $name;
-    /** @var array */
-    private $options;
+    private string $name;
+    /** @var array<mixed> */
+    private array $options;
 
-    public function __construct(string $name, array $options)
+    /**
+     * @param array<mixed> $options
+     */
+    private function __construct(string $name, array $options)
     {
         $this->name = $name;
         $this->options = $this->resolveOptions($options);
     }
 
-    public function addToCollection(RouteCollection $collection, array $locales = []): void
+    /**
+     * @param array<mixed> $data
+     */
+    public static function fromData(string $name, array $data): self
+    {
+        $config = isset($data['config']) ? Json::decode($data['config']) : [];
+
+        if (isset($data['template_static'])) {
+            $template = TemplateDocument::PREFIX.'/'.$data['template_static'];
+        } else {
+            $template = $data['template_source'] ?? null;
+        }
+
+        return new self($name, \array_filter(\array_merge($config, [
+            'query' => isset($data['query']) ? Json::decode($data['query']) : null,
+            'index_regex' => $data['index_regex'] ?? null,
+            'template' => $template,
+        ])));
+    }
+
+    /**
+     * @param string[] $locales
+     */
+    public function addToCollection(RouteCollection $collection, array $locales = [], ?string $prefix = null): void
     {
         $path = $this->options['path'];
 
+        if (null !== $prefix) {
+            $this->options['prefix'] = $prefix;
+        }
+
         if (\is_array($path)) {
             foreach ($path as $key => $p) {
-                $locale = \in_array($key, $locales) ? $key : null;
+                $locale = \in_array($key, $locales) ? \strval($key) : null;
                 $route = $this->createRoute($p, $locale);
-
                 $collection->add(\sprintf('%s.%s', $this->name, $key), $route);
             }
         } else {
@@ -44,6 +76,14 @@ class Route
             $defaults['_locale'] = $locale;
         }
 
+        if (null !== $this->options['prefix']) {
+            if ('/' !== \substr($path, 0, 1)) {
+                $path = $this->options['prefix'].'/'.$path;
+            } else {
+                $path = $this->options['prefix'].$path;
+            }
+        }
+
         return new SymfonyRoute(
             $path,
             $defaults,
@@ -56,6 +96,11 @@ class Route
         );
     }
 
+    /**
+     * @param array<mixed> $options
+     *
+     * @return array<mixed>
+     */
     private function resolveOptions(array $options): array
     {
         $resolver = new OptionsResolver();
@@ -69,9 +114,10 @@ class Route
                 'options' => [],
                 'host' => null,
                 'schemes' => null,
+                'prefix' => null,
                 'type' => null,
                 'query' => null,
-                'template' => null,
+                'template' => '[template]',
                 'index_regex' => null,
                 'condition' => null,
             ])
@@ -84,13 +130,7 @@ class Route
             })
             ->setNormalizer('options', function (Options $options, $value) {
                 if (null !== $options['query']) {
-                    $query = \json_decode($options['query']);
-
-                    if (JSON_ERROR_NONE !== \json_last_error()) {
-                        throw new \LogicException('invalid json for query!');
-                    }
-
-                    $value['query'] = \json_encode($query);
+                    $value['query'] = \json_encode($options['query']);
                 }
 
                 $value['type'] = $options['type'];

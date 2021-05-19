@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Request;
 
 use EMS\ClientHelperBundle\Contracts\Request\HandlerInterface;
 use EMS\ClientHelperBundle\Exception\SingleResultException;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
-use EMS\ClientHelperBundle\Helper\Twig\TwigLoader;
+use EMS\ClientHelperBundle\Helper\Templating\TemplateDocument;
 use EMS\CommonBundle\Common\EMSLink;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -14,12 +16,10 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Route as SymfonyRoute;
 use Symfony\Component\Routing\RouterInterface;
 
-class Handler implements HandlerInterface
+final class Handler implements HandlerInterface
 {
-    /** @var ClientRequest */
-    private $clientRequest;
-    /** @var RouterInterface */
-    private $router;
+    private ClientRequest $clientRequest;
+    private RouterInterface $router;
 
     public function __construct(ClientRequestManager $manager, RouterInterface $router)
     {
@@ -27,6 +27,9 @@ class Handler implements HandlerInterface
         $this->router = $router;
     }
 
+    /**
+     * @return array{template: string, context: array<mixed>}
+     */
     public function handle(Request $request): array
     {
         $route = $this->getRoute($request);
@@ -67,17 +70,11 @@ class Handler implements HandlerInterface
             return null;
         }
 
-        $pattern = '/%(?<parameter>(_|)[[:alnum:]]*)%/m';
-        $json = \preg_replace_callback($pattern, function ($match) use ($request) {
-            return $request->get($match['parameter'], $match[0]);
-        }, $query);
+        $json = RequestHelper::replace($request, $query);
 
         $indexRegex = $route->getOption('index_regex');
         if (null !== $indexRegex) {
-            $pattern = '/%(?<parameter>(_|)[[:alnum:]]*)%/m';
-            $indexRegex = \preg_replace_callback($pattern, function ($match) use ($request) {
-                return $request->get($match['parameter'], $match[0]);
-            }, $indexRegex);
+            $indexRegex = RequestHelper::replace($request, $indexRegex);
         }
 
         try {
@@ -87,21 +84,20 @@ class Handler implements HandlerInterface
         }
     }
 
+    /**
+     * @param ?array<mixed> $document
+     */
     private function getTemplate(Request $request, SymfonyRoute $route, array $document = null): string
     {
         $template = $route->getOption('template');
+        $template = RequestHelper::replace($request, $template ?? '');
 
-        $pattern = '/%(?<parameter>(_|)[[:alnum:]]*)%/m';
-        $template = \preg_replace_callback($pattern, function ($match) use ($request) {
-            return $request->get($match['parameter'], $match[0]);
-        }, $template);
-
-        if (null === $document || TwigLoader::PREFIX === \substr($template, 0, 6)) {
+        if (null === $document || TemplateDocument::PREFIX === \substr($template, 0, 6)) {
             return $template;
         }
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
 
-        return TwigLoader::PREFIX.'/'.$propertyAccessor->getValue($document, '[_source]'.$template);
+        return TemplateDocument::PREFIX.'/'.$propertyAccessor->getValue($document, '[_source]'.$template);
     }
 }

@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Command;
 
 use EMS\ClientHelperBundle\Exception\ClusterHealthNotGreenException;
 use EMS\ClientHelperBundle\Exception\ClusterHealthRedException;
 use EMS\ClientHelperBundle\Exception\IndexNotFoundException;
-use EMS\ClientHelperBundle\Exception\NoClientsFoundException;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\CommonBundle\Service\ElasticaService;
@@ -16,33 +17,31 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class HealthCheckCommand extends Command
+final class HealthCheckCommand extends Command
 {
     /** @var ClientRequest[] */
-    private $clientRequests;
-
-    /** @var EnvironmentHelper */
-    private $environmentHelper;
-
-    /** @var StorageManager */
-    private $storageManager;
-
+    private iterable $clientRequests;
+    private EnvironmentHelper $environmentHelper;
+    private ?StorageManager $storageManager;
     private ElasticaService $elasticaService;
 
     /**
-     * @param iterable $clientRequests
+     * @param ClientRequest[] $clientRequests
      */
-    public function __construct(EnvironmentHelper $environmentHelper, ElasticaService $elasticaService, iterable $clientRequests = null, StorageManager $storageManager = null)
-    {
+    public function __construct(
+        EnvironmentHelper $environmentHelper,
+        ElasticaService $elasticaService,
+        iterable $clientRequests = null,
+        StorageManager $storageManager = null
+    ) {
+        parent::__construct();
         $this->environmentHelper = $environmentHelper;
         $this->elasticaService = $elasticaService;
         $this->clientRequests = $clientRequests ?? [];
         $this->storageManager = $storageManager;
-
-        parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('emsch:health-check')
@@ -57,23 +56,16 @@ class HealthCheckCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $io->title('Performing Health Check');
 
-        $this->checkElasticSearch($io, $input->getOption('green'));
+        $this->checkElasticSearch($io, (true === $input->getOption('green')));
         $this->checkIndexes($io);
-        $this->checkStorage($io, $input->getOption('skip-storage'));
+        $this->checkStorage($io, (true === $input->getOption('skip-storage')));
 
         $io->success('Health check finished.');
 
         return 1;
     }
 
-    /**
-     * @param bool $green
-     *
-     * @throws NoClientsFoundException
-     * @throws ClusterHealthRedException
-     * @throws ClusterHealthNotGreenException
-     */
-    private function checkElasticSearch(SymfonyStyle $io, $green)
+    private function checkElasticSearch(SymfonyStyle $io, bool $green): void
     {
         $io->section('Elasticsearch');
         $status = $this->elasticaService->getHealthStatus();
@@ -91,10 +83,7 @@ class HealthCheckCommand extends Command
         $io->success('Elasticsearch is working.');
     }
 
-    /**
-     * @throws IndexNotFoundException
-     */
-    private function checkIndexes(SymfonyStyle $io)
+    private function checkIndexes(SymfonyStyle $io): void
     {
         $io->section('Indexes');
         $countAliases = 0;
@@ -112,12 +101,7 @@ class HealthCheckCommand extends Command
         $io->success(\sprintf('%d indices have been found in %d aliases.', $countIndices, $countAliases));
     }
 
-    /**
-     * @param bool $skip
-     *
-     * @return void
-     */
-    private function checkStorage(SymfonyStyle $io, $skip)
+    private function checkStorage(SymfonyStyle $io, bool $skip): void
     {
         $io->section('Storage');
 

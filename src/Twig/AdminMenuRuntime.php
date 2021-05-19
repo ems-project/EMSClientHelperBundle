@@ -1,17 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Twig;
 
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\CommonBundle\Common\EMSLink;
 use Twig\Extension\RuntimeExtensionInterface;
 
-class AdminMenuRuntime implements RuntimeExtensionInterface
+final class AdminMenuRuntime implements RuntimeExtensionInterface
 {
-    /**
-     * @var EnvironmentHelper
-     */
-    private $environmentHelper;
+    private EnvironmentHelper $environmentHelper;
 
     public function __construct(EnvironmentHelper $environmentHelper)
     {

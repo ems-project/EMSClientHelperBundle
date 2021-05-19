@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Api;
 
 use EMS\ClientHelperBundle\Contracts\Api\ApiServiceInterface;
@@ -11,27 +13,28 @@ use Symfony\Component\HttpFoundation\FileBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Twig\Environment;
 
-class ApiService implements ApiServiceInterface
+/**
+ * @todo use EMS\CommonBundle\Contracts\CoreApi\CoreApiInterface
+ */
+final class ApiService implements ApiServiceInterface
 {
-    const EMS_AJAX_MESSAGE_LEVELS = ['error', 'warning'];
+    private const EMS_AJAX_MESSAGE_LEVELS = ['error', 'warning'];
 
     /** @var ClientRequest[] */
-    private $clientRequests;
-
+    private iterable $clientRequests;
     /** @var Client[] */
-    private $apiClients;
+    private iterable $apiClients;
+    private UrlGeneratorInterface $urlGenerator;
+    private Environment $twig;
+    private LoggerInterface $logger;
 
-    /** @var UrlGeneratorInterface */
-    private $urlGenerator;
-
-    /** @var \Twig_Environment */
-    private $twig;
-
-    /** @var LoggerInterface */
-    private $logger;
-
-    public function __construct(LoggerInterface $logger, \Twig_Environment $twig, UrlGeneratorInterface $urlGenerator, iterable $clientRequests = [], iterable $apiClients = [])
+    /**
+     * @param ClientRequest[] $clientRequests
+     * @param Client[]        $apiClients
+     */
+    public function __construct(LoggerInterface $logger, Environment $twig, UrlGeneratorInterface $urlGenerator, iterable $clientRequests = [], iterable $apiClients = [])
     {
         $this->logger = $logger;
         $this->twig = $twig;
@@ -40,6 +43,9 @@ class ApiService implements ApiServiceInterface
         $this->apiClients = $apiClients;
     }
 
+    /**
+     * @return mixed
+     */
     public function treatFormRequest(Request $request, string $apiName, string $validationTemplate = null)
     {
         $body = $request->request->all();
@@ -88,8 +94,6 @@ class ApiService implements ApiServiceInterface
     }
 
     /**
-     * @throws \Exception
-     *
      * @return array<string, mixed>
      */
     private function createContentFileHashField(string $apiName, UploadedFile $file): array
@@ -111,23 +115,7 @@ class ApiService implements ApiServiceInterface
         ];
     }
 
-    public function addClientRequest(ClientRequest $clientRequest)
-    {
-        $name = $clientRequest->getOption('[api][name]', false);
-
-        if ($name) {
-            $this->clientRequests[$name] = $clientRequest;
-        }
-    }
-
-    /**
-     * @param string $apiName
-     *
-     * @return Response
-     *
-     * @throws NotFoundHttpException
-     */
-    public function getContentTypes($apiName)
+    public function getContentTypes(string $apiName): Response
     {
         $response = new Response();
         $contentTypes = $this->getClientRequest($apiName)->getContentTypes();
@@ -150,14 +138,9 @@ class ApiService implements ApiServiceInterface
     }
 
     /**
-     * @param string $apiName
-     * @param string $contentType
-     * @param string $size
-     * @param string $scrollId
-     *
-     * @return Response
+     * @param array<mixed> $filter
      */
-    public function getContentType($apiName, $contentType, array $filter = [], $size = null, $scrollId = null)
+    public function getContentType(string $apiName, string $contentType, array $filter = [], int $size = 10, ?string $scrollId = null): Response
     {
         $response = new Response();
 
@@ -188,6 +171,9 @@ class ApiService implements ApiServiceInterface
         return $response;
     }
 
+    /**
+     * @param array<mixed> $body
+     */
     public function updateDocument(string $apiName, string $type, string $ouuid, array $body): string
     {
         $apiClient = $this->getApiClient($apiName);
@@ -196,6 +182,9 @@ class ApiService implements ApiServiceInterface
         return $this->finalizeResponse($apiClient, $response, $type, $ouuid);
     }
 
+    /**
+     * @param array<mixed> $body
+     */
     public function createDocument(string $apiName, string $type, ?string $ouuid, array $body): string
     {
         $apiClient = $this->getApiClient($apiName);
@@ -204,6 +193,9 @@ class ApiService implements ApiServiceInterface
         return $this->finalizeResponse($apiClient, $response, $type, $ouuid);
     }
 
+    /**
+     * @param array<mixed> $response
+     */
     private function finalizeResponse(Client $apiClient, array $response, string $type, ?string $ouuid): string
     {
         if (!$response['success']) {
@@ -240,7 +232,10 @@ class ApiService implements ApiServiceInterface
         return $response['ouuid'];
     }
 
-    public function uploadFile(string $apiName, \SplFileInfo $file, $filename)
+    /**
+     * @return array<mixed>
+     */
+    public function uploadFile(string $apiName, \SplFileInfo $file, string $filename): array
     {
         $response = $this->getApiClient($apiName)->postFile($file, $filename);
         //TODO: remove this hack once the ems back is returning the file hash as parameter
@@ -255,14 +250,7 @@ class ApiService implements ApiServiceInterface
         return $response;
     }
 
-    /**
-     * @param string $apiName
-     * @param string $contentType
-     * @param string $ouuid
-     *
-     * @return Response
-     */
-    public function getDocument($apiName, $contentType, $ouuid)
+    public function getDocument(string $apiName, string $contentType, string $ouuid): Response
     {
         $urlParent = $this->urlGenerator->generate('emsch_api_content_type', [
             'apiName' => $apiName,
@@ -278,14 +266,7 @@ class ApiService implements ApiServiceInterface
         return $response;
     }
 
-    /**
-     * @param string $apiName
-     *
-     * @return ClientRequest
-     *
-     * @throws NotFoundHttpException
-     */
-    private function getClientRequest($apiName)
+    private function getClientRequest(string $apiName): ClientRequest
     {
         foreach ($this->clientRequests as $clientRequest) {
             if ($apiName === $clientRequest->getOption('[api][name]', false)) {

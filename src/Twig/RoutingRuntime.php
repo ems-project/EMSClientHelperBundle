@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Twig;
 
 use EMS\ClientHelperBundle\Helper\Routing\Url\Transformer;
 use Twig\Extension\RuntimeExtensionInterface;
 
-class RoutingRuntime implements RuntimeExtensionInterface
+final class RoutingRuntime implements RuntimeExtensionInterface
 {
     private Transformer $transformer;
 

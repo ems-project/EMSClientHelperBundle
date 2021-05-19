@@ -10,8 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class UserController
 {
-    /** @var UserService */
-    private $userService;
+    private UserService $userService;
 
     public function __construct(UserService $userService)
     {

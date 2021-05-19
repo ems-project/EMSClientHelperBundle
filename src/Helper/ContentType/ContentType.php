@@ -5,19 +5,20 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\ContentType;
 
 use EMS\ClientHelperBundle\Contracts\ContentType\ContentTypeInterface;
+use EMS\ClientHelperBundle\Helper\Environment\Environment;
 
 final class ContentType implements ContentTypeInterface
 {
-    private string $alias;
+    private Environment $environment;
     private string $name;
     private \DateTimeImmutable $lastPublished;
     private int $total;
-    /** @var ?array<mixed> */
-    private ?array $cache = null;
+    /** @var mixed */
+    private $cache = null;
 
-    public function __construct(string $alias, string $name, int $total)
+    public function __construct(Environment $environment, string $name, int $total)
     {
-        $this->alias = $alias;
+        $this->environment = $environment;
         $this->name = $name;
         $this->total = $total;
         $this->lastPublished = new \DateTimeImmutable();
@@ -26,6 +27,11 @@ final class ContentType implements ContentTypeInterface
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function getEnvironment(): Environment
+    {
+        return $this->environment;
     }
 
     public function isLastPublishedAfterTime(int $timestamp): bool
@@ -43,21 +49,21 @@ final class ContentType implements ContentTypeInterface
 
     public function getCacheKey(): string
     {
-        return \sprintf('%s_%s', $this->alias, $this->name);
+        return \sprintf('%s_%s', $this->environment->getAlias(), $this->name);
     }
 
     /**
-     * @return ?array<mixed>
+     * @return mixed
      */
-    public function getCache(): ?array
+    public function getCache()
     {
         return $this->cache;
     }
 
     /**
-     * @param ?array<mixed> $cache
+     * @param mixed $cache
      */
-    public function setCache(?array $cache): void
+    public function setCache($cache): void
     {
         $this->cache = $cache;
     }

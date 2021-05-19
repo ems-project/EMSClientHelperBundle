@@ -1,21 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Cache;
 
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use Psr\Cache\CacheItemInterface;
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class CacheHelper
+final class CacheHelper
 {
-    private AdapterInterface $cache;
+    private CacheItemPoolInterface $cache;
     private LoggerInterface $logger;
     private string $hashAlgo;
 
-    public function __construct(AdapterInterface $cache, LoggerInterface $logger, string $hashAlgo)
+    public function __construct(CacheItemPoolInterface $cache, LoggerInterface $logger, string $hashAlgo)
     {
         $this->cache = $cache;
         $this->logger = $logger;
@@ -34,6 +36,10 @@ class CacheHelper
 
         if (!$cachedContentType instanceof ContentType) {
             return null;
+        }
+
+        if ($cachedContentType->getEnvironment()->getHash() !== $contentType->getEnvironment()->getHash()) {
+            return null; //update on environment
         }
 
         if ($cachedContentType->getCacheValidityTag() !== $contentType->getCacheValidityTag()) {

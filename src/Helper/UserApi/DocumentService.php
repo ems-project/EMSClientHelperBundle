@@ -10,8 +10,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class DocumentService
 {
-    /** @var ClientFactory */
-    private $client;
+    private ClientFactory $client;
 
     public function __construct(ClientFactory $client)
     {

@@ -1,25 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Routing\Url;
 
+use EMS\ClientHelperBundle\Exception\TemplatingException;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
-use EMS\ClientHelperBundle\Helper\Twig\TwigException;
+use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\CommonBundle\Common\EMSLink;
 use Psr\Log\LoggerInterface;
 use Twig\Environment;
 
-class Transformer
+final class Transformer
 {
     private ClientRequest $clientRequest;
     private Generator $generator;
     private Environment $twig;
     private LoggerInterface $logger;
     private string $template;
+    /** @var array<string, mixed> */
     private array $documents;
 
-    public function __construct(ClientRequest $clientRequest, Generator $generator, Environment $twig, LoggerInterface $logger, ?string $template)
+    public function __construct(ClientRequestManager $clientRequestManager, Generator $generator, Environment $twig, LoggerInterface $logger, ?string $template)
     {
-        $this->clientRequest = $clientRequest;
+        $this->clientRequest = $clientRequestManager->getDefault();
         $this->generator = $generator;
         $this->twig = $twig;
         $this->logger = $logger;
@@ -54,7 +58,7 @@ class Transformer
             $url = $this->twigRender($template, $context);
 
             if ($url) {
-                return $this->generator->prependBaseUrl($emsLink, $url);
+                return $this->generator->prependBaseUrl($url);
             }
 
             return null;
@@ -72,7 +76,13 @@ class Transformer
     {
         $transform = \preg_replace_callback(EMSLink::PATTERN, function ($match) use ($config) {
             //array filter to remove empty capture groups
-            $generation = $this->generate(\array_filter($match), $config);
+            $cleanMatch = \array_filter($match);
+
+            if (null === $cleanMatch) {
+                return $match[0];
+            }
+
+            $generation = $this->generate($cleanMatch, $config);
             $route = (null !== $generation ? $generation : $match[0]);
             $baseUrl = $config['baseUrl'] ?? '';
 
@@ -89,7 +99,7 @@ class Transformer
     {
         try {
             return $this->twig->render($template, $context);
-        } catch (TwigException $ex) {
+        } catch (TemplatingException $ex) {
             $this->logger->warning($ex->getMessage());
         } catch (\Throwable $ex) {
             $this->logger->error($ex->getMessage());

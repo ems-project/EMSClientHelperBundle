@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
 use Elastica\Aggregation\Terms;
@@ -17,19 +19,19 @@ use EMS\CommonBundle\Elasticsearch\Document\EMSSource;
 use EMS\CommonBundle\Elasticsearch\Exception\NotFoundException;
 use EMS\CommonBundle\Search\Search;
 use EMS\CommonBundle\Service\ElasticaService;
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
-class ClientRequest implements ClientRequestInterface
+final class ClientRequest implements ClientRequestInterface
 {
     private const CONTENT_TYPE_LIMIT = 500;
     private EnvironmentHelper $environmentHelper;
     private CacheHelper $cacheHelper;
     private ContentTypeHelper $contentTypeHelper;
     private LoggerInterface $logger;
-    private AdapterInterface $cache;
+    private CacheItemPoolInterface $cache;
     /** @var array<string, mixed> */
     private array $options;
     /** @var array<string, \DateTime> */
@@ -46,13 +48,10 @@ class ClientRequest implements ClientRequestInterface
         CacheHelper $cacheHelper,
         ContentTypeHelper $contentTypeHelper,
         LoggerInterface $logger,
-        AdapterInterface $cache,
+        CacheItemPoolInterface $cache,
         string $name,
         array $options = []
     ) {
-        if (!isset($options['index_prefix'])) {
-            throw new \RuntimeException('Client request index_prefix is deprecated and must be removed now: Environment name === Elasticsearch alias name');
-        }
         $this->environmentHelper = $environmentHelper;
         $this->cacheHelper = $cacheHelper;
         $this->contentTypeHelper = $contentTypeHelper;
@@ -256,30 +255,7 @@ class ClientRequest implements ClientRequestInterface
         return $out;
     }
 
-    public function mustBeBind(): bool
-    {
-        return $this->options['must_be_bind'] ?? true;
-    }
-
-    public function hasEnvironments(): bool
-    {
-        return \count($this->getEnvironments()) > 0;
-    }
-
-    public function isBind(): bool
-    {
-        return $this->hasEnvironments() && null !== $this->environmentHelper->getBindEnvironmentName();
-    }
-
-    /**
-     * @return Environment[]
-     */
-    public function getEnvironments(): array
-    {
-        return $this->environmentHelper->getEnvironments();
-    }
-
-    public function getCurrentEnvironment(): Environment
+    public function getCurrentEnvironment(): ?Environment
     {
         return $this->environmentHelper->getCurrentEnvironment();
     }
@@ -291,20 +267,32 @@ class ClientRequest implements ClientRequestInterface
 
     public function getRouteContentType(Environment $environment): ?ContentType
     {
-        return $this->getContentType($this->getOption('[route_type]'), $environment);
+        if (null === $routeType = $this->getOption('[route_type]')) {
+            return null;
+        }
+
+        return $this->getContentType($routeType, $environment);
     }
 
-    public function getTranslationContentType(): ?ContentType
+    public function getTranslationContentType(Environment $environment): ?ContentType
     {
-        return $this->getContentType($this->getOption('[translation_type]'));
+        if (null === $translationType = $this->getOption('[translation_type]')) {
+            return null;
+        }
+
+        return $this->getContentType($translationType, $environment);
     }
 
     public function getContentType(string $name, ?Environment $environment = null): ?ContentType
     {
         if (null === $environment) {
-            $environment = $this->environmentHelper->getCurrentEnvironment();
+            if (null === $currentEnvironment = $this->getCurrentEnvironment()) {
+                return null;
+            }
+            $environment = $currentEnvironment;
         }
-        if (null === $contentType = $this->contentTypeHelper->get($this, $name, $environment)) {
+
+        if (null === $contentType = $this->contentTypeHelper->get($this, $environment, $name)) {
             return null;
         }
 
@@ -346,6 +334,16 @@ class ClientRequest implements ClientRequestInterface
     public function hasOption(string $option): bool
     {
         return isset($this->options[$option]) && null != $this->options[$option];
+    }
+
+    public function refresh(): bool
+    {
+        return $this->elasticaService->refresh($this->getAlias());
+    }
+
+    public function healthStatus(string $status): string
+    {
+        return $this->elasticaService->getHealthStatus($status, '10s', $this->getAlias());
     }
 
     /**
@@ -580,16 +578,24 @@ class ClientRequest implements ClientRequestInterface
 
     public function getCacheKey(string $prefix = '', string $environment = null): string
     {
-        if (null === $environment) {
-            $environment = $this->environmentHelper->getBindEnvironmentName();
+        if ($environment) {
+            return $prefix.$environment;
         }
 
-        return $prefix.$environment;
+        if (null === $currentEnvironment = $this->getCurrentEnvironment()) {
+            throw new \RuntimeException('No active environment');
+        }
+
+        return $currentEnvironment->getName();
     }
 
     public function getAlias(): string
     {
-        return $this->environmentHelper->getCurrentEnvironment()->getAlias();
+        if (null === $currentEnvironment = $this->getCurrentEnvironment()) {
+            throw new \RuntimeException('No current environment found!');
+        }
+
+        return $currentEnvironment->getAlias();
     }
 
     /**
@@ -613,7 +619,7 @@ class ClientRequest implements ClientRequestInterface
 
         /** @var Response $response */
         $response = $cachedHierarchy->get();
-        if (!$cachedHierarchy->isHit() || $response->getLastModified() != $lastUpdate) {
+        if (!$cachedHierarchy->isHit() || $response->getLastModified() !== $lastUpdate) {
             $response = $function();
             $response->setLastModified($lastUpdate);
             $this->cache->save($cachedHierarchy->set($response));

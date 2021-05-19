@@ -1,24 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Elasticsearch;
 
 use EMS\ClientHelperBundle\Contracts\Elasticsearch\ClientRequestManagerInterface;
 use Psr\Log\LoggerInterface;
 
-class ClientRequestManager implements ClientRequestManagerInterface
+final class ClientRequestManager implements ClientRequestManagerInterface
 {
-    /**
-     * @var ClientRequest[]
-     */
-    private $clientRequests = [];
-
-    /**
-     * @var ClientRequest
-     */
-    private $default;
-
-    /** @var LoggerInterface */
-    private $logger;
+    /** @var array<string, ClientRequest> */
+    private array $clientRequests = [];
+    private ClientRequest $default;
+    private LoggerInterface $logger;
 
     /**
      * @param iterable|ClientRequest[] $clientRequests

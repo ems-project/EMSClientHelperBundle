@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\EventListener;
 
-use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\ClientHelperBundle\Helper\Request\ExceptionHelper;
 use EMS\ClientHelperBundle\Helper\Request\LocaleHelper;
-use EMS\ClientHelperBundle\Helper\Translation\TranslationHelper;
+use EMS\ClientHelperBundle\Helper\Translation\Translator;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -16,26 +17,17 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 
-class KernelListener implements EventSubscriberInterface
+final class KernelListener implements EventSubscriberInterface
 {
-    /** @var EnvironmentHelper */
-    private $environmentHelper;
-
-    /** @var TranslationHelper */
-    private $translationHelper;
-
-    /** @var LocaleHelper */
-    private $localeHelper;
-
-    /** @var ExceptionHelper */
-    private $exceptionHelper;
-
-    /** @var bool */
-    private $bindLocale;
+    private EnvironmentHelper $environmentHelper;
+    private Translator $translationHelper;
+    private LocaleHelper $localeHelper;
+    private ExceptionHelper $exceptionHelper;
+    private bool $bindLocale;
 
     public function __construct(
         EnvironmentHelper $environmentHelper,
-        TranslationHelper $translationHelper,
+        Translator $translationHelper,
         LocaleHelper $localeHelper,
         ExceptionHelper $exceptionHelper,
         bool $bindLocale
@@ -73,10 +65,10 @@ class KernelListener implements EventSubscriberInterface
     {
         $request = $event->getRequest();
 
-        foreach ($this->environmentHelper->getEnvironments() as $env) {
-            /** @var $env Environment */
-            if ($env->matchRequest($request)) {
-                $env->modifyRequest($request);
+        foreach ($this->environmentHelper->getEnvironments() as $environment) {
+            if ($environment->matchRequest($request)) {
+                $environment->makeActive();
+                $environment->modifyRequest($request);
                 break;
             }
         }
@@ -105,7 +97,9 @@ class KernelListener implements EventSubscriberInterface
             return;
         }
 
-        if (\preg_match('/(emsch_api_).*/', $request->attributes->get('_route'))) {
+        $route = $request->attributes->get('_route', null);
+
+        if (null === $route || \preg_match('/(emsch_api_).*/', \strval($route))) {
             return;
         }
 
@@ -116,6 +110,10 @@ class KernelListener implements EventSubscriberInterface
 
     public function customErrorTemplate(ExceptionEvent $event): void
     {
+        if (!$this->exceptionHelper->isEnabled()) {
+            return;
+        }
+
         $flattenException = FlattenException::createFromThrowable($event->getThrowable());
 
         if ($template = $this->exceptionHelper->renderError($flattenException)) {

@@ -14,10 +14,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class FileService
 {
-    /** @var ClientFactory */
-    private $client;
-    /** @var LoggerInterface */
-    private $logger;
+    private ClientFactory $client;
+    private LoggerInterface $logger;
 
     public function __construct(ClientFactory $client, LoggerInterface $logger)
     {

@@ -1,13 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EMS\ClientHelperBundle\Helper\Search;
 
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 
-class Analyzer
+final class Analyzer
 {
-    /** @var ClientRequest */
-    private $clientRequest;
+    private ClientRequest $clientRequest;
 
     public function __construct(ClientRequest $clientRequest)
     {
