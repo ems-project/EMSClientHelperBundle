@@ -614,14 +614,16 @@ final class ClientRequest implements ClientRequestInterface
 
         $cachedHierarchy = $this->cache->getItem($cacheHash);
 
-        $contentType = $this->getContentType($type);
-        $lastUpdate = $contentType ? $contentType->getLastPublished() : new \DateTimeImmutable('Wed, 09 Feb 1977 16:00:00 GMT');
-
         /** @var Response $response */
         $response = $cachedHierarchy->get();
-        if (!$cachedHierarchy->isHit() || $response->getLastModified() !== $lastUpdate) {
+
+        $lastPublishedDate = $this->getLastPublishedDate($type);
+        $lastModified = $response->getLastModified();
+        $isModified = $lastModified ? $lastModified->getTimestamp() !== $lastPublishedDate->getTimestamp() : true;
+
+        if (!$cachedHierarchy->isHit() || $isModified) {
             $response = $function();
-            $response->setLastModified($lastUpdate);
+            $response->setLastModified($lastPublishedDate);
             $this->cache->save($cachedHierarchy->set($response));
             $this->logger->notice('log.cache_missed', [
                 'cache_key' => $cacheHash,
@@ -636,5 +638,23 @@ final class ClientRequest implements ClientRequestInterface
         }
 
         return $response;
+    }
+
+    private function getLastPublishedDate(string $contentTypeNames): \DateTimeImmutable
+    {
+        $publishDates = [];
+
+        foreach (\explode(',', $contentTypeNames) as $contentTypeName) {
+            $contentType = $this->getContentType($contentTypeName);
+            $publishDates[] = $contentType ? $contentType->getLastPublished() : null;
+        }
+
+        $lastPublishedDate = \max($publishDates);
+
+        if ($lastPublishedDate instanceof \DateTimeImmutable) {
+            return $lastPublishedDate;
+        }
+
+        return new \DateTimeImmutable('Wed, 09 Feb 1977 16:00:00 GMT');
     }
 }

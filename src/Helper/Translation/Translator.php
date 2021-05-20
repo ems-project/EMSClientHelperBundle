@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Translation;
 
+use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use Symfony\Bundle\FrameworkBundle\Translation\Translator as SymfonyTranslator;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
@@ -26,21 +27,10 @@ final class Translator implements CacheWarmerInterface
 
     public function addCatalogues(): void
     {
-        if (null === $environment = $this->environmentHelper->getCurrentEnvironment()) {
-            return;
-        }
+        $environment = $this->environmentHelper->getCurrentEnvironment();
 
-        if ($environment->isLocalPulled()) {
-            foreach ($environment->getLocal()->getTranslations() as $file) {
-                $this->translator->addResource($file->format, $file->resource, $file->locale, $environment->getName());
-            }
-
-            return;
-        }
-
-        foreach ($this->builder->buildMessageCatalogues($environment) as $messageCatalogue) {
-            $catalogue = $this->translator->getCatalogue($messageCatalogue->getLocale());
-            $catalogue->addCatalogue($messageCatalogue);
+        if ($environment) {
+            $this->loadEnvironment($environment);
         }
     }
 
@@ -52,8 +42,26 @@ final class Translator implements CacheWarmerInterface
     public function warmUp($cacheDir): void
     {
         try {
-            $this->addCatalogues();
+            foreach ($this->environmentHelper->getEnvironments() as $environment) {
+                $this->loadEnvironment($environment);
+            }
         } catch (\Throwable $e) {
+        }
+    }
+
+    private function loadEnvironment(Environment $environment): void
+    {
+        if ($environment->isLocalPulled()) {
+            foreach ($environment->getLocal()->getTranslations() as $file) {
+                $this->translator->addResource($file->format, $file->resource, $file->locale, $environment->getName());
+            }
+
+            return;
+        }
+
+        foreach ($this->builder->buildMessageCatalogues($environment) as $messageCatalogue) {
+            $catalogue = $this->translator->getCatalogue($messageCatalogue->getLocale());
+            $catalogue->addCatalogue($messageCatalogue);
         }
     }
 }
