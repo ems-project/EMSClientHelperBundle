@@ -169,9 +169,17 @@ final class Filter
         if (null !== $this->field) {
             $this->field = RequestHelper::replace($request, $this->field);
         }
+
         if (null !== $this->value) {
-            $this->value = RequestHelper::replace($request, $this->value);
+            if (\is_array($this->value)) {
+                $this->value = \array_map(function ($v) use ($request) {
+                    return \is_string($v) ? RequestHelper::replace($request, $v) : $v;
+                }, $this->value);
+            } elseif (\is_string($this->value)) {
+                $this->value = RequestHelper::replace($request, $this->value);
+            }
         }
+
         $requestValue = $request->get($this->name);
 
         if ($this->public && $requestValue) {
