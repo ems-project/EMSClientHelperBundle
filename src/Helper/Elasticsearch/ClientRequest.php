@@ -586,7 +586,7 @@ final class ClientRequest implements ClientRequestInterface
             throw new \RuntimeException('No active environment');
         }
 
-        return $currentEnvironment->getName();
+        return $prefix.$currentEnvironment->getName();
     }
 
     public function getAlias(): string
