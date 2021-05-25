@@ -614,11 +614,11 @@ final class ClientRequest implements ClientRequestInterface
 
         $cachedHierarchy = $this->cache->getItem($cacheHash);
 
-        /** @var Response $response */
+        /** @var Response|null $response */
         $response = $cachedHierarchy->get();
 
         $lastPublishedDate = $this->getLastPublishedDate($type);
-        $lastModified = $response->getLastModified();
+        $lastModified = $response ? $response->getLastModified() : null;
         $isModified = $lastModified ? $lastModified->getTimestamp() !== $lastPublishedDate->getTimestamp() : true;
 
         if (!$cachedHierarchy->isHit() || $isModified) {
