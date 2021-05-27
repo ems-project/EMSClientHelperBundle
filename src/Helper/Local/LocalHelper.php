@@ -174,7 +174,9 @@ final class LocalHelper
     public function uploadAssets(Environment $environment, string $baseUrl): string
     {
         $directory = \implode(DIRECTORY_SEPARATOR, [$this->projectDir, 'public', $baseUrl]);
-        dump(\is_dir($directory));
+        if (!\is_dir($directory)) {
+            throw new \RuntimeException(\sprintf('Directory not found %s', $baseUrl));
+        }
 
         return 'ok';
     }
