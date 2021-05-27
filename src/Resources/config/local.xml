@@ -15,6 +15,7 @@
             <argument type="service" id="emsch.helper.builders" />
             <argument type="service" id="emsch.helper.environment.api"/>
             <argument type="service" id="logger" />
+            <argument type="string">%kernel.project_dir%</argument>
         </service>
 
         <service id="emsch.command.local" class="EMS\ClientHelperBundle\Command\Local\AbstractLocalCommand" abstract="true" public="false">

@@ -24,6 +24,7 @@ final class LocalHelper
     private Builders $builders;
     private EnvironmentApi $environmentApi;
     private LoggerInterface $logger;
+    private string $projectDir;
 
     public function __construct(
         CacheItemPoolInterface $cache,
@@ -31,7 +32,8 @@ final class LocalHelper
         ContentTypeHelper $contentTypeHelper,
         Builders $builders,
         EnvironmentApi $environmentApi,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        string $projectDir
     ) {
         $this->cache = $cache;
         $this->clientRequest = $clientRequestManager->getDefault();
@@ -39,6 +41,7 @@ final class LocalHelper
         $this->builders = $builders;
         $this->environmentApi = $environmentApi;
         $this->logger = $logger;
+        $this->projectDir = $projectDir;
     }
 
     public function api(Environment $environment): CoreApiInterface
@@ -166,5 +169,13 @@ final class LocalHelper
     public function setLogger(LoggerInterface $logger): void
     {
         $this->logger = $logger;
+    }
+
+    public function uploadAssets(Environment $environment, string $baseUrl): string
+    {
+        $directory = \implode(DIRECTORY_SEPARATOR, [$this->projectDir, 'public', $baseUrl]);
+        dump(\is_dir($directory));
+
+        return 'ok';
     }
 }
