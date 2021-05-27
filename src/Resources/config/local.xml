@@ -34,5 +34,8 @@
         <service id="emsch.command.local.status" class="EMS\ClientHelperBundle\Command\Local\StatusCommand" parent="emsch.command.local">
             <tag name="console.command" command="emsch:local:status"/>
         </service>
+        <service id="emsch.command.local.upload_assets" class="EMS\ClientHelperBundle\Command\Local\UploadAssetsCommand" parent="emsch.command.local">
+            <tag name="console.command" command="emsch:local:upload-assets"/>
+        </service>
     </services>
 </container>
