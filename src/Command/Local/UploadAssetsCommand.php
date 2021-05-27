@@ -28,15 +28,26 @@ final class UploadAssetsCommand extends AbstractLocalCommand
             $baseUrl = $this->environment->getAlias();
         }
 
+        if (!$this->coreApi->isAuthenticated()) {
+            $this->io->error(\sprintf('Not authenticated for %s, run emsch:local:login', $this->coreApi->getBaseUrl()));
+
+            return -1;
+        }
+
         try {
-            $assetsHash = $this->localHelper->uploadAssets($this->environment, $baseUrl);
+            $assetsArchive = $this->localHelper->makeAssetsArchives($baseUrl);
         } catch (\Throwable $e) {
             $this->io->error($e->getMessage());
 
             return -1;
         }
-        $this->io->success(\sprintf('Assets have been uploaded with the hash %s', $assetsHash));
+        $this->uploadArchive($assetsArchive);
 
         return 1;
+    }
+
+    protected function uploadArchive(string $assetsArchive): void
+    {
+        $this->io->success(\sprintf('Assets have been uploaded with the hash %s', $assetsArchive));
     }
 }

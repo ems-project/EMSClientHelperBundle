@@ -172,14 +172,7 @@ final class LocalHelper
         $this->logger = $logger;
     }
 
-    public function uploadAssets(Environment $environment, string $baseUrl): string
-    {
-        $zipFile = $this->makeAssetsArchives($baseUrl);
-
-        return 'ok';
-    }
-
-    private function makeAssetsArchives(string $baseUrl): string
+    public function makeAssetsArchives(string $baseUrl): string
     {
         $directory = \implode(DIRECTORY_SEPARATOR, [$this->projectDir, 'public', $baseUrl]);
         if (!\is_dir($directory)) {
