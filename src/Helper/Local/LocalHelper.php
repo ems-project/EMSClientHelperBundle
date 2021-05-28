@@ -15,6 +15,7 @@ use EMS\CommonBundle\Contracts\CoreApi\CoreApiInterface;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Finder\Finder;
 
 final class LocalHelper
 {
@@ -24,6 +25,7 @@ final class LocalHelper
     private Builders $builders;
     private EnvironmentApi $environmentApi;
     private LoggerInterface $logger;
+    private string $projectDir;
 
     public function __construct(
         CacheItemPoolInterface $cache,
@@ -31,7 +33,8 @@ final class LocalHelper
         ContentTypeHelper $contentTypeHelper,
         Builders $builders,
         EnvironmentApi $environmentApi,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        string $projectDir
     ) {
         $this->cache = $cache;
         $this->clientRequest = $clientRequestManager->getDefault();
@@ -39,6 +42,7 @@ final class LocalHelper
         $this->builders = $builders;
         $this->environmentApi = $environmentApi;
         $this->logger = $logger;
+        $this->projectDir = $projectDir;
     }
 
     public function api(Environment $environment): CoreApiInterface
@@ -166,5 +170,42 @@ final class LocalHelper
     public function setLogger(LoggerInterface $logger): void
     {
         $this->logger = $logger;
+    }
+
+    public function makeAssetsArchives(string $baseUrl): string
+    {
+        $directory = \implode(DIRECTORY_SEPARATOR, [$this->projectDir, 'public', $baseUrl]);
+        if (!\is_dir($directory)) {
+            throw new \RuntimeException(\sprintf('Directory not found %s', $baseUrl));
+        }
+
+        $zipFile = \tempnam(\sys_get_temp_dir(), 'zip');
+        if (!\is_string($zipFile)) {
+            throw new \RuntimeException('Error while generating a temporary zip file');
+        }
+
+        $zip = new \ZipArchive();
+        $zip->open($zipFile, \ZipArchive::OVERWRITE);
+
+        $finder = new Finder();
+        $finder->files()->in($directory);
+
+        if (!$finder->hasResults()) {
+            throw new \RuntimeException('The directory is empty');
+        }
+
+        foreach ($finder as $file) {
+            $filePath = $file->getRealPath();
+            $filename = $file->getRelativePathname();
+            if (!\is_string($filePath)) {
+                throw new \RuntimeException(\sprintf('File %s path not found', $filename));
+            }
+            $zip->addFile($filePath, $filename);
+        }
+
+        $zip->addPattern('/.*/', $directory);
+        $zip->close();
+
+        return $zipFile;
     }
 }
