@@ -71,7 +71,7 @@ final class Search
             'en' => 'english',
             'de' => 'german',
         ]), $clientRequest->getLocale());
-        $this->setSynonyms(($options['synonyms'] ?? []), $clientRequest->getLocale());
+        $this->setSynonyms(($options['synonyms'] ?? []));
 
         $filters = $options['filters'] ?? [];
         foreach ($filters as $name => $options) {
@@ -399,14 +399,14 @@ final class Search
     /**
      * @param array<mixed> $synonyms
      */
-    private function setSynonyms(array $synonyms, string $locale): void
+    private function setSynonyms(array $synonyms): void
     {
         foreach ($synonyms as $options) {
             if (\is_string($options)) {
                 $options = ['types' => [$options]];
             }
 
-            $this->synonyms[] = new Synonym($options, $locale);
+            $this->synonyms[] = new Synonym($this->request, $options);
         }
     }
 }
