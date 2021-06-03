@@ -28,8 +28,7 @@ final class Manager
      */
     public function search(Request $request): array
     {
-        $requestSearch = new Search($this->clientRequest);
-        $requestSearch->bindRequest($request);
+        $requestSearch = new Search($request, $this->clientRequest);
 
         $qbService = new QueryBuilder($this->clientRequest, $requestSearch);
         $search = $qbService->buildSearch($requestSearch->getTypes());
