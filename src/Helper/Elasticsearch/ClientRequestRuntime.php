@@ -9,18 +9,21 @@ use EMS\CommonBundle\Common\Document;
 use EMS\CommonBundle\Common\EMSLink;
 use EMS\CommonBundle\Elasticsearch\Response\Response;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Extension\RuntimeExtensionInterface;
 
 final class ClientRequestRuntime implements RuntimeExtensionInterface
 {
     private ClientRequestManager $manager;
+    private RequestStack $requestStack;
     private LoggerInterface $logger;
     /** @var Document[] */
     private array $documents = [];
 
-    public function __construct(ClientRequestManager $manager, LoggerInterface $logger)
+    public function __construct(ClientRequestManager $manager, RequestStack $requestStack, LoggerInterface $logger)
     {
         $this->manager = $manager;
+        $this->requestStack = $requestStack;
         $this->logger = $logger;
     }
 
@@ -40,7 +43,12 @@ final class ClientRequestRuntime implements RuntimeExtensionInterface
 
     public function searchConfig(): Search
     {
-        return new Search($this->manager->getDefault());
+        $currentRequest = $this->requestStack->getCurrentRequest();
+        if (null === $currentRequest) {
+            throw new \RuntimeException('Unexpected null request');
+        }
+
+        return new Search($currentRequest, $this->manager->getDefault());
     }
 
     /**
