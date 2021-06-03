@@ -59,11 +59,11 @@ final class Search
         $this->types = $options['types']; //required
         $this->facets = $options['facets'] ?? [];
         $this->sizes = $options['sizes'] ?? [];
-        $this->defaultSorts = $this->parseSorts(($options['default_sorts'] ?? []), $clientRequest->getLocale());
-        $this->sorts = $this->parseSorts(($options['sorts'] ?? []), $clientRequest->getLocale());
+        $this->defaultSorts = $this->parseSorts(($options['default_sorts'] ?? []));
+        $this->sorts = $this->parseSorts(($options['sorts'] ?? []));
 
-        $this->setHighlight(($options['highlight'] ?? []), $clientRequest->getLocale());
-        $this->setFields(($options['fields'] ?? []), $clientRequest->getLocale());
+        $this->setHighlight(($options['highlight'] ?? []));
+        $this->setFields(($options['fields'] ?? []));
         $this->setSuggestFields(($options['suggestFields'] ?? $options['fields'] ?? []), $clientRequest->getLocale());
         $this->setAnalyzer(($options['analyzers'] ?? [
             'fr' => 'french',
@@ -81,7 +81,7 @@ final class Search
         $this->bindRequest($request);
     }
 
-    public function bindRequest(Request $request): void
+    private function bindRequest(Request $request): void
     {
         $this->queryString = $request->get('q', $this->queryString);
         $requestF = $request->get('f', null);
@@ -298,7 +298,7 @@ final class Search
      *
      * @return array<string, array>
      */
-    private function parseSorts(array $sorts, string $locale): array
+    private function parseSorts(array $sorts): array
     {
         $result = [];
 
@@ -307,7 +307,7 @@ final class Search
                 $options = ['field' => $options];
             }
 
-            $options['field'] = \str_replace('%locale%', $locale, $options['field']);
+            $options['field'] = RequestHelper::replace($this->request, $options['field']);
 
             if ('_score' !== $options['field']) {
                 $options['missing'] = '_last';
@@ -330,11 +330,9 @@ final class Search
     /**
      * @param string[] $fields
      */
-    private function setFields(array $fields, string $locale): void
+    private function setFields(array $fields): void
     {
-        $this->fields = \array_map(function (string $field) use ($locale) {
-            return \str_replace('%locale%', $locale, $field);
-        }, $fields);
+        $this->fields = \array_map(fn (string $field): string => RequestHelper::replace($this->request, $field), $fields);
     }
 
     /**
@@ -352,12 +350,13 @@ final class Search
     /**
      * @param array<mixed> $data
      */
-    private function setHighlight(array $data, string $locale): void
+    private function setHighlight(array $data): void
     {
         if (\is_array($data) && isset($data['fields'])) {
             foreach ($data['fields'] as $key => $options) {
-                if (\strpos($key, '%locale%')) {
-                    $data['fields'][\str_replace('%locale%', $locale, $key)] = $options;
+                $replacedKey = RequestHelper::replace($this->request, $key);
+                if ($replacedKey !== $key) {
+                    $data['fields'][$replacedKey] = $options;
                     unset($data['fields'][$key]);
                 }
             }
