@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class Search
 {
+    private Request $request;
     private ?string $indexRegex;
     /** @var string[] */
     private array $types;
@@ -45,8 +46,9 @@ final class Search
     private string $analyzer;
     private string $sortOrder = 'asc';
 
-    public function __construct(ClientRequest $clientRequest)
+    public function __construct(Request $request, ClientRequest $clientRequest)
     {
+        $this->request = $request;
         $options = $this->getOptions($clientRequest);
 
         if (isset($options['facets'])) {
@@ -75,6 +77,8 @@ final class Search
         foreach ($filters as $name => $options) {
             $this->filters[$name] = new Filter($clientRequest, $name, $options);
         }
+
+        $this->bindRequest($request);
     }
 
     public function bindRequest(Request $request): void
