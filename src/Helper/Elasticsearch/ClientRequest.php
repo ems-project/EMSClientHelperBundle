@@ -146,20 +146,17 @@ final class ClientRequest implements ClientRequestInterface
 
     /**
      * @param string[] $sourceFields
-     * @param string[] $source_exclude
+     * @param string[] $sourceExclude
      *
      * @return array<string, mixed>|false
      */
-    public function getByOuuid(string $type, string $ouuid, array $sourceFields = [], array $source_exclude = [])
+    public function getByOuuid(string $type, string $ouuid, array $sourceFields = [], array $sourceExclude = [])
     {
         $this->logger->debug('ClientRequest : getByOuuid {type}:{id}', ['type' => $type, 'id' => $ouuid]);
-        if (!empty($source_exclude)) {
-            @\trigger_error('_source_exclude field are not supported anymore', E_USER_DEPRECATED);
-        }
 
         foreach ($this->elasticaService->getIndicesFromAlias($this->getAlias()) as $index) {
             try {
-                $document = $this->elasticaService->getDocument($index, $type, $ouuid, $sourceFields);
+                $document = $this->elasticaService->getDocument($index, $type, $ouuid, $sourceFields, $sourceExclude);
 
                 return $document->getRaw();
             } catch (NotFoundException $e) {

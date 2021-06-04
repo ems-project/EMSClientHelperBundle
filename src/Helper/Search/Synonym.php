@@ -7,33 +7,33 @@ namespace EMS\ClientHelperBundle\Helper\Search;
 use Elastica\Query\AbstractQuery;
 use Elastica\Query\BoolQuery;
 use Elastica\Query\Terms;
+use EMS\ClientHelperBundle\Helper\Request\RequestHelper;
 use EMS\CommonBundle\Elasticsearch\Document\EMSSource;
+use Symfony\Component\HttpFoundation\Request;
 
 final class Synonym
 {
     /** @var string[] */
-    private $types;
-    /** @var string|null */
-    private $field;
-    /** @var string|null */
-    private $searchField;
+    private array $types;
+    private ?string $field;
+    private ?string $searchField;
     /** @var array<mixed> */
-    private $filter;
+    private array $filter;
 
     /**
      * @param array{types: ?string[], field: ?string, search: ?string, } $data
      */
-    public function __construct(array $data, string $locale)
+    public function __construct(Request $request, array $data)
     {
         $this->types = $data['types'] ?? [];
         $this->filter = $data['filter'] ?? [];
 
         if (isset($data['field'])) {
-            $this->field = \str_replace('%locale%', $locale, $data['field']);
+            $this->field = RequestHelper::replace($request, $data['field']);
         }
 
         if (isset($data['search'])) {
-            $this->searchField = \str_replace('%locale%', $locale, $data['search']);
+            $this->searchField = RequestHelper::replace($request, $data['search']);
         }
     }
 
