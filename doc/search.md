@@ -29,7 +29,7 @@
 
 - filterName: the named of the request query parameter.
 - type: term, terms, date_range
-- public: default false, only public filters will accept request values
+- public: default true, only public filters will accept request values
 - active: default true, deactivated filter can become active by passing the filterName
 - field: the search field in the elasticsearch document
 - agg_size: for adding the field in aggregations
