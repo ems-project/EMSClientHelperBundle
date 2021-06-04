@@ -32,8 +32,10 @@ final class Filter
     private ?int $aggSize = null;
     /** default true for terms, when value passed default false */
     private bool $postFilter = true;
-    /** only public filters will handle a request. */
+    /** only public filters will handle a request value. */
     private bool $public = false;
+    /** you can deactivate a filter and activate it by passing the filter name in the request */
+    private bool $active = true;
     /** if not all doc contain the filter */
     private bool $optional = false;
     private ?AbstractQuery $queryFilters = null;
@@ -80,6 +82,7 @@ final class Filter
         $this->nestedPath = $options['nested_path'] ?? null;
 
         $this->public = isset($options['public']) ? (bool) $options['public'] : true;
+        $this->active = isset($options['active']) ? (bool) $options['active'] : true;
         $this->optional = isset($options['optional']) ? (bool) $options['optional'] : false;
         $this->aggSize = isset($options['aggs_size']) ? (int) $options['aggs_size'] : null;
         $this->sortField = isset($options['sort_field']) ? $options['sort_field'] : null;
@@ -138,7 +141,7 @@ final class Filter
 
     public function isActive(): bool
     {
-        return !empty($this->query);
+        return $this->active && !empty($this->query);
     }
 
     public function isOptional(): bool
@@ -181,7 +184,10 @@ final class Filter
             }
         }
 
-        $requestValue = $request->get($this->name);
+        $requestValue = $request->get($this->name, false);
+        if (false !== $requestValue) {
+            $this->active = true;
+        }
 
         if ($this->public && $requestValue) {
             $this->setQuery($requestValue);
