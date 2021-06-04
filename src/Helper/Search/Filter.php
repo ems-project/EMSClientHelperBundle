@@ -44,8 +44,10 @@ final class Filter
 
     /** @var mixed|null */
     private $value;
-    /** @var array<mixed> */
-    private array $choices = [];
+    /** @var null|array<mixed> */
+    private ?array $choices = null;
+
+
     /** @var bool|string */
     private $dateFormat;
 
@@ -365,7 +367,7 @@ final class Filter
 
     private function setChoices(): void
     {
-        if (null != $this->choices || self::TYPE_TERMS !== $this->type) {
+        if (null !== $this->choices || self::TYPE_TERMS !== $this->type) {
             return;
         }
 
