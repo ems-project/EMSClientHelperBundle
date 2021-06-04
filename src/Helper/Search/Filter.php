@@ -44,9 +44,8 @@ final class Filter
 
     /** @var mixed|null */
     private $value;
-    /** @var null|array<mixed> */
+    /** @var array<mixed>|null */
     private ?array $choices = null;
-
 
     /** @var bool|string */
     private $dateFormat;
@@ -233,6 +232,10 @@ final class Filter
     public function getChoices(): array
     {
         $this->setChoices();
+
+        if (null === $this->choices) {
+            throw new \RuntimeException('Choices not loaded!');
+        }
 
         return $this->choices;
     }
