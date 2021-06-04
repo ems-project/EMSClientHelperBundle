@@ -307,7 +307,11 @@ final class Filter
             return null;
         }
 
-        return new Range($this->getField(), \array_filter(['gte' => $start, 'lte' => $end]));
+        return new Range($this->getField(), \array_filter([
+            'gte' => $start,
+            'lte' => $end,
+            'format' => 'yyyy-MM-dd',
+        ]));
     }
 
     private function getQueryVersion(): ?AbstractQuery
