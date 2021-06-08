@@ -58,7 +58,7 @@ final class AssetController extends AbstractController
         return $this->proxy($requestPath, $target);
     }
 
-    public function proxyFromRefererPattern(string $requestPath, string $pathRegex = '/^\\/channel\\/(?P<environment>([a-z\\-0-9_]+))(\\/)?/', string $targetPattern = 'bundles'.DIRECTORY_SEPARATOR.'%cache_key%'): Response
+    public function proxyFromRefererPattern(string $requestPath, string $pathRegex = '/^(\\/index\\.php)?\\/channel\\/(?P<environment>([a-z\\-0-9_]+))(\\/)?/', string $targetPattern = 'bundles'.DIRECTORY_SEPARATOR.'%cache_key%'): Response
     {
         $request = $this->requestStack->getCurrentRequest();
         if (null === $request) {
