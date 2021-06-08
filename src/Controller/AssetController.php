@@ -16,6 +16,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class AssetController extends AbstractController
 {
+    public const REQUEST_HEADER_CHANNEL_ALIAS = 'EMS_INTERNAL_CHANNEL_ALIAS';
     private ClientRequest $clientRequestManager;
     private string $projectDir;
     private AssetRuntime $assetRuntime;
@@ -63,6 +64,11 @@ final class AssetController extends AbstractController
         $request = $this->requestStack->getCurrentRequest();
         if (null === $request) {
             throw new \RuntimeException('Unexpected null request');
+        }
+
+        $alias = $request->headers->get(self::REQUEST_HEADER_CHANNEL_ALIAS);
+        if (\is_string($alias)) {
+            return $this->proxyToCacheKey($requestPath, $alias);
         }
 
         $referer = $request->headers->get('Referer');
