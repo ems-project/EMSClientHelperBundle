@@ -13,7 +13,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class AssetController extends AbstractController
 {
-    public const REQUEST_HEADER_ENVIRONMENT_ALIAS = 'EMS_INTERNAL_ENVIRONMENT_ALIAS';
+    public const REQUEST_HEADER_ENVIRONMENT_ALIAS = 'X-EMS-INTERNAL-ENVIRONMENT-ALIAS';
     private string $projectDir;
     private AssetRuntime $assetRuntime;
     private RequestStack $requestStack;
