@@ -13,7 +13,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class AssetController extends AbstractController
 {
-    public const REQUEST_HEADER_ENVIRONMENT_ALIAS = 'EMS_INTERNAL_ENVIRONMENT_ALIAS';
     private string $projectDir;
     private AssetRuntime $assetRuntime;
     private RequestStack $requestStack;
@@ -51,21 +50,6 @@ final class AssetController extends AbstractController
         ]);
 
         return $this->proxy($requestPath, $target);
-    }
-
-    public function proxyFromInternalHeader(string $requestPath): Response
-    {
-        $request = $this->requestStack->getCurrentRequest();
-        if (null === $request) {
-            throw new \RuntimeException('Unexpected null request');
-        }
-
-        $alias = $request->headers->get(self::REQUEST_HEADER_ENVIRONMENT_ALIAS);
-        if (!\is_string($alias)) {
-            throw new NotFoundHttpException('Internal header not found. Are you in a channel context (Referer)?');
-        }
-
-        return $this->proxyToEnvironmentAlias($requestPath, $alias);
     }
 
     public function proxy(string $requestPath, string $target): Response
