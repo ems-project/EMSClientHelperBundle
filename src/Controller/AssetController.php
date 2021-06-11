@@ -4,37 +4,31 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Controller;
 
-use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
-use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\CommonBundle\Twig\AssetRuntime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class AssetController extends AbstractController
 {
-    private ClientRequest $clientRequestManager;
     private string $projectDir;
     private AssetRuntime $assetRuntime;
     private RequestStack $requestStack;
 
-    public function __construct(ClientRequestManager $clientRequestManager, AssetRuntime $assetRuntime, RequestStack $requestStack, string $projectDir)
+    public function __construct(AssetRuntime $assetRuntime, RequestStack $requestStack, string $projectDir)
     {
-        $this->clientRequestManager = $clientRequestManager->getDefault();
         $this->assetRuntime = $assetRuntime;
         $this->requestStack = $requestStack;
         $this->projectDir = $projectDir;
     }
 
-    public function proxyToCacheKey(string $requestPath, string $environment = null): Response
+    public function proxyToEnvironmentAlias(string $requestPath, string $alias): Response
     {
-        $cacheKey = $this->clientRequestManager->getCacheKey('', $environment);
         $target = \implode(DIRECTORY_SEPARATOR, [
             'bundles',
-            $cacheKey,
+            $alias,
         ]);
 
         return $this->proxy($requestPath, $target);
@@ -56,41 +50,6 @@ final class AssetController extends AbstractController
         ]);
 
         return $this->proxy($requestPath, $target);
-    }
-
-    public function proxyFromRefererPattern(string $requestPath, string $pathRegex = '/^\\/channel\\/(?P<environment>([a-z\\-0-9_]+))(\\/)?/', string $targetPattern = 'bundles'.DIRECTORY_SEPARATOR.'%cache_key%'): Response
-    {
-        $request = $this->requestStack->getCurrentRequest();
-        if (null === $request) {
-            throw new \RuntimeException('Unexpected null request');
-        }
-
-        $referer = $request->headers->get('Referer');
-        if (!\is_string($referer)) {
-            throw new NotFoundHttpException('Referer not found');
-        }
-
-        $referer = \parse_url($referer);
-        if (false === $referer) {
-            throw new \RuntimeException('Unexpected unparsable referer');
-        }
-
-        if (($referer['host'] ?? null) !== $request->getHost()) {
-            throw new BadRequestHttpException('Host and referer\'s host does not match');
-        }
-
-        $path = \substr($referer['path'] ?? '', \strlen($request->getBasePath()));
-        $matches = [];
-        if (!\preg_match($pathRegex, $path, $matches) && isset($referer['query'])) {
-            return $this->proxyToZipArchive($requestPath, $referer['query']);
-        }
-
-        $environment = $matches['environment'] ?? null;
-        if (!\is_string($environment)) {
-            throw new NotFoundHttpException('Environment not found');
-        }
-
-        return $this->proxyToCacheKey($requestPath, $environment);
     }
 
     public function proxy(string $requestPath, string $target): Response
