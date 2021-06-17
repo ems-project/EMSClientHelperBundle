@@ -97,7 +97,8 @@ final class Search
         $this->setSortOrder($request->get('o', $this->sortOrder));
 
         if (null !== $this->indexRegex) {
-            $this->indexRegex = RequestHelper::replace($request, $this->indexRegex);
+            $requestSearchIndex = RequestHelper::replace($request, $this->indexRegex);
+            $this->indexRegex = RequestHelper::replace($request, $requestSearchIndex);
         }
 
         foreach ($this->filters as $filter) {
