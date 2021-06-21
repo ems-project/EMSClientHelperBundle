@@ -48,6 +48,7 @@
             <argument type="service" id="Symfony\Component\Routing\RouterInterface" />
         </service>
         <service id="emsch.routing.url.transformer" class="EMS\ClientHelperBundle\Helper\Routing\Url\Transformer">
+            <argument type="service" id="ems_common.twig.runtime.request"/>
             <argument type="service" id="emsch.manager.client_request"/>
             <argument type="service" id="emsch.routing.url.generator" />
             <argument type="service" id="twig" />
