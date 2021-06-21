@@ -8,11 +8,14 @@ use EMS\ClientHelperBundle\Exception\TemplatingException;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\CommonBundle\Common\EMSLink;
+use EMS\CommonBundle\Helper\EmsFields;
+use EMS\CommonBundle\Twig\RequestRuntime;
 use Psr\Log\LoggerInterface;
 use Twig\Environment;
 
 final class Transformer
 {
+    private RequestRuntime $requestRuntime;
     private ClientRequest $clientRequest;
     private Generator $generator;
     private Environment $twig;
@@ -21,8 +24,9 @@ final class Transformer
     /** @var array<string, mixed> */
     private array $documents;
 
-    public function __construct(ClientRequestManager $clientRequestManager, Generator $generator, Environment $twig, LoggerInterface $logger, ?string $template)
+    public function __construct(RequestRuntime $requestRuntime, ClientRequestManager $clientRequestManager, Generator $generator, Environment $twig, LoggerInterface $logger, ?string $template)
     {
+        $this->requestRuntime = $requestRuntime;
         $this->clientRequest = $clientRequestManager->getDefault();
         $this->generator = $generator;
         $this->twig = $twig;
@@ -46,7 +50,11 @@ final class Transformer
             $emsLink = EMSLink::fromMatch($match);
 
             if ('asset' === $emsLink->getLinkType()) {
-                return '/file/view/'.$emsLink->getOuuid().'?'.\http_build_query($emsLink->getQuery());
+                return $this->requestRuntime->assetPath([
+                    EmsFields::CONTENT_FILE_HASH_FIELD => $emsLink->getOuuid(),
+                    EmsFields::CONTENT_FILE_NAME_FIELD => $emsLink->getQuery()['name'] ?? 'asset',
+                    EmsFields::CONTENT_MIME_TYPE_FIELD => $emsLink->getQuery()['type'] ?? 'application/octet-stream',
+                ]);
             }
 
             if (!$emsLink->hasContentType()) {
