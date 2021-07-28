@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
 
-final class FolderUploadCommand extends AbstractLocalCommand implements CommandInterface
+final class FolderUploadCommand extends AbstractUploadCommand implements CommandInterface
 {
     private const ARG_FOLDER = 'folder';
 

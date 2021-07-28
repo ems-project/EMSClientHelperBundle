@@ -8,7 +8,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-final class UploadAssetsCommand extends AbstractLocalCommand
+final class UploadAssetsCommand extends AbstractUploadCommand
 {
     private const ARG_BASE_URL = 'base_url';
 
