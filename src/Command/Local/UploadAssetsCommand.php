@@ -81,6 +81,7 @@ final class UploadAssetsCommand extends AbstractLocalCommand
             $uploaded = $this->coreApi->addChunk($hash, $chunk);
             $this->io->progressAdvance(\strlen($chunk));
         }
+        \fclose($handle);
         $this->io->progressFinish();
 
         if ($uploaded !== $filesize) {
