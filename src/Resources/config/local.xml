@@ -38,5 +38,8 @@
         <service id="emsch.command.local.upload_assets" class="EMS\ClientHelperBundle\Command\Local\UploadAssetsCommand" parent="emsch.command.local">
             <tag name="console.command" command="emsch:local:upload-assets"/>
         </service>
+        <service id="emsch.command.local.folder_upload" class="EMS\ClientHelperBundle\Command\Local\FolderUploadCommand" parent="emsch.command.local">
+            <tag name="console.command" command="emsch:local:folder-upload"/>
+        </service>
     </services>
 </container>
