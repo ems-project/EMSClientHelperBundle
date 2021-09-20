@@ -91,7 +91,7 @@ final class Route
             $this->options['options'],
             $this->options['host'],
             $this->options['schemes'],
-            [$this->options['method']],
+            $this->options['method'],
             $this->options['condition']
         );
     }
@@ -121,6 +121,7 @@ final class Route
                 'index_regex' => null,
                 'condition' => null,
             ])
+            ->addAllowedTypes('method', ['string', 'string[]'])
             ->setNormalizer('defaults', function (Options $options, $value) {
                 if (!isset($value['_controller'])) {
                     $value['_controller'] = $options['controller'];
@@ -136,6 +137,13 @@ final class Route
                 $value['type'] = $options['type'];
                 $value['template'] = $options['template'];
                 $value['index_regex'] = $options['index_regex'];
+
+                return $value;
+            })
+            ->setNormalizer('method', function (Options $options, $value) {
+                if (\is_string($value)) {
+                    return [$value];
+                }
 
                 return $value;
             })
