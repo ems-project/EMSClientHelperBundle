@@ -71,7 +71,17 @@ final class Environment
         return $this->name;
     }
 
-    public function getAlias(string $remoteClusterSeparator = ':'): string
+    public function getAlias(): string
+    {
+        return $this->getAliasIdentifier();
+    }
+
+    public function getAliasForCacheKey(): string
+    {
+        return $this->getAliasIdentifier('_');
+    }
+
+    private function getAliasIdentifier(string $remoteClusterSeparator = ':'): string
     {
         if (null === $this->remoteCluster) {
             return $this->alias;
