@@ -23,5 +23,33 @@ Allow to refer a remote cluster on which elasticsearch queries will be made. If 
 I.e.:
 
 ```json
-
+{
+  "preview-nl": {
+    "regex": "/.*rva.*/",
+    "request": {
+      "_locale": "nl"
+    },
+    "alias": "webonem_preview",
+    "backend": "${BACKEND_URL}",
+    "remote_cluster": "cluster_socsec7_test"
+  },
+  "webonem_preview-de": {
+    "regex": "/.*lfa.*/",
+    "request": {
+      "_locale": "de"
+    },
+    "alias": "webonem_preview",
+    "backend": "${BACKEND_URL}",
+    "remote_cluster": "cluster_socsec7_test"
+  },
+  "preview-fr": {
+    "regex": "/.*/",
+    "request": {
+      "_locale": "fr"
+    },
+    "alias": "webonem_preview",
+    "backend": "${BACKEND_URL}",
+    "remote_cluster": "cluster_socsec7_test"
+  }
+}
 ```
