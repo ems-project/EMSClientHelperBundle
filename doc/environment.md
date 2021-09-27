@@ -7,18 +7,18 @@ Environments are used to associate HTTP base urls to a specific config. It's usu
     {
       "preview": {
         "regex": "/.*/",
-        "alias": "webonem_preview"
+        "alias": "demo_preview"
       }
     }
 ```
 
-In this example every request are associated to the webonem_preview elasticsearch alias
+In this example every request are associated to the demo_preview elasticsearch alias
 
 ## Other options 
 
 ### remote_cluster
 
-Allow to refer a remote cluster on which elasticsearch queries will be made. If not define queries will be made on the defined cluster itself.
+Allow to refer a [remote cluster](https://www.elastic.co/guide/en/elasticsearch/reference/6.8/modules-cross-cluster-search.html) on which elasticsearch queries will be made. If not define queries will be made on the defined cluster itself.
 
 I.e.:
 
@@ -29,27 +29,27 @@ I.e.:
     "request": {
       "_locale": "nl"
     },
-    "alias": "webonem_preview",
+    "alias": "demo_preview",
     "backend": "${BACKEND_URL}",
-    "remote_cluster": "cluster_socsec7_test"
+    "remote_cluster": "cluster_es7_test"
   },
-  "webonem_preview-de": {
+  "demo_preview-de": {
     "regex": "/.*lfa.*/",
     "request": {
       "_locale": "de"
     },
-    "alias": "webonem_preview",
+    "alias": "demo_preview",
     "backend": "${BACKEND_URL}",
-    "remote_cluster": "cluster_socsec7_test"
+    "remote_cluster": "cluster_es7_test"
   },
   "preview-fr": {
     "regex": "/.*/",
     "request": {
       "_locale": "fr"
     },
-    "alias": "webonem_preview",
+    "alias": "demo_preview",
     "backend": "${BACKEND_URL}",
-    "remote_cluster": "cluster_socsec7_test"
+    "remote_cluster": "cluster_es7_test"
   }
 }
 ```
