@@ -33,7 +33,10 @@ final class Handler implements HandlerInterface
     public function handle(Request $request): array
     {
         $route = $this->getRoute($request);
-        $context = ['trans_default_domain' => $this->clientRequest->getCacheKey()];
+        $context = [
+            'trans_default_domain' => $this->clientRequest->getCacheKey(),
+            'emschEnvironment' => $this->clientRequest->getCurrentEnvironment(),
+        ];
 
         if (null !== $document = $this->getDocument($request, $route)) {
             $context['document'] = $document;
