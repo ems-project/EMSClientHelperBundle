@@ -9,13 +9,14 @@ use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\CommonBundle\Common\EMSLink;
 use EMS\CommonBundle\Helper\EmsFields;
-use EMS\CommonBundle\Twig\RequestRuntime;
+use EMS\CommonBundle\Twig\AssetRuntime;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
 final class Transformer
 {
-    private RequestRuntime $requestRuntime;
+    private AssetRuntime $assetRuntime;
     private ClientRequest $clientRequest;
     private Generator $generator;
     private Environment $twig;
@@ -24,9 +25,9 @@ final class Transformer
     /** @var array<string, mixed> */
     private array $documents;
 
-    public function __construct(RequestRuntime $requestRuntime, ClientRequestManager $clientRequestManager, Generator $generator, Environment $twig, LoggerInterface $logger, ?string $template)
+    public function __construct(AssetRuntime $assetRuntime, ClientRequestManager $clientRequestManager, Generator $generator, Environment $twig, LoggerInterface $logger, ?string $template)
     {
-        $this->requestRuntime = $requestRuntime;
+        $this->assetRuntime = $assetRuntime;
         $this->clientRequest = $clientRequestManager->getDefault();
         $this->generator = $generator;
         $this->twig = $twig;
@@ -50,11 +51,7 @@ final class Transformer
             $emsLink = EMSLink::fromMatch($match);
 
             if ('asset' === $emsLink->getLinkType()) {
-                return $this->requestRuntime->assetPath([
-                    EmsFields::CONTENT_FILE_HASH_FIELD => $emsLink->getOuuid(),
-                    EmsFields::CONTENT_FILE_NAME_FIELD => $emsLink->getQuery()['name'] ?? 'asset',
-                    EmsFields::CONTENT_MIME_TYPE_FIELD => $emsLink->getQuery()['type'] ?? 'application/octet-stream',
-                ]);
+                return $this->generateForAsset($emsLink, $match, $config);
             }
 
             if (!$emsLink->hasContentType()) {
@@ -92,12 +89,33 @@ final class Transformer
 
             $generation = $this->generate($cleanMatch, $config);
             $route = (null !== $generation ? $generation : $match[0]);
+            $srcAttribute = $match['src'] ?? false;
             $baseUrl = $config['baseUrl'] ?? '';
 
-            return $baseUrl.$route;
+            $transformed = $baseUrl.$route;
+
+            return $srcAttribute ? 'src="'.$transformed : $transformed;
         }, $content);
 
         return \is_string($transform) ? $transform : $content;
+    }
+
+
+    private function generateForAsset(EMSLink $emsLink, array $match, array $config = []): string
+    {
+        $assetFilePaths = $config['asset_file_path'] ?? false;
+
+        if ($assetFilePaths && isset($match['src'])) {
+            $assetConfig = [EmsFields::ASSET_CONFIG_GET_FILE_PATH => true];
+        } elseif ($assetFilePaths) {
+            $assetConfig = [EmsFields::ASSET_CONFIG_URL_TYPE => UrlGeneratorInterface::NETWORK_PATH];
+        }
+
+        return $this->assetRuntime->assetPath([
+            EmsFields::CONTENT_FILE_HASH_FIELD => $emsLink->getOuuid(),
+            EmsFields::CONTENT_FILE_NAME_FIELD => $emsLink->getQuery()['name'] ?? 'asset',
+            EmsFields::CONTENT_MIME_TYPE_FIELD => $emsLink->getQuery()['type'] ?? 'application/octet-stream',
+        ], $assetConfig ?? []);
     }
 
     /**
