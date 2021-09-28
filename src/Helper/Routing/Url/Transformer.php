@@ -100,7 +100,10 @@ final class Transformer
         return \is_string($transform) ? $transform : $content;
     }
 
-
+    /**
+     * @param array<mixed> $match
+     * @param array<mixed> $config
+     */
     private function generateForAsset(EMSLink $emsLink, array $match, array $config = []): string
     {
         $assetFilePaths = $config['asset_file_path'] ?? false;
@@ -115,7 +118,7 @@ final class Transformer
             EmsFields::CONTENT_FILE_HASH_FIELD => $emsLink->getOuuid(),
             EmsFields::CONTENT_FILE_NAME_FIELD => $emsLink->getQuery()['name'] ?? 'asset',
             EmsFields::CONTENT_MIME_TYPE_FIELD => $emsLink->getQuery()['type'] ?? 'application/octet-stream',
-        ], $assetConfig ?? []);
+        ], $assetConfig ?? null);
     }
 
     /**
