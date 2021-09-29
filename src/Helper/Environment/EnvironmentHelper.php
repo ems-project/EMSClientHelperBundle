@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 final class EnvironmentHelper implements EnvironmentHelperInterface
 {
+    private EnvironmentFactory $environmentFactory;
     /** @var Environment[] */
     private array $environments = [];
     private RequestStack $requestStack;
@@ -23,6 +24,7 @@ final class EnvironmentHelper implements EnvironmentHelperInterface
         string $emschEnv,
         array $environments
     ) {
+        $this->environmentFactory = $environmentFactory;
         $this->requestStack = $requestStack;
         $this->emschEnv = $emschEnv;
 
@@ -36,7 +38,7 @@ final class EnvironmentHelper implements EnvironmentHelperInterface
      */
     public function addEnvironment(string $name, array $config): void
     {
-        $this->environments[] = new Environment($name, $config);
+        $this->environments[] = $this->environmentFactory->create($name, $config);
     }
 
     public function getEmschEnv(): string
