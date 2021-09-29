@@ -49,7 +49,7 @@ final class ContentType implements ContentTypeInterface
 
     public function getCacheKey(): string
     {
-        return \sprintf('%s_%s', $this->environment->getAlias(), $this->name);
+        return \sprintf('%s_%s', $this->environment->getAliasForCacheKey(), $this->name);
     }
 
     /**
