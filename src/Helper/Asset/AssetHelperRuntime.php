@@ -26,7 +26,7 @@ final class AssetHelperRuntime implements RuntimeExtensionInterface
         $this->filesystem = new Filesystem();
     }
 
-    public function assets(string $hash, string $saveDir = 'bundles'): void
+    public function assets(string $hash, string $saveDir = 'bundles'): string
     {
         $basePath = $this->publicDir.\DIRECTORY_SEPARATOR.$saveDir.\DIRECTORY_SEPARATOR;
         $directory = $basePath.$hash;
@@ -36,7 +36,7 @@ final class AssetHelperRuntime implements RuntimeExtensionInterface
             $symlink = $basePath.$cacheKey;
 
             if ($this->filesystem->exists($symlink.\DIRECTORY_SEPARATOR.$hash)) {
-                return; //valid
+                return $directory; //valid
             }
 
             if (!$this->filesystem->exists($directory)) {
@@ -50,5 +50,7 @@ final class AssetHelperRuntime implements RuntimeExtensionInterface
         } catch (\Exception $e) {
             $this->manager->getLogger()->error('emsch_assets failed : {error}', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
         }
+
+        return $directory;
     }
 }
