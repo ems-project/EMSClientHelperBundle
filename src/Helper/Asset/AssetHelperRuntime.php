@@ -36,7 +36,7 @@ final class AssetHelperRuntime implements RuntimeExtensionInterface
             $symlink = $basePath.$cacheKey;
 
             if ($this->filesystem->exists($symlink.\DIRECTORY_SEPARATOR.$hash)) {
-                return $directory; //valid
+                return $directory;
             }
 
             if (!$this->filesystem->exists($directory)) {
