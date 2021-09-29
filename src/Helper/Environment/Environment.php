@@ -11,14 +11,15 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 final class Environment
 {
-    const ENVIRONMENT_ATTRIBUTE = '_environment';
-    const BACKEND_ATTRIBUTE = '_backend';
-    const LOCALE_ATTRIBUTE = '_locale';
-    const REGEX_CONFIG = 'regex';
-    const ROUTE_PREFIX = 'route_prefix';
-    const BACKEND_CONFIG = 'backend';
-    const REQUEST_CONFIG = 'request';
-    const ALIAS_CONFIG = 'alias';
+    public const ENVIRONMENT_ATTRIBUTE = '_environment';
+    public const BACKEND_ATTRIBUTE = '_backend';
+    public const LOCALE_ATTRIBUTE = '_locale';
+    public const REGEX_CONFIG = 'regex';
+    public const ROUTE_PREFIX = 'route_prefix';
+    public const BACKEND_CONFIG = 'backend';
+    public const REQUEST_CONFIG = 'request';
+    public const ALIAS_CONFIG = 'alias';
+    public const REMOTE_CLUSTER = 'remote_cluster';
 
     private string $name;
     private bool $active = false;
@@ -26,14 +27,13 @@ final class Environment
     private ?string $regex;
     private ?string $routePrefix;
     private ?string $backend;
-
     /** @var array<string, mixed> */
     private array $request = [];
     /** @var array<mixed> */
     private array $options;
     private string $hash;
-
     private ?LocalEnvironment $local = null;
+    private ?string $remoteCluster;
 
     /**
      * @param array<string, mixed> $config
@@ -42,6 +42,7 @@ final class Environment
     {
         $this->name = $name;
         $this->alias = $config[self::ALIAS_CONFIG] ?? $name;
+        $this->remoteCluster = $config[self::REMOTE_CLUSTER] ?? null;
         $this->regex = $config[self::REGEX_CONFIG] ?? null;
         $this->routePrefix = $config[self::ROUTE_PREFIX] ?? null;
         $this->backend = $config[self::BACKEND_CONFIG] ?? null;
@@ -72,7 +73,21 @@ final class Environment
 
     public function getAlias(): string
     {
-        return $this->alias;
+        return $this->getAliasIdentifier();
+    }
+
+    public function getAliasForCacheKey(): string
+    {
+        return $this->getAliasIdentifier('_');
+    }
+
+    private function getAliasIdentifier(string $remoteClusterSeparator = ':'): string
+    {
+        if (null === $this->remoteCluster) {
+            return $this->alias;
+        }
+
+        return \implode($remoteClusterSeparator, [$this->remoteCluster, $this->alias]);
     }
 
     public function isActive(): bool
