@@ -109,7 +109,7 @@ final class Transformer
         $assetConfig = [];
         $assetFilePaths = $config['asset_file_path'] ?? false;
 
-        if ($assetFilePaths && 'src' === ($match['src'] ?? null)) {
+        if ($assetFilePaths && isset($match['src'])) {
             $assetConfig = [EmsFields::ASSET_CONFIG_GET_FILE_PATH => true];
         } elseif ($assetFilePaths) {
             $assetConfig = [EmsFields::ASSET_CONFIG_URL_TYPE => UrlGeneratorInterface::NETWORK_PATH];
