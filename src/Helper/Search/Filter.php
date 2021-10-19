@@ -185,6 +185,9 @@ final class Filter
         }
 
         $requestValue = $request->get($this->name, false);
+        if (\is_array($requestValue) && 1 === \count($requestValue) && '' === ($requestValue[0] ?? false)) {
+            $requestValue = false;
+        }
         if (false !== $requestValue) {
             $this->active = true;
         }
