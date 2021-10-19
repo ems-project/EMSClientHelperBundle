@@ -44,6 +44,13 @@
             <tag name="controller.service_arguments"/>
         </service>
 
+        <service id="emsch.controller.spreadsheet" class="EMS\ClientHelperBundle\Controller\SpreadsheetController">
+            <argument type="service" id="emsch.routing.handler" />
+            <argument type="service" id="twig"/>
+            <argument type="service" id="ems_common.service.spreadsheet_generator_service"/>
+            <tag name="controller.service_arguments"/>
+        </service>
+
         <service id="emsch.routing.url.generator" class="EMS\ClientHelperBundle\Helper\Routing\Url\Generator">
             <argument type="service" id="Symfony\Component\Routing\RouterInterface" />
         </service>
