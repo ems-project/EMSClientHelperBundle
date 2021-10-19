@@ -24,6 +24,50 @@ In Twig you can set/override the pdf options with custom meta tags in the head s
 </head>
 ```
 
+## Spreadsheet generation
+
+For enabling spreadsheet generation use the **emsch.controller.spreadsheet** controller
+```yaml
+test_xlsx:
+  config:
+    path: /test.xlsx
+    controller: 'emsch.controller.spreadsheet'
+  template_static: template/test/xlsx.json.twig
+  order: 4
+```
+
+In Twig you can set the spreadsheet options by generating a JSON
+```twig
+{% set config = {
+    "filename": "custom-filename",
+    "disposition": "attachment",
+    "writer": "xlsx",
+    "sheets": [
+        {
+            "name": "Sheet 1",
+            "rows": [
+                ["A1", "A2"],
+                ["B1", "B2"],
+            ]
+        },
+        {
+            "name": "Sheet 2",
+            "rows": [
+                ["A1", "A2"],
+                ["B1", "B2"],
+            ]
+        },
+    ]
+} %}
+
+{{- config|json_encode|raw -}}
+```
+
+Two writer are supported:
+ - `xlsx`: Generate a Microsoft Excel file
+ - `csv`: Generate a CSV file
+
+
 ## Route to an asset
 
 A route may also directly returns an asset:
