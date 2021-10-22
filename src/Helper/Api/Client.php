@@ -85,7 +85,7 @@ final class Client implements ApiClientInterface
     /**
      * @return array<mixed>
      */
-    public function finalize(string $type, string $revisionId): array
+    public function finalize(string $type, int $revisionId): array
     {
         $response = $this->client->post(
             \sprintf('api/data/%s/finalize/%d', $type, $revisionId)
@@ -97,7 +97,7 @@ final class Client implements ApiClientInterface
     /**
      * @return array<mixed>
      */
-    public function discardDraft(string $type, string $revisionId)
+    public function discardDraft(string $type, int $revisionId)
     {
         $response = $this->client->post(
             \sprintf('api/data/%s/discard/%d', $type, $revisionId)
