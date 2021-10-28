@@ -7,6 +7,7 @@ namespace EMS\ClientHelperBundle\Helper\Search;
 use Elastica\Query\AbstractQuery;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Request\RequestHelper;
+use EMS\CommonBundle\Common\Standard\Json;
 use EMS\CommonBundle\Elasticsearch\Response\Response;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -49,7 +50,7 @@ final class Search
     public function __construct(Request $request, ClientRequest $clientRequest)
     {
         $this->request = $request;
-        $options = $this->getOptions($clientRequest);
+        $options = $this->getOptions($request, $clientRequest);
 
         if (isset($options['facets'])) {
             @\trigger_error('Deprecated facets, please use filters setting', E_USER_DEPRECATED);
@@ -279,8 +280,12 @@ final class Search
     /**
      * @return array<mixed>
      */
-    private function getOptions(ClientRequest $clientRequest): array
+    private function getOptions(Request $request, ClientRequest $clientRequest): array
     {
+        if ($requestSearchConfig = $request->get('search_config')) {
+            return Json::decode($requestSearchConfig);
+        }
+
         $currentEnvironment = $clientRequest->getCurrentEnvironment();
 
         if ($currentEnvironment && $currentEnvironment->hasOption('search_config')) {
