@@ -78,14 +78,14 @@ final class EnvironmentHelper implements EnvironmentHelperInterface
 
     public function getCurrentEnvironment(): ?Environment
     {
-        if ('cli' === PHP_SAPI) {
-            return $this->environments[$this->emschEnv] ?? null;
-        }
-
         foreach ($this->environments as $environment) {
             if ($environment->isActive()) {
                 return $environment;
             }
+        }
+
+        if ('cli' === PHP_SAPI) {
+            return $this->environments[$this->emschEnv] ?? null;
         }
 
         return null;
