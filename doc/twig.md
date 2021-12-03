@@ -31,7 +31,7 @@ The default value of the saveDir is **bundles**.
 {{- emsch_assets_version('hash', 'saveDir') -}}
 ```
 
-This function must call only one time per Twig rendering.
+This function can be called only one time per Twig rendering. Otherwise, an error will be thrown.
 
 Example base template.
 ```twig
