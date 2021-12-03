@@ -67,6 +67,7 @@
 	},
 	"scripts": {
 		"phpcs": "php-cs-fixer fix",
-		"phpstan": "phpstan analyse"
+		"phpstan": "phpstan analyse",
+		"phpall": "php-cs-fixer fix && phpstan analyse"
 	}
 }
