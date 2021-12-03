@@ -90,6 +90,9 @@
             <argument type="string">%kernel.project_dir%</argument>
             <tag name="twig.runtime" />
         </service>
+        <service id="emsch.twig.runtime.asset_vserion_strategy" class="EMS\ClientHelperBundle\Helper\Asset\AssetVersionStrategy">
+            <argument type="service" id="emsch.twig.runtime.asset" />
+        </service>
         <service id="emsch.twig.runtime.client_request" class="EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestRuntime">
             <argument type="service" id="emsch.manager.client_request" />
             <argument type="service" id="request_stack" />
