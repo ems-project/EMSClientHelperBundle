@@ -30,6 +30,9 @@ final class AssetHelperRuntime implements RuntimeExtensionInterface
 
     public function setVersion(string $hash, string $saveDir = 'bundles'): string
     {
+        if (null !== $this->versionHash && $this->versionHash !== $hash) {
+            throw new \RuntimeException('Another hash version has been already defined');
+        }
         $this->versionHash = $hash;
         $this->versionSaveDir = $saveDir;
 
