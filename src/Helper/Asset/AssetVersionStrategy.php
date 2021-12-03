@@ -9,10 +9,12 @@ use Symfony\Component\Asset\VersionStrategy\VersionStrategyInterface;
 final class AssetVersionStrategy implements VersionStrategyInterface
 {
     private AssetHelperRuntime $assetHelperRuntime;
+    private ?string $localFolder;
 
-    public function __construct(AssetHelperRuntime $assetHelperRuntime)
+    public function __construct(AssetHelperRuntime $assetHelperRuntime, ?string $localFolder)
     {
         $this->assetHelperRuntime = $assetHelperRuntime;
+        $this->localFolder = $localFolder;
     }
 
     public function getVersion($path): string
@@ -22,6 +24,10 @@ final class AssetVersionStrategy implements VersionStrategyInterface
 
     public function applyVersion($path): string
     {
+        if (!empty($this->localFolder)) {
+            return \sprintf('%s/%s?hash=%s', $this->localFolder, $path, $this->assetHelperRuntime->getVersionHash());
+        }
+
         return \sprintf('%s/%s/%s', $this->assetHelperRuntime->getVersionSaveDir(), $this->assetHelperRuntime->getVersionHash(), $path);
     }
 }
