@@ -16,6 +16,8 @@ final class AssetHelperRuntime implements RuntimeExtensionInterface
     private ClientRequestManager $manager;
     private string $publicDir;
     private Filesystem $filesystem;
+    private ?string $versionHash = null;
+    private ?string $versionSaveDir = null;
 
     public function __construct(StorageManager $storageManager, ClientRequestManager $manager, string $projectDir)
     {
@@ -24,6 +26,17 @@ final class AssetHelperRuntime implements RuntimeExtensionInterface
         $this->publicDir = $projectDir.'/public';
 
         $this->filesystem = new Filesystem();
+    }
+
+    public function setVersion(string $hash, string $saveDir = 'bundles'): string
+    {
+        if (null !== $this->versionHash && $this->versionHash !== $hash) {
+            throw new \RuntimeException('Another hash version has been already defined');
+        }
+        $this->versionHash = $hash;
+        $this->versionSaveDir = $saveDir;
+
+        return $this->assets($hash, $saveDir);
     }
 
     public function assets(string $hash, string $saveDir = 'bundles'): string
@@ -52,5 +65,23 @@ final class AssetHelperRuntime implements RuntimeExtensionInterface
         }
 
         return $directory;
+    }
+
+    public function getVersionHash(): string
+    {
+        if (null === $this->versionHash) {
+            throw new \RuntimeException('Asset version has not been set');
+        }
+
+        return $this->versionHash;
+    }
+
+    public function getVersionSaveDir(): string
+    {
+        if (null === $this->versionSaveDir) {
+            throw new \RuntimeException('Asset version has not been set');
+        }
+
+        return $this->versionSaveDir;
     }
 }

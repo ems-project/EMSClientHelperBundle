@@ -21,6 +21,26 @@ Example base template.
 <link rel="stylesheet" href="{{ asset('bundles/emsch_assets/css/app.css') }}">
 ```
 
+## emsch_assets_version
+
+This is similar to [emsch_assets](#emsch_assets) but using the hash as version strategy for the assets. No need to add an alias rule in the Vhost file.
+
+This function will unzip the file (hash) in /public/{saveDir}/**hash** (if not exists).
+The default value of the saveDir is **bundles**.
+```twig
+{{- emsch_assets_version('hash', 'saveDir') -}}
+```
+
+This function can be called only one time per Twig rendering. Otherwise, an error will be thrown.
+
+Example base template.
+```twig
+<link rel="stylesheet" href="{{ asset('css/app.css', 'emsch') }}">
+```
+
+When you are developing you may want to use asset in a local folder (in the `public` folder) instead of a zip file. In order to do so, use the `EMSCH_ASSET_LOCAL_FOLDER` environment variable
+
+
 ## emsch_unzip
 
 Like emsch_assets this will unzip a file into the required saveDir.

@@ -23,6 +23,7 @@ final class Configuration implements ConfigurationInterface
                 ->booleanNode('bind_locale')->end()
                 ->booleanNode('handle_exceptions')->defaultTrue()->end()
                 ->scalarNode('etag_hash_algo')->end()
+                ->scalarNode('asset_local_folder')->end()
                 ->arrayNode('templates')
                     ->children()
                         ->scalarNode('error')->end()
