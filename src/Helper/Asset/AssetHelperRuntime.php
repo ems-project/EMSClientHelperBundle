@@ -36,25 +36,27 @@ final class AssetHelperRuntime implements RuntimeExtensionInterface
         $this->versionHash = $hash;
         $this->versionSaveDir = $saveDir;
 
-        return $this->assets($hash, $saveDir);
+        return $this->assets($hash, $saveDir, false);
     }
 
-    public function assets(string $hash, string $saveDir = 'bundles'): string
+    public function assets(string $hash, string $saveDir = 'bundles', bool $addEnvironmentSymlink = true): string
     {
         $basePath = $this->publicDir.\DIRECTORY_SEPARATOR.$saveDir.\DIRECTORY_SEPARATOR;
         $directory = $basePath.$hash;
 
         try {
-            $cacheKey = $this->manager->getDefault()->getAlias();
-            $symlink = $basePath.$cacheKey;
-
-            if ($this->filesystem->exists($symlink.\DIRECTORY_SEPARATOR.$hash)) {
-                return $directory;
-            }
-
             if (!$this->filesystem->exists($directory)) {
                 AssetRuntime::extract($this->storageManager->getStream($hash), $directory);
                 $this->filesystem->touch($directory.\DIRECTORY_SEPARATOR.$hash);
+            }
+            if (!$addEnvironmentSymlink) {
+                return $directory;
+            }
+
+            $cacheKey = $this->manager->getDefault()->getAlias();
+            $symlink = $basePath.$cacheKey;
+            if ($this->filesystem->exists($symlink.\DIRECTORY_SEPARATOR.$hash)) {
+                return $directory;
             }
 
             $this->manager->getLogger()->warning('switching assets {symlink} to {hash}', ['symlink' => $symlink, 'hash' => $hash]);
