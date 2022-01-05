@@ -76,6 +76,12 @@
             <tag name="kernel.event_subscriber" />
         </service>
 
+        <service id="emsch.event_listener.cache_listener" class="EMS\ClientHelperBundle\EventListener\CacheListener">
+            <argument type="service" id="emsch.controller.cache"/>
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber" />
+        </service>
+
         <!-- twig -->
         <service id="emsch.twig.extension.helper" class="EMS\ClientHelperBundle\Twig\HelperExtension">
             <tag name="twig.extension" />

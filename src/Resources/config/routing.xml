@@ -37,6 +37,10 @@
             <tag name="controller.service_arguments"/>
         </service>
 
+        <service id="emsch.controller.cache" class="EMS\ClientHelperBundle\Controller\CacheController">
+            <tag name="controller.service_arguments"/>
+        </service>
+
         <service id="emsch.controller.pdf" class="EMS\ClientHelperBundle\Controller\PdfController">
             <argument type="service" id="emsch.routing.handler" />
             <argument type="service" id="twig"/>
