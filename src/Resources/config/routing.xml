@@ -38,6 +38,7 @@
         </service>
 
         <service id="emsch.controller.cache" class="EMS\ClientHelperBundle\Controller\CacheController">
+            <argument type="service" id="emsch.helper_cache"/>
             <tag name="controller.service_arguments"/>
         </service>
 
