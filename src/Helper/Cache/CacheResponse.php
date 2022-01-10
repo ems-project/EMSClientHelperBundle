@@ -67,7 +67,7 @@ final class CacheResponse
 
     public function getLog(): string
     {
-        return sprintf('Cached log message: %s', $this->log);
+        return \sprintf('Cached log message: %s', $this->log);
     }
 
     public function getResponse(): Response
