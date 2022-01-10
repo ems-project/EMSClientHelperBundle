@@ -17,11 +17,37 @@ final class CacheHelper
     private LoggerInterface $logger;
     private string $hashAlgo;
 
-    public function __construct(CacheItemPoolInterface $cache, LoggerInterface $logger, string $hashAlgo)
-    {
+    public function __construct(
+        CacheItemPoolInterface $cache,
+        LoggerInterface $logger,
+        string $hashAlgo
+    ) {
         $this->cache = $cache;
         $this->logger = $logger;
         $this->hashAlgo = $hashAlgo;
+    }
+
+    public function getResponse(string $cacheKey): ?Response
+    {
+        $cacheItem = $this->cache->getItem($cacheKey);
+        if (!$cacheItem->isHit()) {
+            return null;
+        }
+
+        $this->logger->debug(\sprintf('Using cached response with key %s', $cacheKey));
+
+        $cacheResponse = CacheResponse::fromCache($cacheItem);
+        $response = $cacheResponse->getResponse();
+        $this->logger->log($response->isSuccessful() ? 'debug' : 'error', $cacheResponse->getLog());
+
+        return $response;
+    }
+
+    public function saveResponse(CacheResponse $cacheResponse, string $cacheKey): void
+    {
+        $item = $this->cache->getItem($cacheKey);
+        $item->set($cacheResponse->getData());
+        $this->cache->save($item);
     }
 
     public function getContentType(ContentType $contentType): ?ContentType
