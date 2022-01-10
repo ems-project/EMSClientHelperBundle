@@ -112,3 +112,53 @@ This json may also contain an optional `immutable` boolean option [default value
   "immutable": true
 }
 ```
+
+## Profiler
+
+You can disable the profiler for a specific route, by setting **_profiler** to false.
+
+```yaml
+example:
+    config:
+        path: '/example-no-profiler'
+        defaults: { _profiler: false }
+    template_static: template/page.html.twig
+```
+
+
+## EMSCH cache (sub-request)
+
+For routes that **not** return a streamable response we can enable caching that is generated in a subRequest.
+The pdf controller already has support for streams and can fallback to response when using _emsch_cache.
+
+```yaml
+pdf_example:
+    config:
+        path: '/my-pdf-example/{_locale}/{id}/{timestamp}'
+        requirements: { _locale: fr|nl, id: .+, timestamp: .+ }
+        defaults: { 
+          _emsch_cache: { key: 'pdf_example_%_locale%_%id%_%timestamp%', limit: 300 } 
+        }
+        controller: emsch.controller.pdf
+    query: '{"query":{"bool":{"must":[{"term":{"_contenttype":{"value":"page"}}},{"term":{"id":{"value":"%id%"}}}]}}}'
+    template_static: template/my-pdf-example.html.twig
+```
+
+### Return HTTP codes:
+* **201**: On the first request when nothing is cached, this means the sub-request is started
+* **202**: If the sub-request is still running
+* **200**: The sub-request was finished and the response comes from the cache
+* **500**: An exception has occurred and this is now in cache. Check the error logs.
+  * Max memory limit reached? 
+  * Max execution limit reached, you can increase this on the route.
+
+### Note
+
+For now everything is cached using the symfony cache, this means if we restart the server the cache is cleared.
+The timestamp in the route can be the max _finalization time of your content types, this way the cache will not be used if the content has changed.
+
+This setup only works with php-fpm (no windows) because we continue the process after the response was send (onKernelTerminate).
+> Internally, the HttpKernel makes use of the fastcgi_finish_request PHP function. This means that at the moment, only the PHP FPM server API is able to send a response to the client while the server's PHP process still performs some tasks. With all other server APIs, listeners to kernel.terminate are still executed, but the response is not sent to the client until they are all completed.
+
+
+

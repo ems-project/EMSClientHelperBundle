@@ -27,6 +27,7 @@
         <service id="emsch.routing.handler" class="EMS\ClientHelperBundle\Helper\Request\Handler">
             <argument type="service" id="emsch.manager.client_request" />
             <argument type="service" id="router" />
+            <argument type="service" id="profiler" on-invalid="null" />
         </service>
 
         <service id="emsch.controller.router" class="EMS\ClientHelperBundle\Controller\RouterController">

@@ -36,17 +36,18 @@ final class CacheHelper
 
         $this->logger->debug(\sprintf('Using cached response with key %s', $cacheKey));
 
-        return CacheResponse::fromCache($cacheItem)->getResponse();
+        $cacheResponse = CacheResponse::fromCache($cacheItem);
+        $response = $cacheResponse->getResponse();
+        $this->logger->log($response->isSuccessful() ? 'debug' : 'error', $cacheResponse->getLog());
+
+        return $response;
     }
 
-    public function saveResponse(Response $response, string $cacheKey): void
+    public function saveResponse(CacheResponse $cacheResponse, string $cacheKey): void
     {
-        $cacheResponse = new CacheResponse($response);
         $item = $this->cache->getItem($cacheKey);
         $item->set($cacheResponse->getData());
         $this->cache->save($item);
-
-        $this->logger->info(\sprintf('Cached response with key: %s', $cacheKey));
     }
 
     public function getContentType(ContentType $contentType): ?ContentType

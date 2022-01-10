@@ -81,6 +81,7 @@
         </service>
 
         <service id="emsch.event_listener.cache_listener" class="EMS\ClientHelperBundle\EventListener\CacheListener">
+            <argument type="service" id="emsch.helper_cache"/>
             <argument type="service" id="emsch.controller.cache"/>
             <argument type="service" id="kernel"/>
             <argument type="service" id="logger"/>

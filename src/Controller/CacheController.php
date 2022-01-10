@@ -27,7 +27,7 @@ final class CacheController
         $response = $this->cacheHelper->getResponse($request->getEmschCacheKey());
 
         if (null === $response) {
-            return new Response(null, Response::HTTP_ACCEPTED);
+            return new Response(null, Response::HTTP_CREATED);
         }
 
         return $response;

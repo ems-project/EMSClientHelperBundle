@@ -12,6 +12,19 @@ final class EmschRequest extends Request
     public const ATTRIBUTE_EMSCH_CACHE = '_emsch_cache';
     public const ATTRIBUTE_SUB_REQUEST = '_emsch_sub_request';
 
+    public static function fromRequest(Request $request): self
+    {
+        return new self(
+            $request->query->all(),
+            $request->request->all(),
+            $request->attributes->all(),
+            $request->cookies->all(),
+            $request->files->all(),
+            $request->server->all(),
+            $request->getContent(),
+        );
+    }
+
     public function closeSession(): void
     {
         $session = $this->session;
@@ -19,17 +32,6 @@ final class EmschRequest extends Request
         if ($session instanceof SessionInterface && $session->isStarted()) {
             $session->save();
         }
-    }
-
-    public function makeSubRequest(): void
-    {
-        $this->attributes->remove(self::ATTRIBUTE_EMSCH_CACHE);
-        $this->attributes->set(self::ATTRIBUTE_SUB_REQUEST, true);
-    }
-
-    public function hasEmschCache(): bool
-    {
-        return $this->attributes->has(self::ATTRIBUTE_EMSCH_CACHE);
     }
 
     public function getEmschCacheKey(): string
@@ -42,22 +44,25 @@ final class EmschRequest extends Request
         return $this->getEmschCache()['limit'];
     }
 
+    public function hasEmschCache(): bool
+    {
+        return $this->attributes->has(self::ATTRIBUTE_EMSCH_CACHE);
+    }
+
+    public function isProfilerEnabled(): bool
+    {
+        return $this->attributes->get('_profiler', true);
+    }
+
     public function isSubRequest(): bool
     {
         return $this->attributes->get(self::ATTRIBUTE_SUB_REQUEST, false);
     }
 
-    public static function fromRequest(Request $request): self
+    public function makeSubRequest(): void
     {
-        return new self(
-            $request->query->all(),
-            $request->request->all(),
-            $request->attributes->all(),
-            $request->cookies->all(),
-            $request->files->all(),
-            $request->server->all(),
-            $request->getContent(),
-        );
+        $this->attributes->remove(self::ATTRIBUTE_EMSCH_CACHE);
+        $this->attributes->set(self::ATTRIBUTE_SUB_REQUEST, true);
     }
 
     /**
