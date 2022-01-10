@@ -12,6 +12,7 @@ use EMS\ClientHelperBundle\Helper\Templating\TemplateDocument;
 use EMS\CommonBundle\Common\EMSLink;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Route as SymfonyRoute;
 use Symfony\Component\Routing\RouterInterface;
@@ -20,11 +21,16 @@ final class Handler implements HandlerInterface
 {
     private ClientRequest $clientRequest;
     private RouterInterface $router;
+    private ?Profiler $profiler;
 
-    public function __construct(ClientRequestManager $manager, RouterInterface $router)
-    {
+    public function __construct(
+        ClientRequestManager $manager,
+        RouterInterface $router,
+        ?Profiler $profiler
+    ) {
         $this->clientRequest = $manager->getDefault();
         $this->router = $router;
+        $this->profiler = $profiler;
     }
 
     /**
@@ -32,7 +38,13 @@ final class Handler implements HandlerInterface
      */
     public function handle(Request $request): array
     {
-        $route = $this->getRoute($request);
+        $emschRequest = EmschRequest::fromRequest($request);
+
+        if (null !== $this->profiler && !$emschRequest->isProfilerEnabled()) {
+            $this->profiler->disable();
+        }
+
+        $route = $this->getRoute($emschRequest);
         $context = ['trans_default_domain' => $this->clientRequest->getCacheKey()];
 
         if (null !== $document = $this->getDocument($request, $route)) {

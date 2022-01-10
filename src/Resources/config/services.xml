@@ -37,6 +37,10 @@
             <argument type="service" id="EMS\CommonBundle\Contracts\CoreApi\CoreApiFactoryInterface" />
         </service>
 
+        <service id="emsch.helper.request.emsch_request_resolver" class="EMS\ClientHelperBundle\Helper\Request\EmschRequestResolver">
+            <tag name="controller.argument_value_resolver" priority="100"/>
+        </service>
+
         <service id="emsch.helper_locale" class="EMS\ClientHelperBundle\Helper\Request\LocaleHelper">
             <argument type="service" id="router"/>
             <argument type="string">%emsch.locales%</argument>
@@ -73,6 +77,15 @@
             <argument type="service" id="emsch.helper_locale" />
             <argument type="service" id="emsch.helper_exception" />
             <argument type="string">%emsch.bind_locale%</argument>
+            <tag name="kernel.event_subscriber" />
+        </service>
+
+        <service id="emsch.event_listener.cache_listener" class="EMS\ClientHelperBundle\EventListener\CacheListener">
+            <argument type="service" id="emsch.helper_cache"/>
+            <argument type="service" id="emsch.controller.cache"/>
+            <argument type="service" id="kernel"/>
+            <argument type="service" id="logger"/>
+            <argument type="service" id="EMS\CommonBundle\Contracts\Elasticsearch\QueryLoggerInterface"/>
             <tag name="kernel.event_subscriber" />
         </service>
 
