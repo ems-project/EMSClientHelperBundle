@@ -47,40 +47,36 @@ final class PushCommand extends AbstractLocalCommand
 
         foreach ($status->itemsAdded() as $item) {
             $data = $this->coreApi->data($item->getContentType());
-            $draft = $data->create($item->getDataLocal());
+            $draft = $data->create($item->getDataLocal(), $item->getId());
             $ouuid = $data->finalize($draft->getRevisionId());
-            $item->setId($ouuid);
-            $this->writeItem('<fg=green>Created</>', $item);
+            $item->setIdOrigin($ouuid);
+            $this->writeItem('<fg=green>Created</>', $item, $item->getId());
         }
 
         foreach ($status->itemsUpdated() as $item) {
-            if (null === $id = $item->getId()) {
-                continue;
-            }
-
             $data = $this->coreApi->data($item->getContentType());
-            $draft = $data->update($id, $item->getDataLocal());
+            $draft = $data->update($item->getId(), $item->getDataLocal());
             $data->finalize($draft->getRevisionId());
-            $this->writeItem('<fg=blue>Updated</>', $item);
+            $this->writeItem('<fg=blue>Updated</>', $item, $item->getId());
         }
 
         foreach ($status->itemsDeleted() as $item) {
-            if (null === $id = $item->getId()) {
+            if (null === $id = $item->getIdOrigin()) {
                 continue;
             }
 
             $this->coreApi->data($item->getContentType())->delete($id);
-            $this->writeItem('<fg=red>Deleted</>', $item);
+            $this->writeItem('<fg=red>Deleted</>', $item, $id);
         }
     }
 
-    private function writeItem(string $type, Item $item): void
+    private function writeItem(string $type, Item $item, string $id): void
     {
         $url = \vsprintf('%s - %s/data/revisions/%s:%s', [
             $item->getKey(),
             $this->coreApi->getBaseUrl(),
             $item->getContentType(),
-            $item->getId(),
+            $id,
         ]);
 
         $this->io->writeln(\sprintf('[%s] %s', $type, $url));
