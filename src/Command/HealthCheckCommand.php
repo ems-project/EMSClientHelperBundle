@@ -7,37 +7,28 @@ namespace EMS\ClientHelperBundle\Command;
 use EMS\ClientHelperBundle\Exception\ClusterHealthNotGreenException;
 use EMS\ClientHelperBundle\Exception\ClusterHealthRedException;
 use EMS\ClientHelperBundle\Exception\IndexNotFoundException;
-use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
+use EMS\CommonBundle\Common\Command\AbstractCommand;
 use EMS\CommonBundle\Service\ElasticaService;
 use EMS\CommonBundle\Storage\StorageManager;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
-final class HealthCheckCommand extends Command
+final class HealthCheckCommand extends AbstractCommand
 {
-    /** @var ClientRequest[] */
-    private iterable $clientRequests;
     private EnvironmentHelper $environmentHelper;
     private ?StorageManager $storageManager;
     private ElasticaService $elasticaService;
 
-    /**
-     * @param ClientRequest[] $clientRequests
-     */
     public function __construct(
         EnvironmentHelper $environmentHelper,
         ElasticaService $elasticaService,
-        iterable $clientRequests = null,
         StorageManager $storageManager = null
     ) {
         parent::__construct();
         $this->environmentHelper = $environmentHelper;
         $this->elasticaService = $elasticaService;
-        $this->clientRequests = $clientRequests ?? [];
         $this->storageManager = $storageManager;
     }
 
@@ -53,39 +44,38 @@ final class HealthCheckCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $io = new SymfonyStyle($input, $output);
-        $io->title('Performing Health Check');
+        $this->io->title('Performing Health Check');
 
-        $this->checkElasticSearch($io, (true === $input->getOption('green')));
-        $this->checkIndexes($io);
-        $this->checkStorage($io, (true === $input->getOption('skip-storage')));
+        $this->checkElasticSearch($this->getOptionBool('green'));
+        $this->checkIndexes();
+        $this->checkStorage($this->getOptionBool('skip-storage'));
 
-        $io->success('Health check finished.');
+        $this->io->success('Health check finished.');
 
-        return 1;
+        return self::EXECUTE_SUCCESS;
     }
 
-    private function checkElasticSearch(SymfonyStyle $io, bool $green): void
+    private function checkElasticSearch(bool $green): void
     {
-        $io->section('Elasticsearch');
+        $this->io->section('Elasticsearch');
         $status = $this->elasticaService->getHealthStatus();
 
         if ('red' === $status) {
-            $io->error('Cluster health is RED');
+            $this->io->error('Cluster health is RED');
             throw new ClusterHealthRedException();
         }
 
         if ($green && 'green' !== $status) {
-            $io->error('Cluster health is NOT GREEN');
+            $this->io->error('Cluster health is NOT GREEN');
             throw new ClusterHealthNotGreenException();
         }
 
-        $io->success('Elasticsearch is working.');
+        $this->io->success('Elasticsearch is working.');
     }
 
-    private function checkIndexes(SymfonyStyle $io): void
+    private function checkIndexes(): void
     {
-        $io->section('Indexes');
+        $this->io->section('Indexes');
         $countAliases = 0;
         $countIndices = 0;
         foreach ($this->environmentHelper->getEnvironments() as $environment) {
@@ -93,26 +83,26 @@ final class HealthCheckCommand extends Command
             try {
                 $countIndices += \count($this->elasticaService->getIndicesFromAlias($environment->getAlias()));
             } catch (\Throwable $e) {
-                $io->error(\sprintf('Alias %s not found with error: %s', $environment->getAlias(), $e->getMessage()));
+                $this->io->error(\sprintf('Alias %s not found with error: %s', $environment->getAlias(), $e->getMessage()));
                 throw new IndexNotFoundException();
             }
         }
 
-        $io->success(\sprintf('%d indices have been found in %d aliases.', $countIndices, $countAliases));
+        $this->io->success(\sprintf('%d indices have been found in %d aliases.', $countIndices, $countAliases));
     }
 
-    private function checkStorage(SymfonyStyle $io, bool $skip): void
+    private function checkStorage(bool $skip): void
     {
-        $io->section('Storage');
+        $this->io->section('Storage');
 
         if ($skip) {
-            $io->note('Skipping Storage Health Check.');
+            $this->io->note('Skipping Storage Health Check.');
 
             return;
         }
 
         if (null === $this->storageManager) {
-            $io->warning('Skipping assets because health check has no access to a storageManager, enable storage ?');
+            $this->io->warning('Skipping assets because health check has no access to a storageManager, enable storage ?');
 
             return;
         }
@@ -123,6 +113,6 @@ final class HealthCheckCommand extends Command
             $adapters[] = $name.' -> '.($status ? 'green' : 'red');
         }
 
-        $io->listing($adapters);
+        $this->io->listing($adapters);
     }
 }
