@@ -16,16 +16,20 @@ final class PushCommand extends AbstractLocalCommand
         $this->io->title('Local development - push');
         $this->io->section(\sprintf('Pushing for environment %s', $this->environment->getName()));
 
+        if (!$this->healthCheck()) {
+            return self::EXECUTE_ERROR;
+        }
+
         if (!$this->localHelper->isUpToDate($this->environment)) {
             $this->io->error('Not up to date, please commit/stash changes and run emsch:local:pull');
 
-            return -1;
+            return self::EXECUTE_ERROR;
         }
 
         if (!$this->coreApi->isAuthenticated()) {
             $this->io->error(\sprintf('Not authenticated for %s, run emsch:local:login', $this->coreApi->getBaseUrl()));
 
-            return -1;
+            return self::EXECUTE_ERROR;
         }
 
         foreach ($this->localHelper->statuses($this->environment) as $status) {
@@ -34,7 +38,7 @@ final class PushCommand extends AbstractLocalCommand
 
         $this->localHelper->buildVersion($this->environment, true);
 
-        return 1;
+        return self::EXECUTE_SUCCESS;
     }
 
     private function pushStatus(Status $status): void
@@ -79,6 +83,6 @@ final class PushCommand extends AbstractLocalCommand
             $item->getId(),
         ]);
 
-        $this->io->writeln(\sprintf('%s %s', $type, $url));
+        $this->io->writeln(\sprintf('[%s] %s', $type, $url));
     }
 }

@@ -58,6 +58,16 @@ final class LocalHelper
         return $coreApi;
     }
 
+    public function getUrl(): string
+    {
+        return $this->clientRequest->getUrl();
+    }
+
+    public function health(): string
+    {
+        return $this->clientRequest->healthStatus('green');
+    }
+
     public function login(Environment $environment, string $username, string $password): CoreApiInterface
     {
         $coreApi = $this->environmentApi->login($environment, $username, $password);

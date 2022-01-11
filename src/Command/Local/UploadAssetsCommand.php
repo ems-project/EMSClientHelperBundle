@@ -43,7 +43,7 @@ final class UploadAssetsCommand extends AbstractUploadCommand
         if (!$this->coreApi->isAuthenticated()) {
             $this->io->error(\sprintf('Not authenticated for %s, run emsch:local:login', $this->coreApi->getBaseUrl()));
 
-            return -1;
+            return self::EXECUTE_ERROR;
         }
 
         try {
@@ -51,17 +51,15 @@ final class UploadAssetsCommand extends AbstractUploadCommand
         } catch (\Throwable $e) {
             $this->io->error($e->getMessage());
 
-            return -1;
+            return self::EXECUTE_ERROR;
         }
 
-        $hash = $this->uploadFile($assetsArchive);
-
-        if (null === $hash) {
-            return 1;
+        if (null === $hash = $this->uploadFile($assetsArchive)) {
+            return self::EXECUTE_ERROR;
         }
 
         $this->io->success(\sprintf('Assets %s have been uploaded', $hash));
 
-        return 0;
+        return self::EXECUTE_ERROR;
     }
 }

@@ -63,6 +63,11 @@ final class ClientRequest implements ClientRequestInterface
         $this->name = $name;
     }
 
+    public function getUrl()
+    {
+        return $this->elasticaService->getUrl();
+    }
+
     /**
      * @return string[]
      */
