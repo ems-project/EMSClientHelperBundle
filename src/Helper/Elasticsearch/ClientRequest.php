@@ -64,7 +64,7 @@ final class ClientRequest implements ClientRequestInterface
         $this->name = $name;
     }
 
-    public function getUrl()
+    public function getUrl(): string
     {
         return $this->elasticaService->getUrl();
     }
@@ -301,7 +301,7 @@ final class ClientRequest implements ClientRequestInterface
 
         $cachedContentType = $this->cacheHelper->getContentType($contentType);
 
-        return $cachedContentType ? $cachedContentType : $contentType;
+        return $cachedContentType ?: $contentType;
     }
 
     /**
@@ -344,9 +344,9 @@ final class ClientRequest implements ClientRequestInterface
         return $this->elasticaService->refresh($this->getAlias());
     }
 
-    public function healthStatus(string $status): string
+    public function healthStatus(): string
     {
-        return $this->elasticaService->getHealthStatus($status, '10s', $this->getAlias());
+        return $this->elasticaService->getHealthStatus();
     }
 
     /**

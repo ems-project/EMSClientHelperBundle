@@ -48,8 +48,7 @@ final class PushCommand extends AbstractLocalCommand
         foreach ($status->itemsAdded() as $item) {
             $data = $this->coreApi->data($item->getContentType());
             $draft = $data->create($item->getDataLocal(), $item->getId());
-            $ouuid = $data->finalize($draft->getRevisionId());
-            $item->setIdOrigin($ouuid);
+            $data->finalize($draft->getRevisionId());
             $this->writeItem('<fg=green>Created</>', $item, $item->getId());
         }
 

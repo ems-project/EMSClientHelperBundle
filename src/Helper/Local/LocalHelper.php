@@ -66,7 +66,17 @@ final class LocalHelper
 
     public function health(): string
     {
-        return $this->clientRequest->healthStatus('green');
+        return $this->clientRequest->healthStatus();
+    }
+
+    public function checkConfigFile(Environment $environment): bool
+    {
+        return false === ConfigFile::fromDir($environment->getLocal()->getDirectory())->isEmpty();
+    }
+
+    public function tryIndexSearch(): void
+    {
+        $this->clientRequest->searchArgs([]);
     }
 
     public function login(Environment $environment, string $username, string $password): CoreApiInterface
@@ -99,7 +109,7 @@ final class LocalHelper
     public function buildVersion(Environment $environment, bool $refresh = false): void
     {
         if ($refresh) {
-            if ('green' === $this->clientRequest->healthStatus('green')) {
+            if ('green' === $this->clientRequest->healthStatus()) {
                 $this->clientRequest->refresh();
             }
             $this->contentTypeHelper->clear();

@@ -58,7 +58,7 @@ abstract class AbstractLocalCommand extends AbstractCommand
         $this->coreApi = $this->localHelper->api($this->environment);
     }
 
-    protected function healthCheck(): bool
+    protected function healthCheck(bool $checkConfigFile = true): bool
     {
         $health = $this->localHelper->health();
 
@@ -70,6 +70,20 @@ abstract class AbstractLocalCommand extends AbstractCommand
 
         if ('yellow' === $health) {
             $this->io->warning(\sprintf('Yellow health for %s', $this->localHelper->getUrl()));
+        }
+
+        try {
+            $this->localHelper->tryIndexSearch();
+        } catch (\Throwable $e) {
+            $this->io->error($e->getMessage());
+
+            return false;
+        }
+
+        if ($checkConfigFile && !$this->localHelper->checkConfigFile($this->environment)) {
+            $this->io->error('Missing config.yaml file, please pull first');
+
+            return false;
         }
 
         return true;

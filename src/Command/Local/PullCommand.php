@@ -14,7 +14,7 @@ final class PullCommand extends AbstractLocalCommand
         $this->io->title('Local development - pull');
         $this->io->section(\sprintf('Pulling for environment %s', $this->environment->getName()));
 
-        if (!$this->healthCheck()) {
+        if (!$this->healthCheck(false)) {
             return self::EXECUTE_ERROR;
         }
 

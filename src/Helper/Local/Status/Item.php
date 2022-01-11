@@ -26,7 +26,7 @@ final class Item
 
     public function isAdded(): bool
     {
-        return $this->id !== $this->idOrigin;
+        return [] !== $this->dataLocal && $this->id !== $this->idOrigin;
     }
 
     public function isUpdated(): bool

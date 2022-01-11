@@ -25,6 +25,11 @@ final class ConfigFile
         $this->config = Yaml::parse($content) ?? [];
     }
 
+    public function isEmpty(): bool
+    {
+        return [] === $this->config;
+    }
+
     public static function fromDir(string $directory): self
     {
         return new self($directory);
