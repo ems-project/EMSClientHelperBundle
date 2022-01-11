@@ -11,6 +11,7 @@ use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentApi;
 use EMS\ClientHelperBundle\Helper\Local\Status\Status;
+use EMS\CommonBundle\Common\Standard\Hash;
 use EMS\CommonBundle\Contracts\CoreApi\CoreApiInterface;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
@@ -123,7 +124,7 @@ final class LocalHelper
 
     private function apiCacheToken(CoreApiInterface $coreApi): CacheItemInterface
     {
-        return $this->cache->getItem('token_'.\sha1($coreApi->getBaseUrl()));
+        return $this->cache->getItem(Hash::string($coreApi->getBaseUrl(), 'token_'));
     }
 
     private function statusRouting(Environment $environment): Status
@@ -150,9 +151,9 @@ final class LocalHelper
         $templates = $this->builders->templating()->getTemplates($environment);
 
         foreach ($environment->getLocal()->getTemplates() as $templateFile) {
-            $mapping = $templates->getMapping($templateFile->getContentType());
+            $mapping = $templates->getMapping($templateFile->getContentTypeName());
 
-            $status->addItemLocal($templateFile->getName(), $templateFile->getContentType(), [
+            $status->addItemLocal($templateFile->getName(), $templateFile->getContentTypeName(), [
                 ($mapping['name']) => $templateFile->getName(),
                 ($mapping['code']) => $templateFile->getCode(),
             ]);

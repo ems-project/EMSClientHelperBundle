@@ -9,6 +9,7 @@ use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Routing\RoutingBuilder;
 use EMS\ClientHelperBundle\Helper\Templating\TemplateBuilder;
 use EMS\ClientHelperBundle\Helper\Translation\TranslationBuilder;
+use EMS\CommonBundle\Common\Standard\Hash;
 
 final class Builders
 {
@@ -39,7 +40,7 @@ final class Builders
             ''
         );
 
-        return \sha1($cacheValidityTags);
+        return Hash::string($cacheValidityTags);
     }
 
     public function build(Environment $environment, string $directory): void

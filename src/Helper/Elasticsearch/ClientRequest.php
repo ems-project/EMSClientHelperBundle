@@ -15,6 +15,7 @@ use EMS\ClientHelperBundle\Helper\ContentType\ContentTypeHelper;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\CommonBundle\Common\EMSLink;
+use EMS\CommonBundle\Common\Standard\Hash;
 use EMS\CommonBundle\Elasticsearch\Document\EMSSource;
 use EMS\CommonBundle\Elasticsearch\Exception\NotFoundException;
 use EMS\CommonBundle\Search\Search;
@@ -608,12 +609,8 @@ final class ClientRequest implements ClientRequestInterface
         if (null === $type) {
             return $function();
         }
-        $jsonEncoded = \json_encode($cacheKey);
-        if (false === $jsonEncoded) {
-            throw new \RuntimeException('Unexpected false json_encode result');
-        }
-        $cacheHash = \sha1($jsonEncoded);
 
+        $cacheHash = Hash::array($cacheKey);
         $cachedHierarchy = $this->cache->getItem($cacheHash);
 
         /** @var Response|null $response */

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Templating;
 
 use EMS\ClientHelperBundle\Helper\Builder\AbstractBuilder;
-use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 
 final class TemplateBuilder extends AbstractBuilder
@@ -31,13 +30,7 @@ final class TemplateBuilder extends AbstractBuilder
 
     public function buildFiles(Environment $environment, string $directory): void
     {
-        $templates = $this->getTemplates($environment);
-        $contentTypes = $templates->getContentTypes();
-
-        $contentTypeNames = \array_map(fn (ContentType $contentType) => $contentType->getName(), $contentTypes);
-        $documents = $this->getDocuments($environment);
-
-        TemplateFiles::build($directory, $contentTypeNames, $documents);
+        TemplateFiles::build($directory, $this->getTemplates($environment), $this->getDocuments($environment));
     }
 
     /**

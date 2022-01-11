@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Local\Status;
 
+use EMS\CommonBundle\Common\Standard\Hash;
+
 final class Item
 {
     private string $key;
@@ -18,7 +20,7 @@ final class Item
     private function __construct(string $key, string $contentType)
     {
         $this->key = $key;
-        $this->id = \sha1($key);
+        $this->id = Hash::string($key);
         $this->contentType = $contentType;
     }
 

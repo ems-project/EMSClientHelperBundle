@@ -75,7 +75,7 @@ final class RoutingFile implements \Countable
         foreach ($this->routes as $name => $route) {
             if (isset($route['template_static'])) {
                 $template = $this->templateFiles->find($route['template_static']);
-                if ($template && $template->hasOuuid()) {
+                if ($template) {
                     $route['template_static'] = $template->getPathOuuid();
                 }
             }
