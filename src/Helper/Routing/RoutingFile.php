@@ -53,6 +53,7 @@ final class RoutingFile implements \Countable
             }
 
             unset($data['name']);
+            unset($data['order']);
             $routes[$document->getName()] = $data;
         }
 
@@ -68,6 +69,7 @@ final class RoutingFile implements \Countable
      */
     public function getData(): array
     {
+        $order = 0;
         $data = [];
 
         foreach ($this->routes as $name => $route) {
@@ -78,6 +80,7 @@ final class RoutingFile implements \Countable
                 }
             }
 
+            $route['order'] = ++$order;
             $data[$name] = $route;
         }
 

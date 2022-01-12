@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Templating;
 
+use EMS\ClientHelperBundle\Exception\TemplatingException;
 use EMS\ClientHelperBundle\Helper\Builder\BuilderDocumentInterface;
+use EMS\CommonBundle\Common\Standard\Json;
 
 final class TemplateDocument implements BuilderDocumentInterface
 {
@@ -25,6 +27,10 @@ final class TemplateDocument implements BuilderDocumentInterface
         $this->id = $id;
         $this->source = $source;
         $this->mapping = $mapping;
+
+        if (!isset($this->source[$this->mapping['name']])) {
+            throw new TemplatingException(\sprintf('Invalid EMSCH_TEMPLATES mapping %s', Json::encode($mapping)));
+        }
     }
 
     public function getId(): string

@@ -14,6 +14,7 @@ use EMS\ClientHelperBundle\Helper\Environment\EnvironmentApi;
 use EMS\ClientHelperBundle\Helper\Local\Status\Status;
 use EMS\CommonBundle\Common\Standard\Hash;
 use EMS\CommonBundle\Contracts\CoreApi\CoreApiInterface;
+use EMS\CommonBundle\Contracts\CoreApi\Exception\NotAuthenticatedExceptionInterface;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
@@ -75,6 +76,9 @@ final class LocalHelper
         $this->clientRequest->searchArgs([]);
     }
 
+    /**
+     * @throws NotAuthenticatedExceptionInterface
+     */
     public function login(Environment $environment, string $username, string $password): CoreApiInterface
     {
         $coreApi = $this->environmentApi->login($environment, $username, $password);
@@ -88,9 +92,9 @@ final class LocalHelper
     public function isUpToDate(Environment $environment): bool
     {
         $settings = $this->clientRequest->getSettings($environment);
-        $localVersion = $environment->getLocal()->getVersionFile()->getVersion();
+        $lockVersion = $environment->getLocal()->getVersionLockFile()->getVersion($environment);
 
-        return $localVersion === $this->builders->getVersion($settings);
+        return $lockVersion === $this->builders->getVersion($settings);
     }
 
     public function build(Environment $environment): void
@@ -101,13 +105,11 @@ final class LocalHelper
         $this->builders->build($environment, $directory);
         $environment->getLocal()->refresh($settings);
 
-        $this->buildVersion($environment);
+        $this->lockVersion($environment);
     }
 
-    public function buildVersion(Environment $environment, bool $refresh = false): void
+    public function lockVersion(Environment $environment, bool $refresh = false): void
     {
-        $settings = $this->clientRequest->getSettings($environment);
-
         if ($refresh) {
             if ('green' === $this->clientRequest->healthStatus()) {
                 $this->clientRequest->refresh();
@@ -115,9 +117,9 @@ final class LocalHelper
             $this->contentTypeHelper->clear();
         }
 
-        $directory = $environment->getLocal()->getDirectory();
-
-        VersionFile::build($directory, $this->builders->getVersion($settings));
+        $settings = $this->clientRequest->getSettings($environment, false);
+        $versionLockFile = $environment->getLocal()->getVersionLockFile();
+        $versionLockFile->addVersion($environment, $this->builders->getVersion($settings))->save();
     }
 
     /**

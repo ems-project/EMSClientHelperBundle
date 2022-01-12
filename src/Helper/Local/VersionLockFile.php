@@ -1,0 +1,57 @@
+<?php
+
+declare(strict_types=1);
+
+namespace EMS\ClientHelperBundle\Helper\Local;
+
+use EMS\ClientHelperBundle\Helper\Environment\Environment;
+use EMS\CommonBundle\Common\Standard\Json;
+use Symfony\Component\Filesystem\Filesystem;
+
+final class VersionLockFile
+{
+    private string $filename;
+    /** @var array<mixed> */
+    private array $lock = [];
+    private const NAME = 'version.lock';
+
+    public function __construct(string $directory)
+    {
+        $this->filename = $directory.\DIRECTORY_SEPARATOR.self::NAME;
+        $content = \file_exists($this->filename) ? \file_get_contents($this->filename) : false;
+        $this->lock = Json::decode($content ?: '{}');
+    }
+
+    public function addVersion(Environment $environment, string $version): self
+    {
+        $this->lock['version'][$environment->getBackendUrl()] = $version;
+
+        return $this;
+    }
+
+    public function getVersion(Environment $environment): ?string
+    {
+        return $this->lock['version'][$environment->getBackendUrl()] ?? null;
+    }
+
+    public function save(): self
+    {
+        $filesystem = new Filesystem();
+        $filesystem->dumpFile($this->filename, Json::encode($this->lock, true));
+
+        return $this;
+    }
+
+//    public static function build(string $directory, string $version): self
+//    {
+//        $filesystem = new Filesystem();
+//        $filesystem->dumpFile($directory.\DIRECTORY_SEPARATOR.self::NAME, $version);
+//
+//        return new self($directory);
+//    }
+//
+//    public function getVersion(): ?string
+//    {
+//        return $this->version;
+//    }
+}

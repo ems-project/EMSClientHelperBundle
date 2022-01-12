@@ -265,11 +265,11 @@ final class ClientRequest implements ClientRequestInterface
         $this->cacheHelper->saveContentType($contentType);
     }
 
-    public function getSettings(Environment $environment): Settings
+    public function getSettings(Environment $environment, bool $cache = true): Settings
     {
         static $save = [];
 
-        if (isset($save[$environment->getName()])) {
+        if (isset($save[$environment->getName()]) && $cache) {
             return $save[$environment->getName()];
         }
 

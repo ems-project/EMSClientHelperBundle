@@ -36,7 +36,7 @@ final class PushCommand extends AbstractLocalCommand
             $this->pushStatus($status);
         }
 
-        $this->localHelper->buildVersion($this->environment, true);
+        $this->localHelper->lockVersion($this->environment, true);
 
         return self::EXECUTE_SUCCESS;
     }

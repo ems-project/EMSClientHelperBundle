@@ -19,8 +19,8 @@ final class LoginCommand extends AbstractLocalCommand
     {
         parent::configure();
         $this
-            ->addArgument(self::ARG_USERNAME, InputArgument::OPTIONAL, 'username', null)
-            ->addArgument(self::ARG_PASSWORD, InputArgument::OPTIONAL, 'password', null)
+            ->addArgument(self::ARG_USERNAME, InputArgument::OPTIONAL, 'username')
+            ->addArgument(self::ARG_PASSWORD, InputArgument::OPTIONAL, 'password')
         ;
     }
 

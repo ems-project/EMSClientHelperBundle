@@ -65,9 +65,9 @@ final class LocalEnvironment
         return $this->translationFiles;
     }
 
-    public function getVersionFile(): VersionFile
+    public function getVersionLockFile(): VersionLockFile
     {
-        return new VersionFile($this->directory);
+        return new VersionLockFile($this->directory);
     }
 
     public function isPulled(): bool
