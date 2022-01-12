@@ -41,17 +41,4 @@ final class VersionLockFile
 
         return $this;
     }
-
-//    public static function build(string $directory, string $version): self
-//    {
-//        $filesystem = new Filesystem();
-//        $filesystem->dumpFile($directory.\DIRECTORY_SEPARATOR.self::NAME, $version);
-//
-//        return new self($directory);
-//    }
-//
-//    public function getVersion(): ?string
-//    {
-//        return $this->version;
-//    }
 }
