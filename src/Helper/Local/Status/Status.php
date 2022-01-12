@@ -22,6 +22,11 @@ final class Status
         return $this->name;
     }
 
+    public function itemsLocal(): Items
+    {
+        return $this->items->filter(fn (Item $item): bool => $item->hasDataLocal() && $item->hasDataOrigin());
+    }
+
     public function itemsAdded(): Items
     {
         return $this->items->filter(fn (Item $item): bool => $item->isAdded());

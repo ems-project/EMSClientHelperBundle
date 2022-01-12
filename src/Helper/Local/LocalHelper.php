@@ -93,11 +93,6 @@ final class LocalHelper
         return $localVersion === $this->builders->getVersion($settings);
     }
 
-    public function getSettings(Environment $environment): Settings
-    {
-        return $this->clientRequest->getSettings($environment);
-    }
-
     public function build(Environment $environment): void
     {
         $settings = $this->clientRequest->getSettings($environment);
@@ -182,7 +177,7 @@ final class LocalHelper
         $status = new Status('Translations');
         $status->addBuilderDocuments($this->builders->translation()->getDocuments($environment));
 
-        if (null === $contentTypeName = $settings->getRouteContentTypeName()) {
+        if (null === $contentTypeName = $settings->getTranslationContentTypeName()) {
             return $status;
         }
 

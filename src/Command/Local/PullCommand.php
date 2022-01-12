@@ -24,16 +24,10 @@ final class PullCommand extends AbstractLocalCommand
             $this->io->success(\sprintf('Pulled successfully into %s', $this->localEnvironment->getDirectory()));
         }
 
-        $localEnvironment = $this->environment->getLocal();
-        $settings = $this->localHelper->getSettings($this->environment);
-
         $list = [];
-        $list[] = ['translations' => $localEnvironment->getTranslations()->count()];
-        foreach ($localEnvironment->getTranslations() as $translationFile) {
-            $list[] = [\sprintf('translations %s', \strtoupper($translationFile->locale)) => \count($translationFile)];
+        foreach ($this->localHelper->statuses($this->environment) as $status) {
+            $list[] = [$status->getName() => $status->itemsLocal()->count()];
         }
-        $list[] = ['templates' => $localEnvironment->getTemplates($settings)->count()];
-        $list[] = ['routes' => $localEnvironment->getRouting($settings)->count()];
 
         $this->io->definitionList(...$list);
 

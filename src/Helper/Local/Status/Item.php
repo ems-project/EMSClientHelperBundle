@@ -26,7 +26,7 @@ final class Item
 
     public function isAdded(): bool
     {
-        return [] !== $this->dataLocal && $this->id !== $this->idOrigin;
+        return $this->hasDataLocal() && $this->id !== $this->idOrigin;
     }
 
     public function isUpdated(): bool
@@ -35,7 +35,7 @@ final class Item
             return false;
         }
 
-        if ([] === $this->dataLocal || $this->dataLocal === $this->dataOrigin) {
+        if (!$this->hasDataLocal() || $this->dataLocal === $this->dataOrigin) {
             return false;
         }
 
@@ -48,7 +48,7 @@ final class Item
             return false;
         }
 
-        return [] === $this->dataLocal || $this->id !== $this->idOrigin;
+        return !$this->hasDataLocal() || $this->id !== $this->idOrigin;
     }
 
     public function getId(): string
@@ -69,6 +69,16 @@ final class Item
     public function getContentType(): string
     {
         return $this->contentType;
+    }
+
+    public function hasDataLocal(): bool
+    {
+        return [] !== $this->dataLocal;
+    }
+
+    public function hasDataOrigin(): bool
+    {
+        return [] !== $this->dataOrigin;
     }
 
     /**
