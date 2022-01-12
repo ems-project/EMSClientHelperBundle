@@ -11,9 +11,10 @@ final class TemplateBuilder extends AbstractBuilder
 {
     public function buildTemplate(Environment $environment, TemplateName $templateName): TemplateDocument
     {
-        $templates = $this->getTemplates($environment);
-        $contentType = $templates->getContentType($templateName->getContentType());
-        $mapping = $templates->getMapping($templateName->getContentType());
+        $settings = $this->settings($environment);
+
+        $contentType = $settings->getTemplateContentType($templateName->getContentType());
+        $mapping = $settings->getTemplateMapping($templateName->getContentType());
 
         $searchField = $templateName->getSearchField();
         $hit = $this->clientRequest->searchOne($contentType->getName(), [
@@ -28,9 +29,18 @@ final class TemplateBuilder extends AbstractBuilder
         return new TemplateDocument($hit['_id'], $hit['_source'], $mapping);
     }
 
-    public function buildFiles(Environment $environment, string $directory): void
+    public function buildFile(Environment $environment, TemplateName $templateName): TemplateFile
     {
-        TemplateFiles::build($directory, $this->getTemplates($environment), $this->getDocuments($environment));
+        $settings = $this->settings($environment);
+
+        return $environment->getLocal()->getTemplates($settings)->getByTemplateName($templateName);
+    }
+
+    public function buildFiles(Environment $environment, string $directory): TemplateFiles
+    {
+        $settings = $this->settings($environment);
+
+        return TemplateFiles::build($directory, $settings, $this->getDocuments($environment));
     }
 
     /**
@@ -38,10 +48,10 @@ final class TemplateBuilder extends AbstractBuilder
      */
     public function getDocuments(Environment $environment): \Generator
     {
-        $templates = $this->getTemplates($environment);
+        $settings = $this->settings($environment);
 
-        foreach ($templates->getContentTypes() as $contentType) {
-            $mapping = $templates->getMapping($contentType->getName());
+        foreach ($settings->getTemplateContentTypes() as $contentType) {
+            $mapping = $settings->getTemplateMapping($contentType->getName());
 
             foreach ($this->search($contentType)->getDocuments() as $doc) {
                 yield new TemplateDocument($doc->getId(), $doc->getSource(), $mapping);
@@ -49,25 +59,16 @@ final class TemplateBuilder extends AbstractBuilder
         }
     }
 
-    public function getTemplates(Environment $environment): Templates
-    {
-        static $templates = null;
-
-        if (null === $templates) {
-            $templates = new Templates($this->clientRequest, $environment);
-        }
-
-        return $templates;
-    }
-
     public function isFresh(Environment $environment, TemplateName $templateName, int $time): bool
     {
+        $settings = $this->clientRequest->getSettings($environment);
+
         if ($environment->isLocalPulled()) {
-            return $environment->getLocal()->getTemplates()->getByTemplateName($templateName)->isFresh($time);
+            return $environment->getLocal()->getTemplates($settings)->getByTemplateName($templateName)->isFresh($time);
         }
 
-        $templates = $this->getTemplates($environment);
+        $contentType = $settings->getTemplateContentType($templateName->getContentType());
 
-        return $templates->getContentType($templateName->getContentType())->isLastPublishedAfterTime($time);
+        return $contentType->isLastPublishedAfterTime($time);
     }
 }

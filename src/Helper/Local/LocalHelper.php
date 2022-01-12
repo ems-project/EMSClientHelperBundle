@@ -8,6 +8,7 @@ use EMS\ClientHelperBundle\Helper\Builder\Builders;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentTypeHelper;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
+use EMS\ClientHelperBundle\Helper\Elasticsearch\Settings;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentApi;
 use EMS\ClientHelperBundle\Helper\Local\Status\Status;
@@ -69,11 +70,6 @@ final class LocalHelper
         return $this->clientRequest->healthStatus();
     }
 
-    public function checkConfigFile(Environment $environment): bool
-    {
-        return false === ConfigFile::fromDir($environment->getLocal()->getDirectory())->isEmpty();
-    }
-
     public function tryIndexSearch(): void
     {
         $this->clientRequest->searchArgs([]);
@@ -91,23 +87,32 @@ final class LocalHelper
 
     public function isUpToDate(Environment $environment): bool
     {
+        $settings = $this->clientRequest->getSettings($environment);
         $localVersion = $environment->getLocal()->getVersionFile()->getVersion();
 
-        return $localVersion === $this->builders->getVersion($environment);
+        return $localVersion === $this->builders->getVersion($settings);
+    }
+
+    public function getSettings(Environment $environment): Settings
+    {
+        return $this->clientRequest->getSettings($environment);
     }
 
     public function build(Environment $environment): void
     {
+        $settings = $this->clientRequest->getSettings($environment);
         $directory = $environment->getLocal()->getDirectory();
 
         $this->builders->build($environment, $directory);
-        $environment->getLocal()->refresh();
+        $environment->getLocal()->refresh($settings);
 
         $this->buildVersion($environment);
     }
 
     public function buildVersion(Environment $environment, bool $refresh = false): void
     {
+        $settings = $this->clientRequest->getSettings($environment);
+
         if ($refresh) {
             if ('green' === $this->clientRequest->healthStatus()) {
                 $this->clientRequest->refresh();
@@ -117,7 +122,7 @@ final class LocalHelper
 
         $directory = $environment->getLocal()->getDirectory();
 
-        VersionFile::build($directory, $this->builders->getVersion($environment));
+        VersionFile::build($directory, $this->builders->getVersion($settings));
     }
 
     /**
@@ -125,10 +130,12 @@ final class LocalHelper
      */
     public function statuses(Environment $environment): array
     {
+        $settings = $this->clientRequest->getSettings($environment);
+
         return [
-            $this->statusRouting($environment),
-            $this->statusTemplating($environment),
-            $this->statusTranslation($environment),
+            $this->statusRouting($environment, $settings),
+            $this->statusTemplating($environment, $settings),
+            $this->statusTranslation($environment, $settings),
         ];
     }
 
@@ -137,31 +144,29 @@ final class LocalHelper
         return $this->cache->getItem(Hash::string($coreApi->getBaseUrl(), 'token_'));
     }
 
-    private function statusRouting(Environment $environment): Status
+    private function statusRouting(Environment $environment, Settings $settings): Status
     {
         $status = new Status('Routing');
         $status->addBuilderDocuments($this->builders->routing()->getDocuments($environment));
 
-        if (null === $contentType = $this->builders->routing()->getContentType($environment)) {
+        if (null === $contentTypeName = $settings->getRouteContentTypeName()) {
             return $status;
         }
 
-        foreach ($environment->getLocal()->getRouting()->getData() as $name => $data) {
-            $status->addItemLocal($name, $contentType->getName(), $data);
+        foreach ($environment->getLocal()->getRouting($settings)->getData() as $name => $data) {
+            $status->addItemLocal($name, $contentTypeName, $data);
         }
 
         return $status;
     }
 
-    private function statusTemplating(Environment $environment): Status
+    private function statusTemplating(Environment $environment, Settings $settings): Status
     {
         $status = new Status('Templating');
         $status->addBuilderDocuments($this->builders->templating()->getDocuments($environment));
 
-        $templates = $this->builders->templating()->getTemplates($environment);
-
-        foreach ($environment->getLocal()->getTemplates() as $templateFile) {
-            $mapping = $templates->getMapping($templateFile->getContentTypeName());
+        foreach ($environment->getLocal()->getTemplates($settings) as $templateFile) {
+            $mapping = $settings->getTemplateMapping($templateFile->getContentTypeName());
 
             $status->addItemLocal($templateFile->getName(), $templateFile->getContentTypeName(), [
                 ($mapping['name']) => $templateFile->getName(),
@@ -172,17 +177,17 @@ final class LocalHelper
         return $status;
     }
 
-    private function statusTranslation(Environment $environment): Status
+    private function statusTranslation(Environment $environment, Settings $settings): Status
     {
         $status = new Status('Translations');
         $status->addBuilderDocuments($this->builders->translation()->getDocuments($environment));
 
-        if (null === $contentType = $this->builders->translation()->getContentType($environment)) {
+        if (null === $contentTypeName = $settings->getRouteContentTypeName()) {
             return $status;
         }
 
         foreach ($environment->getLocal()->getTranslations()->getData() as $name => $data) {
-            $status->addItemLocal($name, $contentType->getName(), $data);
+            $status->addItemLocal($name, $contentTypeName, $data);
         }
 
         return $status;

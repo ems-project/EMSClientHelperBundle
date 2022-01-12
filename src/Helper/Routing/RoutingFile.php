@@ -17,13 +17,12 @@ final class RoutingFile implements \Countable
 
     private const FILE_NAME = 'routes.yaml';
 
-    public function __construct(string $directory)
+    public function __construct(string $directory, TemplateFiles $templateFiles)
     {
         $file = $directory.\DIRECTORY_SEPARATOR.self::FILE_NAME;
-        $content = \file_exists($file) ? (\file_get_contents($file) ?: '') : '';
-        $routes = \file_exists($file) ? Yaml::parse($content) : [];
-
-        $this->templateFiles = new TemplateFiles($directory);
+        $content = \file_exists($file) ? (\file_get_contents($file) ?: '') : false;
+        $routes = \file_exists($file) && $content ? Yaml::parse($content) : [];
+        $this->templateFiles = $templateFiles;
 
         foreach ($routes as $name => $data) {
             if (isset($data['config'])) {
@@ -38,15 +37,14 @@ final class RoutingFile implements \Countable
     /**
      * @param RoutingDocument[] $documents
      */
-    public static function build(string $directory, iterable $documents): self
+    public static function build(string $directory, TemplateFiles $templateFiles, iterable $documents): self
     {
         $routes = [];
-        $templatesFile = new TemplateFiles($directory);
 
         foreach ($documents as $document) {
             $data = $document->getDataSource();
             if (isset($data['template_static'])) {
-                $templateFile = $templatesFile->find($data['template_static']);
+                $templateFile = $templateFiles->find($data['template_static']);
                 $data['template_static'] = $templateFile ? $templateFile->getPathName() : $data['template_static'];
             }
 
@@ -60,9 +58,9 @@ final class RoutingFile implements \Countable
 
         $fileName = $directory.\DIRECTORY_SEPARATOR.self::FILE_NAME;
         $fs = new Filesystem();
-        $fs->dumpFile($fileName, Yaml::dump($routes, 3));
+        $fs->dumpFile($fileName, ($routes ? Yaml::dump($routes, 3) : ''));
 
-        return new self($directory);
+        return new self($directory, $templateFiles);
     }
 
     /**
@@ -92,17 +90,21 @@ final class RoutingFile implements \Countable
     }
 
     /**
-     * @return \Generator|Route[]
+     * @return Route[]
      */
-    public function createRoutes(): \Generator
+    public function createRoutes(): array
     {
+        $routes = [];
+
         foreach ($this->routes as $name => $data) {
             if (isset($data['template_static'])) {
                 $template = $this->templateFiles->find($data['template_static']);
                 $data['template_static'] = $template ? $template->getPathName() : $data['template_static'];
             }
 
-            yield Route::fromData($name, $data);
+            $routes[] = Route::fromData($name, $data);
         }
+
+        return $routes;
     }
 }

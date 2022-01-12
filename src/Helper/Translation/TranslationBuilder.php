@@ -17,7 +17,7 @@ final class TranslationBuilder extends AbstractBuilder
      */
     public function buildMessageCatalogues(Environment $environment, string $domain = null): \Generator
     {
-        if (null === $contentType = $this->getContentType($environment)) {
+        if (null === $contentType = $this->settings($environment)->getTranslationContentType()) {
             return [];
         }
 
@@ -36,17 +36,12 @@ final class TranslationBuilder extends AbstractBuilder
         TranslationFiles::build($directory, $messageCatalogues);
     }
 
-    public function getContentType(Environment $environment): ?ContentType
-    {
-        return $this->clientRequest->getTranslationContentType($environment);
-    }
-
     /**
      * @return TranslationDocument[]
      */
     public function getDocuments(Environment $environment): array
     {
-        if (null === $contentType = $this->getContentType($environment)) {
+        if (null === $contentType = $this->settings($environment)->getTranslationContentType()) {
             return [];
         }
 

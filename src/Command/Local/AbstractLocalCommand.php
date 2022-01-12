@@ -36,7 +36,7 @@ abstract class AbstractLocalCommand extends AbstractCommand
 
     protected function configure(): void
     {
-        $this->addOption(self::OPTION_EMSCH_ENV, null, InputArgument::OPTIONAL, 'emsch env name', null);
+        $this->addOption(self::OPTION_EMSCH_ENV, null, InputArgument::OPTIONAL, 'emsch env name');
     }
 
     protected function initialize(InputInterface $input, OutputInterface $output): void
@@ -58,7 +58,7 @@ abstract class AbstractLocalCommand extends AbstractCommand
         $this->coreApi = $this->localHelper->api($this->environment);
     }
 
-    protected function healthCheck(bool $checkConfigFile = true): bool
+    protected function healthCheck(): bool
     {
         $health = $this->localHelper->health();
 
@@ -76,12 +76,6 @@ abstract class AbstractLocalCommand extends AbstractCommand
             $this->localHelper->tryIndexSearch();
         } catch (\Throwable $e) {
             $this->io->error($e->getMessage());
-
-            return false;
-        }
-
-        if ($checkConfigFile && !$this->localHelper->checkConfigFile($this->environment)) {
-            $this->io->error('Missing config.yaml file, please pull first');
 
             return false;
         }

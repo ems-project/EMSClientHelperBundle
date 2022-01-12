@@ -35,8 +35,6 @@ final class ClientRequest implements ClientRequestInterface
     private CacheItemPoolInterface $cache;
     /** @var array<string, mixed> */
     private array $options;
-    /** @var array<string, \DateTime> */
-    private array $lastUpdateByType;
     private string $name;
     private ElasticaService $elasticaService;
 
@@ -60,7 +58,6 @@ final class ClientRequest implements ClientRequestInterface
         $this->cache = $cache;
         $this->options = $options;
         $this->elasticaService = $elasticaService;
-        $this->lastUpdateByType = [];
         $this->name = $name;
     }
 
@@ -138,11 +135,11 @@ final class ClientRequest implements ClientRequestInterface
      */
     public function getByEmsKey(string $emsLink, array $sourceFields = [])
     {
-        $type = static::getType($emsLink);
+        $type = ClientRequest::getType($emsLink);
         if (null === $type) {
             throw new \RuntimeException('Unexpected null type');
         }
-        $ouuid = static::getOuuid($emsLink);
+        $ouuid = ClientRequest::getOuuid($emsLink);
         if (null === $ouuid) {
             throw new \RuntimeException('Unexpected null ouuid');
         }
@@ -268,22 +265,35 @@ final class ClientRequest implements ClientRequestInterface
         $this->cacheHelper->saveContentType($contentType);
     }
 
-    public function getRouteContentType(Environment $environment): ?ContentType
+    public function getSettings(Environment $environment): Settings
     {
-        if (null === $routeType = $this->getOption('[route_type]')) {
-            return null;
+        static $save = [];
+
+        if (isset($save[$environment->getName()])) {
+            return $save[$environment->getName()];
         }
 
-        return $this->getContentType($routeType, $environment);
-    }
+        $settings = new Settings();
 
-    public function getTranslationContentType(Environment $environment): ?ContentType
-    {
-        if (null === $translationType = $this->getOption('[translation_type]')) {
-            return null;
+        if (null !== $routeContentTypeName = $this->getOption('[route_type]')) {
+            $settings->addRouting($routeContentTypeName, $this->getContentType($routeContentTypeName, $environment));
         }
 
-        return $this->getContentType($translationType, $environment);
+        if (null !== $translationContentTypeName = $this->getOption('[translation_type]')) {
+            $translationContentType = $this->getContentType($translationContentTypeName, $environment);
+            $settings->addTranslation($translationContentTypeName, $translationContentType);
+        }
+
+        if (null !== $templates = $this->getOption('[templates]')) {
+            foreach ($templates as $templateContentTypeName => $templateMapping) {
+                $templateContentType = $this->getContentType($templateContentTypeName, $environment);
+                $settings->addTemplating($templateContentTypeName, $templateMapping, $templateContentType);
+            }
+        }
+
+        $save[$environment->getName()] = $settings;
+
+        return $settings;
     }
 
     public function getContentType(string $name, ?Environment $environment = null): ?ContentType
@@ -304,18 +314,12 @@ final class ClientRequest implements ClientRequestInterface
         return $cachedContentType ?: $contentType;
     }
 
-    /**
-     * @return string
-     */
-    public function getLocale()
+    public function getLocale(): string
     {
         return $this->environmentHelper->getLocale();
     }
 
-    /**
-     * @return string|null
-     */
-    public static function getOuuid(string $emsLink)
+    public static function getOuuid(string $emsLink): ?string
     {
         if (!\strpos($emsLink, ':')) {
             return $emsLink;
@@ -618,7 +622,7 @@ final class ClientRequest implements ClientRequestInterface
 
         $lastPublishedDate = $this->getLastPublishedDate($type);
         $lastModified = $response ? $response->getLastModified() : null;
-        $isModified = $lastModified ? $lastModified->getTimestamp() !== $lastPublishedDate->getTimestamp() : true;
+        $isModified = !$lastModified || $lastModified->getTimestamp() !== $lastPublishedDate->getTimestamp();
 
         if (!$cachedHierarchy->isHit() || $isModified) {
             $response = $function();

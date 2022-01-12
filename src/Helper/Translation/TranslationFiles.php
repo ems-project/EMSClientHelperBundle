@@ -11,7 +11,7 @@ use Symfony\Component\Translation\MessageCatalogue;
 /**
  * @implements \IteratorAggregate<TranslationFile>
  */
-final class TranslationFiles implements \IteratorAggregate
+final class TranslationFiles implements \IteratorAggregate, \Countable
 {
     /** @var TranslationFile[] */
     private array $files = [];
@@ -42,6 +42,17 @@ final class TranslationFiles implements \IteratorAggregate
         }
 
         return new self($directory);
+    }
+
+    public function count(): int
+    {
+        $count = 0;
+
+        foreach ($this->files as $file) {
+            $count += $file->count();
+        }
+
+        return $count;
     }
 
     /**
