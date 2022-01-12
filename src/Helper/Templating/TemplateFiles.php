@@ -18,8 +18,14 @@ final class TemplateFiles implements \IteratorAggregate, \Countable
 
     public function __construct(string $directory, Settings $settings)
     {
+        $fileSystem = new Filesystem();
+
         foreach ($settings->getTemplateContentTypeNames() as $templateContentTypeName) {
             $path = $directory.\DIRECTORY_SEPARATOR.$templateContentTypeName;
+
+            if (!$fileSystem->exists($path)) {
+                continue;
+            }
 
             foreach (Finder::create()->in($path)->files() as $file) {
                 $this->templateFiles[] = new TemplateFile($file, $templateContentTypeName);
