@@ -42,7 +42,7 @@ final class Settings
         $this->templateMapping[$contentTypeName] = $mapping;
 
         if ($contentType) {
-            $this->templateContentTypes[] = $contentType;
+            $this->templateContentTypes[$contentTypeName] = $contentType;
         }
     }
 
