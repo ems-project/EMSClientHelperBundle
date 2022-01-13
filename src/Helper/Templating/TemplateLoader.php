@@ -29,7 +29,7 @@ final class TemplateLoader implements LoaderInterface
         $templateName = new TemplateName($name);
 
         if ($environment->isLocalPulled()) {
-            $template = $this->getEnvironment()->getLocal()->getTemplates()->getByTemplateName($templateName);
+            $template = $this->builder->buildFile($environment, $templateName);
 
             return new Source($template->getCode(), $name, $template->getPath());
         }
@@ -39,7 +39,7 @@ final class TemplateLoader implements LoaderInterface
         return new Source($template->getCode(), $name);
     }
 
-    public function getCacheKey($name)
+    public function getCacheKey($name): string
     {
         $environment = $this->getEnvironment();
         $key = ['twig', $environment->getAlias(), $name];
@@ -51,7 +51,7 @@ final class TemplateLoader implements LoaderInterface
         return \implode('_', $key);
     }
 
-    public function isFresh($name, $time)
+    public function isFresh($name, $time): bool
     {
         return $this->builder->isFresh($this->getEnvironment(), new TemplateName($name), $time);
     }

@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Local\Status;
 
+use EMS\CommonBundle\Common\Standard\Hash;
+
 final class Item
 {
     private string $key;
-    private ?string $id = null;
+    private string $id;
+    private ?string $idOrigin = null;
     private string $contentType;
     /** @var array<mixed> */
     private array $dataLocal = [];
@@ -17,32 +20,45 @@ final class Item
     private function __construct(string $key, string $contentType)
     {
         $this->key = $key;
+        $this->id = Hash::string($key);
         $this->contentType = $contentType;
     }
 
-    public function hasId(): bool
+    public function isAdded(): bool
     {
-        return null === $this->id;
+        return $this->hasDataLocal() && $this->id !== $this->idOrigin;
     }
 
-    public function hasAllData(): bool
+    public function isUpdated(): bool
     {
-        return [] !== $this->dataLocal && [] !== $this->dataOrigin;
+        if ($this->id !== $this->idOrigin) {
+            return false;
+        }
+
+        if (!$this->hasDataLocal() || $this->dataLocal === $this->dataOrigin) {
+            return false;
+        }
+
+        return true;
     }
 
-    public function hasDataLocal(): bool
+    public function isDeleted(): bool
     {
-        return [] === $this->dataLocal;
+        if (null === $this->idOrigin) {
+            return false;
+        }
+
+        return !$this->hasDataLocal() || $this->id !== $this->idOrigin;
     }
 
-    public function dataIsEqual(): bool
-    {
-        return $this->dataLocal === $this->dataOrigin;
-    }
-
-    public function getId(): ?string
+    public function getId(): string
     {
         return $this->id;
+    }
+
+    public function getIdOrigin(): ?string
+    {
+        return $this->idOrigin;
     }
 
     public function getKey(): string
@@ -53,6 +69,16 @@ final class Item
     public function getContentType(): string
     {
         return $this->contentType;
+    }
+
+    public function hasDataLocal(): bool
+    {
+        return [] !== $this->dataLocal;
+    }
+
+    public function hasDataOrigin(): bool
+    {
+        return [] !== $this->dataOrigin;
     }
 
     /**
@@ -81,7 +107,7 @@ final class Item
     {
         $item = new self($key, $contentType);
         $item->setDataOrigin($data);
-        $item->id = $ouuid;
+        $item->setIdOrigin($ouuid);
 
         return $item;
     }
@@ -106,8 +132,8 @@ final class Item
         $this->dataOrigin = $dataOrigin;
     }
 
-    public function setId(?string $id): void
+    public function setIdOrigin(?string $idOrigin): void
     {
-        $this->id = $id;
+        $this->idOrigin = $idOrigin;
     }
 }

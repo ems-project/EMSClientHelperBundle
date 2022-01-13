@@ -7,6 +7,7 @@ namespace EMS\ClientHelperBundle\Helper\Routing;
 use EMS\ClientHelperBundle\Helper\Builder\AbstractBuilder;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
+use EMS\ClientHelperBundle\Helper\Templating\TemplateFiles;
 use EMS\CommonBundle\Search\Search;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -14,19 +15,22 @@ final class RoutingBuilder extends AbstractBuilder
 {
     public function buildRouteCollection(Environment $environment): RouteCollection
     {
-        $routeCollection = new RouteCollection();
+        $settings = $this->settings($environment);
 
-        if (null === $contentType = $this->getContentType($environment)) {
-            return $routeCollection;
-        }
+        $routeCollection = new RouteCollection();
+        $routes = [];
 
         if ($environment->isLocalPulled()) {
-            $routes = $environment->getLocal()->getRouting()->createRoutes();
-        } else {
+            $routes = $environment->getLocal()->getRouting($settings)->createRoutes();
+        } elseif (null !== $contentType = $settings->getRoutingContentType()) {
             $routes = $this->createRoutes($contentType);
         }
 
-        $routePrefix = $contentType->getEnvironment()->getRoutePrefix();
+        if (0 === \count($routes)) {
+            return $routeCollection;
+        }
+
+        $routePrefix = $environment->getRoutePrefix();
         foreach ($routes as $route) {
             $route->addToCollection($routeCollection, $this->locales, $routePrefix);
         }
@@ -34,14 +38,9 @@ final class RoutingBuilder extends AbstractBuilder
         return $routeCollection;
     }
 
-    public function buildFiles(Environment $environment, string $directory): void
+    public function buildFiles(Environment $environment, TemplateFiles $templateFiles, string $directory): void
     {
-        RoutingFile::build($directory, $this->getDocuments($environment));
-    }
-
-    public function getContentType(Environment $environment): ?ContentType
-    {
-        return $this->clientRequest->getRouteContentType($environment);
+        RoutingFile::build($directory, $templateFiles, $this->getDocuments($environment));
     }
 
     /**
@@ -49,7 +48,7 @@ final class RoutingBuilder extends AbstractBuilder
      */
     public function getDocuments(Environment $environment): array
     {
-        if (null === $contentType = $this->getContentType($environment)) {
+        if (null === $contentType = $this->settings($environment)->getRoutingContentType()) {
             return [];
         }
 

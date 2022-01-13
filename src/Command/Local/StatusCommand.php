@@ -16,6 +16,10 @@ final class StatusCommand extends AbstractLocalCommand
     {
         $this->io->title('Local development - status');
 
+        if (!$this->healthCheck()) {
+            return self::EXECUTE_ERROR;
+        }
+
         $loggedInProfile = false;
         if ($this->coreApi->isAuthenticated()) {
             $profile = $this->coreApi->user()->getProfileAuthenticated();
@@ -26,8 +30,9 @@ final class StatusCommand extends AbstractLocalCommand
         $this->io->definitionList(
             ['Environment' => $this->environment->getName()],
             ['Backend url' => $this->environment->getBackendUrl()],
+            ['Cluster' => $this->localHelper->getUrl()],
             ['Logged in as' => ($loggedInProfile ? \sprintf('<fg=green>%s</>', $loggedInProfile) : '<fg=red>No</>')],
-            ['Up to date' => $upToDate ? '<fg=green>Yes</>' : '<fg=red>No</>']
+            ['Up to date' => $upToDate ? '<fg=green>Yes</>' : '<fg=red>No</>'],
         );
 
         $statuses = $this->localHelper->statuses($this->environment);
