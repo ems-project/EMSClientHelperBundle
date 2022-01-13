@@ -22,19 +22,24 @@ final class Status
         return $this->name;
     }
 
+    public function itemsLocal(): Items
+    {
+        return $this->items->filter(fn (Item $item): bool => $item->hasDataLocal() && $item->hasDataOrigin());
+    }
+
     public function itemsAdded(): Items
     {
-        return $this->items->filter(fn (Item $item): bool => $item->hasId());
+        return $this->items->filter(fn (Item $item): bool => $item->isAdded());
     }
 
     public function itemsUpdated(): Items
     {
-        return $this->items->filter(fn (Item $item): bool => !$item->dataIsEqual() && $item->hasAllData());
+        return $this->items->filter(fn (Item $item): bool => $item->isUpdated());
     }
 
     public function itemsDeleted(): Items
     {
-        return $this->items->filter(fn (Item $item): bool => $item->hasDataLocal());
+        return $this->items->filter(fn (Item $item): bool => $item->isDeleted());
     }
 
     /**
@@ -72,7 +77,7 @@ final class Status
         if ($this->items->hasItem($key)) {
             $item = $this->items->getItem($key);
             $item->setDataOrigin($dataOrigin);
-            $item->setId($id);
+            $item->setIdOrigin($id);
         } else {
             $this->items->add(Item::fromOrigin($key, $contentType, $id, $dataOrigin));
         }

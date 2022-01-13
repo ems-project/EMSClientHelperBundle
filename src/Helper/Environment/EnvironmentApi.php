@@ -6,6 +6,7 @@ namespace EMS\ClientHelperBundle\Helper\Environment;
 
 use EMS\CommonBundle\Contracts\CoreApi\CoreApiFactoryInterface;
 use EMS\CommonBundle\Contracts\CoreApi\CoreApiInterface;
+use EMS\CommonBundle\Contracts\CoreApi\Exception\NotAuthenticatedExceptionInterface;
 
 final class EnvironmentApi
 {
@@ -23,6 +24,9 @@ final class EnvironmentApi
         return $this->coreApiFactory->create($backendUrl);
     }
 
+    /**
+     * @throws NotAuthenticatedExceptionInterface
+     */
     public function login(Environment $environment, string $username, string $password): CoreApiInterface
     {
         $backendUrl = $this->getBackendUrl($environment);

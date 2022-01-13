@@ -140,7 +140,6 @@
         <service id="emsch.command.health_check" class="EMS\ClientHelperBundle\Command\HealthCheckCommand">
             <argument type="service" id="emsch.helper_environment" />
             <argument type="service" id="ems_common.service.elastica"/>
-            <argument type="tagged" tag="emsch.client_request" on-invalid="null" />
             <argument type="service" id="ems_common.storage.manager" on-invalid="null" />
             <tag name="console.command" />
         </service>

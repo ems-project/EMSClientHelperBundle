@@ -16,25 +16,29 @@ final class PushCommand extends AbstractLocalCommand
         $this->io->title('Local development - push');
         $this->io->section(\sprintf('Pushing for environment %s', $this->environment->getName()));
 
+        if (!$this->healthCheck()) {
+            return self::EXECUTE_ERROR;
+        }
+
         if (!$this->localHelper->isUpToDate($this->environment)) {
             $this->io->error('Not up to date, please commit/stash changes and run emsch:local:pull');
 
-            return -1;
+            return self::EXECUTE_ERROR;
         }
 
         if (!$this->coreApi->isAuthenticated()) {
             $this->io->error(\sprintf('Not authenticated for %s, run emsch:local:login', $this->coreApi->getBaseUrl()));
 
-            return -1;
+            return self::EXECUTE_ERROR;
         }
 
         foreach ($this->localHelper->statuses($this->environment) as $status) {
             $this->pushStatus($status);
         }
 
-        $this->localHelper->buildVersion($this->environment, true);
+        $this->localHelper->lockVersion($this->environment, true);
 
-        return 1;
+        return self::EXECUTE_SUCCESS;
     }
 
     private function pushStatus(Status $status): void
@@ -43,42 +47,37 @@ final class PushCommand extends AbstractLocalCommand
 
         foreach ($status->itemsAdded() as $item) {
             $data = $this->coreApi->data($item->getContentType());
-            $draft = $data->create($item->getDataLocal());
-            $ouuid = $data->finalize($draft->getRevisionId());
-            $item->setId($ouuid);
-            $this->writeItem('<fg=green>Created</>', $item);
+            $draft = $data->create($item->getDataLocal(), $item->getId());
+            $data->finalize($draft->getRevisionId());
+            $this->writeItem('<fg=green>Created</>', $item, $item->getId());
         }
 
         foreach ($status->itemsUpdated() as $item) {
-            if (null === $id = $item->getId()) {
-                continue;
-            }
-
             $data = $this->coreApi->data($item->getContentType());
-            $draft = $data->update($id, $item->getDataLocal());
+            $draft = $data->update($item->getId(), $item->getDataLocal());
             $data->finalize($draft->getRevisionId());
-            $this->writeItem('<fg=blue>Updated</>', $item);
+            $this->writeItem('<fg=blue>Updated</>', $item, $item->getId());
         }
 
         foreach ($status->itemsDeleted() as $item) {
-            if (null === $id = $item->getId()) {
+            if (null === $id = $item->getIdOrigin()) {
                 continue;
             }
 
             $this->coreApi->data($item->getContentType())->delete($id);
-            $this->writeItem('<fg=red>Deleted</>', $item);
+            $this->writeItem('<fg=red>Deleted</>', $item, $id);
         }
     }
 
-    private function writeItem(string $type, Item $item): void
+    private function writeItem(string $type, Item $item, string $id): void
     {
         $url = \vsprintf('%s - %s/data/revisions/%s:%s', [
             $item->getKey(),
             $this->coreApi->getBaseUrl(),
             $item->getContentType(),
-            $item->getId(),
+            $id,
         ]);
 
-        $this->io->writeln(\sprintf('%s %s', $type, $url));
+        $this->io->writeln(\sprintf('[%s] %s', $type, $url));
     }
 }

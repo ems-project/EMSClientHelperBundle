@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Environment;
 
 use EMS\ClientHelperBundle\Helper\Local\LocalEnvironment;
-use EMS\CommonBundle\Common\Standard\Json;
+use EMS\CommonBundle\Common\Standard\Hash;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -48,7 +48,7 @@ final class Environment
         $this->backend = $config[self::BACKEND_CONFIG] ?? null;
         $this->request = $config[self::REQUEST_CONFIG] ?? [];
         $this->options = $config;
-        $this->hash = $name.\sha1(Json::encode($config));
+        $this->hash = Hash::array($config, $name);
     }
 
     public function getBackendUrl(): ?string

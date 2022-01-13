@@ -55,7 +55,7 @@ final class RoutingDocument implements BuilderDocumentInterface
             'index_regex' => $this->source['index_regex'] ?? null,
             'template_static' => $this->source['template_static'] ?? null,
             'template_source' => $this->source['template_source'] ?? null,
-            'order' => $this->source['order'],
+            'order' => $this->source['order'] ?? null,
         ]);
     }
 

@@ -37,11 +37,14 @@
 		"twig/twig": "^2.14"
 	},
 	"require-dev" : {
-		"friendsofphp/php-cs-fixer" : "^2.17.5",
+		"friendsofphp/php-cs-fixer" : "^3.0",
 		"mockery/mockery" : "^0.9",
 		"phpstan/phpstan": "^0.12",
-		"phpunit/phpunit" : "^5.7",
-		"symfony/phpunit-bridge": "^4.4"
+		"phpunit/phpunit" : "^9.5",
+		"symfony/test-pack": "^1.0",
+		"symfony/web-profiler-bundle": "^4.4",
+		"phpstan/phpstan-phpunit": "^0.12.8",
+		"phpstan/extension-installer": "^1.1"
 	},
 	"autoload" : {
 		"psr-4" : {
@@ -68,6 +71,7 @@
 	"scripts": {
 		"phpcs": "php-cs-fixer fix",
 		"phpstan": "phpstan analyse",
-		"phpall": "php-cs-fixer fix && phpstan analyse"
+		"phpunit":  "phpunit",
+		"phpall": "php-cs-fixer fix && phpunit && phpstan"
 	}
 }
