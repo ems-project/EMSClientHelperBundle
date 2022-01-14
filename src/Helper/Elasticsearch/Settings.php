@@ -54,7 +54,7 @@ final class Settings
         return \array_filter([
             $this->translationContentType,
             $this->routeContentType,
-            ...$this->templateContentTypes,
+            ...\array_values($this->templateContentTypes),
         ]);
     }
 
