@@ -115,3 +115,49 @@ Example menu.html.twig
 </ul>
 ```
 Example menu.html.twig
+
+## Fragment
+
+From a design perspective it might be useful to isolate part of the DOM in sub-requests. For instance a block "last post" is the same on all post and on the homepage. 
+By isolating this in a subrequest with `render` you will have a more readable code.
+
+What you can do is to just import a twig. But if you use the render function instead, you'll be able to cache this specific piece of DOM and reduce the required resources:
+
+```twig
+{{ render(path('last_post', { last: 5 })) }}
+```
+
+
+Off course, you have to declare the `fragment_footer` route. You may want to hide those subrequest for the outside by using the embed's fragment function:
+
+```twig
+    {{ render(controller('emsch.controller.embed::fragment', {
+        template: '@EMSCH/template/fragments/last_post.html.twig',
+        context: {
+            trans_default_domain: trans_default_domain,
+            last: 5,
+        },
+    })) }}
+```
+
+Not need to define a route with this solution.
+
+And if you have a reverse proxy in front of your application supporting [ESI](https://symfony.com/doc/current/http_cache/esi.html), i.e. varnish,
+you can switch to `render_esi`:
+
+
+```twig
+    {{ render_esi(controller('emsch.controller.embed::fragment', {
+        template: '@EMSCH/template/fragments/last_post.html.twig',
+        context: {
+            trans_default_domain: trans_default_domain,
+            last: 5,
+        },
+    })) }}
+```
+
+Here the reverse proxy will calls the sub-requests by himself. So, globally, requests will use less memory. And the reverse proxy will also be able to cache part of the DOM. 
+I.e. the footer, which is basically always the same, won't have to be generated for each query. Even if the cache's TTL is short, it will help to absorb charge's peaks with less resources. 
+
+
+
