@@ -24,7 +24,7 @@ final class TemplateFile
             $pathName = \str_replace(\DIRECTORY_SEPARATOR, '/', $pathName);
         }
 
-        $this->ouuid = Hash::string($pathName);
+        $this->ouuid = Hash::string($contentTypeName.$pathName);
         $this->name = $pathName;
     }
 
