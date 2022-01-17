@@ -20,7 +20,7 @@ final class Item
     private function __construct(string $key, string $contentType)
     {
         $this->key = $key;
-        $this->id = Hash::string($key);
+        $this->id = Hash::string($contentType.$key);
         $this->contentType = $contentType;
     }
 

@@ -4,18 +4,25 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Controller;
 
+use EMS\ClientHelperBundle\Helper\Cache\CacheHelper;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Twig\Environment;
 
 final class EmbedController extends AbstractController
 {
     private ClientRequest $clientRequest;
+    private CacheHelper $cacheHelper;
+    private Environment $templating;
 
-    public function __construct(ClientRequestManager $manager)
+    public function __construct(ClientRequestManager $manager, CacheHelper $cacheHelper, Environment $templating)
     {
         $this->clientRequest = $manager->getDefault();
+        $this->cacheHelper = $cacheHelper;
+        $this->templating = $templating;
     }
 
     /**
@@ -74,5 +81,16 @@ final class EmbedController extends AbstractController
                 'result' => $result,
             ]);
         });
+    }
+
+    /**
+     * @param mixed[] $context
+     */
+    public function fragment(Request $request, string $template, array $context = []): Response
+    {
+        $response = new Response($this->templating->render($template, $context));
+        $this->cacheHelper->makeResponseCacheable($request, $response);
+
+        return $response;
     }
 }
