@@ -4,31 +4,28 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Templating;
 
+use EMS\CommonBundle\Common\Standard\Hash;
 use Symfony\Component\Finder\SplFileInfo;
 
 final class TemplateFile
 {
+    private string $ouuid;
     private string $name;
-    private ?string $ouuid = null;
     private string $path;
-    private string $contentType;
+    private string $contentTypeName;
 
-    public function __construct(SplFileInfo $file, string $contentType)
+    public function __construct(SplFileInfo $file, string $contentTypeName)
     {
         $this->path = $file->getPathname();
-        $this->contentType = $contentType;
+        $this->contentTypeName = $contentTypeName;
 
         $pathName = $file->getRelativePathname();
         if ('/' !== \DIRECTORY_SEPARATOR) {
             $pathName = \str_replace(\DIRECTORY_SEPARATOR, '/', $pathName);
         }
 
+        $this->ouuid = Hash::string($contentTypeName.$pathName);
         $this->name = $pathName;
-    }
-
-    public function hasOuuid(): bool
-    {
-        return null !== $this->ouuid;
     }
 
     public function getCode(): string
@@ -40,9 +37,9 @@ final class TemplateFile
         return $content;
     }
 
-    public function getContentType(): string
+    public function getContentTypeName(): string
     {
-        return $this->contentType;
+        return $this->contentTypeName;
     }
 
     public function getName(): string
@@ -50,28 +47,23 @@ final class TemplateFile
         return $this->name;
     }
 
-    public function getPathName(): string
-    {
-        return $this->contentType.'/'.$this->name;
-    }
-
-    public function getPathOuuid(): string
-    {
-        return $this->contentType.':'.$this->ouuid;
-    }
-
     public function getPath(): string
     {
         return $this->path;
     }
 
+    public function getPathName(): string
+    {
+        return $this->contentTypeName.'/'.$this->name;
+    }
+
+    public function getPathOuuid(): string
+    {
+        return $this->contentTypeName.':'.$this->ouuid;
+    }
+
     public function isFresh(int $time): bool
     {
         return \filemtime($this->path) < $time;
-    }
-
-    public function setOuuid(?string $ouuid): void
-    {
-        $this->ouuid = $ouuid;
     }
 }

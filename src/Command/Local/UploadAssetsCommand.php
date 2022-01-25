@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Command\Local;
 
+use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
+use EMS\ClientHelperBundle\Helper\Local\LocalHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -11,6 +13,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 final class UploadAssetsCommand extends AbstractUploadCommand
 {
     private const ARG_BASE_URL = 'base_url';
+    private ?string $assetLocalFolder;
+
+    public function __construct(EnvironmentHelper $environmentHelper, LocalHelper $localHelper, ?string $assetLocalFolder)
+    {
+        parent::__construct($environmentHelper, $localHelper);
+        $this->assetLocalFolder = $assetLocalFolder;
+    }
 
     protected function configure(): void
     {
@@ -25,13 +34,16 @@ final class UploadAssetsCommand extends AbstractUploadCommand
         $this->io->title('Local development - Upload assets');
         $baseUrl = $input->getArgument(self::ARG_BASE_URL);
         if (!\is_string($baseUrl)) {
+            $baseUrl = $this->assetLocalFolder;
+        }
+        if (!\is_string($baseUrl)) {
             $baseUrl = $this->environment->getAlias();
         }
 
         if (!$this->coreApi->isAuthenticated()) {
             $this->io->error(\sprintf('Not authenticated for %s, run emsch:local:login', $this->coreApi->getBaseUrl()));
 
-            return -1;
+            return self::EXECUTE_ERROR;
         }
 
         try {
@@ -39,17 +51,15 @@ final class UploadAssetsCommand extends AbstractUploadCommand
         } catch (\Throwable $e) {
             $this->io->error($e->getMessage());
 
-            return -1;
+            return self::EXECUTE_ERROR;
         }
 
-        $hash = $this->uploadFile($assetsArchive);
-
-        if (null === $hash) {
-            return 1;
+        if (null === $hash = $this->uploadFile($assetsArchive)) {
+            return self::EXECUTE_ERROR;
         }
 
         $this->io->success(\sprintf('Assets %s have been uploaded', $hash));
 
-        return 0;
+        return self::EXECUTE_ERROR;
     }
 }

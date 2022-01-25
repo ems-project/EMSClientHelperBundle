@@ -7,6 +7,8 @@ namespace EMS\ClientHelperBundle\Helper\Builder;
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
+use EMS\ClientHelperBundle\Helper\Elasticsearch\Settings;
+use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\CommonBundle\Elasticsearch\Response\Response;
 use EMS\CommonBundle\Elasticsearch\Response\ResponseInterface;
 use EMS\CommonBundle\Search\Search;
@@ -19,7 +21,7 @@ use Psr\Log\LoggerInterface;
  * @see \EMS\ClientHelperBundle\Helper\Templating\TemplateBuilder
  * @see \EMS\ClientHelperBundle\Helper\Translation\TranslationBuilder
  */
-abstract class AbstractBuilder implements BuilderInterface
+abstract class AbstractBuilder
 {
     protected ClientRequest $clientRequest;
     protected LoggerInterface $logger;
@@ -36,6 +38,11 @@ abstract class AbstractBuilder implements BuilderInterface
         $this->clientRequest = $manager->getDefault();
         $this->logger = $logger;
         $this->locales = $locales;
+    }
+
+    public function settings(Environment $environment): Settings
+    {
+        return $this->clientRequest->getSettings($environment);
     }
 
     protected function modifySearch(Search $search): void

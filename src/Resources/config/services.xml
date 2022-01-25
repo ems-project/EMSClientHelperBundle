@@ -37,6 +37,10 @@
             <argument type="service" id="EMS\CommonBundle\Contracts\CoreApi\CoreApiFactoryInterface" />
         </service>
 
+        <service id="emsch.helper.request.emsch_request_resolver" class="EMS\ClientHelperBundle\Helper\Request\EmschRequestResolver">
+            <tag name="controller.argument_value_resolver" priority="100"/>
+        </service>
+
         <service id="emsch.helper_locale" class="EMS\ClientHelperBundle\Helper\Request\LocaleHelper">
             <argument type="service" id="router"/>
             <argument type="string">%emsch.locales%</argument>
@@ -76,6 +80,15 @@
             <tag name="kernel.event_subscriber" />
         </service>
 
+        <service id="emsch.event_listener.cache_listener" class="EMS\ClientHelperBundle\EventListener\CacheListener">
+            <argument type="service" id="emsch.helper_cache"/>
+            <argument type="service" id="emsch.controller.cache"/>
+            <argument type="service" id="kernel"/>
+            <argument type="service" id="logger"/>
+            <argument type="service" id="EMS\CommonBundle\Contracts\Elasticsearch\QueryLoggerInterface"/>
+            <tag name="kernel.event_subscriber" />
+        </service>
+
         <!-- twig -->
         <service id="emsch.twig.extension.helper" class="EMS\ClientHelperBundle\Twig\HelperExtension">
             <tag name="twig.extension" />
@@ -89,6 +102,10 @@
             <argument type="service" id="emsch.manager.client_request" />
             <argument type="string">%kernel.project_dir%</argument>
             <tag name="twig.runtime" />
+        </service>
+        <service id="emsch.twig.runtime.asset_vserion_strategy" class="EMS\ClientHelperBundle\Helper\Asset\AssetVersionStrategy">
+            <argument type="service" id="emsch.twig.runtime.asset" />
+            <argument type="string">%emsch.asset_local_folder%</argument>
         </service>
         <service id="emsch.twig.runtime.client_request" class="EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestRuntime">
             <argument type="service" id="emsch.manager.client_request" />
@@ -108,6 +125,8 @@
         </service>
         <service id="emsch.controller.embed" class="EMS\ClientHelperBundle\Controller\EmbedController" public="true">
             <argument type="service" id="emsch.manager.client_request" />
+            <argument type="service" id="emsch.helper_cache"/>
+            <argument type="service" id="twig" />
             <tag name="controller.service_arguments"/>
         </service>
         <service id="EMS\ClientHelperBundle\Controller\AssetController" alias="emsch.controller.asset" public="true" />
@@ -123,7 +142,6 @@
         <service id="emsch.command.health_check" class="EMS\ClientHelperBundle\Command\HealthCheckCommand">
             <argument type="service" id="emsch.helper_environment" />
             <argument type="service" id="ems_common.service.elastica"/>
-            <argument type="tagged" tag="emsch.client_request" on-invalid="null" />
             <argument type="service" id="ems_common.storage.manager" on-invalid="null" />
             <tag name="console.command" />
         </service>

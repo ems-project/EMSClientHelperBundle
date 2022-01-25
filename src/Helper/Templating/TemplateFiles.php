@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Templating;
 
+use EMS\ClientHelperBundle\Helper\Elasticsearch\Settings;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Yaml\Yaml;
 
 /**
  * @implements \IteratorAggregate<TemplateFile>
@@ -16,49 +16,36 @@ final class TemplateFiles implements \IteratorAggregate, \Countable
     /** @var TemplateFile[] */
     private array $templateFiles = [];
 
-    private const FILE_NAME = 'templates.yaml';
-
-    public function __construct(string $directory)
+    public function __construct(string $directory, Settings $settings)
     {
-        $file = $directory.\DIRECTORY_SEPARATOR.self::FILE_NAME;
-        $content = \file_exists($file) ? (\file_get_contents($file) ?: '') : '';
-        $mapping = Yaml::parse($content);
+        $fileSystem = new Filesystem();
 
-        foreach ($mapping as $contentType => $templates) {
-            foreach (Finder::create()->in($directory.\DIRECTORY_SEPARATOR.$contentType)->files() as $file) {
-                $this->templateFiles[] = new TemplateFile($file, $contentType);
+        foreach ($settings->getTemplateContentTypeNames() as $templateContentTypeName) {
+            $path = $directory.\DIRECTORY_SEPARATOR.$templateContentTypeName;
+
+            if (!$fileSystem->exists($path)) {
+                continue;
             }
 
-            foreach ($templates as $ouuid => $name) {
-                $this->get($contentType.'/'.$name)->setOuuid($ouuid);
+            foreach (Finder::create()->in($path)->files() as $file) {
+                $this->templateFiles[] = new TemplateFile($file, $templateContentTypeName);
             }
         }
     }
 
     /**
-     * @param string[]           $contentTypes
      * @param TemplateDocument[] $documents
      */
-    public static function build(string $directory, array $contentTypes, iterable $documents): self
+    public static function build(string $directory, Settings $settings, iterable $documents): self
     {
-        $mapping = \array_map(fn () => [], \array_flip($contentTypes));
         $filesystem = new Filesystem();
 
         foreach ($documents as $document) {
             $filePath = [$directory, $document->getContentType(), $document->getName()];
             $filesystem->dumpFile(\implode(\DIRECTORY_SEPARATOR, $filePath), $document->getCode());
-
-            $mapping[$document->getContentType()][$document->getId()] = $document->getName();
         }
 
-        foreach ($mapping as $contentType => &$docs) {
-            \asort($docs);
-        }
-
-        $jsonMapping = Yaml::dump($mapping);
-        $filesystem->dumpFile($directory.\DIRECTORY_SEPARATOR.self::FILE_NAME, $jsonMapping);
-
-        return new self($directory);
+        return new self($directory, $settings);
     }
 
     public function count(): int

@@ -36,6 +36,7 @@
             <tag name="console.command" command="emsch:local:status"/>
         </service>
         <service id="emsch.command.local.upload_assets" class="EMS\ClientHelperBundle\Command\Local\UploadAssetsCommand" parent="emsch.command.local">
+            <argument type="string">%emsch.asset_local_folder%</argument>
             <tag name="console.command" command="emsch:local:upload-assets"/>
         </service>
         <service id="emsch.command.local.folder_upload" class="EMS\ClientHelperBundle\Command\Local\FolderUploadCommand" parent="emsch.command.local">

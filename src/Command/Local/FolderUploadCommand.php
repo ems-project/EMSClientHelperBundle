@@ -28,7 +28,7 @@ final class FolderUploadCommand extends AbstractUploadCommand implements Command
         if (!$this->coreApi->isAuthenticated()) {
             $this->io->error(\sprintf('Not authenticated for %s, run emsch:local:login', $this->coreApi->getBaseUrl()));
 
-            return -1;
+            return self::EXECUTE_ERROR;
         }
 
         $finder = new Finder();
@@ -36,12 +36,12 @@ final class FolderUploadCommand extends AbstractUploadCommand implements Command
         $finder->files()->in($folder);
 
         if (!$finder->hasResults()) {
-            $this->io->error(\sprintf('No file found'));
+            $this->io->error('No file found');
 
-            return -1;
+            return self::EXECUTE_ERROR;
         }
 
-        $this->io->comment(\sprintf('%d files have been located', $finder->count()));
+        $this->io->comment(\sprintf('%d files located', $finder->count()));
         $uploadedCounter = 0;
         $counter = 0;
         foreach ($finder as $file) {
@@ -58,6 +58,6 @@ final class FolderUploadCommand extends AbstractUploadCommand implements Command
         }
         $this->io->success(\sprintf('%d (on %d) assets have been uploaded', $uploadedCounter, $finder->count()));
 
-        return 0;
+        return self::EXECUTE_SUCCESS;
     }
 }

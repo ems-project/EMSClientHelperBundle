@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Builder;
 
 use EMS\ClientHelperBundle\Helper\ContentType\ContentType;
+use EMS\ClientHelperBundle\Helper\Elasticsearch\Settings;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Routing\RoutingBuilder;
 use EMS\ClientHelperBundle\Helper\Templating\TemplateBuilder;
 use EMS\ClientHelperBundle\Helper\Translation\TranslationBuilder;
+use EMS\CommonBundle\Common\Standard\Hash;
 
 final class Builders
 {
@@ -29,9 +31,9 @@ final class Builders
     /**
      * Returns the combined cache validity tags of all used contentTypes.
      */
-    public function getVersion(Environment $environment): string
+    public function getVersion(Settings $settings): string
     {
-        $contentTypes = $this->getContentTypes($environment);
+        $contentTypes = $settings->getContentTypes();
 
         $cacheValidityTags = \array_reduce(
             $contentTypes,
@@ -39,14 +41,14 @@ final class Builders
             ''
         );
 
-        return \sha1($cacheValidityTags);
+        return Hash::string($cacheValidityTags);
     }
 
     public function build(Environment $environment, string $directory): void
     {
         $this->translation->buildFiles($environment, $directory);
-        $this->templating->buildFiles($environment, $directory);
-        $this->routing->buildFiles($environment, $directory);
+        $templateFiles = $this->templating->buildFiles($environment, $directory);
+        $this->routing->buildFiles($environment, $templateFiles, $directory);
     }
 
     public function routing(): RoutingBuilder
@@ -62,17 +64,5 @@ final class Builders
     public function translation(): TranslationBuilder
     {
         return $this->translation;
-    }
-
-    /**
-     * @return ContentType[]
-     */
-    private function getContentTypes(Environment $environment): array
-    {
-        return \array_filter([
-            $this->translation->getContentType($environment),
-            $this->routing->getContentType($environment),
-            ...$this->templating->getTemplates($environment)->getContentTypes(),
-        ]);
     }
 }

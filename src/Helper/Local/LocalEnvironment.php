@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Local;
 
+use EMS\ClientHelperBundle\Helper\Elasticsearch\Settings;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Routing\RoutingFile;
 use EMS\ClientHelperBundle\Helper\Templating\TemplateFiles;
@@ -37,19 +38,19 @@ final class LocalEnvironment
         return $this->environment;
     }
 
-    public function getRouting(): RoutingFile
+    public function getRouting(Settings $settings): RoutingFile
     {
         if (null === $this->routingFile) {
-            $this->routingFile = new RoutingFile($this->directory);
+            $this->routingFile = new RoutingFile($this->directory, $this->getTemplates($settings));
         }
 
         return $this->routingFile;
     }
 
-    public function getTemplates(): TemplateFiles
+    public function getTemplates(Settings $settings): TemplateFiles
     {
         if (null === $this->templatesFiles) {
-            $this->templatesFiles = new TemplateFiles($this->directory);
+            $this->templatesFiles = new TemplateFiles($this->directory, $settings);
         }
 
         return $this->templatesFiles;
@@ -64,9 +65,9 @@ final class LocalEnvironment
         return $this->translationFiles;
     }
 
-    public function getVersionFile(): VersionFile
+    public function getVersionLockFile(): VersionLockFile
     {
-        return new VersionFile($this->directory);
+        return new VersionLockFile($this->directory);
     }
 
     public function isPulled(): bool
@@ -74,10 +75,10 @@ final class LocalEnvironment
         return $this->fileSystem->exists($this->getDirectory());
     }
 
-    public function refresh(): void
+    public function refresh(Settings $settings): void
     {
-        $this->routingFile = new RoutingFile($this->directory);
-        $this->templatesFiles = new TemplateFiles($this->directory);
+        $this->templatesFiles = new TemplateFiles($this->directory, $settings);
+        $this->routingFile = new RoutingFile($this->directory, $this->templatesFiles);
         $this->translationFiles = new TranslationFiles($this->directory);
     }
 }

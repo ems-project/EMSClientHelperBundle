@@ -8,17 +8,15 @@ use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\ClientHelperBundle\Helper\Local\LocalEnvironment;
 use EMS\ClientHelperBundle\Helper\Local\LocalHelper;
-use EMS\CommonBundle\Command\CommandInterface;
+use EMS\CommonBundle\Common\Command\AbstractCommand;
 use EMS\CommonBundle\Contracts\CoreApi\CoreApiInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
-abstract class AbstractLocalCommand extends Command implements CommandInterface
+abstract class AbstractLocalCommand extends AbstractCommand
 {
     protected CoreApiInterface $coreApi;
     protected Environment $environment;
@@ -26,7 +24,6 @@ abstract class AbstractLocalCommand extends Command implements CommandInterface
     protected LocalHelper $localHelper;
     protected LocalEnvironment $localEnvironment;
     protected LoggerInterface $logger;
-    protected SymfonyStyle $io;
 
     private const OPTION_EMSCH_ENV = 'emsch_env';
 
@@ -39,19 +36,16 @@ abstract class AbstractLocalCommand extends Command implements CommandInterface
 
     protected function configure(): void
     {
-        $this->addOption(self::OPTION_EMSCH_ENV, null, InputArgument::OPTIONAL, 'emsch env name', null);
+        $this->addOption(self::OPTION_EMSCH_ENV, null, InputArgument::OPTIONAL, 'emsch env name');
     }
 
     protected function initialize(InputInterface $input, OutputInterface $output): void
     {
-        $this->io = new SymfonyStyle($input, $output);
+        parent::initialize($input, $output);
+
         $this->logger = new ConsoleLogger($output);
 
-        if (null === $input->getOption(self::OPTION_EMSCH_ENV)) {
-            $input->setOption(self::OPTION_EMSCH_ENV, $this->environmentHelper->getEmschEnv());
-        }
-
-        $environmentName = \strval($input->getOption(self::OPTION_EMSCH_ENV));
+        $environmentName = $this->getOptionString(self::OPTION_EMSCH_ENV, $this->environmentHelper->getEmschEnv());
         $environment = $this->environmentHelper->getEnvironment($environmentName);
 
         if (null === $environment) {
@@ -62,5 +56,30 @@ abstract class AbstractLocalCommand extends Command implements CommandInterface
         $this->localEnvironment = $environment->getLocal();
         $this->localHelper->setLogger($this->logger);
         $this->coreApi = $this->localHelper->api($this->environment);
+    }
+
+    protected function healthCheck(): bool
+    {
+        $health = $this->localHelper->health();
+
+        if ('red' === $health) {
+            $this->io->error(\sprintf('Red health for: %s', $this->localHelper->getUrl()));
+
+            return false;
+        }
+
+        if ('yellow' === $health) {
+            $this->io->warning(\sprintf('Yellow health for %s', $this->localHelper->getUrl()));
+        }
+
+        try {
+            $this->localHelper->tryIndexSearch();
+        } catch (\Throwable $e) {
+            $this->io->error($e->getMessage());
+
+            return false;
+        }
+
+        return true;
     }
 }

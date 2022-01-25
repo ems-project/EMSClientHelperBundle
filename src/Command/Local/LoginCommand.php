@@ -19,8 +19,8 @@ final class LoginCommand extends AbstractLocalCommand
     {
         parent::configure();
         $this
-            ->addArgument(self::ARG_USERNAME, InputArgument::OPTIONAL, 'username', null)
-            ->addArgument(self::ARG_PASSWORD, InputArgument::OPTIONAL, 'password', null)
+            ->addArgument(self::ARG_USERNAME, InputArgument::OPTIONAL, 'username')
+            ->addArgument(self::ARG_PASSWORD, InputArgument::OPTIONAL, 'password')
         ;
     }
 
@@ -39,24 +39,25 @@ final class LoginCommand extends AbstractLocalCommand
     {
         $this->io->title('Local development - login');
 
-        $username = \strval($input->getArgument(self::ARG_USERNAME));
-        $password = \strval($input->getArgument(self::ARG_PASSWORD));
-
         try {
-            $coreApi = $this->localHelper->login($this->environment, $username, $password);
+            $coreApi = $this->localHelper->login(
+                $this->environment,
+                $this->getArgumentString(self::ARG_USERNAME),
+                $this->getArgumentString(self::ARG_PASSWORD)
+            );
         } catch (NotAuthenticatedExceptionInterface $e) {
             $this->io->error('Invalid credentials!');
 
-            return -1;
+            return self::EXECUTE_ERROR;
         } catch (\Throwable $e) {
             $this->io->error($e->getMessage());
 
-            return -1;
+            return self::EXECUTE_ERROR;
         }
 
         $profile = $coreApi->user()->getProfileAuthenticated();
         $this->io->success(\sprintf('Welcome %s on %s', $profile->getUsername(), $this->environment->getBackendUrl()));
 
-        return 1;
+        return self::EXECUTE_SUCCESS;
     }
 }
