@@ -29,7 +29,7 @@ final class SpreadsheetController
         $result = $this->handler->handle($request);
         $config = Json::decode($this->templating->render($result['template'], $result['context']));
         if ($request->isSubRequest()) {
-            return $this->spreadsheetGenerator->generateSpreadsheetResponse($config);
+            return $this->spreadsheetGenerator->generateSpreadsheetCacheableResponse($config);
         }
 
         return $this->spreadsheetGenerator->generateSpreadsheet($config);
