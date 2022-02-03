@@ -55,12 +55,14 @@ final class Filter
     private const TYPE_TERM = 'term';
     private const TYPE_TERMS = 'terms';
     private const TYPE_DATE_RANGE = 'date_range';
+    private const TYPE_DATE_TIME_RANGE = 'datetime_range';
     private const TYPE_DATE_VERSION = 'date_version';
 
     private const TYPES = [
         self::TYPE_TERM,
         self::TYPE_TERMS,
         self::TYPE_DATE_RANGE,
+        self::TYPE_DATE_TIME_RANGE,
         self::TYPE_DATE_VERSION,
     ];
 
@@ -282,6 +284,7 @@ final class Filter
                 $this->query = $term;
                 break;
             case self::TYPE_DATE_RANGE:
+            case self::TYPE_DATE_TIME_RANGE:
                 $this->value = \is_array($value) ? $value : [$value];
                 $this->query = $this->getQueryDateRange($this->value);
                 break;
@@ -302,14 +305,15 @@ final class Filter
         }
 
         $start = $end = null;
+        $format = self::TYPE_DATE_TIME_RANGE === $this->type ? 'Y-m-d H:i:s' : 'Y-m-d';
 
         if (!empty($value['start'])) {
-            $startDatetime = $this->createDateTimeForQuery($value['start'], ' 00:00:00');
-            $start = $startDatetime ? $startDatetime->format('Y-m-d') : null;
+            $startDatetime = $this->createDateTimeForQuery($value['start'], '00:00:00');
+            $start = $startDatetime ? $startDatetime->format($format) : null;
         }
         if (!empty($value['end'])) {
-            $endDatetime = $this->createDateTimeForQuery($value['end'], ' 23:59:59');
-            $end = $endDatetime ? $endDatetime->format('Y-m-d') : null;
+            $endDatetime = $this->createDateTimeForQuery($value['end'], '23:59:59');
+            $end = $endDatetime ? $endDatetime->format($format) : null;
         }
 
         if (null === $start && null === $end) {
@@ -319,7 +323,8 @@ final class Filter
         return new Range($this->getField(), \array_filter([
             'gte' => $start,
             'lte' => $end,
-            'format' => 'yyyy-MM-dd',
+            'time_zone' => (new \DateTime())->format('P'),
+            'format' => self::TYPE_DATE_TIME_RANGE === $this->type ? 'yyyy-MM-dd HH:mm:ss' : 'yyyy-MM-dd',
         ]));
     }
 
@@ -354,7 +359,7 @@ final class Filter
         return $boolQuery;
     }
 
-    private function createDateTimeForQuery(string $value, ?string $time = ''): ?\DateTime
+    private function createDateTimeForQuery(string $value, string $time): ?\DateTime
     {
         if (false === $this->dateFormat) {
             return new \DateTime($value);
