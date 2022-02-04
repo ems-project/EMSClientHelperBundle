@@ -48,6 +48,7 @@ final class EMSClientHelperExtension extends Extension
 
         if ($config['local']) {
             $loader->load('local.xml');
+            $loader->load('admin.xml');
         }
 
         $loader->load('api.xml');
