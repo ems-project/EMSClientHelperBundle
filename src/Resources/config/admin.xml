@@ -6,6 +6,7 @@
 
     <services>
         <service id="emsch.command.admin.get" class="EMS\ClientHelperBundle\Command\Admin\GetCommand" parent="emsch.command.local">
+            <argument type="string">%kernel.project_dir%</argument>
             <tag name="console.command" command="emsch:admin:get"/>
         </service>
     </services>
