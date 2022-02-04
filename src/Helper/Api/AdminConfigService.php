@@ -5,25 +5,45 @@ declare(strict_types=1);
 namespace EMS\ClientHelperBundle\Helper\Api;
 
 use EMS\CommonBundle\Common\Standard\Json;
+use EMS\CommonBundle\Contracts\CoreApi\Endpoint\Admin\ConfigInterface;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
 
 final class AdminConfigService
 {
-    private string $saveFolder;
+    private string $directory;
+    private ConfigInterface $config;
 
-    public function __construct(string $saveFolder)
+    public function __construct(ConfigInterface $config, string $saveFolder)
     {
-        $this->saveFolder = $saveFolder;
+        $this->config = $config;
+        $this->directory = \implode(DIRECTORY_SEPARATOR, [$saveFolder, $this->config->getType()]);
+        if (!\is_dir($this->directory)) {
+            \mkdir($this->directory, 0777, true);
+        }
     }
 
     /**
      * @param mixed[] $config
      */
-    public function save(string $type, string $name, array $config): void
+    public function save(string $name, array $config): void
     {
-        $directory = \implode(DIRECTORY_SEPARATOR, [$this->saveFolder, $type]);
-        if (!\is_dir($directory)) {
-            \mkdir($directory, 0777, true);
+        \file_put_contents($this->directory.DIRECTORY_SEPARATOR.$name.'.json', Json::encode($config, true));
+    }
+
+    public function update(): void
+    {
+        $finder = new Finder();
+        $jsonFiles = $finder->in($this->directory)->files()->name('*.json');
+        foreach ($this->config->index() as $name => $config) {
+            $jsonFiles->notName($name.'.json');
+            $this->save($name, $config);
         }
-        \file_put_contents($directory.DIRECTORY_SEPARATOR.$name.'.json', Json::encode($config, true));
+        foreach ($jsonFiles as $file) {
+            if (!$file instanceof SplFileInfo) {
+                throw new \RuntimeException('Unexpected non SplFileInfo object');
+            }
+            \unlink($file->getPathname());
+        }
     }
 }
