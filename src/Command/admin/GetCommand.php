@@ -24,8 +24,6 @@ final class GetCommand extends AbstractLocalCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->adminConfigService = new AdminConfigService($this->folder);
-
         $this->io->title('Admin - get');
         $this->io->section(\sprintf('Getting configurations from %s', $this->environment->getBackendUrl()));
         if (!$this->healthCheck()) {
@@ -38,9 +36,8 @@ final class GetCommand extends AbstractLocalCommand
         }
 
         foreach ($this->coreApi->admin()->getConfigs() as $config) {
-            foreach ($config->index() as $name => $json) {
-                $this->adminConfigService->save($config->getType(), $name, $json);
-            }
+            $this->adminConfigService = new AdminConfigService($config, $this->folder);
+            $this->adminConfigService->update();
         }
 
         return self::EXECUTE_SUCCESS;
