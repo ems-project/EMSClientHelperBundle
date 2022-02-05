@@ -9,5 +9,8 @@
             <argument type="string">%kernel.project_dir%</argument>
             <tag name="console.command" command="emsch:admin:get"/>
         </service>
+        <service id="emsch.command.admin.update" class="EMS\ClientHelperBundle\Command\Admin\UpdateCommand" parent="emsch.command.local">
+            <tag name="console.command" command="emsch:admin:update"/>
+        </service>
     </services>
 </container>
