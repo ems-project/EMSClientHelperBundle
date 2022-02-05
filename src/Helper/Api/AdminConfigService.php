@@ -35,9 +35,9 @@ final class AdminConfigService
     {
         $finder = new Finder();
         $jsonFiles = $finder->in($this->directory)->files()->name('*.json');
-        foreach ($this->config->index() as $name => $config) {
+        foreach ($this->config->index() as $name) {
             $jsonFiles->notName($name.'.json');
-            $this->save($name, $config);
+            $this->save($name, $this->config->get($name));
         }
         foreach ($jsonFiles as $file) {
             if (!$file instanceof SplFileInfo) {
