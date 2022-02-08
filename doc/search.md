@@ -64,6 +64,32 @@ Example uri for filtering all documents in november 2018.
 
 /search?**fdate[start_date]**=1-11-2018&**fdate[end_date]**=30-11-2018
 
+### DateTimeRrange
+
+Show all document bigger then now on the field new_until.
+Important we need to set the date_format to false, because we are passing 'now'.
+If we let the user select the date from a datepicker we can use the date_format and make the filter public.
+
+URI: /search?onlyNew=1
+
+```json
+{
+  "filters": {
+    "onlyNew": {
+      "type": "datetime_range",
+      "field": "new_until_date",
+      "public": false,
+      "active": false,
+      "date_format": false,
+      "post_filter": true,
+      "value": {
+        "start": "now"
+      }
+    }
+  }
+}
+```
+
 ### Date Version
 
 Elasticms supports versioning on documents. Documents share a version uuid and have a from and to date. 
