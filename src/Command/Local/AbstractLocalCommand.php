@@ -11,8 +11,8 @@ use EMS\ClientHelperBundle\Helper\Local\LocalHelper;
 use EMS\CommonBundle\Common\Command\AbstractCommand;
 use EMS\CommonBundle\Contracts\CoreApi\CoreApiInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -36,7 +36,7 @@ abstract class AbstractLocalCommand extends AbstractCommand
 
     protected function configure(): void
     {
-        $this->addOption(self::OPTION_EMSCH_ENV, null, InputArgument::OPTIONAL, 'emsch env name');
+        $this->addOption(self::OPTION_EMSCH_ENV, null, InputOption::VALUE_OPTIONAL, 'emsch env name');
     }
 
     protected function initialize(InputInterface $input, OutputInterface $output): void
