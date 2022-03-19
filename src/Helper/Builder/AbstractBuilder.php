@@ -27,17 +27,17 @@ abstract class AbstractBuilder
     protected LoggerInterface $logger;
     /** @var string[] */
     protected array $locales;
-
-    private const SEARCH_LIMIT = 1000;
+    private int $searchLimit;
 
     /**
      * @param string[] $locales
      */
-    public function __construct(ClientRequestManager $manager, LoggerInterface $logger, array $locales)
+    public function __construct(ClientRequestManager $manager, LoggerInterface $logger, array $locales, int $searchLimit)
     {
         $this->clientRequest = $manager->getDefault();
         $this->logger = $logger;
         $this->locales = $locales;
+        $this->searchLimit = $searchLimit;
     }
 
     public function settings(Environment $environment): Settings
@@ -53,15 +53,15 @@ abstract class AbstractBuilder
     {
         $search = new Search([$contentType->getEnvironment()->getAlias()]);
         $search->setContentTypes([$contentType->getName()]);
-        $search->setSize(self::SEARCH_LIMIT);
+        $search->setSize($this->searchLimit);
 
         $this->modifySearch($search);
 
         $response = Response::fromResultSet($this->clientRequest->commonSearch($search));
 
-        if ($response->getTotal() > self::SEARCH_LIMIT) {
-            $this->logger->error('Only the first {limit} {type}s have been loaded on a total of {total}', [
-                'limit' => self::SEARCH_LIMIT,
+        if ($response->getTotal() > $this->searchLimit) {
+            $this->logger->error('Only the first {limit} {type}s have been loaded on a total of {total}, consider to raised that limit with emsch.search_limit', [
+                'limit' => $this->searchLimit,
                 'type' => $contentType->getName(),
                 'total' => $response->getTotal(),
             ]);

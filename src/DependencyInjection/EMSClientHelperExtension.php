@@ -37,6 +37,7 @@ final class EMSClientHelperExtension extends Extension
         $container->setParameter('emsch.etag_hash_algo', $config['etag_hash_algo'] ?? 'sha1');
         $container->setParameter('emsch.asset_local_folder', $config['asset_local_folder'] ?? null);
         $container->setParameter('emsch.request_environments', $config['request_environments']);
+        $container->setParameter('emsch.search_limit', $config['search_limit']);
 
         $templates = $config['templates'];
         $container->getDefinition('emsch.helper_exception')->replaceArgument(4, $templates['error']);
