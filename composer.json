@@ -24,7 +24,7 @@
 		"php": "^7.4",
 		"ext-json": "*",
 		"composer/ca-bundle": "^1.1",
-		"elasticms/common-bundle": "~1.8.0",
+		"elasticms/common-bundle": "^2.0",
 		"psr/cache": "^1.0",
 		"symfony-cmf/routing": "^2.1.0",
 		"symfony/asset": "^4.4",
@@ -34,7 +34,16 @@
 		"symfony/property-access": "^4.4",
 		"symfony/translation": "^4.4",
 		"symfony/yaml": "^4.4",
-		"twig/twig": "^2.14"
+		"twig/twig": "^2.14",
+		"symfony/dom-crawler": "^4.4",
+		"symfony/expression-language": "^4.4",
+		"symfony/http-client": "^4.4",
+		"symfony/http-foundation": "^4.4",
+		"symfony/monolog-bridge": "^4.4",
+		"symfony/routing": "^4.4",
+		"symfony/security": "^4.4",
+		"symfony/serializer": "^4.4",
+		"symfony/stopwatch": "^4.4"
 	},
 	"require-dev" : {
 		"friendsofphp/php-cs-fixer" : "^3.0",
@@ -61,7 +70,10 @@
 	},
 	"config": {
 		"lock": false,
-		"sort-packages": true
+		"sort-packages": true,
+		"allow-plugins": {
+			"phpstan/extension-installer": true
+		}
 	},
 	"extra" : {
 		"branch-alias" : {
@@ -73,5 +85,11 @@
 		"phpstan": "phpstan analyse",
 		"phpunit":  "phpunit",
 		"phpall": "php-cs-fixer fix && phpunit && phpstan"
+	},
+	"extra": {
+		"symfony": {
+			"allow-contrib": false,
+			"require": "4.4.*"
+		}
 	}
 }

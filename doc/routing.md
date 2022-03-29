@@ -67,6 +67,7 @@ Two writer are supported:
  - `xlsx`: Generate a Microsoft Excel file
  - `csv`: Generate a CSV file
 
+Add style on Cell are available [See on EMSCommonBundle documentation](https://github.com/ems-project/EMSCommonBundle/tree/master/doc/spreadsheet.md)
 
 ## Route to an asset
 
