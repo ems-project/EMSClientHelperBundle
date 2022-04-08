@@ -159,5 +159,20 @@ you can switch to `render_esi`:
 Here the reverse proxy will calls the sub-requests by himself. So, globally, requests will use less memory. And the reverse proxy will also be able to cache part of the DOM. 
 I.e. the footer, which is basically always the same, won't have to be generated for each query. Even if the cache's TTL is short, it will help to absorb charge's peaks with less resources. 
 
+## Cacheable fragment
+
+Some repetitive computes can also be cached. For that you may call the `cacheableFragment` method: 
 
 
+```twig
+    {% set structure = render(controller('emsch.controller.embed::cacheableFragment', {
+        cacheType: 'menu',
+        template: '@EMSCH/template/fragments/structure_from_menu_documents.json.twig',
+        context: {
+            trans_default_domain: trans_default_domain,
+            last: 5,
+        },
+    }))|ems_json_decode %}
+```
+
+The `cacheType` parameter is the content type's name used to invalidate the response in cache (if something has been updated) 

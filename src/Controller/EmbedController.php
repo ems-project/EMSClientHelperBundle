@@ -93,4 +93,17 @@ final class EmbedController extends AbstractController
 
         return $response;
     }
+
+    /**
+     * @param mixed[] $context
+     */
+    public function cacheableFragment(string $cacheType, string $template, array $context = []): Response
+    {
+        return $this->clientRequest->getCacheResponse([
+            'template' => $template,
+            'context' => $context,
+        ], $cacheType, function () use ($template, $context) {
+            return new Response($this->templating->render($template, $context));
+        });
+    }
 }
