@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Api;
 
-use EMS\ClientHelperBundle\Contracts\Api\ApiClientInterface;
 use EMS\CommonBundle\Common\HttpClientFactory;
 use GuzzleHttp\Client as HttpClient;
 use Psr\Log\LoggerInterface;
@@ -12,7 +11,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @todo use EMS\CommonBundle\Contracts\CoreApi\CoreApiInterface
  */
-final class Client implements ApiClientInterface
+final class Client
 {
     private HttpClient $client;
     private string $key;
@@ -122,39 +121,5 @@ final class Client implements ApiClientInterface
         ]);
 
         return \json_decode($response->getBody()->getContents(), true);
-    }
-
-    public function createFormVerification(string $value): ?string
-    {
-        try {
-            $response = $this->client->post('/api/forms/verifications', [
-                'json' => ['value' => $value],
-            ]);
-
-            $json = \json_decode($response->getBody()->getContents(), true);
-
-            return isset($json['code']) ? $json['code'] : null;
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
-
-            return null;
-        }
-    }
-
-    public function getFormVerification(string $value): ?string
-    {
-        try {
-            $response = $this->client->get('/api/forms/verifications', [
-                'query' => ['value' => $value],
-            ]);
-
-            $json = \json_decode($response->getBody()->getContents(), true);
-
-            return isset($json['code']) ? $json['code'] : null;
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
-
-            return null;
-        }
     }
 }
