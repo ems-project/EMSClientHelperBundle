@@ -130,9 +130,9 @@ final class LocalHelper
         $settings = $this->clientRequest->getSettings($environment);
 
         return [
-            $this->statusRouting($environment, $settings),
-            $this->statusTemplating($environment, $settings),
             $this->statusTranslation($environment, $settings),
+            $this->statusTemplating($environment, $settings),
+            $this->statusRouting($environment, $settings),
         ];
     }
 
