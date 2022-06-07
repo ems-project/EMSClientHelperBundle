@@ -7,6 +7,7 @@ namespace EMS\ClientHelperBundle\Helper\Api;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\CommonBundle\Helper\EmsFields;
 use Psr\Log\LoggerInterface;
+use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\FileBag;
 use Symfony\Component\HttpFoundation\Request;
@@ -186,6 +187,7 @@ final class ApiService
      */
     public function createDocument(string $apiName, string $type, ?string $ouuid, array $body): string
     {
+        $ouuid = $ouuid ?? Uuid::uuid4()->toString();
         $apiClient = $this->getApiClient($apiName);
         $response = $apiClient->initNewDocument($type, $body, $ouuid);
 
