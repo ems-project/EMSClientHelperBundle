@@ -213,7 +213,7 @@ will search and match with the **_all** field.
 }
 ````
 
-## Highhight
+## Highlight
 
 Get highlighted snippets from one or more fields in your search 
 ````json
@@ -234,3 +234,30 @@ Get highlighted snippets from one or more fields in your search
   }
 }
 ````
+
+## Routes with specific search config
+
+A route can specify its own search config by adding a search_config request attribute:
+
+I.e. in the routes.yml files:
+````yaml
+emsch_search:
+    config:
+        path: { en: search, fr: chercher, nl: zoeken, de: suche }
+        defaults: {
+           search_config:{
+             "types": ["page", "publication", "slideshow"],
+             "fields": ["_all"],
+             "sizes": [10],
+             "sorts": {
+               "recent": {"field": "published_date", "order": "desc", "unmapped_type": "date", "missing":  "_last"}
+             }
+           }
+        }
+        controller: 'emsch.controller.search::handle'
+````
+
+This approach can be very useful in development mode as you don't have to restart your application to test another search config.
+
+
+
