@@ -283,6 +283,10 @@ final class Search
     private function getOptions(Request $request, ClientRequest $clientRequest): array
     {
         if ($requestSearchConfig = $request->get('search_config')) {
+            if (\is_array($requestSearchConfig)) {
+                return $requestSearchConfig;
+            }
+
             return Json::decode($requestSearchConfig);
         }
 
