@@ -286,6 +286,7 @@ final class Search
             if (\is_array($requestSearchConfig)) {
                 return $requestSearchConfig;
             }
+            @\trigger_error('Deprecated search_config as string, please define it as an object in your route\'s config', E_USER_DEPRECATED);
 
             return Json::decode($requestSearchConfig);
         }
