@@ -152,8 +152,8 @@ final class QueryBuilder
                 $nested->setPath($filterNestedPath);
                 $nested->setQuery($query);
                 $nested->setParam('ignore_unmapped', true);
-                $nestedQueries[$filter->getNestedPath()]['bool']['must'][] = $filter->getQuery();
-                $postFilters->addMust($nestedQueries);
+
+                $postFilters->addMust($nested);
             } else {
                 $postFilters->addMust($query);
             }
@@ -191,9 +191,10 @@ final class QueryBuilder
             if (null !== $nestedPath) {
                 $nested = new NestedAggregation($filter->getName(), $nestedPath);
                 $nested->addAggregation($aggregation);
+                $aggs[$filter->getName()] = $nested;
+            } else {
+                $aggs[$filter->getName()] = $aggregation;
             }
-
-            $aggs[$filter->getName()] = $aggregation;
         }
 
         return \array_filter($aggs);

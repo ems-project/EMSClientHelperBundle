@@ -211,7 +211,7 @@ final class Filter
         $this->queryFilters = $queryFilters;
         $this->setChoices();
 
-        $data = $aggregation['nested'] ?? $aggregation;
+        $data = $aggregation[$this->name] ?? $aggregation;
         $buckets = $data['filtered_'.$this->name]['buckets'] ?? $data['buckets'];
 
         foreach ($buckets as $bucket) {
@@ -418,7 +418,8 @@ final class Filter
         $search = $this->clientRequest->commonSearch($search)->getResponse()->getData();
 
         $result = $search['aggregations'][$this->name];
-        $buckets = $this->isNested() ? $result['nested']['buckets'] : $result['buckets'];
+
+        $buckets = $this->isNested() ? $result[$this->name]['buckets'] : $result['buckets'];
         $choices = [];
 
         foreach ($buckets as $bucket) {
