@@ -15,6 +15,7 @@ For enabling pdf generation use the **emsch.controller.pdf** controller
 In Twig you can set/override the pdf options with custom meta tags in the head section
 ```html
 <head>
+    <title>Title</title>
     <meta name="pdf:filename" content="example.pdf" />
     <meta name="pdf:attachment" content="true" />
     <meta name="pdf:compress" content="true" />
@@ -162,4 +163,24 @@ This setup only works with php-fpm (no windows) because we continue the process 
 > Internally, the HttpKernel makes use of the fastcgi_finish_request PHP function. This means that at the moment, only the PHP FPM server API is able to send a response to the client while the server's PHP process still performs some tasks. With all other server APIs, listeners to kernel.terminate are still executed, but the response is not sent to the client until they are all completed.
 
 
+## Search route
 
+See the [search documentation](./search.md) fo more information.
+
+I.e.:
+````yaml
+emsch_search:
+    config:
+        path: { en: search, fr: chercher, nl: zoeken, de: suche }
+        defaults: {
+           search_config:{
+             "types": ["page", "publication", "slideshow"],
+             "fields": ["_all"],
+             "sizes": [10],
+             "sorts": {
+               "recent": {"field": "published_date", "order": "desc", "unmapped_type": "date", "missing":  "_last"}
+             }
+           }
+        }
+        controller: 'emsch.controller.search::handle'
+````
