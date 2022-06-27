@@ -643,6 +643,18 @@ final class ClientRequest implements ClientRequestInterface
         return $response;
     }
 
+    /**
+     * @param mixed[] $config
+     */
+    public function addEnvironment(string $name, array $config = [], bool $overwrite = false): void
+    {
+        if (!$overwrite && null !== $this->environmentHelper->getEnvironment($name)) {
+            return;
+        }
+        $this->environmentHelper->addEnvironment($name, $config);
+        $this->environmentHelper->giveEnvironment($name)->makeActive();
+    }
+
     private function getLastPublishedDate(string $contentTypeNames): \DateTimeImmutable
     {
         $publishDates = [];

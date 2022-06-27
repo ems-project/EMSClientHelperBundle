@@ -51,6 +51,15 @@ final class EnvironmentHelper implements EnvironmentHelperInterface
         return $this->environments[$name] ?? null;
     }
 
+    public function giveEnvironment(string $name): Environment
+    {
+        if (!isset($this->environments[$name])) {
+            throw new \RuntimeException(\sprintf('Environment %s not found', $name));
+        }
+
+        return $this->environments[$name];
+    }
+
     /**
      * @return Environment[]
      */
