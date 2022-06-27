@@ -38,7 +38,7 @@ final class EnvironmentHelper implements EnvironmentHelperInterface
      */
     public function addEnvironment(string $name, array $config): void
     {
-        $this->environments[] = $this->environmentFactory->create($name, $config);
+        $this->environments[$name] = $this->environmentFactory->create($name, $config);
     }
 
     public function getEmschEnv(): string
