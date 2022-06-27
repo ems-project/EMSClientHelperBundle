@@ -133,7 +133,7 @@ final class QueryBuilder
         return $query;
     }
 
-    private function getPostFilters(Filter $exclude = null, string $nestedPath = null): ?AbstractQuery
+    private function getPostFilters(Filter $exclude = null): ?AbstractQuery
     {
         $postFilters = new BoolQuery();
 
@@ -147,7 +147,7 @@ final class QueryBuilder
             }
 
             $filterNestedPath = $filter->getNestedPath();
-            if (null !== $filterNestedPath && $filterNestedPath !== $nestedPath) {
+            if (null !== $filterNestedPath) {
                 $nested = new Nested();
                 $nested->setPath($filterNestedPath);
                 $nested->setQuery($query);
@@ -186,15 +186,7 @@ final class QueryBuilder
             }
 
             $aggregation = $hasPostFilter ? $this->getAggPostFilter($filter) : $this->getAgg($filter);
-
-            $nestedPath = $filter->getNestedPath();
-            if (null !== $nestedPath) {
-                $nested = new NestedAggregation($filter->getName(), $nestedPath);
-                $nested->addAggregation($aggregation);
-                $aggs[$filter->getName()] = $nested;
-            } else {
-                $aggs[$filter->getName()] = $aggregation;
-            }
+            $aggs[$filter->getName()] = $aggregation;
         }
 
         return \array_filter($aggs);
@@ -219,6 +211,11 @@ final class QueryBuilder
             $agg->setOrder($orderField, $filter->getSortOrder());
         }
 
+        if ($filter->isNested() && null !== $path = $filter->getNestedPath()) {
+            $nestedAggregation = new NestedAggregation($filter->getName(), $path);
+            $agg = $nestedAggregation->addAggregation($agg);
+        }
+
         return $agg;
     }
 
@@ -228,7 +225,7 @@ final class QueryBuilder
     private function getAggPostFilter(Filter $filter): AbstractAggregation
     {
         $agg = $this->getAgg($filter);
-        $postFilters = $this->getPostFilters($filter, $filter->getNestedPath());
+        $postFilters = $this->getPostFilters($filter);
 
         if (null === $postFilters) {
             return $agg;
