@@ -119,4 +119,13 @@ final class ClientRequestRuntime implements RuntimeExtensionInterface
 
         return $document;
     }
+
+    /**
+     * @param mixed[] $config
+     */
+    public function addEnvironment(string $name, array $config = [], string $website = 'website'): void
+    {
+        $clientRequest = $this->manager->get($website);
+        $clientRequest->addEnvironment($name, $config);
+    }
 }

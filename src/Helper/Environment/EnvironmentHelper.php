@@ -38,7 +38,7 @@ final class EnvironmentHelper implements EnvironmentHelperInterface
      */
     public function addEnvironment(string $name, array $config): void
     {
-        $this->environments[] = $this->environmentFactory->create($name, $config);
+        $this->environments[$name] = $this->environmentFactory->create($name, $config);
     }
 
     public function getEmschEnv(): string
@@ -49,6 +49,15 @@ final class EnvironmentHelper implements EnvironmentHelperInterface
     public function getEnvironment(string $name): ?Environment
     {
         return $this->environments[$name] ?? null;
+    }
+
+    public function giveEnvironment(string $name): Environment
+    {
+        if (!isset($this->environments[$name])) {
+            throw new \RuntimeException(\sprintf('Environment %s not found', $name));
+        }
+
+        return $this->environments[$name];
     }
 
     /**
