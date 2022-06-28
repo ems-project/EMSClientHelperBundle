@@ -212,7 +212,9 @@ final class Filter
         $this->setChoices();
 
         $data = $aggregation[$this->name] ?? $aggregation;
-        $buckets = $data['filtered_'.$this->name]['buckets'] ?? $data['buckets'];
+        $data = $data['filtered_'.$this->name] ?? $data;
+
+        $buckets = $data[$this->name]['buckets'] ?? $data['buckets'];
 
         foreach ($buckets as $bucket) {
             if (!isset($this->choices[$bucket['key']])) {
