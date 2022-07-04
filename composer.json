@@ -8,18 +8,11 @@
 	"license" : "MIT",
 	"authors" : [
 		{
-			"name" : "Isabelle Michiels",
-			"email" : "isabelle.michiels@smals.be"
-		},
-		{
-			"name" : "David Mattei",
-			"email" : "david.mattei@smals.be"
-		},
-		{
-			"name" : "David Meert",
-			"email" : "david.meert@smals.be"
+			"name" : "EMS Community",
+			"homepage" : "https://github.com/ems-project/EMSClientHelperBundle/contributors"
 		}
 	],
+	"minimum-stability": "dev",
 	"require" : {
 		"php": "^7.4",
 		"ext-json": "*",
@@ -58,10 +51,7 @@
 	"autoload" : {
 		"psr-4" : {
 			"EMS\\ClientHelperBundle\\" : "src/"
-		},
-		"exclude-from-classmap" : [
-			"tests/"
-		]
+		}
 	},
 	"autoload-dev" : {
 		"psr-4" : {
@@ -75,21 +65,10 @@
 			"phpstan/extension-installer": true
 		}
 	},
-	"extra" : {
-		"branch-alias" : {
-			"dev-master" : "0.1-dev"
-		}
-	},
 	"scripts": {
 		"phpcs": "php-cs-fixer fix",
 		"phpstan": "phpstan analyse --memory-limit 1G",
 		"phpunit":  "phpunit",
 		"phpall": "php-cs-fixer fix && phpunit && phpstan"
-	},
-	"extra": {
-		"symfony": {
-			"allow-contrib": false,
-			"require": "4.4.*"
-		}
 	}
 }
