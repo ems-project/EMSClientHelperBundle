@@ -29,6 +29,7 @@ final class Configuration implements ConfigurationInterface
                     ->defaultValue(1000)
                 ->end()
                 ->arrayNode('templates')
+                    ->addDefaultsIfNotSet()
                     ->children()
                         ->scalarNode('error')->defaultValue('@EMSCH/template/error{code}.html.twig')->end()
                         ->scalarNode('ems_link')->defaultValue('@EMSCH/template/emsLinks/{type}.ems_link.twig')->end()
