@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-final class UploadAssetsCommand extends AbstractUploadCommand
+final class UploadAssetsCommand extends AbstractLocalCommand
 {
     private const ARG_BASE_URL = 'base_url';
     private ?string $assetLocalFolder;
@@ -54,12 +54,68 @@ final class UploadAssetsCommand extends AbstractUploadCommand
             return self::EXECUTE_ERROR;
         }
 
-        if (null === $hash = $this->uploadFile($assetsArchive)) {
+        try {
+            $hash = $this->upload($assetsArchive);
+            $this->io->success(\sprintf('Assets %s have been uploaded', $hash));
+
+            return self::EXECUTE_SUCCESS;
+        } catch (\Throwable $e) {
+            $this->io->error($e->getMessage());
+
             return self::EXECUTE_ERROR;
         }
+    }
 
-        $this->io->success(\sprintf('Assets %s have been uploaded', $hash));
+    private function upload(string $filename): string
+    {
+        $fileApi = $this->coreApi->file();
 
-        return self::EXECUTE_ERROR;
+        $hash = $fileApi->hashFile($filename);
+        $filesize = \filesize($filename);
+        if (!\is_int($filesize)) {
+            throw new \RuntimeException('Unexpected file size type');
+        }
+
+        $fromByte = $fileApi->initUpload($hash, $filesize, 'bundle.zip', 'application/zip');
+        if ($fromByte < 0) {
+            throw new \RuntimeException(\sprintf('Unexpected negative offset: %d', $fromByte));
+        }
+        if ($fromByte > $filesize) {
+            throw new \RuntimeException(\sprintf('Unexpected bigger offset than the filesize: %d > %d', $fromByte, $filesize));
+        }
+
+        $handle = \fopen($filename, 'r');
+        if (false === $handle) {
+            throw new \RuntimeException(\sprintf('Unexpected error while open the archive %s', $filename));
+        }
+        if ($fromByte > 0) {
+            if (0 !== \fseek($handle, $fromByte)) {
+                throw new \RuntimeException(\sprintf('Unexpected error while seeking the file pointer at position %s', $fromByte));
+            }
+        }
+
+        if ($fromByte === $filesize) {
+            $this->io->comment(\sprintf('The assets %s were already uploaded', $hash));
+
+            return $hash;
+        }
+
+        $this->io->progressStart($filesize);
+        $uploaded = $fromByte;
+        while (!\feof($handle)) {
+            $chunk = \fread($handle, 819200);
+            if (!\is_string($chunk)) {
+                throw new \RuntimeException('Unexpected chunk type');
+            }
+            $uploaded = $fileApi->addChunk($hash, $chunk);
+            $this->io->progressAdvance(\strlen($chunk));
+        }
+        \fclose($handle);
+        $this->io->progressFinish();
+        if ($uploaded !== $filesize) {
+            throw new \RuntimeException(\sprintf('Sizes mismatched %d vs. %d for assets %s', $uploaded, $filesize, $hash));
+        }
+
+        return $hash;
     }
 }
