@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Command\Local;
 
-use EMS\CommonBundle\Command\CommandInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Mime\MimeTypes;
 
-final class FolderUploadCommand extends AbstractUploadCommand implements CommandInterface
+final class FolderUploadCommand extends AbstractLocalCommand
 {
     private const ARG_FOLDER = 'folder';
 
@@ -31,8 +31,8 @@ final class FolderUploadCommand extends AbstractUploadCommand implements Command
             return self::EXECUTE_ERROR;
         }
 
+        $mimeTypes = new MimeTypes();
         $finder = new Finder();
-
         $finder->files()->in($folder);
 
         if (!$finder->hasResults()) {
@@ -42,21 +42,38 @@ final class FolderUploadCommand extends AbstractUploadCommand implements Command
         }
 
         $this->io->comment(\sprintf('%d files located', $finder->count()));
-        $uploadedCounter = 0;
-        $counter = 0;
+        $hashesUploaded = [];
+        $duplicates = [];
+        $progressBar = $this->io->createProgressBar($finder->count());
+
         foreach ($finder as $file) {
-            ++$counter;
-            $realPath = $file->getRealPath();
-            if (!\is_string($realPath)) {
-                $this->io->comment(\sprintf('File %s not found', $file->getFilename()));
-                continue;
+            try {
+                $realPath = $file->getRealPath();
+                if (!\is_string($realPath)) {
+                    throw new \RuntimeException(\sprintf('File %s not found', $file->getFilename()));
+                }
+
+                $hash = $this->coreApi->file()->uploadFile($realPath, $mimeTypes->guessMimeType($realPath));
+
+                if (!\array_key_exists($hash, $hashesUploaded)) {
+                    $hashesUploaded[$hash] = $file->getFilename();
+                } else {
+                    $duplicates[] = [$file->getFilename(), $hashesUploaded[$hash]];
+                }
+            } catch (\Throwable $e) {
+                $this->io->error(\sprintf('Upload failed for "%s" (%s)', $realPath ?? $file->getFilename(), $e->getMessage()));
             }
-            $this->io->comment(\sprintf('File %s %d/%d :', $file->getFilename(), $counter, $finder->count()));
-            if (null !== $this->uploadFile($realPath)) {
-                ++$uploadedCounter;
-            }
+
+            $progressBar->advance();
         }
-        $this->io->success(\sprintf('%d (on %d) assets have been uploaded', $uploadedCounter, $finder->count()));
+
+        $progressBar->finish();
+        $this->io->newLine();
+
+        $this->io->warning(\sprintf('Found %d duplicates', \count($duplicates)));
+        $this->io->table(['file', 'duplicate'], $duplicates);
+
+        $this->io->success(\sprintf('%d (on %d) assets have been uploaded', \count($hashesUploaded), $finder->count()));
 
         return self::EXECUTE_SUCCESS;
     }
