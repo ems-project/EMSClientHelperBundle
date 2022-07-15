@@ -66,7 +66,7 @@ final class UploadAssetsCommand extends AbstractLocalCommand
         }
     }
 
-    private function upload(string $filename): ?string
+    private function upload(string $filename): string
     {
         $fileApi = $this->coreApi->file();
 
@@ -113,9 +113,7 @@ final class UploadAssetsCommand extends AbstractLocalCommand
         \fclose($handle);
         $this->io->progressFinish();
         if ($uploaded !== $filesize) {
-            $this->io->warning(\sprintf('Sizes mismatched %d vs. %d for assets %s', $uploaded, $filesize, $hash));
-
-            return null;
+            throw new \RuntimeException(\sprintf('Sizes mismatched %d vs. %d for assets %s', $uploaded, $filesize, $hash));
         }
 
         return $hash;
