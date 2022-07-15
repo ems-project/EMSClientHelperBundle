@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Command\Local;
 
-use EMS\CommonBundle\Command\CommandInterface;
-use http\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Mime\MimeTypes;
 
-final class FolderUploadCommand extends AbstractLocalCommand implements CommandInterface
+final class FolderUploadCommand extends AbstractLocalCommand
 {
     private const ARG_FOLDER = 'folder';
 
@@ -52,7 +50,7 @@ final class FolderUploadCommand extends AbstractLocalCommand implements CommandI
             try {
                 $realPath = $file->getRealPath();
                 if (!\is_string($realPath)) {
-                    throw new RuntimeException(\sprintf('File %s not found', $file->getFilename()));
+                    throw new \RuntimeException(\sprintf('File %s not found', $file->getFilename()));
                 }
 
                 $hash = $this->coreApi->file()->uploadFile($realPath, $mimeTypes->guessMimeType($realPath));
