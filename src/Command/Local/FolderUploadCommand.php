@@ -12,7 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Mime\MimeTypes;
 
-final class UploadFolderCommand extends AbstractLocalCommand implements CommandInterface
+final class FolderUploadCommand extends AbstractLocalCommand implements CommandInterface
 {
     private const ARG_FOLDER = 'folder';
 
