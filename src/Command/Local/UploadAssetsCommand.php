@@ -56,12 +56,12 @@ final class UploadAssetsCommand extends AbstractLocalCommand
         }
 
         try {
-            $progressBar = $this->io->createProgressBar(Type::integer(filesize($assetsArchive)));
+            $progressBar = $this->io->createProgressBar(Type::integer(\filesize($assetsArchive)));
             $hash = $this->coreApi->file()->uploadFile(
                 $assetsArchive,
                 'application/zip',
                 'bundle.zip',
-                fn (string $chunk) => $progressBar->advance(strlen($chunk))
+                fn (string $chunk) => $progressBar->advance(\strlen($chunk))
             );
 
             $progressBar->finish();
