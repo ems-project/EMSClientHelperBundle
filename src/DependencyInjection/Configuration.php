@@ -18,7 +18,6 @@ final class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-
                 ->variableNode('request_environments')->isRequired()->end()
                 ->variableNode('locales')->isRequired()->end()
                 ->booleanNode('bind_locale')->end()
@@ -30,7 +29,6 @@ final class Configuration implements ConfigurationInterface
                     ->defaultValue(1000)
                 ->end()
                 ->arrayNode('templates')
-
                     ->addDefaultsIfNotSet()
                     ->children()
                         ->scalarNode('error')->defaultValue('@EMSCH/template/error{code}.html.twig')->end()
