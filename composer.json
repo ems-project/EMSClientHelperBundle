@@ -17,7 +17,7 @@
 		"php": "^7.4",
 		"ext-json": "*",
 		"composer/ca-bundle": "^1.1",
-		"elasticms/common-bundle": "5.0.x-dev",
+		"elasticms/common-bundle": "4.0.x-dev",
 		"psr/cache": "^1.0",
 		"symfony-cmf/routing": "^2.1.0",
 		"symfony/asset": "^4.4",
