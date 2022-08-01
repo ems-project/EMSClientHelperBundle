@@ -305,9 +305,9 @@ final class Search
     }
 
     /**
-     * @param array<string, array|string> $sorts
+     * @param array<string, array<mixed>|string> $sorts
      *
-     * @return array<string, array>
+     * @return array<string, array<mixed>>
      */
     private function parseSorts(array $sorts): array
     {

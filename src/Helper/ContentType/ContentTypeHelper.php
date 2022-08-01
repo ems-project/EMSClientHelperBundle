@@ -10,21 +10,14 @@ use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Environment\Environment;
 use EMS\CommonBundle\Elasticsearch\Response\Response;
 use EMS\CommonBundle\Search\Search;
-use Psr\Log\LoggerInterface;
 
 final class ContentTypeHelper
 {
-    private LoggerInterface $logger;
     /** @var ContentTypeCollection[] */
     private array $contentTypeCollections = [];
 
     public const AGG_CONTENT_TYPE = 'contentType';
     public const AGG_LAST_PUBLISHED = 'lastPublished';
-
-    public function __construct(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-    }
 
     public function clear(): void
     {

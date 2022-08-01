@@ -7,7 +7,6 @@ namespace EMS\ClientHelperBundle\Controller;
 use EMS\CommonBundle\Twig\AssetRuntime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -15,12 +14,10 @@ final class AssetController extends AbstractController
 {
     private string $projectDir;
     private AssetRuntime $assetRuntime;
-    private RequestStack $requestStack;
 
-    public function __construct(AssetRuntime $assetRuntime, RequestStack $requestStack, string $projectDir)
+    public function __construct(AssetRuntime $assetRuntime, string $projectDir)
     {
         $this->assetRuntime = $assetRuntime;
-        $this->requestStack = $requestStack;
         $this->projectDir = $projectDir;
     }
 

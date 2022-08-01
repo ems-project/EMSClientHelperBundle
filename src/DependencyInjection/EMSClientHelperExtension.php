@@ -81,7 +81,6 @@ final class EMSClientHelperExtension extends Extension
             $definition->setArgument(0, $name);
             $definition->setArgument(1, $options['url']);
             $definition->setArgument(2, $options['key']);
-            $definition->setArgument(3, new Reference('logger'));
             $definition->addTag('emsch.api_client');
 
             $container->setDefinition(\sprintf('emsch.api_client.%s', $name), $definition);

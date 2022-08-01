@@ -73,7 +73,7 @@ final class Handler implements HandlerInterface
     }
 
     /**
-     * @return array{_id: string, _type?: string, _source: array}|null
+     * @return array{_id: string, _type?: string, _source: array<mixed>}|null
      */
     public function getDocument(Request $request, SymfonyRoute $route): ?array
     {
@@ -108,7 +108,7 @@ final class Handler implements HandlerInterface
             throw new TemplatingException('Provide a valid string as template!');
         }
 
-        $template = RequestHelper::replace($request, $template ?? '');
+        $template = RequestHelper::replace($request, $template);
 
         if (null === $document || TemplateDocument::PREFIX === \substr($template, 0, 6)) {
             return $template;

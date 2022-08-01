@@ -6,20 +6,17 @@ namespace EMS\ClientHelperBundle\Helper\Request;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\RouterInterface;
 
 final class LocaleHelper
 {
-    private RouterInterface $router;
     /** @var string[] */
     private array $locales;
 
     /**
      * @param string[] $locales
      */
-    public function __construct(RouterInterface $router, array $locales)
+    public function __construct(array $locales)
     {
-        $this->router = $router;
         $this->locales = $locales;
     }
 
