@@ -6,11 +6,12 @@ namespace EMS\ClientHelperBundle\Command\Local;
 
 use EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper;
 use EMS\ClientHelperBundle\Helper\Local\LocalHelper;
+use EMS\Helpers\Standard\Type;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-final class UploadAssetsCommand extends AbstractUploadCommand
+final class UploadAssetsCommand extends AbstractLocalCommand
 {
     private const ARG_BASE_URL = 'base_url';
     private ?string $assetLocalFolder;
@@ -54,12 +55,25 @@ final class UploadAssetsCommand extends AbstractUploadCommand
             return self::EXECUTE_ERROR;
         }
 
-        if (null === $hash = $this->uploadFile($assetsArchive)) {
+        try {
+            $progressBar = $this->io->createProgressBar(Type::integer(\filesize($assetsArchive)));
+            $hash = $this->coreApi->file()->uploadFile(
+                $assetsArchive,
+                'application/zip',
+                'bundle.zip',
+                fn (string $chunk) => $progressBar->advance(\strlen($chunk))
+            );
+
+            $progressBar->finish();
+
+            $this->io->newLine();
+            $this->io->success(\sprintf('Assets %s have been uploaded', $hash));
+
+            return self::EXECUTE_SUCCESS;
+        } catch (\Throwable $e) {
+            $this->io->error($e->getMessage());
+
             return self::EXECUTE_ERROR;
         }
-
-        $this->io->success(\sprintf('Assets %s have been uploaded', $hash));
-
-        return self::EXECUTE_ERROR;
     }
 }
