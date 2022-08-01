@@ -13,6 +13,7 @@
 		}
 	],
 	"minimum-stability": "dev",
+	"prefer-stable" : true,
 	"require" : {
 		"php": "^7.4",
 		"ext-json": "*",
@@ -22,31 +23,28 @@
 		"symfony-cmf/routing": "^2.1.0",
 		"symfony/asset": "^4.4",
 		"symfony/config": "^4.4",
-		"symfony/framework-bundle": "^4.4",
-		"symfony/options-resolver": "^4.4",
-		"symfony/property-access": "^4.4",
-		"symfony/translation": "^4.4",
-		"symfony/yaml": "^4.4",
-		"twig/twig": "^2.14",
 		"symfony/dom-crawler": "^4.4",
 		"symfony/expression-language": "^4.4",
+		"symfony/framework-bundle": "^4.4",
 		"symfony/http-client": "^4.4",
 		"symfony/http-foundation": "^4.4",
 		"symfony/monolog-bridge": "^4.4",
+		"symfony/options-resolver": "^4.4",
+		"symfony/property-access": "^4.4",
 		"symfony/routing": "^4.4",
 		"symfony/security": "^4.4",
 		"symfony/serializer": "^4.4",
-		"symfony/stopwatch": "^4.4"
+		"symfony/stopwatch": "^4.4",
+		"symfony/translation": "^4.4",
+		"symfony/twig-bundle": "4.4",
+		"symfony/yaml": "^4.4",
+		"twig/twig": "^2.14"
 	},
 	"require-dev" : {
-		"friendsofphp/php-cs-fixer" : "^3.0",
-		"mockery/mockery" : "^0.9",
-		"phpstan/phpstan": "^0.12",
-		"phpunit/phpunit" : "^9.5",
-		"symfony/test-pack": "^1.0",
-		"symfony/web-profiler-bundle": "^4.4",
-		"phpstan/phpstan-phpunit": "^0.12.8",
-		"phpstan/extension-installer": "^1.1"
+		"friendsofphp/php-cs-fixer": "^3.0",
+		"phpstan/phpstan": "^1.0",
+		"phpstan/phpstan-symfony": "^1.2",
+		"symfony/test-pack": "^1.0"
 	},
 	"autoload" : {
 		"psr-4" : {
@@ -60,15 +58,12 @@
 	},
 	"config": {
 		"lock": false,
-		"sort-packages": true,
-		"allow-plugins": {
-			"phpstan/extension-installer": true
-		}
+		"sort-packages": true
 	},
 	"scripts": {
 		"phpcs": "php-cs-fixer fix",
 		"phpstan": "phpstan analyse --memory-limit 1G",
 		"phpunit":  "phpunit",
-		"phpall": "php-cs-fixer fix && phpunit && phpstan"
+		"phpall": "php-cs-fixer fix && phpunit && phpstan analyse --memory-limit 1G"
 	}
 }
