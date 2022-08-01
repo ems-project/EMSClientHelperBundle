@@ -16,19 +16,13 @@ final class SearchController
     private Manager $manager;
     private Handler $handler;
     private Environment $templating;
-    /** @var string[] */
-    private array $locales;
     private CacheHelper $cacheHelper;
 
-    /**
-     * @param string[] $locales
-     */
-    public function __construct(Manager $manager, Handler $handler, Environment $templating, CacheHelper $cacheHelper, array $locales)
+    public function __construct(Manager $manager, Handler $handler, Environment $templating, CacheHelper $cacheHelper)
     {
         $this->manager = $manager;
         $this->handler = $handler;
         $this->templating = $templating;
-        $this->locales = $locales;
         $this->cacheHelper = $cacheHelper;
     }
 

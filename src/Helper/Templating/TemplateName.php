@@ -8,7 +8,6 @@ use EMS\ClientHelperBundle\Exception\TemplatingException;
 
 final class TemplateName
 {
-    private string $name;
     private string $contentType;
     private string $searchValue;
     private ?string $searchField;
@@ -18,8 +17,6 @@ final class TemplateName
 
     public function __construct(string $name)
     {
-        $this->name = $name;
-
         $match = $this->match($name);
         list($contentType, $searchValue, $searchField) = $match;
 

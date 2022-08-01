@@ -16,7 +16,7 @@ final class EnvironmentHelper implements EnvironmentHelperInterface
     private string $emschEnv;
 
     /**
-     * @param array<string, array> $environments
+     * @param array<string, array<mixed>> $environments
      */
     public function __construct(
         EnvironmentFactory $environmentFactory,

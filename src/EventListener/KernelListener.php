@@ -40,7 +40,7 @@ final class KernelListener implements EventSubscriberInterface
     }
 
     /**
-     * @return array<string, array>
+     * @return array<string, array<mixed>>
      */
     public static function getSubscribedEvents(): array
     {

@@ -42,7 +42,7 @@ final class TranslationFile implements \Countable
     }
 
     /**
-     * @param array<string, array|string> $messages
+     * @param array<string, array<mixed>|string> $messages
      *
      * @return array<string, string>
      */
