@@ -21,7 +21,7 @@
 		"symfony/console": "^4.4|^5.4",
 		"symfony/event-dispatcher": "^4.4|^5.4",
 		"symfony/mime": "^4.4|^5.4",
-		"symfony/security": "^4.4|^5.4",
+		"symfony/security-csrf": "^4.4|^5.4",
 		"symfony/twig-bundle": "^4.4|^5.4",
 		"symfony/yaml": "^4.4|^5.4"
 	},
