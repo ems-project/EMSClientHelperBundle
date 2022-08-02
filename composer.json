@@ -12,12 +12,10 @@
 			"homepage" : "https://github.com/ems-project/EMSClientHelperBundle/contributors"
 		}
 	],
-	"minimum-stability": "dev",
-	"prefer-stable" : true,
 	"require" : {
 		"php": "^7.4",
 		"composer/ca-bundle": "^1.1",
-		"elasticms/common-bundle": "4.0.x-dev",
+		"elasticms/common-bundle": "4.0.*@dev",
 		"symfony-cmf/routing": "^2.3",
 		"symfony/asset": "^4.4|^5.4",
 		"symfony/console": "^4.4|^5.4",
