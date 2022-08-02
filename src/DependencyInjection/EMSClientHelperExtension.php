@@ -17,7 +17,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 final class EMSClientHelperExtension extends Extension
 {
     /**
-     * @param array<string, mixed> $configs
+     * {@inheritDoc}
      */
     public function load(array $configs, ContainerBuilder $container): void
     {

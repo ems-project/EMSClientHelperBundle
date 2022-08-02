@@ -52,9 +52,9 @@ abstract class BaseRouter implements RouterInterface, RequestMatcherInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param array<string, string> $parameters
      */
-    public function generate($name, $parameters = [], $referenceType = self::ABSOLUTE_PATH): string
+    public function generate(string $name, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string
     {
         return $this->getGenerator()->generate($name, $parameters, $referenceType);
     }
