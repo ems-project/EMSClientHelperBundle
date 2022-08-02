@@ -15,10 +15,8 @@
 	"minimum-stability": "dev",
 	"require" : {
 		"php": "^7.4",
-		"ext-json": "*",
 		"composer/ca-bundle": "^1.1",
 		"elasticms/common-bundle": "4.0.x-dev",
-		"psr/cache": "^1.0",
 		"symfony-cmf/routing": "^2.3",
 		"symfony/asset": "^4.4|^5.4",
 		"symfony/console": "^4.4|^5.4",
