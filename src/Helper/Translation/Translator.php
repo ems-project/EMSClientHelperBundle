@@ -50,7 +50,6 @@ final class Translator implements CacheWarmerInterface
             foreach ($this->environmentHelper->getEnvironments() as $environment) {
                 $this->loadEnvironment($environment);
             }
-
         } catch (\Throwable $e) {
         }
 
