@@ -44,7 +44,7 @@ final class RouterController
 
         $data = \json_decode($json, true);
 
-        return new RedirectResponse($data['url'], ($data['status'] ?? 302));
+        return new RedirectResponse($data['url'], $data['status'] ?? 302);
     }
 
     public function asset(Request $request): Response

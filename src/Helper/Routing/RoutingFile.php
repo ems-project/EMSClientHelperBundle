@@ -60,7 +60,7 @@ final class RoutingFile implements \Countable
 
         $fileName = $directory.\DIRECTORY_SEPARATOR.self::FILE_NAME;
         $fs = new Filesystem();
-        $fs->dumpFile($fileName, ($routes ? Yaml::dump($routes, 3) : ''));
+        $fs->dumpFile($fileName, $routes ? Yaml::dump($routes, 3) : '');
 
         return new self($directory, $templateFiles);
     }

@@ -79,7 +79,7 @@ final class Transformer
     public function transform(string $content, array $config = []): string
     {
         $transform = \preg_replace_callback(EMSLink::PATTERN, function ($match) use ($config) {
-            //array filter to remove empty capture groups
+            // array filter to remove empty capture groups
             $cleanMatch = \array_filter($match);
 
             if (0 === \count($cleanMatch)) {

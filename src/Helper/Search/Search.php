@@ -57,22 +57,22 @@ final class Search
         }
 
         $this->indexRegex = $options['index_regex'] ?? null;
-        $this->types = $options['types']; //required
+        $this->types = $options['types']; // required
         $this->facets = $options['facets'] ?? [];
         $this->sizes = $options['sizes'] ?? [];
-        $this->defaultSorts = $this->parseSorts(($options['default_sorts'] ?? []));
-        $this->sorts = $this->parseSorts(($options['sorts'] ?? []));
+        $this->defaultSorts = $this->parseSorts($options['default_sorts'] ?? []);
+        $this->sorts = $this->parseSorts($options['sorts'] ?? []);
 
-        $this->setHighlight(($options['highlight'] ?? []));
-        $this->setFields(($options['fields'] ?? []));
-        $this->setSuggestFields(($options['suggestFields'] ?? $options['fields'] ?? []), $clientRequest->getLocale());
-        $this->setAnalyzer(($options['analyzers'] ?? [
+        $this->setHighlight($options['highlight'] ?? []);
+        $this->setFields($options['fields'] ?? []);
+        $this->setSuggestFields($options['suggestFields'] ?? $options['fields'] ?? [], $clientRequest->getLocale());
+        $this->setAnalyzer($options['analyzers'] ?? [
             'fr' => 'french',
             'nl' => 'dutch',
             'en' => 'english',
             'de' => 'german',
-        ]), $clientRequest->getLocale());
-        $this->setSynonyms(($options['synonyms'] ?? []));
+        ], $clientRequest->getLocale());
+        $this->setSynonyms($options['synonyms'] ?? []);
 
         $filters = $options['filters'] ?? [];
         foreach ($filters as $name => $options) {

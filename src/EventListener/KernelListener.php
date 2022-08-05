@@ -55,7 +55,7 @@ final class KernelListener implements EventSubscriberInterface
             KernelEvents::EXCEPTION => [
                 ['bindEnvironment', 100],
                 ['redirectMissingLocale', 21],
-                ['loadTranslations', 20], //not found is maybe redirected or custom error pages with translations
+                ['loadTranslations', 20], // not found is maybe redirected or custom error pages with translations
                 ['customErrorTemplate', -10],
             ],
         ];

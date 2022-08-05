@@ -243,7 +243,7 @@ final class ClientRequest implements ClientRequestInterface
             if (isset($item['_source'][$childrenField]) && \is_array($item['_source'][$childrenField])) {
                 foreach ($item['_source'][$childrenField] as $key) {
                     if ($key) {
-                        $child = $this->getHierarchy($key, $childrenField, (null === $depth ? null : $depth - 1), $sourceFields, $activeChild);
+                        $child = $this->getHierarchy($key, $childrenField, null === $depth ? null : $depth - 1, $sourceFields, $activeChild);
                         if ($child) {
                             $out->addChild($child);
                         }
