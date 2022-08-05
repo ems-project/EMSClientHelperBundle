@@ -39,14 +39,22 @@ final class Translator implements CacheWarmerInterface
         return false;
     }
 
-    public function warmUp($cacheDir): void
+    /**
+     * @param string $cacheDir
+     *
+     * @return string[]
+     */
+    public function warmUp($cacheDir)
     {
         try {
             foreach ($this->environmentHelper->getEnvironments() as $environment) {
                 $this->loadEnvironment($environment);
             }
+
         } catch (\Throwable $e) {
         }
+
+        return [];
     }
 
     private function loadEnvironment(Environment $environment): void

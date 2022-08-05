@@ -570,9 +570,6 @@ final class ClientRequest implements ClientRequestInterface
 
         foreach ($scroll as $resultSet) {
             foreach ($resultSet as $result) {
-                if (false === $result) {
-                    continue;
-                }
                 yield $result->getHit();
             }
         }
