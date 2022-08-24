@@ -20,7 +20,7 @@
     </php>
 
     <testsuites>
-        <testsuite name="Common bundle suite">
+        <testsuite name="Client helper bundle suite">
             <directory>./tests/</directory>
         </testsuite>
     </testsuites>
