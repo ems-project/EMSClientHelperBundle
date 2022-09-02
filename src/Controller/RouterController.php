@@ -10,6 +10,7 @@ use EMS\CommonBundle\Storage\Processor\Processor;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Twig\Environment;
 
 final class RouterController
@@ -43,6 +44,9 @@ final class RouterController
         $json = $this->templating->render($result['template'], $result['context']);
 
         $data = \json_decode($json, true);
+        if (!isset($data['url'])) {
+            throw new NotFoundHttpException($data['message'] ?? 'Page not found');
+        }
 
         return new RedirectResponse($data['url'], $data['status'] ?? 302);
     }
