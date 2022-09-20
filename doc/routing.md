@@ -184,3 +184,41 @@ emsch_search:
         }
         controller: 'emsch.controller.search::handle'
 ````
+
+## Redirect route
+
+A route can be defined in order to redirect the request to another url. An easy approach is by using the redirect Symfony controller:
+
+````yaml
+favicon_ico:
+    config:
+      path: /favicon.ico
+      controller: 'Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction'
+      defaults: { permanent: true, path: '/bundles/assets/static/icon64.png' }
+````
+
+But if you need logic to specify the redirect url you may use the emsch redirect controller's function:
+
+````yaml
+favicon_ico:
+  config:
+    path: /favicon.ico
+    controller: 'emsch.controller.router::redirect'
+  template_static: template/ems/redirect_favicon.json.twig
+````
+
+And in the redirect_favicon.json.twig template:
+
+````twig
+{% apply spaceless %}
+      {% set assetPath = emsch_assets_version('240c99f842c118a733f14420bf40e320bdb500b9') %}
+      {{ {'url': asset('static/favicon-96x96.png', 'emsch'), 'status': 301 }|json_encode|raw }}
+{% endapply %}
+````
+
+The template's response should be a JSON containing those optional parameters:
+ - `url`: the target url to redirect to
+ - `status`: the HTTP return's code. Default value: 302
+ - `message`: A 404 message. Default value 'Page not found'
+
+If the url parameter is not defined, the controller will throw a 404 with the message parameter.
