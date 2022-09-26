@@ -21,7 +21,7 @@ final class Router extends BaseRouter implements VersatileGeneratorInterface
 
     public function supports($name): bool
     {
-        return 0 === \preg_match('/^(_profiler|_wdt).*$/s', $name);
+        return null !== $this->getRouteCollection()->get($name);
     }
 
     /**
