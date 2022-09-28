@@ -76,7 +76,7 @@ final class KernelListener implements EventSubscriberInterface
 
     public function loadTranslations(KernelEvent $event): void
     {
-        if ($event->isMasterRequest()) {
+        if ($event->isMainRequest()) {
             $this->translationHelper->addCatalogues();
         }
     }
@@ -93,7 +93,7 @@ final class KernelListener implements EventSubscriberInterface
         $request = $event->getRequest();
         $exception = $event->getThrowable();
 
-        if (!$this->bindLocale || !$event->isMasterRequest() || !$exception instanceof NotFoundHttpException) {
+        if (!$this->bindLocale || !$event->isMainRequest() || !$exception instanceof NotFoundHttpException) {
             return;
         }
 
