@@ -8,7 +8,6 @@
         <defaults public="false" />
 
         <service id="emsch.routing.chain_router" class="Symfony\Cmf\Component\Routing\ChainRouter">
-            <argument type="service" id="logger" on-invalid="ignore" />
             <call method="add">
                 <argument type="service" id="router.default"/>
             </call>

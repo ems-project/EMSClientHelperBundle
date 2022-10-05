@@ -443,7 +443,7 @@ final class Filter
         if (isset($options['post_filter'])) {
             $this->postFilter = (bool) $options['post_filter'];
         } elseif (self::TYPE_TERMS === $this->type && $this->public) {
-            $this->postFilter = true; //default post filtering for public terms filters
+            $this->postFilter = true; // default post filtering for public terms filters
         } else {
             $this->postFilter = false;
         }

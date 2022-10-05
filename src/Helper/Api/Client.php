@@ -6,7 +6,6 @@ namespace EMS\ClientHelperBundle\Helper\Api;
 
 use EMS\CommonBundle\Common\HttpClientFactory;
 use GuzzleHttp\Client as HttpClient;
-use Psr\Log\LoggerInterface;
 
 /**
  * @todo use EMS\CommonBundle\Contracts\CoreApi\CoreApiInterface
@@ -16,14 +15,12 @@ final class Client
     private HttpClient $client;
     private string $key;
     private string $name;
-    private LoggerInterface $logger;
 
-    public function __construct(string $name, string $baseUrl, string $key, LoggerInterface $logger)
+    public function __construct(string $name, string $baseUrl, string $key)
     {
         $this->name = $name;
         $this->key = $key;
         $this->client = HttpClientFactory::create($baseUrl, ['X-Auth-Token' => $this->key]);
-        $this->logger = $logger;
     }
 
     public function getName(): string

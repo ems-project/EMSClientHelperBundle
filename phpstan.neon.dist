@@ -1,8 +1,11 @@
+includes:
+    - vendor/phpstan/phpstan-symfony/extension.neon
+    - vendor/phpstan/phpstan-symfony/rules.neon
+    - vendor/phpstan/phpstan-doctrine/extension.neon
+
 parameters:
     paths:
         - %currentWorkingDirectory%/src
-    excludes_analyse:
-        - %currentWorkingDirectory%/vendor/*
-        - %currentWorkingDirectory%/src/DependencyInjection/Configuration.php
+    excludePaths:
+        - %currentWorkingDirectory%/src/Resources/*
     level: 8
-    inferPrivatePropertyTypeFromConstructor: true

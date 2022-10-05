@@ -17,11 +17,17 @@ final class AssetVersionStrategy implements VersionStrategyInterface
         $this->localFolder = $localFolder;
     }
 
+    /**
+     * @param string $path
+     */
     public function getVersion($path): string
     {
         return $this->assetHelperRuntime->getVersionHash();
     }
 
+    /**
+     * @param string $path
+     */
     public function applyVersion($path): string
     {
         if (!empty($this->localFolder)) {

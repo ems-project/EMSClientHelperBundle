@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace EMS\ClientHelperBundle\Helper\Routing\Url;
 
-use EMS\ClientHelperBundle\Exception\TemplatingException;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequest;
 use EMS\ClientHelperBundle\Helper\Elasticsearch\ClientRequestManager;
 use EMS\CommonBundle\Common\EMSLink;
@@ -80,10 +79,10 @@ final class Transformer
     public function transform(string $content, array $config = []): string
     {
         $transform = \preg_replace_callback(EMSLink::PATTERN, function ($match) use ($config) {
-            //array filter to remove empty capture groups
+            // array filter to remove empty capture groups
             $cleanMatch = \array_filter($match);
 
-            if (null === $cleanMatch) {
+            if (0 === \count($cleanMatch)) {
                 return $match[0];
             }
 
@@ -129,8 +128,6 @@ final class Transformer
     {
         try {
             return $this->twig->render($template, $context);
-        } catch (TemplatingException $ex) {
-            $this->logger->warning($ex->getMessage());
         } catch (\Throwable $ex) {
             $this->logger->error($ex->getMessage());
         }

@@ -239,7 +239,7 @@ final class ApiService
     public function uploadFile(string $apiName, \SplFileInfo $file, string $filename): array
     {
         $response = $this->getApiClient($apiName)->postFile($file, $filename);
-        //TODO: remove this hack once the ems back is returning the file hash as parameter
+        // TODO: remove this hack once the ems back is returning the file hash as parameter
         if (!isset($response[EmsFields::CONTENT_FILE_HASH_FIELD_]) && isset($response['url'])) {
             $output_array = [];
             \preg_match('/\/data\/file\/view\/(?P<hash>.*)\?.*/', $response['url'], $output_array);

@@ -17,9 +17,7 @@
             <tag name="monolog.logger" channel="emsch_manager"/>
         </service>
 
-        <service id="emsch.helper_content_type" class="EMS\ClientHelperBundle\Helper\ContentType\ContentTypeHelper">
-            <argument type="service" id="logger" />
-        </service>
+        <service id="emsch.helper_content_type" class="EMS\ClientHelperBundle\Helper\ContentType\ContentTypeHelper" />
 
         <service id="EMS\ClientHelperBundle\Contracts\Environment\EnvironmentHelperInterface" alias="emsch.helper_environment" />
         <service id="emsch.helper_environment" class="EMS\ClientHelperBundle\Helper\Environment\EnvironmentHelper">
@@ -42,7 +40,6 @@
         </service>
 
         <service id="emsch.helper_locale" class="EMS\ClientHelperBundle\Helper\Request\LocaleHelper">
-            <argument type="service" id="router"/>
             <argument type="string">%emsch.locales%</argument>
         </service>
         <service id="emsch.helper_exception" class="EMS\ClientHelperBundle\Helper\Request\ExceptionHelper">
@@ -121,20 +118,26 @@
             <argument type="service" id="emsch.routing.handler" />
             <argument type="service" id="twig" />
             <argument type="service" id="emsch.helper_cache"/>
-            <argument type="string">%emsch.locales%</argument>
         </service>
         <service id="emsch.controller.embed" class="EMS\ClientHelperBundle\Controller\EmbedController" public="true">
             <argument type="service" id="emsch.manager.client_request" />
             <argument type="service" id="emsch.helper_cache"/>
             <argument type="service" id="twig" />
+            <call method="setContainer">
+                <argument type="service" id="Psr\Container\ContainerInterface"/>
+            </call>
             <tag name="controller.service_arguments"/>
+            <tag name="container.service_subscriber"/>
         </service>
         <service id="EMS\ClientHelperBundle\Controller\AssetController" alias="emsch.controller.asset" public="true" />
         <service id="emsch.controller.asset" class="EMS\ClientHelperBundle\Controller\AssetController" public="true">
             <argument type="service" id="EMS\CommonBundle\Twig\AssetRuntime"/>
-            <argument type="service" id="request_stack"/>
             <argument type="string">%kernel.project_dir%</argument>
+            <call method="setContainer">
+                <argument type="service" id="Psr\Container\ContainerInterface"/>
+            </call>
             <tag name="controller.service_arguments"/>
+            <tag name="container.service_subscriber"/>
         </service>
         <service id="EMS\ClientHelperBundle\Controller\EmbedController" alias="emsch.controller.embed" public="true" />
 

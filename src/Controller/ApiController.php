@@ -30,7 +30,8 @@ final class ApiController
     {
         $scrollId = $request->query->get('scroll');
         $size = \intval($request->query->get('size'));
-        $filter = $request->query->get('filter', []);
+        /** @var string[] $filter */
+        $filter = $request->query->all('filter');
 
         return $this->service->getContentType($apiName, $contentType, $filter, $size, $scrollId)->getResponse();
     }

@@ -21,6 +21,7 @@ final class RoutingFile implements \Countable
     {
         $file = $directory.\DIRECTORY_SEPARATOR.self::FILE_NAME;
         $content = \file_exists($file) ? (\file_get_contents($file) ?: '') : false;
+        /** @var array<string, mixed> $routes */
         $routes = \file_exists($file) && $content ? Yaml::parse($content) : [];
         $this->templateFiles = $templateFiles;
 
@@ -59,7 +60,7 @@ final class RoutingFile implements \Countable
 
         $fileName = $directory.\DIRECTORY_SEPARATOR.self::FILE_NAME;
         $fs = new Filesystem();
-        $fs->dumpFile($fileName, ($routes ? Yaml::dump($routes, 3) : ''));
+        $fs->dumpFile($fileName, $routes ? Yaml::dump($routes, 3) : '');
 
         return new self($directory, $templateFiles);
     }

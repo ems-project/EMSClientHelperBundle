@@ -91,7 +91,7 @@ final class ClientRequest implements ClientRequestInterface
     }
 
     /**
-     * @return array{_id: string, _type?: string, _source: array}
+     * @return array{_id: string, _type?: string, _source: array<mixed>}
      */
     public function get(string $type, string $id): array
     {
@@ -243,7 +243,7 @@ final class ClientRequest implements ClientRequestInterface
             if (isset($item['_source'][$childrenField]) && \is_array($item['_source'][$childrenField])) {
                 foreach ($item['_source'][$childrenField] as $key) {
                     if ($key) {
-                        $child = $this->getHierarchy($key, $childrenField, (null === $depth ? null : $depth - 1), $sourceFields, $activeChild);
+                        $child = $this->getHierarchy($key, $childrenField, null === $depth ? null : $depth - 1, $sourceFields, $activeChild);
                         if ($child) {
                             $out->addChild($child);
                         }
@@ -497,7 +497,7 @@ final class ClientRequest implements ClientRequestInterface
      * @param string|string[]      $type
      * @param array<string, mixed> $body
      *
-     * @return array{_id: string, _type?: string, _source: array}
+     * @return array{_id: string, _type?: string, _source: array<mixed>}
      */
     public function searchOne($type, array $body, ?string $indexRegex = null): array
     {
@@ -557,7 +557,7 @@ final class ClientRequest implements ClientRequestInterface
     /**
      * @param array<mixed> $params
      *
-     * @return \Generator<array>
+     * @return \Generator<array<mixed>>
      */
     public function scrollAll(array $params, string $timeout = '30s', string $index = null): iterable
     {
@@ -570,9 +570,6 @@ final class ClientRequest implements ClientRequestInterface
 
         foreach ($scroll as $resultSet) {
             foreach ($resultSet as $result) {
-                if (false === $result) {
-                    continue;
-                }
                 yield $result->getHit();
             }
         }

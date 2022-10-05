@@ -76,7 +76,7 @@ final class FileService
      */
     private function parseEmsResponse(array $response): array
     {
-        //TODO: remove this hack once the ems back is returning the file hash as parameter
+        // TODO: remove this hack once the ems back is returning the file hash as parameter
         if (!isset($response[EmsFields::CONTENT_FILE_HASH_FIELD_]) && isset($response['url'])) {
             $output_array = [];
             \preg_match('/\/data\/file\/view\/(?P<hash>.*)\?.*/', $response['url'], $output_array);

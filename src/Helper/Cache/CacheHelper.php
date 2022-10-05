@@ -65,7 +65,7 @@ final class CacheHelper
         }
 
         if ($cachedContentType->getEnvironment()->getHash() !== $contentType->getEnvironment()->getHash()) {
-            return null; //update on environment
+            return null; // update on environment
         }
 
         if ($cachedContentType->getCacheValidityTag() !== $contentType->getCacheValidityTag()) {
