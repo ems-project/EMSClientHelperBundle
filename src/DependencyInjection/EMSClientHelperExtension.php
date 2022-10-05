@@ -17,7 +17,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 final class EMSClientHelperExtension extends Extension
 {
     /**
-     * @param array<string, mixed> $configs
+     * {@inheritDoc}
      */
     public function load(array $configs, ContainerBuilder $container): void
     {
@@ -26,7 +26,6 @@ final class EMSClientHelperExtension extends Extension
         $loader->load('services.xml');
         $loader->load('routing.xml');
         $loader->load('search.xml');
-        $loader->load('user_api.xml');
 
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
@@ -45,10 +44,14 @@ final class EMSClientHelperExtension extends Extension
 
         $this->processElasticms($container, $loader, $config['elasticms']);
         $this->processApi($container, $config['api']);
-        $this->processUserApi($container, $config['user_api']);
 
         if ($config['local']) {
             $loader->load('local.xml');
+        }
+
+        if ($config['user_api']['enabled']) {
+            $container->setParameter('emsch.user_api.url', $config['user_api']['url']);
+            $loader->load('user_api.xml');
         }
 
         $loader->load('api.xml');
@@ -78,7 +81,6 @@ final class EMSClientHelperExtension extends Extension
             $definition->setArgument(0, $name);
             $definition->setArgument(1, $options['url']);
             $definition->setArgument(2, $options['key']);
-            $definition->setArgument(3, new Reference('logger'));
             $definition->addTag('emsch.api_client');
 
             $container->setDefinition(\sprintf('emsch.api_client.%s', $name), $definition);
@@ -120,17 +122,5 @@ final class EMSClientHelperExtension extends Extension
         $loader->addTag('twig.loader', ['alias' => $name, 'priority' => 1]);
 
         $container->setDefinition(\sprintf('emsch.twig.loader.%s', $name), $loader);
-    }
-
-    /**
-     * @param array<string, mixed> $config
-     */
-    private function processUserApi(ContainerBuilder $container, array $config): void
-    {
-        if (!$config['enabled']) {
-            return;
-        }
-
-        $container->setParameter('emsch.user_api.url', $config['url']);
     }
 }

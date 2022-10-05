@@ -48,7 +48,7 @@ final class RouterController
             throw new NotFoundHttpException($data['message'] ?? 'Page not found');
         }
 
-        return new RedirectResponse($data['url'], ($data['status'] ?? 302));
+        return new RedirectResponse($data['url'], $data['status'] ?? 302);
     }
 
     public function asset(Request $request): Response

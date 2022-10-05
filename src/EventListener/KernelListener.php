@@ -40,7 +40,7 @@ final class KernelListener implements EventSubscriberInterface
     }
 
     /**
-     * @return array<string, array>
+     * @return array<string, array<mixed>>
      */
     public static function getSubscribedEvents(): array
     {
@@ -55,7 +55,7 @@ final class KernelListener implements EventSubscriberInterface
             KernelEvents::EXCEPTION => [
                 ['bindEnvironment', 100],
                 ['redirectMissingLocale', 21],
-                ['loadTranslations', 20], //not found is maybe redirected or custom error pages with translations
+                ['loadTranslations', 20], // not found is maybe redirected or custom error pages with translations
                 ['customErrorTemplate', -10],
             ],
         ];
@@ -76,7 +76,7 @@ final class KernelListener implements EventSubscriberInterface
 
     public function loadTranslations(KernelEvent $event): void
     {
-        if ($event->isMasterRequest()) {
+        if ($event->isMainRequest()) {
             $this->translationHelper->addCatalogues();
         }
     }
@@ -93,7 +93,7 @@ final class KernelListener implements EventSubscriberInterface
         $request = $event->getRequest();
         $exception = $event->getThrowable();
 
-        if (!$this->bindLocale || !$event->isMasterRequest() || !$exception instanceof NotFoundHttpException) {
+        if (!$this->bindLocale || !$event->isMainRequest() || !$exception instanceof NotFoundHttpException) {
             return;
         }
 

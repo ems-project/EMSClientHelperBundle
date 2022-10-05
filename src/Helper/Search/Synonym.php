@@ -21,7 +21,7 @@ final class Synonym
     private array $filter;
 
     /**
-     * @param array{types: ?string[], field: ?string, search: ?string, } $data
+     * @param array{types?: ?string[], field?: ?string, search?: ?string, filter?: ?array<mixed>} $data
      */
     public function __construct(Request $request, array $data)
     {

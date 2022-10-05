@@ -19,7 +19,7 @@ final class RoutingDocument implements BuilderDocumentInterface
         $this->id = $document->getId();
         $this->source = $document->getSource();
 
-        //clean json spaces
+        // clean json spaces
         if (isset($this->source['config'])) {
             $this->source['config'] = Json::encode(Json::decode($this->source['config']));
         }

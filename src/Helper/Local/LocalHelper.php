@@ -166,8 +166,8 @@ final class LocalHelper
             $mapping = $settings->getTemplateMapping($templateFile->getContentTypeName());
 
             $status->addItemLocal($templateFile->getName(), $templateFile->getContentTypeName(), [
-                ($mapping['name']) => $templateFile->getName(),
-                ($mapping['code']) => $templateFile->getCode(),
+                $mapping['name'] => $templateFile->getName(),
+                $mapping['code'] => $templateFile->getCode(),
             ]);
         }
 

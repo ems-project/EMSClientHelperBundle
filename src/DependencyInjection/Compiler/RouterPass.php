@@ -11,7 +11,7 @@ final class RouterPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container): void
     {
-        //override the default symfony router, with the chain router
+        // override the default symfony router, with the chain router
         $container->setAlias('router', 'emsch.routing.chain_router');
         $container->getAlias('router')->setPublic(true);
     }

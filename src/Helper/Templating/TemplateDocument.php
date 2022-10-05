@@ -59,8 +59,8 @@ final class TemplateDocument implements BuilderDocumentInterface
     public function getDataSource(): array
     {
         return [
-            ($this->mapping['name']) => $this->getName(),
-            ($this->mapping['code']) => $this->getCode(),
+            $this->mapping['name'] => $this->getName(),
+            $this->mapping['code'] => $this->getCode(),
         ];
     }
 }
