@@ -46,7 +46,7 @@ final class FileService
     private function upload(Client $client, UploadedFile $file): array
     {
         try {
-            $response = $client->post('api/file', [
+            $response = $client->post('api/file/upload', [
                 'multipart' => [
                     [
                         'name' => 'upload',
