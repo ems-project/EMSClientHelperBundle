@@ -24,6 +24,9 @@ final class FileService
         $client = $this->client->createClient(['X-Auth-Token' => $request->headers->get('X-Auth-Token')]);
 
         $responses = [];
+        if (1 !== $request->files->count()) {
+            throw new \RuntimeException(\sprintf('The upload file api only supports single file upload, %d files have been given', $request->files->count()));
+        }
         foreach ($request->files as $file) {
             $responses = $this->upload($client, $file);
         }
