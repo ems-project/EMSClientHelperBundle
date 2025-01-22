@@ -9,7 +9,7 @@
     "authors": [
         {
             "name": "EMS Community",
-            "homepage": "https://github.com/ems-project/EMSClientHelperBundle/contributors"
+            "homepage": "https://github.com/ems-project/elasticms/contributors"
         }
     ],
     "require": {
@@ -30,24 +30,13 @@
         "symfony/yaml": "6.4.*",
         "thenetworg/oauth2-azure": "^2.2"
     },
-    "require-dev": {
-        "symfony/test-pack": "^1.0"
-    },
     "autoload": {
         "psr-4": {
             "EMS\\ClientHelperBundle\\": "src/"
         }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "EMS\\ClientHelperBundle\\Tests\\": "tests/"
-        }
-    },
     "config": {
         "lock": false,
         "sort-packages": true
-    },
-    "scripts": {
-        "phpunit": "phpunit"
     }
 }
